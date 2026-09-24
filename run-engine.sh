@@ -61,24 +61,33 @@ start_engine() {
 
 ensure_browser_worker() {
   local venv_python="$WORKER_VENV_DIR/bin/python"
+  
   if [ ! -x "$venv_python" ]; then
     echo "[run-engine] creating browser-worker virtualenv at $WORKER_VENV_DIR"
     python3 -m venv "$WORKER_VENV_DIR"
   fi
+
   if ! "$venv_python" -c "import playwright" >/dev/null 2>&1; then
     echo "[run-engine] installing Playwright browser-worker dependencies in $WORKER_VENV_DIR"
     "$venv_python" -m pip install --quiet --disable-pip-version-check -r "$WORKER_DIR/requirements.txt"
   fi
-  if compgen -G "${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}/firefox-*/firefox/firefox" >/dev/null 2>&1; then
+
+  # Динамическая проверка реального наличия бинарника Firefox
+  local playwright_path="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
+  if compgen -G "$playwright_path/firefox-*/firefox/firefox" >/dev/null 2>&1; then
     echo "[run-engine] using cached Playwright Firefox runtime"
     return 0
   fi
-  local browser_marker="$WORKER_DIR/.playwright-firefox-installed"
-  if [ ! -f "$browser_marker" ]; then
-    echo "[run-engine] installing Playwright Firefox runtime (first run only)"
-    "$venv_python" -m playwright install firefox
-    touch "$browser_marker"
+
+  # Проверка наличия Node.js перед скачиванием
+  if ! command -v node >/dev/null 2>&1; then
+    echo "[run-engine] ERROR: Node.js is required by Playwright but was not found."
+    echo "[run-engine] Please run: sudo apt update && sudo apt install -y nodejs npm"
+    return 1
   fi
+
+  echo "[run-engine] Firefox runtime missing. Installing Playwright Firefox..."
+  "$venv_python" -m playwright install firefox
 }
 
 start_browser_worker() {
@@ -104,6 +113,7 @@ start_browser_worker() {
     sleep 1
     attempts=$((attempts + 1))
   done
+
   echo "[run-engine] browser worker failed to start; see $WORKER_LOG"
   return 1
 }
