@@ -1,9 +1,5 @@
 
-
-<img width="2912" height="1440" alt="Gemini_Generated_Image_am0pnwam0pnwam0p" src="https://github.com/user-attachments/assets/dbe3af9e-9271-40f4-9cf9-1c756765957a" />
-<img width="1353" height="497" alt="Screenshot 2026-09-19 at 14-23-39 RequestRider" src="https://github.com/user-attachments/assets/45c5dd27-d9e8-4a00-9dcf-7157b0bd61a7" />
 <img width="2912" height="1440" alt="Gemini_Generated_Image_s92k5ts92k5ts92k" src="https://github.com/user-attachments/assets/39bb8059-739c-46b5-83de-2cacfb0189d8" />
-
 
 # RequestRider
 
