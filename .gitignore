@@ -1,0 +1,13 @@
+node_modules
+dist
+.vite
+data/
+dev_output.log
+data-test-*/
+web/db.sqlite3
+__pycache__/
+.pytest_cache/
+test-results/
+playwright-report/
+bin/
+*.log

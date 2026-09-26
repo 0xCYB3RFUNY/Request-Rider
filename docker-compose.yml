@@ -1,0 +1,36 @@
+services:
+  tor:
+    build: ./tor
+    ports:
+      - "127.0.0.1:9050:9050"
+  engine:
+    build: ./engine
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8081:8081"
+    environment:
+      CA_DIR: /data/ca
+      PROXY_LISTEN_ADDR: 0.0.0.0:8080
+      ENGINE_LISTEN_ADDR: 0.0.0.0:8081
+      ROUTE_ADDRESS: tor:9050
+    volumes:
+      - ./data/ca:/data/ca
+    depends_on:
+      - tor
+  browser-worker:
+    build: ./browser-worker
+    ports:
+      - "127.0.0.1:8090:8090"
+    environment:
+      PORT: 8090
+  web:
+    build: ./web
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      ENGINE_URL: http://engine:8081
+      BROWSER_WORKER_URL: http://browser-worker:8090
+      PASSIVE_PROXY_URL: http://engine:8080
+    depends_on:
+      - engine
+      - browser-worker
