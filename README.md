@@ -284,6 +284,9 @@ external OAST providers або автоматичного destructive action.
 Потрібні Go, Python 3, `curl` і `venv` або `virtualenv`.
 
 Із кореня репозиторію:
+```bash
+sudo apt install golang tor npm python3 -y
+```
 
 ```bash
 ./run-engine.sh
