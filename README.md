@@ -785,7 +785,7 @@ df -h /
 ## Документація функцій
 
 Кожна велика функція описана окремим файлом у папці
-[документация](./документация):
+[Документація](./Документація):
 
 | Функція | Документ |
 |---|---|
@@ -807,16 +807,12 @@ df -h /
 | Практичні сценарії Automation | [automation-сценарії.md](./документация/automation-сценарії.md) |
 | Workspaces і Session | [robochi-prostory-sesii.md](./документация/robochi-prostory-sesii.md) |
 | Project Hub і Target Knowledge Base | [project-hub.md](./документация/project-hub.md) |
-| Звіт про видалені обмеження рівня застосунку | [видалені-обмеження.md](./документация/видалені-обмеження.md) |
 
 ## Пов’язані документи
 
 - [`SECURITY.md`](SECURITY.md) — операційна безпека та checklist.
 - [`ROADMAP.md`](ROADMAP.md) — короткий актуальний план розвитку.
-- [`AGENT_USER_GUIDE.md`](AGENT_USER_GUIDE.md) — окрема інструкція AI-вкладки.
-- [`LLM.md`](LLM.md) — межі та модель AI runtime.
-- [`DEVELOPMENT_LOG.md`](DEVELOPMENT_LOG.md) — хронологічний журнал змін,
-  виправлень, запусків і перевірок.
-- [`документация/`](документация/) — актуальні довідники Repeater, Intruder,
+- [`AGENT_USER_GUIDE.md`](AGENT_USER_GUIDE.md) — окрема інструкція AI-вкладки,межі та модель AI runtime.
+- [`Документія/`](Документація/) — актуальні довідники Repeater, Intruder,
   Target, Scanner, Proxy, Traffic, History, Decoder, Comparer, OSINT, AI та
   workspace/session.
