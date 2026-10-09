@@ -191,7 +191,7 @@ API рушія. Окремої вкладки в інтерфейсі немає
 ### Крок 1 — Отримати код
 
 ```bash
-git clone https://github.com/0xCYB3RFUNY/Request-Ride.git
+git clone https://github.com/0xCYB3RFUNY/Request-Rider.git
 cd Request-Rider
 ```
 
