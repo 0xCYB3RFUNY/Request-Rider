@@ -1,0 +1,34 @@
+id: dns-axfr-enabled
+
+info:
+  name: DNS Zone Transfer Check (AXFR)
+  author: matejsmycka
+  severity: medium
+  description: |
+    Checks if particular domain can be queried via DNS Zone Transfer (AXFR). An open zone transfer can disclose all DNS records for a zone, leading to information leakage.
+  reference:
+    - https://beaglesecurity.com/blog/vulnerability/dns-zone-transfer.html
+  metadata:
+    verified: true
+    shodan-query: port:53
+  tags: dns,tcp,axfr,code,vuln
+
+code:
+  - engine:
+      - bash
+    source: |
+      domain=$Host
+      dig axfr $domain @$(dig $domain ns +short | head -n1)
+
+    matchers:
+      - type: regex
+        regex:
+          - 'XFR size: [1-9][0-9]* records?'
+        condition: and
+
+    extractors:
+      - type: regex
+        regex:
+          - 'SOA\s+([^\s]+)'
+        group: 1
+# digest: 4a0a004730450220729310e32ddaf376e205fe7202c209109d72fc732c11c480c2d0e76fcaa5ad3d022100e3ccab3824ce3028b6de37a92e77fc88aa98d5d8e6ae0ef6d8b061490e6ac218:922c64590222798bb761d5b6d8e72950

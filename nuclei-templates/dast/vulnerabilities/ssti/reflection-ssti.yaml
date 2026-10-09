@@ -1,0 +1,58 @@
+id: reflection-ssti
+
+info:
+  name: Reflected SSTI Arithmetic Based
+  author: pdteam
+  severity: medium
+  reference:
+    - https://github.com/zaproxy/zap-extensions/blob/2d9898900abe85a47b9fe0ceb85ec39070816b98/addOns/ascanrulesAlpha/src/main/java/org/zaproxy/zap/extension/ascanrulesAlpha/SstiScanRule.java
+    - https://github.com/DiogoMRSilva/websitesVulnerableToSSTI#list-of-seversneeds-update
+  metadata:
+    max-request: 14
+  tags: ssti,dast,vuln
+
+variables:
+  first: "{{rand_int(1000, 9999)}}"
+  second: "{{rand_int(1000, 9999)}}"
+  result: "{{to_number(first)*to_number(second)}}"
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+          - 'method == "POST"'
+          - 'method == "PUT"'
+    skip-variables-check: true
+    payloads:
+      ssti:
+        - '{{concat("${", "{{first}}*{{second}}", "}")}}'
+        - '{{concat("{{", "{{first}}*{{second}}", "}}")}}'
+        - '{{concat("<%=", "{{first}}*{{second}}", "%>")}}'
+        - '{{concat("{", "{{first}}*{{second}}", "}")}}'
+        - '{{concat("{{{", "{{first}}*{{second}}", "}}}")}}'
+        - '{{concat("${{", "{{first}}*{{second}}", "}}")}}'
+        - '{{concat("#{", "{{first}}*{{second}}", "}")}}'
+        - '{{concat("[[", "{{first}}*{{second}}", "]]")}}'
+        - '{{concat("{{=", "{{first}}*{{second}}", "}}")}}'
+        - '{{concat("[[${", "{{first}}*{{second}}", "}]]")}}'
+        - '{{concat("${xyz|", "{{first}}*{{second}}", "}")}}'
+        - '{{concat("#set($x=", "{{first}}*{{second}}", ")${x}")}}'
+        - '{{concat("@(", "{{first}}*{{second}}", ")")}}'
+        - '{{concat("{@", "{{first}}*{{second}}", "}")}}'
+
+    fuzzing:
+      - parts:
+          - query
+          - body
+        type: postfix
+        fuzz:
+          - "{{ssti}}"
+
+    stop-at-first-match: true
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "{{result}}"
+# digest: 4b0a00483046022100e98c0448d99ab0ca09f1c0a06b25ddeac849b63c9bdceb7dda7b2b49bdf77d2702210084316996739eb648565920b9c66ba441f68ddf5b9c5241f89f143ba8933324bd:922c64590222798bb761d5b6d8e72950

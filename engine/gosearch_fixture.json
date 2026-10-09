@@ -1,0 +1,206 @@
+{
+  "_comment": "Фікстура звірки для порту ibnaleem/gosearch (коміт 687f9ed). Один вхід для оригіналу і для рушія; без неї числа реєстру невідтворювані. Кожна здатність оригіналу присутня тут хоча б один раз, плейсхолдерів немає — значення реальні за формою, щоб вимірювалось покриття, а не власна фільтрація.",
+  "upstream_commit": "687f9ed0c0ad9d09ba243886d5e0e23dc7847380",
+  "query_username": "ibnaleem",
+  "query_email": "leaked.user@yandex.ru",
+  "capabilities": {
+    "proxynova": {
+      "_source": "internal/modules/proxynova/proxynova.go:31 — GET api.proxynova.com/comb?query=",
+      "_why_this_body": "count != len(lines) — джерело суперечить саме собі; рядок без ':' — те, що оригінал відкидав мовчки; пароль із двома ':' — те, що оригінальний Split ламав.",
+      "count": 4,
+      "lines": [
+        "leaked.user@yandex.ru:Summer2018",
+        "second.user@yandex.ru:p:a:ss:word",
+        "no-separator-here",
+        "leaked.user@yandex.ru:Summer2018"
+      ]
+    },
+    "breachdirectory": {
+      "_source": "internal/modules/breachdirectory/breachdirectory.go:14 + gobreach/gobreach.go:57",
+      "_why_this_body": "entry з власним паролем (який оригінал губив, коли weakpass відповідав) і entry без пароля (який губив, коли відповідав); found != len(result).",
+      "found": 2,
+      "result": [
+        {
+          "email": "leaked.user@yandex.ru",
+          "password": "Winter2019",
+          "sha1": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+          "sources": "Telegram; Yahoo"
+        },
+        {
+          "email": "second.user@yandex.ru",
+          "password": "",
+          "sha1": "8c9f0f895fb98ab9159f51fd6707eada55d3f0c5",
+          "sources": "Adobe; Dropbox; Steam"
+        }
+      ]
+    },
+    "weakpass": {
+      "_source": "internal/modules/weakpass/weakpass.go:22 — GET weakpass.com/api/v1/search/<sha1>.json",
+      "_why_this_body": "хеш, який розбивається, і хеш, який ні — обидва стани ланцюга мають бути в фікстурі, інакше перевіряється лише щаслива гілка.",
+      "answers": {
+        "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8": {
+          "type": "sha1",
+          "hash": "5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8",
+          "pass": "password"
+        },
+        "8c9f0f895fb98ab9159f51fd6707eada55d3f0c5": {
+          "type": "sha1",
+          "hash": "8c9f0f895fb98ab9159f51fd6707eada55d3f0c5",
+          "pass": ""
+        }
+      }
+    },
+    "gravatar": {
+      "_source": "internal/modules/gravatar/gravatar.go:47 — GET gravatar.com/<user>.json",
+      "_why_this_body": "профіль із опублікованими адресами і пов'язаними акаунтами — саме те, чого не бачив HTML-проб; порожній entry — відповідь «профілю немає», яка не є помилкою.",
+      "found": {
+        "entry": [
+          {
+            "hash": "205e460b479e2e5b48aec07710c08d50",
+            "requestHash": "ibnaleem",
+            "preferredUsername": "ibnaleem",
+            "displayName": "Ibnaleem",
+            "aboutMe": "security research",
+            "emails": [{ "value": "ibnaleem@yandex.ru" }],
+            "accounts": [
+              { "url": "https://mastodon.social/@ibnaleem", "username": "ibnaleem", "name": "mastodon" },
+              { "url": "https://example.org/~ibnaleem", "username": "ibnaleem", "name": "" }
+            ]
+          }
+        ]
+      },
+      "absent": { "entry": [] }
+    },
+    "keybase": {
+      "_source": "internal/modules/keybase/keybase.go:89 — GET keybase.io/_/api/1.0/user/lookup.json?usernames=",
+      "_why_this_body": "профіль із двома доведеними зв'язками (proofs) — єдине, що Keybase дає понад HTML; і відмова status.code != 0, яку оригінал перетворював на «профілю немає».",
+      "found": {
+        "status": { "code": 0 },
+        "them": [
+          {
+            "id": "1a2b3c4d",
+            "basics": { "username": "ibnaleem", "username_cased": "Ibnaleem", "ctime": 1600000000, "mtime": 1700000000 },
+            "profile": { "full_name": "Ibnaleem", "location": "Tbilisi", "bio": "security" },
+            "pictures": { "primary": { "url": "https://example.org/avatar.png" } },
+            "stellar": { "primary": { "account_id": "GA7ZQK7EXAMPLE" } },
+            "devices": { "desktop": { "type": "desktop", "name": "workstation" } },
+            "cryptocurrency_addresses": { "btc": [{ "address": "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2" }] },
+            "proofs_summary": {
+              "all": [
+                { "proof_type": "twitter", "nametag": "ibnaleem", "service_url": "https://twitter.com/ibnaleem" },
+                { "proof_type": "github", "nametag": "ibnaleem", "service_url": "https://github.com/ibnaleem" }
+              ]
+            }
+          }
+        ]
+      },
+      "refused": {
+        "status": { "code": 205, "name": "user not found", "desc": "no such user" },
+        "them": []
+      }
+    },
+    "hudsonrock": {
+      "_source": "internal/modules/hudsonrock/hudsonrock.go:72 — GET cavalier.hudsonrock.com/.../search-by-username и stealersbyemail",
+      "_why_this_body": "повний лог інфостілера; і відповідь «нічого не знайдено» зі СЛОВЕСНИМ message, який не збігається з літералом оригіналу — саме той випадок, де оригінал перетворив би відсутність на «компрометація».",
+      "found": {
+        "message": "",
+        "stealers": [
+          {
+            "date_compromised": "2026-09-30T10:00:00Z",
+            "stealer_family": "RedLine",
+            "computer_name": "DESKTOP-AB12",
+            "operating_system": "Windows 11",
+            "malware_path": "C:\\Users\\dev\\AppData\\Local\\Temp\\loader.exe",
+            "ip": "203.0.113.7",
+            "total_corporate_services": 12,
+            "total_user_services": 40,
+            "top_passwords": ["Summer2018", "Winter2019"],
+            "top_logins": ["https://mail.yandex.ru"],
+            "antiviruses": "Kaspersky"
+          }
+        ]
+      },
+      "absent": {
+        "message": "Nothing on file for this identifier.",
+        "stealers": []
+      }
+    },
+    "github_keys": {
+      "_source": "internal/modules/github/{ssh-keys,gpg-keys,social-accounts,mutual-followers}.go",
+      "_why_this_body": "два ключі ОДНОГО типу — те, що оригінальні «тип + цифровий id» не розрізняє; GPG-адреса з verified і приватним заповнювачем, який треба відфільтрувати.",
+      "ssh_keys": [
+        { "id": 1, "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleKeyMaterialOne ibnaleem@work" },
+        { "id": 2, "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExampleKeyMaterialTwo ibnaleem@home" }
+      ],
+      "gpg_keys": [
+        {
+          "name": "work key",
+          "key_id": "ABC123DEF456",
+          "revoked": false,
+          "emails": [
+            { "email": "ibnaleem@yandex.ru", "verified": true },
+            { "email": "43872+ibnaleem@users.noreply.github.com", "verified": true }
+          ]
+        }
+      ],
+      "social_accounts": [
+        { "provider": "mastodon", "url": "https://mastodon.social/@ibnaleem" },
+        { "url": "https://example.org/~ibnaleem" }
+      ],
+      "followers": [
+        { "login": "follower-alpha" },
+        { "login": "follower-beta" },
+        { "login": "follower-gamma" }
+      ],
+      "follows_back": { "follower-alpha": 204, "follower-beta": 404, "follower-gamma": 204 }
+    },
+    "search_domains": {
+      "_source": "internal/search/search.go:30 + utils.BuildDomains (utils.go:82)",
+      "_why_this_body": "26 TLD оригіналу; відмічено три, які відповідають не-error, — саме їх оригінал рахував «знайденими» разом із 404 і 403.",
+      "tlds": [
+        ".com", ".net", ".org", ".biz", ".info", ".name", ".pro", ".cat",
+        ".co", ".me", ".io", ".tech", ".dev", ".app", ".shop", ".fail",
+        ".xyz", ".blog", ".portfolio", ".store", ".online", ".about",
+        ".space", ".lol", ".fun", ".social"
+      ],
+      "answering": {
+        "ibnaleem.biz": 200,
+        "ibnaleem.co": 200,
+        "ibnaleem.io": 301
+      }
+    },
+    "pwnedpasswords": {
+      "_source": "НЕМАЄ в оригіналі. Додано 2026-10-07 за вимогою оператора: оригінал розбиває хеш у пароль і зупиняється, не рахуючи, у скількох витоках цей пароль траплявся.",
+      "_why_this_body": "один пароль у корпусі (великий лічильник) і один поза ним (лічильник 0). Різниця між ними — та сама різниця, яку оригінал не бачив.",
+      "_k_anonymity": "назові йде лише 5 символів SHA-1; решта порівнюється локально",
+      "corpus": {
+        "Summer2018": 9037,
+        "unseen-password-9f2c1a": 0
+      }
+    }
+  },
+  "measured_2026_10_07": {
+    "_note": "Оригінал запущено ОКРЕМО з цієї ж фікстури-форми на живій відповіді; числа нижче — з його stdout і його файлу, а не з нашого коду.",
+    "upstream_proxynova_lines_printed": 20,
+    "upstream_proxynova_count_field": 3458,
+    "upstream_unique_passwords": 18,
+    "upstream_report_file_mode": "775",
+    "upstream_domains_found": 3,
+    "ours_proxynova_addresses": 18,
+    "ours_proxynova_credentials": 19,
+    "ours_report_file_mode": "640",
+    "ours_domains_found": 3,
+    "ours_domains": ["ibnaleem.biz", "ibnaleem.co", "ibnaleem.io"],
+    "ours_findings": 20,
+    "ours_distinct_findings": 19,
+    "ours_identities": 18,
+    "password_breach_counts_measured_live": {
+      "123456": 210461208,
+      "123qwe": 3973136,
+      "9081726354": 41807,
+      "01096262jm": 117,
+      "19701941": 0,
+      "69d67e": 0
+    }
+  }
+}

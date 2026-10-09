@@ -1,0 +1,142 @@
+{% load osint_report %}<!doctype html>
+<html lang="{{ language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ file_name }} · RequestRider</title>
+{% include "lab/_report_base.html" %}
+</head>
+<body>
+{% include "lab/_report_brand.html" with brand_title=file_name brand_subtitle=graph.name %}
+<main>
+  <div class="rr-stats">
+    <span class="rr-stat"><b class="ok">{{ rows_total|intcomma }}</b>{% tr "rows_in_file" %}</span>
+    <span class="rr-stat"><b>{{ selection.total|intcomma }}</b>{% tr "matching" %}</span>
+    <span class="rr-stat rr-stat-opt"><b>{{ file_bytes|filesizeformat }}</b>{% tr "on_disk" %}</span>
+    <span class="rr-stat rr-stat-opt"><b>{{ file_name }}</b>{{ file_kind|upper }}</span>
+    <span class="rr-lang">
+      <a class="rr-btn" href="?lang={{ other_language }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if kind %}&amp;type={{ kind|urlencode }}{% endif %}{% if sort %}&amp;sort={{ sort|urlencode }}&amp;dir={{ direction }}{% endif %}{% if selection.page != 1 %}&amp;page={{ selection.page }}{% endif %}&amp;page_size={{ page_size }}" aria-label="{% tr 'switch_language' %}">{{ other_language_label }}</a>
+    </span>
+  </div>
+  {% if hidden_columns %}
+  <p class="rr-note">{% tr "hidden_columns" %}{% for column in hidden_columns %}<code>{{ column }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  {% endif %}
+
+  <section class="rr-block grow">
+    <div class="rr-tools">
+      <form class="rr-search" method="get" action="">
+        <input type="search" name="q" value="{{ query }}" autocomplete="off" spellcheck="false"
+               placeholder="{% tr 'search' %}" aria-label="{% tr 'search_aria' %}">
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <input type="hidden" name="dir" value="{{ direction }}">
+        <input type="hidden" name="type" value="{{ kind }}">
+        <input type="hidden" name="page_size" value="{{ page_size }}">
+        <button class="rr-btn" type="submit">{% tr "find" %}</button>
+        {% if query or kind or sort %}
+        <a class="rr-btn" href="?page_size={{ page_size }}">{% tr "reset" %}</a>
+        {% endif %}
+      </form>
+      {% if selection.counts %}
+      <div class="rr-chips" role="group" aria-label="{% tr 'type_filter_aria' %}">
+        <a class="rr-chip" href="?q={{ query|urlencode }}&amp;page_size={{ page_size }}{% if sort %}&amp;sort={{ sort }}&amp;dir={{ direction }}{% endif %}"
+           aria-pressed="{% if not kind %}true{% else %}false{% endif %}">{% tr "all_types" %}<b>{{ rows_total|intcomma }}</b></a>
+        {% for label, count in selection.counts %}
+        <a class="rr-chip" href="?q={{ query|urlencode }}&amp;type={{ label|urlencode }}&amp;page_size={{ page_size }}{% if sort %}&amp;sort={{ sort }}&amp;dir={{ direction }}{% endif %}"
+           aria-pressed="{% if kind == label %}true{% else %}false{% endif %}">{% kind_label label %}<b>{{ count|intcomma }}</b></a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rr-scroll">
+      <table class="rr-table">
+        <thead>
+          <tr>
+            <th class="rr-num" scope="col">#</th>
+            {% for column in visible_columns %}
+            <th scope="col" {% if sort == column %}aria-sort="{% if direction == 'desc' %}descending{% else %}ascending{% endif %}"{% endif %}>
+              <a href="?q={{ query|urlencode }}&amp;type={{ kind|urlencode }}&amp;sort={{ column|urlencode }}&amp;dir={% if sort == column and direction == 'asc' %}desc{% else %}asc{% endif %}&amp;page={{ selection.page }}&amp;page_size={{ page_size }}">{{ column }}</a>
+            </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in selection.rows %}
+          <tr>
+            <td class="rr-num">{{ selection.offset|add:forloop.counter }}</td>
+            {% for column in visible_columns %}
+            <td>
+              {% if column == "type" %}
+                {% if row.type %}<span class="rr-tag rr-tag-{{ row.type }}">{% kind_label row.type %}</span>
+                {% elif row.relation %}<span class="rr-tag rr-tag-rel">{% kind_label "link" %}</span>
+                {% else %}<span class="rr-dash">—</span>{% endif %}
+              {% elif column == "relation" %}
+                {% if row.relation %}<span class="rr-tag rr-tag-rel">{{ row.relation }}</span>{% else %}<span class="rr-dash">—</span>{% endif %}
+              {% elif column == "identity" %}
+                {% if row.identity %}<span class="rr-id">{{ row.identity }}</span>
+                {% elif row.relation %}<span class="rr-id rr-endpoint">{{ row.source }} → {{ row.target }}</span>
+                {% else %}<span class="rr-dash">—</span>{% endif %}
+              {% elif column == "provenance" %}
+                {% for part in row.provenance|provenance_parts %}<span class="rr-prov">{{ part }}</span>{% if not forloop.last %} {% endif %}{% empty %}<span class="rr-dash">—</span>{% endfor %}
+              {% else %}
+                {{ row|row_cell:column }}
+              {% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          {% empty %}
+          <tr><td class="rr-empty" colspan="{{ visible_columns|length|add:1 }}">{% tr "no_match" %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rr-foot">
+      <span class="rr-status">
+        <b>{% tr "rows" %}</b>
+        {{ selection.first }}–{{ selection.last }}
+        {% tr "of" %}
+        <b>{{ selection.total|intcomma }}</b>
+        {% if query or kind %}
+        ({% tr "filtered_from" %} <b>{{ rows_total|intcomma }}</b>)
+        {% endif %}
+      </span>
+      {% if selection.pages > 1 %}
+      {% if selection.has_previous %}
+      <a class="rr-btn" rel="prev" href="?q={{ query|urlencode }}&amp;type={{ kind|urlencode }}&amp;sort={{ sort|urlencode }}&amp;dir={{ direction }}&amp;page={{ selection.previous_page }}&amp;page_size={{ page_size }}">{% tr "previous" %}</a>
+      {% else %}
+      <span class="rr-btn" aria-disabled="true">{% tr "previous" %}</span>
+      {% endif %}
+      <span class="rr-status">{% tr "page_of" %} {{ selection.page }} / {{ selection.pages|intcomma }}</span>
+      {% if selection.has_next %}
+      <a class="rr-btn" rel="next" href="?q={{ query|urlencode }}&amp;type={{ kind|urlencode }}&amp;sort={{ sort|urlencode }}&amp;dir={{ direction }}&amp;page={{ selection.next_page }}&amp;page_size={{ page_size }}">{% tr "next" %}</a>
+      {% else %}
+      <span class="rr-btn" aria-disabled="true">{% tr "next" %}</span>
+      {% endif %}
+      {% endif %}
+      <form class="rr-tools rr-page-form" method="get" action="">
+        <input type="hidden" name="q" value="{{ query }}">
+        <input type="hidden" name="type" value="{{ kind }}">
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <input type="hidden" name="dir" value="{{ direction }}">
+        <label class="rr-status" for="rr-page-size">{% tr "rows_per_page" %}</label>
+        <select class="rr-btn" id="rr-page-size" name="page_size">
+          {% for size in page_sizes %}
+          <option value="{{ size }}" {% if size == page_size %}selected{% endif %}>{{ size }}</option>
+          {% endfor %}
+        </select>
+        <noscript><button class="rr-btn" type="submit">{% tr "apply" %}</button></noscript>
+      </form>
+      <span class="rr-file-actions">
+        <a class="rr-btn" href="?download=1">{% tr "download" %}</a>
+        <a class="rr-btn" href="?raw=1" target="_blank" rel="noopener">{% tr "raw" %}</a>
+        {% for item in companions %}
+        <a class="rr-btn" href="../{{ item.name }}" title="{{ item.name }} · {{ item.rows|intcomma }}">{% tr "open_file" %} {{ item.kind|upper }}</a>
+        {% endfor %}
+        <a class="rr-btn" href="../">{% tr "files" %}</a>
+      </span>
+    </div>
+  </section>
+</main>
+</body>
+</html>

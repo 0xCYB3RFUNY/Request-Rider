@@ -1,0 +1,5 @@
+playwright==1.55.0
+# Camoufox is an optional anti-detect runtime for browser-driven Target. It is
+# pinned like every other dependency so a rebuild cannot drift, and start.sh
+# installs it through the same venv.
+camoufox==0.5.6

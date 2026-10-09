@@ -1,0 +1,21 @@
+node_modules
+dist
+.vite
+data/
+dev_output.log
+data-test-*/
+                    
+
+# Віртуальні оточення Python. Два каталоги — 571 МБ у browser-worker і 113 МБ
+# у web — разом вони більші за весь інший код репозиторію, і жоден з них не
+# є джерелом: `requirements.txt` відтворює їх contents точніше, ніж це робить
+# коміт. До baseline 2026-09-29 вони не були в списку, тому новий репозиторій
+# починався б з 870 МБ, з яких 684 — це залежності.
+.venv/
+__pycache__/
+.pytest_cache/
+test-results/
+playwright-report/
+bin/
+*.log
+
