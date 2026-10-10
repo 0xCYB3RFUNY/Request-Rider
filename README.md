@@ -1,5 +1,6 @@
 
 <img width="2912" height="1440" alt="659528573-39bb8059-739c-46b5-83de-2cacfb0189d8" src="https://github.com/user-attachments/assets/5081f1a5-eb41-4dd6-a351-aea2117565eb" />
+<img width="1365" height="625" alt="Screenshot 2026-10-10 at 04-33-23 RequestRider" src="https://github.com/user-attachments/assets/0b4b59e4-fdac-4af4-b274-108986544556" />
 
 # Request-Rider — Посібник користувача
 <!--
