@@ -1,0 +1,26 @@
+# Build context for engine/Dockerfile.
+#
+# Without this file `docker build` ships the whole directory, including the
+# locally produced 14 MB binary in bin/ and every test artefact. None of it is
+# used: the Dockerfile compiles /engine from source in its own stage.
+
+# Compiled binary and runtime artefacts: the image builds its own /engine.
+bin/
+
+# Test-only Go files stay in the context on purpose - `go test ./...` is not
+# part of the image build, but leaving them out would silently change what
+# `docker build` type-checks. They are small, so only caches are dropped.
+**/__pycache__/
+**/*.pyc
+
+# Never ship a CA private key into an image, in any form.
+data/
+*.key
+*.pem
+*.crt
+
+# Local editor and OS noise.
+.git/
+.gitignore
+.DS_Store
+*.log

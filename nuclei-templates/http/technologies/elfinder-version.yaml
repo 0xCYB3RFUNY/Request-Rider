@@ -1,0 +1,45 @@
+id: elfinder-version
+
+info:
+  name: elFinder Version - Detect
+  author: idealphase
+  severity: info
+  description: |
+    Detects elFinder installations and extracts the version string from the bundled elfinder.min.js or elFinder.version.js files. This template only identifies the version and does not check for any vulnerability.
+  reference:
+    - https://github.com/Studio-42/elFinder/
+  classification:
+    cpe: cpe:2.3:a:std42:elfinder:*:*:*:*:*:*:*:*
+  metadata:
+    max-request: 2
+    vendor: std42
+    product: elfinder
+    shodan-query: http.html:"elFinder"
+  tags: tech,elfinder,oss,version,detect,discovery
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/js/elfinder.min.js"
+      - "{{BaseURL}}/js/elFinder.version.js"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "elFinder - file manager for web"
+          - "elFinder.prototype.version ="
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: regex
+        group: 1
+        regex:
+          - '\* Version (.+) \('
+          - "elFinder.prototype.version = '([0-9.]+)';"
+# digest: 4a0a004730450221008f5a4730e080dba869fc1c73a257740d326a774fe810da8acce35b729d41dd220220482abd7cf02f38a1fb022bda9398d1b97589fdcab3af6130f52b6913c7b01a0b:922c64590222798bb761d5b6d8e72950
