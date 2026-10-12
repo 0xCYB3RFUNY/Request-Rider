@@ -10,6 +10,7 @@ package main
 // returns early on a server with no transport, which is what `&server{}` is).
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -300,7 +301,7 @@ func TestTheSharedRetentionSweepReleasesOnlyFinishedActiveScans(t *testing.T) {
 // A queued run must report an unknown total, not a zero. "0 of 0 pages" reads
 // as a finished run with nothing to report.
 func TestAQueuedActiveScanReportsNoTotalsRatherThanZero(t *testing.T) {
-	job, err := (&server{}).startActiveScanJob(nil, activeScanInput{URL: "http://127.0.0.1:1/"})
+	job, err := (&server{}).startActiveScanJob(context.Background(), activeScanInput{URL: "http://127.0.0.1:1/"})
 	if err != nil {
 		t.Fatalf("a run that cannot connect must still start: %v", err)
 	}

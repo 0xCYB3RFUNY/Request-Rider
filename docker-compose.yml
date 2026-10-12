@@ -23,7 +23,7 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-requestrider}
       POSTGRES_USER: ${POSTGRES_USER:-requestrider}
@@ -40,13 +40,13 @@ services:
     build: ./tor
     restart: unless-stopped
     ports:
-      - "127.0.0.1:9050:9050"
+      - "127.0.0.1:${TOR_PORT:-9050}:9050"
   engine:
     build: ./engine
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:8080"
-      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:${PROXY_PORT:-8080}:8080"
+      - "127.0.0.1:${ENGINE_PORT:-8081}:8081"
     environment:
       CA_DIR: /data/ca
       PROXY_LISTEN_ADDR: 0.0.0.0:8080
@@ -75,7 +75,7 @@ services:
     build: ./browser-worker
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8090:8090"
+      - "127.0.0.1:${WORKER_PORT:-8090}:8090"
     environment:
       PORT: 8090
       # worker.py defaults HOST to 127.0.0.1, which inside a container accepts
@@ -89,7 +89,7 @@ services:
     build: ./web
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"
     environment:
       ENGINE_URL: http://engine:8081
       BROWSER_WORKER_URL: http://browser-worker:8090

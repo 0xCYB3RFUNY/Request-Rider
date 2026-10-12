@@ -169,6 +169,9 @@ func (r txtResolver) lookupTXT(_ context.Context, name string) ([]string, error)
 }
 func (r txtResolver) lookupMX(context.Context, string) ([]string, error) { return nil, nil }
 func (r txtResolver) lookupNS(context.Context, string) ([]string, error) { return nil, nil }
+func (r txtResolver) lookupCNAME(context.Context, string) (string, error) { return "", nil }
+func (r txtResolver) lookupCAA(context.Context, string) ([]string, error) { return nil, nil }
+func (r txtResolver) lookupSOA(context.Context, string) (string, error) { return "", nil }
 
 func TestSharedHostNamesStopsAtItsOwnBoundAndSaysSo(t *testing.T) {
 	var many []string

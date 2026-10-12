@@ -916,29 +916,62 @@ def _durable_scanner_stats(stats):
 
 
 def _ingest_scanner_run_once(project, engine, url, findings, stats, templates=None):
-    """Append one scanner run to the project journal (evidence log, no triage)."""
+    """Append or idempotently update a scanner run in the project journal."""
     if not project:
-        return
+        return None
+    from .models import compute_finding_identity
+
+    clean_url = str(url or "")
     items = []
     for item in findings or []:
         if not isinstance(item, dict):
             continue
+        title = str(
+            item.get("title")
+            or item.get("vulnerability")
+            or item.get("name")
+            or item.get("check_id")
+            or item.get("template_id")
+            or ""
+        ).strip()
+        identity_hash = str(item.get("identity_hash") or compute_finding_identity(item, clean_url))
+        finding_id = str(item.get("id") or identity_hash)
         items.append({
-            "title": str(item.get("title", "")),
+            "id": finding_id,
+            "identity_hash": identity_hash,
+            "title": title,
             "severity": str(item.get("severity") or "INFO").upper(),
             "evidence": str(item.get("evidence", "")),
-            "recommendation": str(item.get("recommendation", "")),
-            "template_id": str(item.get("template_id", "")),
+            "recommendation": str(item.get("recommendation") or item.get("remediation") or ""),
+            "template_id": str(item.get("template_id") or item.get("check_id") or item.get("scanner") or ""),
             "cve": [str(value) for value in item.get("cve") or []],
+            "target": str(item.get("matched_at") or item.get("target") or item.get("url") or clean_url),
+            "method": str(item.get("method") or "").upper(),
+            "param": str(item.get("param") or item.get("parameter") or ""),
+            "description": str(item.get("description") or ""),
         })
+
+    existing_run = ScannerRun.objects.filter(
+        project=project,
+        engine=engine,
+        url=clean_url,
+    ).order_by("-created_at").first()
+
+    if existing_run:
+        return existing_run.upsert_findings(
+            items,
+            stats=_durable_scanner_stats(stats),
+            templates=_scanner_template_summary(templates),
+        )
+
     severities = sorted(
         {str(item.get("severity") or "INFO").upper() for item in items},
         key=lambda level: _SEVERITY_RANK.get(level, 9),
     )
-    ScannerRun.objects.create(
+    return ScannerRun.objects.create(
         project=project,
         engine=engine,
-        url=str(url or ""),
+        url=clean_url,
         summary={
             "findings_count": len(items),
             "highest_severity": severities[0] if severities else "INFO",

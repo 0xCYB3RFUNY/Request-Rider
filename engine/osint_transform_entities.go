@@ -212,7 +212,7 @@ func addressTotal(network *net.IPNet) int64 {
 // nextAddress returns the address one above the given one, staying inside the
 // range's family. It returns the input unchanged when the family is exhausted,
 // which the caller's containment check turns into the end of the walk.
-func nextAddress(address net.IP, network *net.IPNet) net.IP {
+func nextAddress(address net.IP, _ *net.IPNet) net.IP {
 	next := make(net.IP, len(address))
 	copy(next, address)
 	for index := len(next) - 1; index >= 0; index-- {
@@ -519,7 +519,7 @@ var technologyCookieSignatures = []technologySignature{
 // transform either confirms the technology, reports that it is no longer
 // announced, or reports that the host could not be read — and it never reports
 // success for a question it did not ask.
-func (s *server) runTechnologyProbe(ctx context.Context, result *osintTransformResult, input osintTransformInput, collector *transformCollector) error {
+func (s *server) runTechnologyProbe(ctx context.Context, result *osintTransformResult, input osintTransformInput, _ *transformCollector) error {
 	if !input.ConfirmNetwork {
 		return transformError("NETWORK_CONFIRMATION_REQUIRED", "a technology probe fetches the host")
 	}

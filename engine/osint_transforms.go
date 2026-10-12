@@ -575,9 +575,10 @@ func (s *server) osintTransformJobAction(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	state := osintJobRunning
-	if action == "cancel" {
+	switch action {
+	case "cancel":
 		state = osintJobCancelled
-	} else if action == "pause" {
+	case "pause":
 		state = osintJobPaused
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{"job_id": id, "state": state})
@@ -1958,15 +1959,99 @@ func (s *server) runDNSRecords(ctx context.Context, result *osintTransformResult
 	// it another. Over such a route the query itself is an HTTPS request, because
 	// a Tor relay refuses to exit on port 53.
 	routed := resolverForContext(ctx, client, s)
+
+	// Check cancellation before issuing queries
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	dnsProps := map[string]interface{}{}
+	dnsErrors := map[string]string{}
+
+	// 1. A / AAAA queries via lookupHost
 	ips, err := routed.lookupHost(ctx, domain)
 	if err != nil {
-		result.Warnings = append(result.Warnings, err.Error())
+		dnsErrors["A_AAAA"] = err.Error()
+		result.Warnings = append(result.Warnings, "DNS A/AAAA: "+err.Error())
+	} else if len(ips) > 0 {
+		dnsProps["ips"] = ips
 	}
-	result.Entities = append(result.Entities, entity("domain", domain, nil, map[string]interface{}{"source": "dns_records"}))
+
+	// 2. CNAME record
+	if cname, cnameErr := routed.lookupCNAME(ctx, domain); cnameErr != nil {
+		dnsErrors["CNAME"] = cnameErr.Error()
+	} else if cname != "" {
+		dnsProps["cname"] = cname
+	}
+
+	// 3. MX records
+	if mx, mxErr := routed.lookupMX(ctx, domain); mxErr != nil {
+		dnsErrors["MX"] = mxErr.Error()
+	} else if len(mx) > 0 {
+		dnsProps["mx"] = mx
+	}
+
+	// 4. NS records
+	if ns, nsErr := routed.lookupNS(ctx, domain); nsErr != nil {
+		dnsErrors["NS"] = nsErr.Error()
+	} else if len(ns) > 0 {
+		dnsProps["ns"] = ns
+	}
+
+	// 5. TXT records
+	if txt, txtErr := routed.lookupTXT(ctx, domain); txtErr != nil {
+		dnsErrors["TXT"] = txtErr.Error()
+	} else if len(txt) > 0 {
+		dnsProps["txt"] = txt
+	}
+
+	// 6. SOA record
+	if soa, soaErr := routed.lookupSOA(ctx, domain); soaErr != nil {
+		dnsErrors["SOA"] = soaErr.Error()
+	} else if soa != "" {
+		dnsProps["soa"] = soa
+	}
+
+	// 7. CAA records
+	if caa, caaErr := routed.lookupCAA(ctx, domain); caaErr != nil {
+		dnsErrors["CAA"] = caaErr.Error()
+	} else if len(caa) > 0 {
+		dnsProps["caa"] = caa
+	}
+
+	// Attach explicit DNS errors and records to properties
+	domainProps := map[string]interface{}{"source": "dns_records"}
+	for k, v := range dnsProps {
+		domainProps["dns_"+k] = v
+	}
+	if len(dnsErrors) > 0 {
+		domainProps["dns_errors"] = dnsErrors
+	}
+
+	result.Entities = append(result.Entities, entity("domain", domain, nil, domainProps))
 	for _, ip := range ips {
 		result.Entities = append(result.Entities, entity("ip", ip, nil, map[string]interface{}{"source": "dns_records"}))
 		result.Relations = append(result.Relations, transformRelation{Type: "resolves_to", SourceType: "domain", Source: domain, TargetType: "ip", Target: ip})
 	}
+
+	// Add relations for CNAME, MX and NS if present
+	if cname, ok := dnsProps["cname"].(string); ok && cname != "" {
+		result.Entities = append(result.Entities, entity("domain", cname, nil, map[string]interface{}{"source": "dns_cname"}))
+		result.Relations = append(result.Relations, transformRelation{Type: "cname", SourceType: "domain", Source: domain, TargetType: "domain", Target: cname})
+	}
+	if mxList, ok := dnsProps["mx"].([]string); ok {
+		for _, mxHost := range mxList {
+			result.Entities = append(result.Entities, entity("domain", mxHost, nil, map[string]interface{}{"source": "dns_mx"}))
+			result.Relations = append(result.Relations, transformRelation{Type: "mx", SourceType: "domain", Source: domain, TargetType: "domain", Target: mxHost})
+		}
+	}
+	if nsList, ok := dnsProps["ns"].([]string); ok {
+		for _, nsHost := range nsList {
+			result.Entities = append(result.Entities, entity("domain", nsHost, nil, map[string]interface{}{"source": "dns_ns"}))
+			result.Relations = append(result.Relations, transformRelation{Type: "ns", SourceType: "domain", Source: domain, TargetType: "domain", Target: nsHost})
+		}
+	}
+
 	if len(ips) == 0 {
 		// Nothing resolved, so there is nothing to have a reputation for. Saying
 		// so is better than asking the index about a host the resolver could not

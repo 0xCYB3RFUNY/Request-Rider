@@ -68,7 +68,7 @@ func (fixture *domainProbeFixture) serve(t *testing.T) *httptest.Server {
 // The pass builds `http://<user><tld>`, so every candidate has to land on the test
 // server. Rewriting here rather than in the pass keeps the pass's URL construction
 // exactly as upstream has it — a construction that the registry test pins.
-func (fixture *domainProbeFixture) hostIn(served *httptest.Server) func() {
+func (fixture *domainProbeFixture) hostIn(_ *httptest.Server) func() {
 	return func() {}
 }
 

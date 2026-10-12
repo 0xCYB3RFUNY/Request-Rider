@@ -543,8 +543,6 @@ func TestRunWaybackURLsReportsEmptyIndexWithoutFallback(t *testing.T) {
 // the fallback real.
 func TestArchiveChainSpansMoreThanOneHost(t *testing.T) {
 	hosts := map[string]bool{}
-	engine := &server{transport: &http.Transport{}}
-	engine.archiveIndexList = nil
 	// The production chain is asserted on its shape rather than by calling it,
 	// because building it asks the crawl index which collections exist.
 	chain := append(

@@ -3128,3 +3128,99 @@ class TestDatabaseEncodingTests(TestCase):
             cursor.execute("SELECT %s::text", ["\u00a7marker \u00e9"])
             stored = str(cursor.fetchone()[0])
         self.assertEqual(stored, "\u00a7marker \u00e9")
+
+
+class ScannerFindingIdentityTests(TestCase):
+    """Verify stable evidence-aware identity and idempotent ScannerRun upsert."""
+
+    def test_compute_finding_identity_deterministic_and_unique(self):
+        from lab.models import compute_finding_identity
+
+        item1 = {
+            "vulnerability": "Missing Security Header",
+            "url": "https://example.test/",
+            "method": "GET",
+            "param": "",
+            "evidence": "Strict-Transport-Security missing",
+        }
+        item2 = {
+            "title": "missing security header",
+            "matched_at": "https://example.test/",
+            "method": "get",
+            "parameter": "",
+            "evidence": "Strict-Transport-Security missing",
+        }
+        item3 = {
+            "vulnerability": "Missing Security Header",
+            "url": "https://example.test/",
+            "method": "GET",
+            "param": "",
+            "evidence": "Content-Security-Policy missing",
+        }
+
+        h1 = compute_finding_identity(item1)
+        h2 = compute_finding_identity(item2)
+        h3 = compute_finding_identity(item3)
+
+        self.assertEqual(len(h1), 64)
+        self.assertEqual(h1, h2, "Equivalent findings with title vs vulnerability must produce identical identity")
+        self.assertNotEqual(h1, h3, "Different evidence must produce distinct identity")
+
+    def test_scanner_run_idempotent_upsert_merges_without_duplicates(self):
+        from lab.models import Project, ScannerRun
+        from lab.views import _ingest_scanner_run_once
+
+        project = Project.objects.create(name="Identity Test Project")
+        url = "https://app.test/"
+        findings_v1 = [
+            {
+                "vulnerability": "Sensitive Path Disclosed",
+                "evidence": "/.env returned 200 OK",
+                "severity": "MEDIUM",
+                "recommendation": "Restrict access to .env",
+            },
+            {
+                "vulnerability": "Exposed Server Banner",
+                "evidence": "Server: Apache/2.4",
+                "severity": "INFO",
+            },
+        ]
+
+        run1 = _ingest_scanner_run_once(project, "builtin", url, findings_v1, {"pages": 1})
+        self.assertIsNotNone(run1)
+        self.assertEqual(ScannerRun.objects.filter(project=project, url=url).count(), 1)
+        self.assertEqual(len(run1.findings), 2)
+        self.assertEqual(run1.summary["findings_count"], 2)
+        self.assertEqual(run1.summary["highest_severity"], "MEDIUM")
+        self.assertTrue(all(f.get("identity_hash") for f in run1.findings))
+
+        # Re-running on the same target with enriched evidence and updated severity
+        findings_v2 = [
+            {
+                "vulnerability": "Sensitive Path Disclosed",
+                "evidence": "/.env returned 200 OK with AWS_SECRET_ACCESS_KEY disclosed",
+                "severity": "HIGH",
+                "recommendation": "Restrict access to .env immediately",
+            },
+            {
+                "vulnerability": "New Finding SQLi",
+                "evidence": "error in SQL syntax",
+                "severity": "CRITICAL",
+                "recommendation": "Use parameter binding",
+            },
+        ]
+
+        run2 = _ingest_scanner_run_once(project, "builtin", url, findings_v2, {"pages": 2})
+        self.assertEqual(ScannerRun.objects.filter(project=project, url=url).count(), 1, "Idempotent upsert must not create duplicate ScannerRun")
+        self.assertEqual(run1.id, run2.id)
+
+        run2.refresh_from_db()
+        self.assertEqual(len(run2.findings), 3, "2 original + 1 new finding merged by identity")
+        self.assertEqual(run2.summary["findings_count"], 3)
+        self.assertEqual(run2.summary["highest_severity"], "CRITICAL")
+
+        # Check that Sensitive Path Disclosed was upgraded to HIGH with enriched evidence
+        sensitive_finding = next(f for f in run2.findings if "Sensitive Path" in f["title"])
+        self.assertEqual(sensitive_finding["severity"], "HIGH")
+        self.assertIn("AWS_SECRET_ACCESS_KEY", sensitive_finding["evidence"])
+

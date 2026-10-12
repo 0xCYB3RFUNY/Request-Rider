@@ -75,7 +75,7 @@ func (fixture *identityGraphFixture) handler(t *testing.T) http.Handler {
 	return mux
 }
 
-func (fixture *identityGraphFixture) answer(path, query string) (string, int) {
+func (fixture *identityGraphFixture) answer(path, _ string) (string, int) {
 	switch {
 	case strings.HasPrefix(path, "/gravatar"):
 		// `gravatarDigestOnly` reproduces the live service for an address: the raw

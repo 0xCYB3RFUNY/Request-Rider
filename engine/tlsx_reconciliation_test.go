@@ -362,7 +362,7 @@ func TestTheFingerprintRowAgreesWithTheProbe(t *testing.T) {
 // «перший збіг» означало б звіряти тест із одним рядком таблиці, а не з тим,
 // що реєстр твердить загалом.
 var tlsxClaimedCountLine = regexp.MustCompile(
-	"усього властивостей .tls_.[^|]*\\|\\s*\\*\\*(\\d+)\\*\\*")
+	`усього властивостей .tls_.[^|]*\|\s*\*\*(\d+)\*\*`)
 
 func tlsxClaimedCount(t *testing.T, registry string) int {
 	t.Helper()

@@ -28,27 +28,27 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_amazon_mws_auth_token",
-		pattern:  regexp.MustCompile("(amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"),
+		pattern:  regexp.MustCompile(`(amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})`),
 		severity: "Amazon MWS Auth Token",
 	},
 	{
 		id:       "pinkerton_amazon_aws_s3_url",
-		pattern:  regexp.MustCompile("(s3\\.amazonaws\\.com/+|[a-zA-Z0-9_\\-]+\\.s3\\.amazonaws\\.com)"),
+		pattern:  regexp.MustCompile(`(s3\.amazonaws\.com/+|[a-zA-Z0-9_\-]+\.s3\.amazonaws\.com)`),
 		severity: "Amazon AWS S3 URL",
 	},
 	{
 		id:       "pinkerton_google_api_key",
-		pattern:  regexp.MustCompile("(AIza[0-9A-Za-z\\-_]{35})"),
+		pattern:  regexp.MustCompile(`(AIza[0-9A-Za-z\-_]{35})`),
 		severity: "Google API Key",
 	},
 	{
 		id:       "pinkerton_google_oauth_access_token",
-		pattern:  regexp.MustCompile("(ya29\\.[0-9A-Za-z\\-_]+)"),
+		pattern:  regexp.MustCompile(`(ya29\.[0-9A-Za-z\-_]+)`),
 		severity: "Google OAuth Access Token",
 	},
 	{
 		id:       "pinkerton_google_cloud_platform_oauth",
-		pattern:  regexp.MustCompile("([0-9]+-[0-9A-Za-z_]{32}\\.apps\\.googleusercontent\\.com)"),
+		pattern:  regexp.MustCompile(`([0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com)`),
 		severity: "Google Cloud Platform OAuth",
 	},
 	{
@@ -58,17 +58,17 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_google_captcha_key",
-		pattern:  regexp.MustCompile("(6L[0-9A-Za-z\\-_]{38})"),
+		pattern:  regexp.MustCompile(`(6L[0-9A-Za-z\-_]{38})`),
 		severity: "Google Captcha Key",
 	},
 	{
 		id:       "pinkerton_firebase_key",
-		pattern:  regexp.MustCompile("(AAAA[A-Za-z0-9_\\-]{7}:[A-Za-z0-9_\\-]{140})"),
+		pattern:  regexp.MustCompile(`(AAAA[A-Za-z0-9_\-]{7}:[A-Za-z0-9_\-]{140})`),
 		severity: "Firebase Key",
 	},
 	{
 		id:       "pinkerton_firebase_url",
-		pattern:  regexp.MustCompile("([a-zA-Z0-9\\-]+\\.firebaseio\\.com)"),
+		pattern:  regexp.MustCompile(`([a-zA-Z0-9\-]+\.firebaseio\.com)`),
 		severity: "Firebase URL",
 	},
 	{
@@ -83,7 +83,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_github_access_token",
-		pattern:  regexp.MustCompile("([a-zA-Z0-9_\\-]+:[a-zA-Z0-9_\\-]+@github\\.com)"),
+		pattern:  regexp.MustCompile(`([a-zA-Z0-9_\-]+:[a-zA-Z0-9_\-]+@github\.com)`),
 		severity: "GitHub Access Token",
 	},
 	{
@@ -93,7 +93,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_gitlab_personal_access_token",
-		pattern:  regexp.MustCompile("(glpat-[0-9a-zA-Z\\-_]{20})"),
+		pattern:  regexp.MustCompile(`(glpat-[0-9a-zA-Z\-_]{20})`),
 		severity: "GitLab Personal Access Token",
 	},
 	{
@@ -103,7 +103,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_slack_webhook",
-		pattern:  regexp.MustCompile("(https://hooks\\.slack\\.com/services/T\\w{8}/B\\w{8}/\\w{24})"),
+		pattern:  regexp.MustCompile(`(https://hooks\.slack\.com/services/T\w{8}/B\w{8}/\w{24})`),
 		severity: "Slack Webhook",
 	},
 	{
@@ -118,7 +118,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_slack_oauth_v2_config_token",
-		pattern:  regexp.MustCompile("(xoxe\\.xoxp-1-[0-9a-zA-Z]{166})"),
+		pattern:  regexp.MustCompile(`(xoxe\.xoxp-1-[0-9a-zA-Z]{166})`),
 		severity: "Slack OAuth v2 Config Token",
 	},
 	{
@@ -153,7 +153,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_twitter_access_token",
-		pattern:  regexp.MustCompile("((?i)twitter.*[1-9][0-9]+-\\w{40})"),
+		pattern:  regexp.MustCompile(`((?i)twitter.*[1-9][0-9]+-\w{40})`),
 		severity: "Twitter Access Token",
 	},
 	{
@@ -210,17 +210,17 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_paypal_braintree_access_token",
-		pattern:  regexp.MustCompile("(access_token\\$production\\$[0-9a-z]{16}\\$[0-9a-f]{32})"),
+		pattern:  regexp.MustCompile(`(access_token\$production\$[0-9a-z]{16}\$[0-9a-f]{32})`),
 		severity: "PayPal Braintree Access Token",
 	},
 	{
 		id:       "pinkerton_square_access_token",
-		pattern:  regexp.MustCompile("(sq0atp-[0-9A-Za-z\\-_]{22})"),
+		pattern:  regexp.MustCompile(`(sq0atp-[0-9A-Za-z\-_]{22})`),
 		severity: "Square Access Token",
 	},
 	{
 		id:       "pinkerton_square_oauth_secret",
-		pattern:  regexp.MustCompile("(sq0csp-[0-9A-Za-z\\-_]{43})"),
+		pattern:  regexp.MustCompile(`(sq0csp-[0-9A-Za-z\-_]{43})`),
 		severity: "Square OAuth Secret",
 	},
 	{
@@ -235,12 +235,12 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_adobe_client_secret",
-		pattern:  regexp.MustCompile("((?i)\\bp8e-[a-zA-Z0-9]{32})"),
+		pattern:  regexp.MustCompile(`((?i)\bp8e-[a-zA-Z0-9]{32})`),
 		severity: "Adobe Client Secret",
 	},
 	{
 		id:       "pinkerton_alibaba_accesskey_id",
-		pattern:  regexp.MustCompile("(\\bLTAI[a-zA-Z0-9]{20}\\b)"),
+		pattern:  regexp.MustCompile(`(\bLTAI[a-zA-Z0-9]{20}\b)`),
 		severity: "Alibaba AccessKey ID",
 	},
 	{
@@ -250,12 +250,12 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_doppler_api_token",
-		pattern:  regexp.MustCompile("(dp\\.pt\\.[a-zA-Z0-9]{43})"),
+		pattern:  regexp.MustCompile(`(dp\.pt\.[a-zA-Z0-9]{43})`),
 		severity: "Doppler API Token",
 	},
 	{
 		id:       "pinkerton_dynatrace_api_token",
-		pattern:  regexp.MustCompile("(dt0c01\\.[a-zA-Z0-9]{24}\\.[a-z0-9]{64})"),
+		pattern:  regexp.MustCompile(`(dt0c01\.[a-zA-Z0-9]{24}\.[a-z0-9]{64})`),
 		severity: "Dynatrace API Token",
 	},
 	{
@@ -265,7 +265,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_npm_access_token",
-		pattern:  regexp.MustCompile("(\\bnpm_[a-z0-9]{36}\\b)"),
+		pattern:  regexp.MustCompile(`(\bnpm_[a-z0-9]{36}\b)`),
 		severity: "NPM Access Token",
 	},
 	{
@@ -295,17 +295,17 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_authorization_bearer",
-		pattern:  regexp.MustCompile("([Bb]earer [a-zA-Z0-9_\\-\\.=]+)"),
+		pattern:  regexp.MustCompile(`([Bb]earer [a-zA-Z0-9_\-\.=]+)`),
 		severity: "Authorization Bearer",
 	},
 	{
 		id:       "pinkerton_authorization_basic",
-		pattern:  regexp.MustCompile("([Bb]asic [a-zA-Z0-9=:_\\+/\\-]{5,100})"),
+		pattern:  regexp.MustCompile(`([Bb]asic [a-zA-Z0-9=:_\+/\-]{5,100})`),
 		severity: "Authorization Basic",
 	},
 	{
 		id:       "pinkerton_jwt_token",
-		pattern:  regexp.MustCompile("(eyJ[A-Za-z0-9\\-_=]+\\.[A-Za-z0-9\\-_=]+\\.[A-Za-z0-9\\-_.+/=]+)"),
+		pattern:  regexp.MustCompile(`(eyJ[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_.+/=]+)`),
 		severity: "JWT Token",
 	},
 	{
@@ -350,7 +350,7 @@ var pinkertonRules = []secretRule{
 	},
 	{
 		id:       "pinkerton_mailto",
-		pattern:  regexp.MustCompile("(mailto:[a-zA-Z0-9_.+\\-]+@[a-zA-Z0-9\\-]+\\.[a-zA-Z0-9.\\-]+)"),
+		pattern:  regexp.MustCompile(`(mailto:[a-zA-Z0-9_.+\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9.\-]+)`),
 		severity: "Mailto",
 	},
 }

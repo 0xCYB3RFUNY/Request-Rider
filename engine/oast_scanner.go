@@ -60,7 +60,7 @@ func oastProviderURL() string {
 // Nil is the honest answer here and not a degraded one: `{{interactsh-url}` then
 // produces a refusal naming what is missing, which is a state the operator can
 // act on.
-func (s *server) newOASTScannerSource(ctx context.Context) scanner.OASTSource {
+func (s *server) newOASTScannerSource(_ context.Context) scanner.OASTSource {
 	provider := oastProviderURL()
 	if provider == "" {
 		return nil

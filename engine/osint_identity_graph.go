@@ -279,11 +279,20 @@ func identityGraphDumpFile(result *osintTransformResult, value string, options m
 	sections := map[string][]transformEntity{}
 
 	var builder strings.Builder
-	builder.WriteString(strings.Repeat("⎯", 85) + "\n")
-	builder.WriteString(":: Query                                :  " + value + "\n")
-	builder.WriteString(":: Written                              :  " + time.Now().UTC().Format(time.RFC3339) + "\n")
-	builder.WriteString(":: Services queried                     :  " + services + "\n")
-	builder.WriteString(":: Services that answered               :  " + strings.Join(answered, ", ") + "\n")
+	builder.WriteString(strings.Repeat("⎯", 85))
+	builder.WriteByte('\n')
+	builder.WriteString(":: Query                                :  ")
+	builder.WriteString(value)
+	builder.WriteByte('\n')
+	builder.WriteString(":: Written                              :  ")
+	builder.WriteString(time.Now().UTC().Format(time.RFC3339))
+	builder.WriteByte('\n')
+	builder.WriteString(":: Services queried                     :  ")
+	builder.WriteString(services)
+	builder.WriteByte('\n')
+	builder.WriteString(":: Services that answered               :  ")
+	builder.WriteString(strings.Join(answered, ", "))
+	builder.WriteByte('\n')
 	// Each entity is routed to exactly one section, by what it **is** rather than
 	// by which service wrote it. The first version filtered on
 	// `Properties["service"]` and then also accepted anything with the stealer
@@ -312,9 +321,13 @@ func identityGraphDumpFile(result *osintTransformResult, value string, options m
 		if len(items) == 0 {
 			continue
 		}
-		builder.WriteString("\n:: " + label + "\n")
+		builder.WriteString("\n:: ")
+		builder.WriteString(label)
+		builder.WriteByte('\n')
 		for _, item := range items {
-			builder.WriteString("   ↳ " + identityGraphDescribe(item) + "\n")
+			builder.WriteString("   ↳ ")
+			builder.WriteString(identityGraphDescribe(item))
+			builder.WriteByte('\n')
 		}
 	}
 
@@ -331,13 +344,17 @@ func identityGraphDumpFile(result *osintTransformResult, value string, options m
 		sort.Strings(addresses)
 		builder.WriteString("\n:: Emails\n")
 		for _, address := range addresses {
-			builder.WriteString("   ↳ " + address + "\n")
+			builder.WriteString("   ↳ ")
+			builder.WriteString(address)
+			builder.WriteByte('\n')
 		}
 	}
 	if len(result.Warnings) > 0 {
 		builder.WriteString("\n:: Warnings\n")
 		for _, warning := range result.Warnings {
-			builder.WriteString("   ↳ " + warning + "\n")
+			builder.WriteString("   ↳ ")
+			builder.WriteString(warning)
+			builder.WriteByte('\n')
 		}
 	}
 
@@ -404,7 +421,7 @@ func identityGraphDumpRequested(options map[string]interface{}) bool {
 // people's domains, and an operator who runs the identity lookup for every value
 // would pay it every time without choosing to. The option is `check_domains`, so
 // the pass is reachable and its absence from a run is a stated fact.
-func identityGraphDomainPass(ctx context.Context, client *http.Client, username string, timeout time.Duration, readBytes int64, result *osintTransformResult, collector *transformCollector) (int, error) {
+func identityGraphDomainPass(ctx context.Context, client *http.Client, username string, timeout time.Duration, readBytes int64, result *osintTransformResult, _ *transformCollector) (int, error) {
 	var (
 		waitGroup sync.WaitGroup
 		mutex     sync.Mutex

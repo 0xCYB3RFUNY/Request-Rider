@@ -333,10 +333,14 @@ def _active_finding_row(item):
     """
     if not isinstance(item, dict):
         return None
+    from lab.models import compute_finding_identity
+    identity_hash = str(item.get("identity_hash") or compute_finding_identity(item, item.get("endpoint") or ""))
+    finding_id = str(item.get("id") or identity_hash)
     severity = str(item.get("severity") or "INFO").upper()
     return {
-        "id": str(item.get("id", "")),
-        "title": str(item.get("title", "")),
+        "id": finding_id,
+        "identity_hash": identity_hash,
+        "title": str(item.get("title") or item.get("vulnerability") or item.get("name") or ""),
         "severity": severity,
         "tier": str(item.get("tier", "")),
         "module": str(item.get("module", "")),
@@ -357,7 +361,7 @@ def _active_finding_row(item):
 
 
 def _ingest_active_scan_run(project, url, report):
-    """Write one finished run to the Project's journal.
+    """Write or idempotently update one finished run in the Project's journal.
 
     The evidence kept is the findings themselves plus the counters that make a run
     readable without opening it: which target, how many surfaces were tested, how
@@ -366,33 +370,46 @@ def _ingest_active_scan_run(project, url, report):
     and that has to be visible in the summary rather than inferred from silence.
     """
     if not project or not isinstance(report, dict):
-        return
+        return None
     rows = [row for row in (_active_finding_row(item) for item in report.get("findings") or []) if row]
+    stats = report.get("stats") or {}
+    clean_url = str(url or report.get("target") or "")
+
+    existing_run = ScannerRun.objects.filter(
+        project=project,
+        engine="active",
+        url=clean_url,
+    ).order_by("-created_at").first()
+
+    raw_stats = {
+        "requests": stats.get("requests", 0),
+        "points": stats.get("points", 0),
+        "modules": stats.get("modules", 0),
+        "chains": stats.get("chains", 0),
+        "verified": stats.get("verified", 0),
+        "potential": stats.get("potential", 0),
+        "capped": stats.get("capped", 0),
+        "hosts": stats.get("hosts", 0),
+        "pages": report.get("pages", 0),
+        "workers": report.get("workers", 0),
+        "duration": report.get("duration", ""),
+    }
+
+    if existing_run:
+        return existing_run.upsert_findings(rows, stats=raw_stats)
+
     severities = sorted(
         {row["severity"] for row in rows},
         key=lambda level: _SEVERITY_RANK.get(level, 9),
     )
-    stats = report.get("stats") or {}
-    ScannerRun.objects.create(
+    return ScannerRun.objects.create(
         project=project,
         engine="active",
-        url=str(url or report.get("target") or ""),
+        url=clean_url,
         summary={
             "findings_count": len(rows),
             "highest_severity": severities[0] if severities else "INFO",
-            "stats": {
-                "requests": stats.get("requests", 0),
-                "points": stats.get("points", 0),
-                "modules": stats.get("modules", 0),
-                "chains": stats.get("chains", 0),
-                "verified": stats.get("verified", 0),
-                "potential": stats.get("potential", 0),
-                "capped": stats.get("capped", 0),
-                "hosts": stats.get("hosts", 0),
-                "pages": report.get("pages", 0),
-                "workers": report.get("workers", 0),
-                "duration": report.get("duration", ""),
-            },
+            "stats": raw_stats,
             "warnings": [str(value) for value in report.get("warnings") or []],
             "proofs": len(report.get("proofs") or []),
         },

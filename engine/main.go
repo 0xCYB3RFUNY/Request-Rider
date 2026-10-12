@@ -33,6 +33,8 @@ import (
 
 	"golang.org/x/net/html"
 
+	wappalyzer "github.com/projectdiscovery/wappalyzergo"
+
 	"intruder/engine/pkg/enrich"
 	"intruder/engine/pkg/intruder"
 	"intruder/engine/pkg/passive"
@@ -1600,12 +1602,11 @@ func (s *server) scanner(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "INVALID_TOOL_PROXY", err)
 		return
 	}
-	result, err := s.runSafeScannerContext(withToolTransport(routeContext, transport), parsed)
+	result, err := s.runSafeScannerContext(withToolTransport(routeContext, transport), parsed, profile)
 	if err != nil {
 		writeOperationError(w, http.StatusBadGateway, "SCANNER_CHECK_FAILED", err)
 		return
 	}
-	result["profile"] = profile
 	result["source_ip"] = sourceIP
 	writeJSON(w, http.StatusOK, result)
 }
@@ -1959,9 +1960,10 @@ func (s *server) scannerNucleiJobAction(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 	state := scanner.JobRunning
-	if action == "cancel" {
+	switch action {
+	case "cancel":
 		state = scanner.JobCancelled
-	} else if action == "pause" {
+	case "pause":
 		state = scanner.JobPaused
 	}
 	writeJSON(w, http.StatusOK, map[string]interface{}{"job_id": id, "state": state})
@@ -2430,11 +2432,30 @@ func securityHeaderChecks(headers map[string]string) map[string]interface{} {
 	return checks
 }
 
+var (
+	wappalyzerClient     *wappalyzer.Wappalyze
+	wappalyzerClientOnce sync.Once
+)
+
+func getWappalyzer() *wappalyzer.Wappalyze {
+	wappalyzerClientOnce.Do(func() {
+		client, err := wappalyzer.New()
+		if err != nil {
+			log.Printf("[scanner] failed to initialize wappalyzergo: %v", err)
+			return
+		}
+		wappalyzerClient = client
+	})
+	return wappalyzerClient
+}
+
 func detectTechnologies(response map[string]interface{}, target *url.URL) []string {
-	// Fingerprinting is based on static HTML, headers, cookies, and asset URLs.
-	// Runtime-only frameworks require a browser/Wappalyzer worker and are not
-	// inferred from speculation.
-	headers := response["headers"].(map[string]string)
+	// Fingerprinting uses wappalyzergo across thousands of technology signatures
+	// (HTML, headers, cookies, scripts) supplemented by our local quick probes.
+	headers, _ := response["headers"].(map[string]string)
+	if headers == nil {
+		headers = map[string]string{}
+	}
 	body, _ := response["body"].(string)
 	text := strings.ToLower(body)
 	technologies := []string{}
@@ -2444,6 +2465,48 @@ func detectTechnologies(response map[string]interface{}, target *url.URL) []stri
 			return
 		}
 		technologies = append(technologies, name+" · "+evidence)
+	}
+
+	// 1. Wappalyzer detection across fingerprints with categories and CPE
+	if w := getWappalyzer(); w != nil {
+		wHeaders := make(map[string][]string, len(headers)+1)
+		for key, value := range headers {
+			wHeaders[strings.ToLower(key)] = []string{value}
+		}
+		if rawCookies, ok := response["cookies"].([]map[string]interface{}); ok {
+			var cookieStrs []string
+			for _, cookie := range rawCookies {
+				name, _ := cookie["name"].(string)
+				if name != "" {
+					val, _ := cookie["value"].(string)
+					cookieStrs = append(cookieStrs, name+"="+val)
+				}
+			}
+			if len(cookieStrs) > 0 {
+				wHeaders["set-cookie"] = cookieStrs
+			}
+		}
+		matches := w.FingerprintWithInfo(wHeaders, []byte(body))
+		appNames := make([]string, 0, len(matches))
+		for appName := range matches {
+			appNames = append(appNames, appName)
+		}
+		sort.Strings(appNames)
+		for _, appName := range appNames {
+			info := matches[appName]
+			var parts []string
+			if len(info.Categories) > 0 {
+				parts = append(parts, strings.Join(info.Categories, ", "))
+			}
+			if info.CPE != "" {
+				parts = append(parts, "CPE: "+info.CPE)
+			}
+			evidence := "Wappalyzer"
+			if len(parts) > 0 {
+				evidence += " (" + strings.Join(parts, "; ") + ")"
+			}
+			add(appName, evidence)
+		}
 	}
 	for key, value := range headers {
 		if strings.EqualFold(key, "server") && value != "" {
@@ -2638,15 +2701,68 @@ func discoverOSINTResources(target *url.URL, response map[string]interface{}) ma
 	}
 }
 
-func (s *server) runSafeScanner(target *url.URL) (map[string]interface{}, error) {
-	return s.runSafeScannerContext(context.Background(), target)
+type scannerProfileConfig struct {
+	Name        string
+	MaxProbes   int
+	Timeout     time.Duration
+	Categories  map[string]bool
+	PassiveOnly bool
+	Description string
 }
 
-func (s *server) runSafeScannerContext(ctx context.Context, target *url.URL) (map[string]interface{}, error) {
+func getScannerProfileConfig(profile string) scannerProfileConfig {
+	switch strings.ToLower(strings.TrimSpace(profile)) {
+	case "cms":
+		return scannerProfileConfig{
+			Name:        "cms",
+			MaxProbes:   7,
+			Timeout:     15 * time.Second,
+			Categories:  map[string]bool{"cms": true, "admin": true},
+			PassiveOnly: false,
+			Description: "CMS & admin surface reconnaissance",
+		}
+	case "api":
+		return scannerProfileConfig{
+			Name:        "api",
+			MaxProbes:   7,
+			Timeout:     15 * time.Second,
+			Categories:  map[string]bool{"api": true, "misconfiguration": true, "debug": true},
+			PassiveOnly: false,
+			Description: "API, misconfiguration & debug endpoint reconnaissance",
+		}
+	case "security_headers", "passive":
+		return scannerProfileConfig{
+			Name:        "security_headers",
+			MaxProbes:   0,
+			Timeout:     10 * time.Second,
+			Categories:  map[string]bool{},
+			PassiveOnly: true,
+			Description: "Passive security headers, cookie flags and TLS analysis with zero active path probes",
+		}
+	case "generic_web", "full", "":
+		fallthrough
+	default:
+		return scannerProfileConfig{
+			Name:        "generic_web",
+			MaxProbes:   14,
+			Timeout:     20 * time.Second,
+			Categories:  map[string]bool{"cms": true, "api": true, "admin": true, "misconfiguration": true, "debug": true},
+			PassiveOnly: false,
+			Description: "Standard web reconnaissance covering CMS, API, admin and misconfiguration surfaces",
+		}
+	}
+}
+
+func (s *server) runSafeScanner(target *url.URL) (map[string]interface{}, error) {
+	return s.runSafeScannerContext(context.Background(), target, "generic_web")
+}
+
+func (s *server) runSafeScannerContext(ctx context.Context, target *url.URL, profile string) (map[string]interface{}, error) {
+	pcfg := getScannerProfileConfig(profile)
 	transport := s.toolRunTransport(ctx)
-	client := &http.Client{Transport: transport, Timeout: 20 * time.Second}
+	client := &http.Client{Transport: transport, Timeout: pcfg.Timeout}
 	resolver := resolverForContext(ctx, client, s)
-	return runSafeScannerWithResolverContext(ctx, target, resolver, transport)
+	return runSafeScannerWithResolverAndProfileContext(ctx, target, resolver, transport, pcfg.Name)
 }
 
 // toolRunTransport is the transport of the current run: the recording proxy when
@@ -2659,14 +2775,23 @@ func (s *server) toolRunTransport(ctx context.Context) http.RoundTripper {
 }
 
 func runSafeScanner(target *url.URL) (map[string]interface{}, error) {
-	return runSafeScannerWithResolver(target, net.DefaultResolver, osintHTTPClient.Transport)
+	return runSafeScannerWithResolverAndProfile(target, net.DefaultResolver, osintHTTPClient.Transport, "generic_web")
 }
 
 func runSafeScannerWithResolver(target *url.URL, resolver *net.Resolver, transport http.RoundTripper) (map[string]interface{}, error) {
-	return runSafeScannerWithResolverContext(context.Background(), target, systemResolver{resolver: resolver}, transport)
+	return runSafeScannerWithResolverAndProfileContext(context.Background(), target, systemResolver{resolver: resolver}, transport, "generic_web")
+}
+
+func runSafeScannerWithResolverAndProfile(target *url.URL, resolver *net.Resolver, transport http.RoundTripper, profile string) (map[string]interface{}, error) {
+	return runSafeScannerWithResolverAndProfileContext(context.Background(), target, systemResolver{resolver: resolver}, transport, profile)
 }
 
 func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, resolver routeResolver, transport http.RoundTripper) (map[string]interface{}, error) {
+	return runSafeScannerWithResolverAndProfileContext(ctx, target, resolver, transport, "generic_web")
+}
+
+func runSafeScannerWithResolverAndProfileContext(ctx context.Context, target *url.URL, resolver routeResolver, transport http.RoundTripper, profile string) (map[string]interface{}, error) {
+	pcfg := getScannerProfileConfig(profile)
 	base, err := runOSINTWithResolverContext(ctx, target, true, resolver, transport)
 	if err != nil {
 		return nil, err
@@ -2817,47 +2942,57 @@ func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, res
 		{path: "/debug/", name: "Debug endpoint", category: "debug"},
 	}
 	probes := []map[string]interface{}{}
-	for _, candidate := range commonPaths {
-		probeURL := target.ResolveReference(&url.URL{Path: candidate.path}).String()
-		response, err := probeScannerPathWithTransportContext(ctx, probeURL, transport)
-		if err != nil {
-			continue
-		}
-		probeBody, probeTruncated, _ := readAnalysisBody(response.Body)
-		response.Body.Close()
-		probeFingerprint := fingerprintResponse(response, probeBody)
-		isFallback := baselineFingerprint != "" && probeFingerprint == baselineFingerprint
-		probes = append(probes, map[string]interface{}{
-			"path": candidate.path, "category": candidate.category, "status": response.StatusCode,
-			"content_type": response.Header.Get("Content-Type"), "fingerprint": probeFingerprint,
-			"same_as_baseline": isFallback, "body_truncated": probeTruncated,
-		})
-		if response.StatusCode >= 200 && response.StatusCode < 400 && !isFallback {
-			severity := "LOW"
-			if response.StatusCode == http.StatusOK {
-				severity = "MEDIUM"
+	if !pcfg.PassiveOnly && pcfg.MaxProbes > 0 {
+		for _, candidate := range commonPaths {
+			if !pcfg.Categories[candidate.category] {
+				continue
 			}
-			if candidate.category == "misconfiguration" && response.StatusCode == http.StatusOK {
-				severity = "HIGH"
+			if len(probes) >= pcfg.MaxProbes {
+				break
 			}
-			findings = append(findings, map[string]interface{}{
-				"severity":       severity,
-				"title":          candidate.name,
-				"category":       candidate.category,
-				"evidence":       fmt.Sprintf("%s returned HTTP %d (read-only probe; content was not retained).", probeURL, response.StatusCode),
-				"recommendation": "Review whether this endpoint is intentionally exposed; if not, restrict access and validate the deployment configuration.",
+			probeURL := target.ResolveReference(&url.URL{Path: candidate.path}).String()
+			response, err := probeScannerPathWithTransportContext(ctx, probeURL, transport)
+			if err != nil {
+				continue
+			}
+			probeBody, probeTruncated, _ := readAnalysisBody(response.Body)
+			response.Body.Close()
+			probeFingerprint := fingerprintResponse(response, probeBody)
+			isFallback := baselineFingerprint != "" && probeFingerprint == baselineFingerprint
+			probes = append(probes, map[string]interface{}{
+				"path": candidate.path, "category": candidate.category, "status": response.StatusCode,
+				"content_type": response.Header.Get("Content-Type"), "fingerprint": probeFingerprint,
+				"same_as_baseline": isFallback, "body_truncated": probeTruncated,
 			})
+			if response.StatusCode >= 200 && response.StatusCode < 400 && !isFallback {
+				severity := "LOW"
+				if response.StatusCode == http.StatusOK {
+					severity = "MEDIUM"
+				}
+				if candidate.category == "misconfiguration" && response.StatusCode == http.StatusOK {
+					severity = "HIGH"
+				}
+				findings = append(findings, map[string]interface{}{
+					"severity":       severity,
+					"title":          candidate.name,
+					"category":       candidate.category,
+					"evidence":       fmt.Sprintf("%s returned HTTP %d (read-only probe; content was not retained).", probeURL, response.StatusCode),
+					"recommendation": "Review whether this endpoint is intentionally exposed; if not, restrict access and validate the deployment configuration.",
+				})
+			}
 		}
 	}
-	allow, optionsErr := scannerOptionsWithTransportContext(ctx, target, transport)
-	if optionsErr == nil && allow != "" {
-		findings = append(findings, map[string]interface{}{
-			"severity":       "INFO",
-			"title":          "HTTP methods advertised",
-			"category":       "http",
-			"evidence":       fmt.Sprintf("Allow header: %s", allow),
-			"recommendation": "Disable methods that are not required by the application and verify write methods require authorization.",
-		})
+	if !pcfg.PassiveOnly {
+		allow, optionsErr := scannerOptionsWithTransportContext(ctx, target, transport)
+		if optionsErr == nil && allow != "" {
+			findings = append(findings, map[string]interface{}{
+				"severity":       "INFO",
+				"title":          "HTTP methods advertised",
+				"category":       "http",
+				"evidence":       fmt.Sprintf("Allow header: %s", allow),
+				"recommendation": "Disable methods that are not required by the application and verify write methods require authorization.",
+			})
+		}
 	}
 	// Two checks can reach the same result row (for example the same public
 	// path answered identically twice). Collapse identical title+evidence pairs
@@ -2876,6 +3011,7 @@ func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, res
 		"status_code":      statusCode,
 		"findings_count":   len(findings),
 		"highest_severity": "INFO",
+		"profile":          pcfg.Name,
 	}
 	severityRank := map[string]int{"INFO": 0, "LOW": 1, "MEDIUM": 2, "HIGH": 3}
 	for _, item := range findings {
@@ -2888,6 +3024,14 @@ func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, res
 	return map[string]interface{}{
 		"url":      target.String(),
 		"status":   "completed",
+		"profile":  pcfg.Name,
+		"profile_budget": map[string]interface{}{
+			"profile":         pcfg.Name,
+			"max_probes":      pcfg.MaxProbes,
+			"probes_executed": len(probes),
+			"passive_only":    pcfg.PassiveOnly,
+			"description":     pcfg.Description,
+		},
 		"summary":  summary,
 		"findings": findings,
 		"details": map[string]interface{}{

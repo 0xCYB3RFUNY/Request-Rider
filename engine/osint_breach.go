@@ -642,7 +642,7 @@ func breachExposureRequestURL(source, value string) (string, []string) {
 // `readBytes` is the caller's `max_bytes`; zero reads the whole body. The bool
 // it returns says the body was cut short, so the caller can say "no match" for a
 // document it only read in part instead of reporting a clean negative.
-func breachExposureFetch(ctx context.Context, client *http.Client, source, endpoint, value string, readBytes int64) (string, int, bool, bool) {
+func breachExposureFetch(ctx context.Context, client *http.Client, source, endpoint, _ string, readBytes int64) (string, int, bool, bool) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return "", 0, false, false

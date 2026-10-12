@@ -1,5 +1,6 @@
 """Database models for durable HTTP history and future Intruder metadata."""
 
+import hashlib
 import secrets
 import uuid
 from urllib.parse import parse_qsl, urlsplit
@@ -269,6 +270,74 @@ class ProjectSecret(models.Model):
         ordering = ["secret_type", "key_name", "id"]
 
 
+def _extract_evidence_anchor(evidence: str) -> str:
+    """Extract the primary invariant subject from evidence.
+
+    Examples:
+    - 'Strict-Transport-Security missing' -> 'strict-transport-security'
+    - 'Server: Apache/2.4' -> 'server'
+    - '/.env returned 200 OK' -> '/.env'
+    - 'Header: cf-ray' -> 'header:cf-ray'
+    """
+    text = str(evidence or "").strip()
+    if not text:
+        return ""
+    first_line = text.split("\n")[0].strip()
+    if ":" in first_line:
+        parts = first_line.split(":", 1)
+        prefix = parts[0].strip().lower()
+        sub = parts[1].strip().split()[0].lower() if parts[1].strip() else ""
+        if prefix in {"header", "cookie", "meta", "asset", "marker"}:
+            return f"{prefix}:{sub}"
+        return prefix
+    token = first_line.split()[0].strip().lower()
+    return token
+
+
+def compute_finding_identity(item: dict, target_url: str = "") -> str:
+    """Stable, evidence-aware identity hash for a finding.
+
+    Combines:
+    - vulnerability type/title (title, vulnerability, name, check_id, template_id)
+    - target URL, endpoint, or matched path
+    - HTTP method
+    - parameter name
+    - invariant evidence anchor
+
+    Produces a deterministic SHA256 hex string ensuring collisions are avoided
+    while identical findings across repeated runs resolve to the exact same identity,
+    even when evidence details are enriched over time.
+    """
+    if not isinstance(item, dict):
+        return hashlib.sha256(b"").hexdigest()
+
+    vuln_type = str(
+        item.get("title")
+        or item.get("vulnerability")
+        or item.get("name")
+        or item.get("check_id")
+        or item.get("template_id")
+        or ""
+    ).strip().lower()
+
+    target = str(
+        item.get("matched_at")
+        or item.get("target")
+        or item.get("endpoint")
+        or item.get("url")
+        or item.get("path")
+        or target_url
+        or ""
+    ).strip().lower()
+
+    method = str(item.get("method") or "").strip().upper()
+    param = str(item.get("param") or item.get("parameter") or "").strip().lower()
+    evidence_anchor = _extract_evidence_anchor(item.get("evidence"))
+
+    seed = f"{vuln_type}|{target}|{method}|{param}|{evidence_anchor}"
+    return hashlib.sha256(seed.encode("utf-8")).hexdigest()
+
+
 class ScannerRun(models.Model):
     """Durable log of one scanner run bound to a project (evidence only)."""
 
@@ -288,6 +357,71 @@ class ScannerRun(models.Model):
     summary = models.JSONField(default=dict)
     findings = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def upsert_findings(self, new_findings, stats=None, templates=None):
+        """Idempotently merge new findings into this run's findings list.
+
+        Updates matching findings by identity_hash, or appends new ones.
+        Recalculates findings_count and highest_severity.
+        """
+        severity_rank = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
+        existing_map = {}
+        order = []
+        for row in self.findings or []:
+            if not isinstance(row, dict):
+                continue
+            key = row.get("identity_hash") or row.get("id") or compute_finding_identity(row, self.url)
+            row["identity_hash"] = key
+            if not row.get("id"):
+                row["id"] = key
+            existing_map[key] = row
+            order.append(key)
+
+        for incoming in new_findings or []:
+            if not isinstance(incoming, dict):
+                continue
+            key = incoming.get("identity_hash") or incoming.get("id") or compute_finding_identity(incoming, self.url)
+            incoming["identity_hash"] = key
+            if not incoming.get("id"):
+                incoming["id"] = key
+            if key in existing_map:
+                current = existing_map[key]
+                curr_sev = str(current.get("severity") or "INFO").upper()
+                new_sev = str(incoming.get("severity") or "INFO").upper()
+                if severity_rank.get(new_sev, 9) < severity_rank.get(curr_sev, 9):
+                    current["severity"] = new_sev
+                curr_ev = str(current.get("evidence") or "")
+                new_ev = str(incoming.get("evidence") or "")
+                if len(new_ev) > len(curr_ev):
+                    current["evidence"] = new_ev
+                if incoming.get("recommendation"):
+                    current["recommendation"] = str(incoming["recommendation"])
+                if incoming.get("cve"):
+                    current["cve"] = sorted(list(set((current.get("cve") or []) + incoming["cve"])))
+            else:
+                existing_map[key] = incoming
+                order.append(key)
+
+        updated_findings = [existing_map[k] for k in order]
+        self.findings = updated_findings
+
+        severities = sorted(
+            {str(item.get("severity") or "INFO").upper() for item in updated_findings},
+            key=lambda level: severity_rank.get(level, 9),
+        )
+        summary = dict(self.summary or {})
+        summary["findings_count"] = len(updated_findings)
+        summary["highest_severity"] = severities[0] if severities else "INFO"
+        if stats and isinstance(stats, dict):
+            curr_stats = dict(summary.get("stats") or {})
+            curr_stats.update(stats)
+            summary["stats"] = curr_stats
+        if templates:
+            summary["templates"] = templates
+
+        self.summary = summary
+        self.save(update_fields=["findings", "summary"])
+        return self
 
 
 class TargetJob(models.Model):

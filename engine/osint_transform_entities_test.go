@@ -53,6 +53,9 @@ func (r *ptrResolver) describe() string { return "a table" }
 func (r *ptrResolver) lookupTXT(context.Context, string) ([]string, error) { return nil, nil }
 func (r *ptrResolver) lookupMX(context.Context, string) ([]string, error)  { return nil, nil }
 func (r *ptrResolver) lookupNS(context.Context, string) ([]string, error)  { return nil, nil }
+func (r *ptrResolver) lookupCNAME(context.Context, string) (string, error) { return "", nil }
+func (r *ptrResolver) lookupCAA(context.Context, string) ([]string, error) { return nil, nil }
+func (r *ptrResolver) lookupSOA(context.Context, string) (string, error)   { return "", nil }
 
 func transformResultFor(transform, value string, options map[string]interface{}, confirm bool) osintTransformInput {
 	return osintTransformInput{

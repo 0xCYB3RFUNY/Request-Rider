@@ -1,0 +1,241 @@
+Listed directory Request-Rider%20v1.2
+Viewed SESSION-CLAIMS.md:1-148
+Searched for "^#+ "
+Viewed DEVELOPMENT_LOG.md:1-150
+Viewed DEVELOPMENT_LOG.md:151-460
+Searched for "відкрит"
+Searched for "претенз"
+Searched for "скарг"
+Searched for "претенз"
+Viewed AGENTS.md:4065-4120
+Ran command: `find . -iname "*claim*" -o -iname "*dev*log*"`
+Ran command: `python3 -c '
+import re
+
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+print(f"Total lines: {len(lines)}")
+
+# Search for patterns related to open claims, issues, complaints, defects
+patterns = [
+    re.compile(r"^\s*#+\s*.*(відкрит|незакрит|претенз|недолік|скарг|не виправлен|неперевірен)", re.IGNORECASE),
+    re.compile(r"\b(відкрите питання|відкритий пункт|відкриті питання|незакрита претензія|не виправлено|лишається відкритим|залишається відкритим|не перевірено|неперевіреною)\b", re.IGNORECASE)
+]
+
+matches = []
+for i, line in enumerate(lines):
+    for p in patterns:
+        if p.search(line):
+            matches.append((i + 1, line.strip()))
+            break
+
+print(f"Total matches: {len(matches)}")
+for lno, text in matches[:40]:
+    print(f"{lno}: {text}")
+'`
+Ran command: `python3 -c '
+import re
+
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+patterns = [
+    re.compile(r"^\s*#+\s*.*(відкрит|незакрит|претенз|недолік|скарг|не виправлен|неперевірен)", re.IGNORECASE),
+    re.compile(r"\b(відкрите питання|відкритий пункт|відкриті питання|незакрита претензія|не виправлено|лишається відкритим|залишається відкритим|не перевірено|неперевіреною)\b", re.IGNORECASE)
+]
+
+matches = []
+for i, line in enumerate(lines):
+    for p in patterns:
+        if p.search(line):
+            matches.append((i + 1, line.strip()))
+            break
+
+for lno, text in matches[40:]:
+    print(f"{lno}: {text}")
+'`
+Ran command: `python3 -c '
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+def print_section(start, end):
+    for i in range(start-1, min(end, len(lines))):
+        print(f"{i+1}: {lines[i]}", end="")
+
+# Lets check the top 1500 lines first (most recent sessions from Oct 8 - Oct 10)
+print("=== TOP ENTRIES (Lines 1-500) ===")
+'`
+Viewed DEVELOPMENT_LOG.md:1535-1580
+Ran command: `python3 -c '
+import re
+
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+patterns = [
+    re.compile(r"^\s*#+\s*.*(відкрит|незакрит|претенз|недолік|скарг|не виправлен|неперевірен)", re.IGNORECASE),
+    re.compile(r"\b(відкрите питання|відкритий пункт|відкриті питання|незакрита претензія|не виправлено|лишається відкритим|залишається відкритим|неперевіреною)\b", re.IGNORECASE)
+]
+
+matched_indices = []
+for i, line in enumerate(lines):
+    for p in patterns:
+        if p.search(line):
+            matched_indices.append(i)
+            break
+
+# Print context around each match (grouping nearby lines)
+groups = []
+curr_group = []
+for idx in matched_indices:
+    if not curr_group or idx - curr_group[-1] < 15:
+        curr_group.append(idx)
+    else:
+        groups.append(curr_group)
+        curr_group = [idx]
+if curr_group:
+    groups.append(curr_group)
+
+print(f"Total groups of open issues/claims: {len(groups)}")
+for g in groups:
+    start = max(0, g[0] - 1)
+    end = min(len(lines), g[-1] + 3)
+    header = lines[start].strip()
+    print(f"--- Lines {start+1}-{end} ---")
+    for li in range(start, end):
+        l_str = lines[li].strip()
+        if any(p.search(l_str) for p in patterns):
+            print(f"  * [{li+1}] {l_str}")
+        elif l_str.startswith("#") or "дефект" in l_str.lower() or "помилк" in l_str.lower():
+            print(f"    [{li+1}] {l_str}")
+'`
+Ran command: `python3 -c '
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    text = f.read()
+
+import re
+
+# Find sections like "### Відкриті питання", "## Відкритий пункт", etc.
+sections = re.findall(r"(###? (?:Відкрит[іе]|Недолік|Що лишається|Що не перевірено|Розбіжність|Спостереження)[^\n]*\n(?:[^\n]+\n){1,15})", text)
+print(f"Found {len(sections)} sections:")
+for s in sections[:15]:
+    print("---")
+    print(s[:250].strip())
+'`
+Ran command: `python3 -c '
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+line_numbers = [
+    125, 325, 430, 1543, 2622, 3867, 4084, 4529, 4685, 4968, 5487, 5732, 
+    5890, 6081, 6171, 6632, 7083, 7100, 7754, 7963, 10168, 10376, 10508, 
+    10775, 11192, 11621, 15325, 15475, 15994, 16659, 16796, 16964, 17481, 
+    17647, 17654, 17779, 17812, 18290, 18436, 18532, 19123, 19219, 19549, 
+    19773, 21963, 23144, 24001, 28161, 29393, 29795, 30458, 31862, 32416, 
+    34021, 37956, 38472
+]
+
+for ln in line_numbers:
+    start = max(0, ln - 2)
+    end = min(len(lines), ln + 12)
+    print(f"=== LINE {ln} ===")
+    for i in range(start, end):
+        print(f"{i+1}: {lines[i]}", end="")
+'`
+Ran command: `python3 -c '
+with open("DEVELOPMENT_LOG.md", "r", encoding="utf-8") as f:
+    lines = f.readlines()
+
+line_numbers = [
+    2622, 3867, 4084, 4529, 4685, 4968, 5487, 5732, 
+    5890, 6081, 6171, 6632, 7083, 7100, 7754, 7963, 10168, 10376, 10508, 
+    10775, 11192, 11621, 15325, 15475, 15994, 16659, 16796, 16964, 17481, 
+    17647, 17654, 17779, 17812, 18290, 18436, 18532, 19123, 19219, 19549, 
+    19773, 21963, 23144, 24001, 28161
+]
+
+for ln in line_numbers:
+    start = max(0, ln - 1)
+    end = min(len(lines), ln + 8)
+    print(f"=== LINE {ln} ===")
+    for i in range(start, end):
+        print(f"{i+1}: {lines[i]}", end="")
+'`
+
+EXEC_MODE=AGENTS_MD_STRICT
+
+AGENTS.md загружен, 17 пунктов приняты к исполнению.
+
+AGENTS.md: применены пункты [0, 1, 2, 3, 10, 11, 16]
+
+---
+
+### Звіт: Незакриті претензії, дефекти та відкриті питання з `SESSION-CLAIMS.md` та `DEVELOPMENT_LOG.md`
+
+На основі повного аналізу файлів [SESSION-CLAIMS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/SESSION-CLAIMS.md) та [DEVELOPMENT_LOG.md](file:///home/kali/Downloads/Request-Rider%20v1.2/DEVELOPMENT_LOG.md) виписано всі незакриті претензії, виявлені й невиправлені дефекти, неперевірені зміни та відкриті питання:
+
+---
+
+#### 1. Незакриті претензії та відкриті записи з [SESSION-CLAIMS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/SESSION-CLAIMS.md)
+
+1. **Зависання MITM-тунелів через відсутність таймаутів у проксі** (`SESSION-CLAIMS.md:29`):
+   - **Статус:** `знайдено, НЕ виправлено / відкрите питання` (сесія `ses_nuclei_hang_20261008`).
+   - **Суть:** У [engine/main.go:666](file:///home/kali/Downloads/Request-Rider%20v1.2/engine/main.go#L666) виклик `http.ListenAndServe(proxyAddr, ...)` виконується без `ReadHeaderTimeout` та `IdleTimeout` (на відміну від рядка 678). Це спричиняє 76 застряглих MITM-тунелів під час сканування повної папки `http`. Правку не вносили, оскільки вона не була замовлена.
+
+2. **Дірка в guard-перевірці вердиктів реєстрації** (`SESSION-CLAIMS.md:85`):
+   - **Статус:** `виміряно / відкритий дефект тесту` (сесія `ses_batch2_20261010`).
+   - **Суть:** Тест `TestNoRegistryMisspellsAVerdict` у `reconciliation_summary_test.go` пропускає помилкові варіанти написання вердикту (наприклад, `улушшено` з 8 літерами замість канонічного 7-літерного `улучшено`). Через це підсумок не потрапляє під регулярний вираз, і тест `TestEveryRegistrySummaryMatchesItsOwnRows` мовчки пропускає такий реєстр без валідації.
+
+3. **Непрогнані тести та застарілий бінарник після відкату блокуючого резолвера** (`SESSION-CLAIMS.md:131`):
+   - **Статус:** `НЕ ПРОГНАНО` (сесія `ses_sourceip_20261010`).
+   - **Суть:** Після відкату блокуючого очікування слота `source_ip` у сесії був відсутній bash-інструмент, через що `go build` і `go test` не запускалися. На портах `:8080/:8081` тривалий час залишався старий бінарник із блокуючим кодом.
+
+4. **Недійсні браузерні перевірки 9 інструментів** (`SESSION-CLAIMS.md:135`):
+   - **Статус:** `недійсні` (сесія `ses_sourceip_20261010`).
+   - **Суть:** Перевірки читали `#traffic tbody tr` прихованої секції DOM і виконувалися на старому бінарнику рушія; результати вважаються недоведеними.
+
+5. **Компроміс неповноти `source_ip` (відсутність process-wide кешу)** (`SESSION-CLAIMS.md:146-147`):
+   - **Статус:** `зафіксовано як недолік / не змінювалося` (сесія `ses_corpus_live_20261010`).
+   - **Суть:** Семафор `source_ip_lookup_concurrency` бере слот лише тоді, коли він вільний цієї миті (`trySourceIPLookupSlot`, миттєва відмова). Ціна: близько 8.5% (а під час сплесків — більше) обмінів залишаються без заповненого `source_ip`. Постійний кеш заборонено правилами проєкту, тому це обмеження залишається відкритим компромісом.
+
+6. **Зникнення каталогу `.git`** (`SESSION-CLAIMS.md:134`):
+   - **Статус:** `відсутній, не моя дія` (сесія `ses_sourceip_20261010`, `ses_matrix_20261010`).
+   - **Суть:** Каталог `.git` був видалений із робочої копії сторонньою дією, через що операції контролю версій, коміти та перевірки через `git show` не працюють.
+
+7. **Збої DNS через недоступну IPv6-адресу** (`SESSION-CLAIMS.md:30`):
+   - **Статус:** `поза нашим кодом`.
+   - **Суть:** У `/etc/resolv.conf` налаштовано `fd17:625c:f037:2::3`, що призводить до `network unreachable` та спричиняло 82 таймаути на DNS-resolve під час сканування.
+
+---
+
+#### 2. Незакриті претензії, дефекти та відкриті питання з [DEVELOPMENT_LOG.md](file:///home/kali/Downloads/Request-Rider%20v1.2/DEVELOPMENT_LOG.md)
+
+1. **Непрочитані здатності інструментів Rust через відсутність `cargo`** (`DEVELOPMENT_LOG.md:71-75`):
+   - **Суть:** Для інструментів `dalfox` та `lonkero` вихідний код написаний на Rust. У системному оточенні відсутній `cargo`, тому їхні параметри та `-help` не вдалося зняти (єдині 2 з 41 інструментів, що лишилися невиміряними в матриці).
+
+2. **Невідповідність нової повноекранної розкладки інваріантам [AGENTS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/AGENTS.md)** (`DEVELOPMENT_LOG.md:325-329`):
+   - **Суть:** Нова розкладка секцій History та Traffic (де блок RAW займає весь екран, а таблиця знаходиться нижче при скролі) прямо суперечить Інваріантам 1 і 2 розділу «Чотири інваріанти раскладки» в [AGENTS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/AGENTS.md), які вимагають фіксованої моделі без скролу. Правила проєкту забороняють агенту правити [AGENTS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/AGENTS.md) без прямої команди оператора, тому це питання залишається відкритим.
+
+3. **Неперевірені DSL-вирази у Nuclei для HTTP-шаблонів** (`DEVELOPMENT_LOG.md:34021-34027`):
+   - **Суть:** Вирази `dsl:` вигляду `name == "literal"` у nuclei вимагають маркерів `{{...}}` через `resolveDSLStringMarkers`. Для `http:`-шаблонів це може створювати невиявлену прогалину (не виміряно і не виправлено). Крім того, 34 вирази `flow:` залишаються непрочитаними.
+
+4. **Дефекти парсингу кнопок і форм у Browser-Worker** (`DEVELOPMENT_LOG.md:19549-19557`):
+   - **Суть:**
+     1. Кнопки без явного атрибута `type` помилково класифікуються як текстові поля вводу (`worker.py:262`).
+     2. Декоративні елементи сторінок (наприклад, навігаційні іконки `ok.ru`) помилково потрапляють у список кандидатів вводу (до 240 хибних елементів).
+
+5. **Збій перевірки `node --check` у скрипті запуску** (`DEVELOPMENT_LOG.md:23144-23152`):
+   - **Суть:** Метод перевірки в [start.sh](file:///home/kali/Downloads/Request-Rider%20v1.2/start.sh) витягує теги `<script>` регулярним виразом. У [web/templates/lab/index.html](file:///home/kali/Downloads/Request-Rider%20v1.2/web/templates/lab/index.html) всередині template-літерала генератора OSINT-звіту міститься літеральний рядок `<script>`, що ламає парсер регулярки і призводить до `SyntaxError` при виклику `start.sh --check`.
+
+6. **Жорстко прив'язані порти в Docker Compose** (`DEVELOPMENT_LOG.md:18532-18540`):
+   - **Суть:** У [docker-compose.yml](file:///home/kali/Downloads/Request-Rider%20v1.2/docker-compose.yml) опубліковані фіксовані хост-порти (`8000, 8080, 8081, 8090, 5432, 9050`). Через це неможливо підняти два паралельні тестові compose-стенди без конфліктів портів.
+
+7. **Хибні спрацьовування детектора капчі та відсутність моделі для Grid-віджетів** (`DEVELOPMENT_LOG.md:21963-21967`, `24001-24005`):
+   - **Суть:** Детектор сітки віджетів реагує на статичні атрибути сторінок навіть без реального виклику капчі. Капчі виду `kind == "grid"` вимагають комп'ютерного зору (vision model), яка відсутня в проєкті.
+
+8. **Осиротілі процеси браузерів у системі** (`DEVELOPMENT_LOG.md:30465-30467`, `37958-37961`):
+   - **Суть:** У фонових процесах системи періодично залишаються екземпляри `playwright`, `firefox` та `chromium` з часом життя від кількох годин до діб, які не завершуються автоматично після виконання задач worker-а.
+
+9. **Розбіжність лічильника ключів i18n з [AGENTS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/AGENTS.md)** (`DEVELOPMENT_LOG.md:30458-30462`):
+   - **Суть:** У [AGENTS.md](file:///home/kali/Downloads/Request-Rider%20v1.2/AGENTS.md) зафіксовано 1157 ключів локалізації, тоді як фактично в проєкті нараховано 1162. Оновлення документації очікує дозволу оператора.

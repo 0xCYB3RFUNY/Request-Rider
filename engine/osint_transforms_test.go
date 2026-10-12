@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -241,5 +242,22 @@ func TestLocalUsernameTransformsDoNotClaimEnumerationIsUnavailable(t *testing.T)
 	if !strings.Contains(description, "username_search") {
 		t.Fatalf("username_enum description does not name the transform that enumerates platforms: %q",
 			description)
+	}
+}
+
+func TestDNSRecordsContextCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	engine := &server{}
+	result := &osintTransformResult{}
+	err := engine.runDNSRecords(ctx, result, osintTransformInput{
+		Value: "example.com", ConfirmNetwork: true,
+	})
+	if err == nil {
+		t.Fatal("runDNSRecords must fail on a cancelled context")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("runDNSRecords error = %v, want context.Canceled", err)
 	}
 }

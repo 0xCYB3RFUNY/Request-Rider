@@ -116,3 +116,38 @@ func TestDohResolverNamesTheMechanismItUses(t *testing.T) {
 		t.Fatalf("describe = %q, a warning must say which resolver failed", got)
 	}
 }
+
+func TestDohResolverReadsCNAMECNAAAndSOA(t *testing.T) {
+	cnameBody := `{"Status":0,"Answer":[{"type":5,"data":"target.example.test."}]}`
+	cnameSrv, _ := dohFixture(t, cnameBody, 0)
+	cnameResolver := dohResolver{client: cnameSrv.Client(), endpoints: []string{cnameSrv.URL + "/dns-query"}}
+	cname, err := cnameResolver.lookupCNAME(context.Background(), "alias.example.test")
+	if err != nil {
+		t.Fatalf("lookupCNAME failed: %v", err)
+	}
+	if cname != "target.example.test" {
+		t.Fatalf("cname = %q, want target.example.test", cname)
+	}
+
+	caaBody := `{"Status":0,"Answer":[{"type":257,"data":"0 issue \"letsencrypt.org\""}]}`
+	caaSrv, _ := dohFixture(t, caaBody, 0)
+	caaResolver := dohResolver{client: caaSrv.Client(), endpoints: []string{caaSrv.URL + "/dns-query"}}
+	caa, err := caaResolver.lookupCAA(context.Background(), "example.test")
+	if err != nil {
+		t.Fatalf("lookupCAA failed: %v", err)
+	}
+	if len(caa) != 1 || caa[0] != `0 issue "letsencrypt.org"` {
+		t.Fatalf("caa = %#v", caa)
+	}
+
+	soaBody := `{"Status":0,"Answer":[{"type":6,"data":"ns1.example.test. hostmaster.example.test. 2026101201 7200 3600 1209600 3600"}]}`
+	soaSrv, _ := dohFixture(t, soaBody, 0)
+	soaResolver := dohResolver{client: soaSrv.Client(), endpoints: []string{soaSrv.URL + "/dns-query"}}
+	soa, err := soaResolver.lookupSOA(context.Background(), "example.test")
+	if err != nil {
+		t.Fatalf("lookupSOA failed: %v", err)
+	}
+	if !strings.Contains(soa, "ns1.example.test") {
+		t.Fatalf("soa = %q", soa)
+	}
+}

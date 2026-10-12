@@ -9,6 +9,8 @@ require (
 	github.com/projectdiscovery/httpx v1.11.0
 	github.com/projectdiscovery/katana v1.6.2-0.20260929193407-04a51b81beae
 	github.com/projectdiscovery/nuclei/v3 v3.11.1
+	github.com/projectdiscovery/tlsx v1.3.2
+	github.com/projectdiscovery/wappalyzergo v0.3.0
 	github.com/redis/go-redis/v9 v9.11.0
 	golang.org/x/net v0.58.0
 )
@@ -147,10 +149,8 @@ require (
 	github.com/projectdiscovery/rawhttp v0.1.91 // indirect
 	github.com/projectdiscovery/retryabledns v1.0.116 // indirect
 	github.com/projectdiscovery/retryablehttp-go v1.3.28 // indirect
-	github.com/projectdiscovery/tlsx v1.3.2 // indirect
 	github.com/projectdiscovery/useragent v0.0.108 // indirect
 	github.com/projectdiscovery/utils v0.11.6 // indirect
-	github.com/projectdiscovery/wappalyzergo v0.3.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.6.0 // indirect

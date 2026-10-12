@@ -828,3 +828,177 @@ func TestValidMapReferenceFiltersJavaScriptFragments(t *testing.T) {
 		}
 	}
 }
+
+func TestRunSafeScannerProfileSecurityHeadersIsPassiveOnlyWithZeroProbes(t *testing.T) {
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("X-Frame-Options", "DENY")
+		_, _ = w.Write([]byte(`<html><body>passive test</body></html>`))
+	}))
+	defer target.Close()
+
+	parsed, err := url.Parse(target.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runSafeScannerWithResolverAndProfile(parsed, net.DefaultResolver, osintHTTPClient.Transport, "security_headers")
+	if err != nil {
+		t.Fatalf("runSafeScanner error: %v", err)
+	}
+	if result["profile"] != "security_headers" {
+		t.Errorf("profile = %v, want security_headers", result["profile"])
+	}
+	budget, ok := result["profile_budget"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("profile_budget missing: %#v", result)
+	}
+	if budget["passive_only"] != true {
+		t.Errorf("passive_only = %v, want true", budget["passive_only"])
+	}
+	if budget["max_probes"] != 0 {
+		t.Errorf("max_probes = %v, want 0", budget["max_probes"])
+	}
+	if budget["probes_executed"] != 0 {
+		t.Errorf("probes_executed = %v, want 0", budget["probes_executed"])
+	}
+	probes := result["details"].(map[string]interface{})["probes"].([]map[string]interface{})
+	if len(probes) != 0 {
+		t.Fatalf("probes count = %d, want 0 for passive security_headers profile: %#v", len(probes), probes)
+	}
+}
+
+func TestRunSafeScannerProfileCMSOnlyProbesCMSAndAdmin(t *testing.T) {
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte(`<html><body>cms test</body></html>`))
+	}))
+	defer target.Close()
+
+	parsed, err := url.Parse(target.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runSafeScannerWithResolverAndProfile(parsed, net.DefaultResolver, osintHTTPClient.Transport, "cms")
+	if err != nil {
+		t.Fatalf("runSafeScanner error: %v", err)
+	}
+	if result["profile"] != "cms" {
+		t.Errorf("profile = %v, want cms", result["profile"])
+	}
+	probes := result["details"].(map[string]interface{})["probes"].([]map[string]interface{})
+	if len(probes) == 0 {
+		t.Fatal("expected probes for cms profile, got 0")
+	}
+	for _, probe := range probes {
+		category := probe["category"].(string)
+		if category != "cms" && category != "admin" {
+			t.Errorf("unexpected probe category for CMS profile: %q (path: %q)", category, probe["path"])
+		}
+	}
+}
+
+func TestRunSafeScannerProfileAPIOnlyProbesAPIAndMisconfig(t *testing.T) {
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte(`<html><body>api test</body></html>`))
+	}))
+	defer target.Close()
+
+	parsed, err := url.Parse(target.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runSafeScannerWithResolverAndProfile(parsed, net.DefaultResolver, osintHTTPClient.Transport, "api")
+	if err != nil {
+		t.Fatalf("runSafeScanner error: %v", err)
+	}
+	if result["profile"] != "api" {
+		t.Errorf("profile = %v, want api", result["profile"])
+	}
+	probes := result["details"].(map[string]interface{})["probes"].([]map[string]interface{})
+	if len(probes) == 0 {
+		t.Fatal("expected probes for api profile, got 0")
+	}
+	for _, probe := range probes {
+		category := probe["category"].(string)
+		if category != "api" && category != "misconfiguration" && category != "debug" {
+			t.Errorf("unexpected probe category for API profile: %q (path: %q)", category, probe["path"])
+		}
+	}
+}
+
+func TestRunSafeScannerProfileFallbackDefaultsToGenericWeb(t *testing.T) {
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte(`<html><body>generic test</body></html>`))
+	}))
+	defer target.Close()
+
+	parsed, err := url.Parse(target.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := runSafeScannerWithResolverAndProfile(parsed, net.DefaultResolver, osintHTTPClient.Transport, "invalid_custom_foo")
+	if err != nil {
+		t.Fatalf("runSafeScanner error: %v", err)
+	}
+	if result["profile"] != "generic_web" {
+		t.Errorf("profile = %v, want generic_web", result["profile"])
+	}
+	budget := result["profile_budget"].(map[string]interface{})
+	if budget["max_probes"] != 14 {
+		t.Errorf("max_probes = %v, want 14", budget["max_probes"])
+	}
+}
+
+func TestDetectTechnologiesWithWappalyzerIntegration(t *testing.T) {
+	response := map[string]interface{}{
+		"headers": map[string]string{
+			"Server":       "Apache/2.4.52 (Ubuntu)",
+			"X-Powered-By": "PHP/8.1.2",
+		},
+		"body": `<!DOCTYPE html>
+<html>
+<head>
+	<meta name="generator" content="WordPress 6.4.2" />
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="wp-custom-logo">
+	<div id="content">Hello WordPress</div>
+</body>
+</html>`,
+		"cookies": []map[string]interface{}{
+			{"name": "wordpress_test_cookie", "value": "WP+Cookie+check"},
+			{"name": "PHPSESSID", "value": "abcdef123456"},
+		},
+	}
+
+	target, err := url.Parse("https://example.test/")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	techList := detectTechnologies(response, target)
+	found := strings.Join(techList, "\n")
+
+	// Ensure Wappalyzer detected WordPress with category/evidence
+	if !strings.Contains(found, "WordPress") {
+		t.Errorf("expected WordPress in technologies, got:\n%s", found)
+	}
+	if !strings.Contains(found, "Wappalyzer") {
+		t.Errorf("expected Wappalyzer evidence in technologies, got:\n%s", found)
+	}
+
+	// Ensure PHP is detected
+	if !strings.Contains(found, "PHP") {
+		t.Errorf("expected PHP in technologies, got:\n%s", found)
+	}
+
+	// Ensure categories like CMS or Programming languages appear in evidence
+	hasCategory := strings.Contains(found, "CMS") || strings.Contains(found, "Blogs")
+	if !hasCategory {
+		t.Errorf("expected Wappalyzer CMS category in evidence, got:\n%s", found)
+	}
+}
+
+

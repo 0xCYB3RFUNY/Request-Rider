@@ -360,7 +360,7 @@ func processTaskDelivery(
 			return
 		case errors.Is(dispatchErr, context.Canceled):
 			result, decodeErr = newTaskResult(task.TaskID, "cancelled", nil, nil)
-		case dispatchErr != nil:
+		default:
 			code, message, retryable := "ENGINE_EXECUTION_FAILED", "engine task execution failed", false
 			var unsupported unsupportedTaskError
 			var execution executionFailure

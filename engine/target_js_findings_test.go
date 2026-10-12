@@ -314,7 +314,9 @@ const third = 'not-an-address';
 func TestJavaScriptFindingsFoldRepeatedWrites(t *testing.T) {
 	var builder strings.Builder
 	for index := 0; index < 25; index++ {
-		builder.WriteString("function paint" + itoa(index) + "(el, html) { el.innerHTML = html; }\n")
+		builder.WriteString("function paint")
+		builder.WriteString(itoa(index))
+		builder.WriteString("(el, html) { el.innerHTML = html; }\n")
 	}
 	findings := collectJSFindings(jsluice.NewAnalyzer([]byte(builder.String())), []byte(builder.String()))
 	if got := countKind(findings, jsFindingSink); got != 25 {

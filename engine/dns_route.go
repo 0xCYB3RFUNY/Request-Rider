@@ -47,6 +47,12 @@ type routeResolver interface {
 	lookupMX(ctx context.Context, name string) ([]string, error)
 	// lookupNS returns the NS name server hosts published for a name.
 	lookupNS(ctx context.Context, name string) ([]string, error)
+	// lookupCNAME returns the canonical name for a given host name.
+	lookupCNAME(ctx context.Context, name string) (string, error)
+	// lookupCAA returns the CAA records published for a name.
+	lookupCAA(ctx context.Context, name string) ([]string, error)
+	// lookupSOA returns the SOA record published for a zone name.
+	lookupSOA(ctx context.Context, name string) (string, error)
 	// describe names the mechanism in a warning, so a run that could not
 	// resolve says which resolver it was talking to.
 	describe() string
@@ -113,6 +119,34 @@ func (r systemResolver) lookupNS(ctx context.Context, name string) ([]string, er
 	}
 	sort.Strings(result)
 	return result, nil
+}
+
+func (r systemResolver) lookupCNAME(ctx context.Context, name string) (string, error) {
+	resolver := r.resolver
+	if resolver == nil {
+		resolver = net.DefaultResolver
+	}
+	cname, err := resolver.LookupCNAME(ctx, name)
+	if err != nil {
+		return "", err
+	}
+	cname = strings.TrimSuffix(strings.TrimSpace(cname), ".")
+	if strings.EqualFold(cname, strings.TrimSuffix(strings.TrimSpace(name), ".")) {
+		return "", nil
+	}
+	return cname, nil
+}
+
+func (r systemResolver) lookupCAA(ctx context.Context, name string) ([]string, error) {
+	// The Go standard library net.Resolver does not expose LookupCAA directly,
+	// so for direct system resolution we query TXT or return nil if unsupported.
+	// When DoH is used, RFC 8659 CAA records (type 257) are queried directly.
+	return nil, nil
+}
+
+func (r systemResolver) lookupSOA(ctx context.Context, name string) (string, error) {
+	// SOA is queried via DoH directly where JSON DNS response contains type 6.
+	return "", nil
 }
 
 func (r systemResolver) describe() string { return "the system resolver" }
@@ -387,6 +421,179 @@ func (r dohResolver) askNS(ctx context.Context, queryURL string) ([]string, erro
 	}
 	sort.Strings(records)
 	return records, nil
+}
+
+func (r dohResolver) lookupCNAME(ctx context.Context, name string) (string, error) {
+	question := name
+	if !strings.HasSuffix(question, ".") {
+		question += "."
+	}
+	query := "?name=" + urlQueryEscape(question) + "&type=CNAME"
+	var lastErr error
+	for _, endpoint := range r.resolvers() {
+		cname, err := r.askCNAME(ctx, endpoint+query)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return cname, nil
+	}
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no DNS-over-HTTPS resolver answered")
+	}
+	return "", lastErr
+}
+
+func (r dohResolver) askCNAME(ctx context.Context, queryURL string) (string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
+	if err != nil {
+		return "", err
+	}
+	request.Header.Set("User-Agent", indexUserAgent)
+	request.Header.Set("Accept", "application/dns-json")
+	response, err := r.client.Do(request)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+	body, err := readControlPlaneBody(response.Body)
+	if err != nil {
+		return "", err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return "", fmt.Errorf("the DNS-over-HTTPS resolver returned HTTP %d", response.StatusCode)
+	}
+	var answer dohAnswer
+	if json.Unmarshal(body, &answer) != nil {
+		return "", fmt.Errorf("the DNS-over-HTTPS answer could not be read")
+	}
+	if answer.Status == 3 {
+		return "", nil
+	}
+	for _, record := range answer.Answer {
+		if record.Type == 5 {
+			return strings.TrimSuffix(strings.TrimSpace(record.Data), "."), nil
+		}
+	}
+	return "", nil
+}
+
+func (r dohResolver) lookupCAA(ctx context.Context, name string) ([]string, error) {
+	question := name
+	if !strings.HasSuffix(question, ".") {
+		question += "."
+	}
+	query := "?name=" + urlQueryEscape(question) + "&type=CAA"
+	var lastErr error
+	for _, endpoint := range r.resolvers() {
+		records, err := r.askCAA(ctx, endpoint+query)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return records, nil
+	}
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no DNS-over-HTTPS resolver answered")
+	}
+	return nil, lastErr
+}
+
+func (r dohResolver) askCAA(ctx context.Context, queryURL string) ([]string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("User-Agent", indexUserAgent)
+	request.Header.Set("Accept", "application/dns-json")
+	response, err := r.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	body, err := readControlPlaneBody(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("the DNS-over-HTTPS resolver returned HTTP %d", response.StatusCode)
+	}
+	var answer dohAnswer
+	if json.Unmarshal(body, &answer) != nil {
+		return nil, fmt.Errorf("the DNS-over-HTTPS answer could not be read")
+	}
+	if answer.Status == 3 {
+		return nil, nil
+	}
+	records := make([]string, 0, len(answer.Answer))
+	for _, record := range answer.Answer {
+		if record.Type == 257 { // CAA type RFC 8659
+			val := strings.TrimSpace(record.Data)
+			if strings.HasPrefix(val, `"`) && strings.HasSuffix(val, `"`) && len(val) >= 2 {
+				val = val[1 : len(val)-1]
+			}
+			if val != "" {
+				records = append(records, val)
+			}
+		}
+	}
+	sort.Strings(records)
+	return records, nil
+}
+
+func (r dohResolver) lookupSOA(ctx context.Context, name string) (string, error) {
+	question := name
+	if !strings.HasSuffix(question, ".") {
+		question += "."
+	}
+	query := "?name=" + urlQueryEscape(question) + "&type=SOA"
+	var lastErr error
+	for _, endpoint := range r.resolvers() {
+		record, err := r.askSOA(ctx, endpoint+query)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return record, nil
+	}
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no DNS-over-HTTPS resolver answered")
+	}
+	return "", lastErr
+}
+
+func (r dohResolver) askSOA(ctx context.Context, queryURL string) (string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
+	if err != nil {
+		return "", err
+	}
+	request.Header.Set("User-Agent", indexUserAgent)
+	request.Header.Set("Accept", "application/dns-json")
+	response, err := r.client.Do(request)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+	body, err := readControlPlaneBody(response.Body)
+	if err != nil {
+		return "", err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return "", fmt.Errorf("the DNS-over-HTTPS resolver returned HTTP %d", response.StatusCode)
+	}
+	var answer dohAnswer
+	if json.Unmarshal(body, &answer) != nil {
+		return "", fmt.Errorf("the DNS-over-HTTPS answer could not be read")
+	}
+	if answer.Status == 3 {
+		return "", nil
+	}
+	for _, record := range answer.Answer {
+		if record.Type == 6 { // SOA type
+			return strings.Trim(strings.TrimSpace(record.Data), `"`), nil
+		}
+	}
+	return "", nil
 }
 
 func (r dohResolver) describe() string {

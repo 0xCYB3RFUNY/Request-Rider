@@ -1592,6 +1592,7 @@
     <section id="scanner-panel-cms" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-cms" data-scanner-panel="cms">
       <div class="hint" data-i18n="scanner.disclaimer">Scanner Pro performs read-only reconnaissance: CMS fingerprints, public paths, TLS, cookies, methods, headers, and configuration exposure signals. It does not exploit, fuzz, brute-force, or bypass access controls.</div>
       <div class="toolbar">
+        <label class="scanner-type-control" for="scanner-profile"><span class="muted" data-i18n="scanner.profileLabel">Profile</span><select id="scanner-profile"><option value="generic_web" data-i18n="scanner.profileGenericWeb">Generic Web</option><option value="cms" data-i18n="scanner.profileCMS">CMS Focus</option><option value="api" data-i18n="scanner.profileAPI">API &amp; Cloud</option><option value="security_headers" data-i18n="scanner.profileSecurityHeaders">Security Headers (Passive)</option></select></label>
         <button type="button" class="primary" id="scanner-run" data-i18n="scanner.run">Run Safe CMS Recon</button>
         <button type="button" id="scanner-clear" data-i18n="scanner.clear">Clear</button>
         <span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="cms"><button type="button" id="scanner-export-cms" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export cms scan" data-i18n-aria-label="scanner.exportCmsAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list" role="menu" hidden><button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button><button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button><button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.exportCsvHint">One row per file</span></button></div></div>
@@ -3368,6 +3369,11 @@ const translations = {
     ,'scanner.progressMatched': 'знахідок'
     ,'scanner.progressErrors': 'помилок'
     ,'scanner.viewCms': 'CMS скан'
+    ,'scanner.profileLabel': 'Профіль'
+    ,'scanner.profileGenericWeb': 'Загальний веб'
+    ,'scanner.profileCMS': 'Фокус на CMS'
+    ,'scanner.profileAPI': 'API та хмара'
+    ,'scanner.profileSecurityHeaders': 'Заголовки безпеки (Пасивний)'
     ,'scanner.viewNuclei': 'Nuclei скан'
     ,'scanner.corpusChecks': 'Перевірок'
     ,'scanner.corpusTags': 'Теги'
@@ -4666,6 +4672,11 @@ const translations = {
     ,'scanner.progressMatched': 'matches'
     ,'scanner.progressErrors': 'errors'
     ,'scanner.viewCms': 'CMS scan'
+    ,'scanner.profileLabel': 'Profile'
+    ,'scanner.profileGenericWeb': 'Generic Web'
+    ,'scanner.profileCMS': 'CMS Focus'
+    ,'scanner.profileAPI': 'API & Cloud'
+    ,'scanner.profileSecurityHeaders': 'Security Headers (Passive)'
     ,'scanner.viewNuclei': 'Nuclei scan'
     ,'scanner.corpusChecks': 'Checks'
     ,'scanner.corpusTags': 'Tags'
@@ -6231,10 +6242,11 @@ async function runScanner() {
   $('scanner-run').disabled = true;
   $('scanner-status').textContent = tr('scanner.running');
   try {
+    const profile = $('scanner-profile')?.value || 'generic_web';
     const response = await fetch('/api/scanner', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({url, profile: 'generic_web'})
+      body: JSON.stringify({url, profile})
     });
     const data = await readJSON(response);
     renderScanner(data, 'cms');

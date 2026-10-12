@@ -186,14 +186,16 @@ func TestNoRegistryMisspellsAVerdict(t *testing.T) {
 		if err != nil {
 			t.Fatalf("read %s: %v", path, err)
 		}
-		// Рядок, де **поруч** є й канонічний вердикт, — це рядок, який
-		// документує виправлення: «було `улушшено`, стало `улучшено`». Такі
-		// рядки пропускаються, інакше guard вів би сам на себе.
+		// Рядок, який документує виправлення («було `улушшено`, стало `улучшено`»,
+		// або опис тайпу/виправлення), пропускається лише якщо це явний опис виправлення,
+		// а не звичайний рядок таблиці чи підсумку.
 		lines := strings.Split(string(raw), "\n")
 		for _, line := range lines {
-			if strings.Contains(line, "`улучшено`") ||
-				strings.Contains(line, "`супадає`") ||
-				strings.Contains(line, "`не перенесено`") {
+			if strings.Contains(line, "було") ||
+				strings.Contains(line, "стало") ||
+				strings.Contains(line, "тайп") ||
+				strings.Contains(line, "замість") ||
+				strings.Contains(line, "виправлен") {
 				continue
 			}
 			candidates := reconciliationVerdictLike.FindAllString(line, -1)

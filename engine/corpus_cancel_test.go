@@ -130,7 +130,7 @@ func TestCancellingAJobThatIsGoneAnswers404(t *testing.T) {
 // property directly: cancelling the job cancels the enumeration's context.
 func TestTheJobsCancellerIsTheRunsOwnContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	job := &corpusJob{ID: "c", Target: "https://example.test/", Started: time.Now(), state: "running", cancel: cancel}
+	job := &corpusJob{cancel: cancel}
 	job.cancel()
 	select {
 	case <-ctx.Done():

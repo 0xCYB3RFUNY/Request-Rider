@@ -106,7 +106,7 @@ func TestMain(m *testing.M) {
 // The brute force wordlist is pinned to one name and the resolver is offline, so
 // the test never depends on real DNS: what is under test is the job lifecycle,
 // not the resolver.
-func runJob(t *testing.T, engine *server, fixture *jobFixture) *osintJob {
+func runJob(t *testing.T, engine *server, _ *jobFixture) *osintJob {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
