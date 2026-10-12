@@ -1,0 +1,55 @@
+# Черга репозиторіїв на звірку
+
+**Оновлено 2026-10-10.** Список оператора. Кожен рядок має стан:
+`реєстр` — звірку зроблено й вона має механічний тест;
+`—` — реєстра ще немає.
+
+Сума: **27 рядків, 26 унікальних репозиторіїв, реєстрів 19 із 26.**
+
+| # | репозиторій | реєстр | коміт | рядків | `не пер.` |
+|---:|---|---|---|---:|---:|
+| 1 | https://github.com/projectdiscovery/nuclei-action | `nuclei_action` | `ca21b89` | 11 | 7 |
+| 2 | https://github.com/projectdiscovery/depx | `depx` | `4d5e392` | 12 | 8 |
+| 3 | https://github.com/projectdiscovery/nuclei-templates-labs | `nuclei_templates_labs` | `144ee9f` | 10 | 9 |
+| 4 | https://github.com/projectdiscovery/goleak | **—** | — | — | — |
+| 5 | https://github.com/projectdiscovery/fuzzing-templates | `fuzzing_templates` | `5585787` | 10 | 7 |
+| 6 | https://github.com/savoirfairelinux/vulnscout | `vulnscout` | `df874ef` | 12 | 10 |
+| 7 | https://github.com/R-s0n/Custom_Vuln_Scan_Templates | `custom_vuln_scan_templates` | `2e98272` | 12 | 7 |
+| 8 | https://github.com/mllamazares/vulncov | `vulncov` | `2989b67` | 10 | 8 |
+| 9 | https://github.com/Organisation-404/VulnHeist | `vulnheist` | `f5f96e3` | 10 | 6 |
+| 10 | https://github.com/koreyhacks/VulnViper | `vulnviper` | `002eafd` | 10 | 4 |
+| 11 | https://github.com/sudo-secxyz/OpenVulnScan | `openvulnscan` | `f16a9de` | 11 | 9 |
+| 12 | https://github.com/ekomsSavior/darkweb_scanner | `darkweb_scanner` | `75efce3` | 11 | 3 |
+| 13 | https://github.com/fagun18/web-vulnerability | `web_vulnerability` | `d4a3893` | 9 | 2 |
+| 14 | https://github.com/anouarbensaad/vulnx | `vulnx` | `5e0e70f` | 16 | 13 |
+| 15 | https://github.com/vulnersCom/nmap-vulners | `nmap_vulners` | `47c73ec` | 11 | 8 |
+| 16 | https://github.com/projectdiscovery/rawhttp | **—** | — | — | — |
+| 17 | https://github.com/projectdiscovery/public-bugbounty-programs | `public_bugbounty_programs` | `45f285b` | 8 | 6 |
+| 18 | https://github.com/projectdiscovery/nuclei-burp-plugin | `nuclei_burp_plugin` | `5dc46f9` | 12 | 6 |
+| 19 | https://github.com/projectdiscovery/tlsx | `tlsx` | не зафіксовано | 12 | 9 |
+| 20 | https://github.com/projectdiscovery/wappalyzergo | `wappalyzergo` | не зафіксовано | 19 | 16 |
+| 21 | https://github.com/projectdiscovery/gologger | **—** | — | — | — |
+| 22 | https://github.com/anouarbensaad/vulnx *(дубль рядка 14)* | — | — | — | — |
+| 23 | https://github.com/projectdiscovery/pdtm | **—** | — | — | — |
+| 24 | https://github.com/projectdiscovery/dnsx | **—** | — | — | — |
+| 25 | https://github.com/projectdiscovery/naabu | `naabu` | `51e24e3` | 12 | 10 |
+| 26 | https://github.com/projectdiscovery/useragent | **—** | — | — | — |
+| 27 | https://github.com/projectdiscovery/utils | **—** | — | — | — |
+
+## Відкриті рядки
+
+| репозиторій | чому ще не звірено |
+|---|---|
+| `projectdiscovery/dnsx` | є в ітерації B3 плану (`ІНТЕГРАЦІЯ_ІНСТРУМЕНТІВ.md`), реєстра немає. Найкорисніший із трьох: SRV/TXT/CAA дають факти про ціль |
+| `projectdiscovery/rawhttp` | B5 плану; сирі HTTP-запити дублюють те, що в нас уже є в Repeater |
+| `projectdiscovery/useragent` | B9 плану; колекція UA — дані, а не здатність |
+
+`goleak`, `gologger`, `pdtm` і `utils` — це інфраструктура, а не сканери:
+`goleak` шукає зтікання горутин, `gologger` форматує логи, `pdtm` пакує
+інструменти, `utils` — спільні хелпери. Реєстр для кожного з них був би
+реєстром чужої інфраструктури, а не наших здатностей; пріоритет — низький.
+
+## Дубль
+
+Рядок 22 повторює рядок 14 (`anouarbensaad/vulnx`). Обидва лишаються, бо список
+оператора; звіряти треба один.

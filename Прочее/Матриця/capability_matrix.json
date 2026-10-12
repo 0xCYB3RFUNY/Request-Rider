@@ -1,0 +1,6483 @@
+[
+  {
+    "tool": "Ashok",
+    "path": "Прочее/Semple-Интеграции/Ashok",
+    "ecosystem": "python",
+    "entry": "Ashok.py",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "flag",
+    "exit_code": 1,
+    "help_lines": 6,
+    "first_line": "Traceback (most recent call last):",
+    "error_head": "ModuleNotFoundError: No module named 'Wappalyzer'",
+    "flags": [
+      {
+        "name": "--headers",
+        "origin": "source"
+      },
+      {
+        "name": "--dns",
+        "origin": "source"
+      },
+      {
+        "name": "--subdomain",
+        "origin": "source"
+      },
+      {
+        "name": "--nmap",
+        "origin": "source"
+      },
+      {
+        "name": "--username",
+        "origin": "source"
+      },
+      {
+        "name": "--cms",
+        "origin": "source"
+      },
+      {
+        "name": "--extract",
+        "origin": "source"
+      },
+      {
+        "name": "--cidr",
+        "origin": "source"
+      },
+      {
+        "name": "--banner",
+        "origin": "source"
+      },
+      {
+        "name": "--geoip",
+        "origin": "source"
+      },
+      {
+        "name": "--wayback",
+        "origin": "source"
+      },
+      {
+        "name": "--dorknumber",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "help упав, код 1: ModuleNotFoundError: No module named 'Wappalyzer'",
+    "file_counts": {
+      ".py": 13,
+      ".pyc": 13,
+      "<none>": 2,
+      ".toml": 1,
+      ".md": 1,
+      ".txt": 1,
+      ".yml": 1
+    },
+    "flag_count": 12,
+    "printed": 0
+  },
+  {
+    "tool": "BlackWidow",
+    "path": "Прочее/Semple-Интеграции/BlackWidow",
+    "ecosystem": "python",
+    "entry": "injectx.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 19,
+    "first_line": "\u001b[93m      ____        _           __ _  __\u001b[0m",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "--url",
+        "origin": "help"
+      },
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "--cookie",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "injectx.py надрукував 19 рядків з джерела",
+    "file_counts": {
+      ".png": 2,
+      "<none>": 2,
+      ".desktop": 1,
+      ".md": 1,
+      ".py": 1,
+      ".sh": 1,
+      ".txt": 1
+    },
+    "flag_count": 8,
+    "printed": 8
+  },
+  {
+    "tool": "Custom_Vuln_Scan_Templates",
+    "path": "Прочее/Semple-Интеграции/Custom_Vuln_Scan_Templates",
+    "ecosystem": "data",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "data-only",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "корпус даних, програми немає",
+    "file_counts": {
+      ".bb": 16,
+      ".yaml": 10,
+      ".md": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "Gf-Patterns",
+    "path": "Прочее/Semple-Интеграции/Gf-Patterns",
+    "ecosystem": "data",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "data-only",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "корпус даних, програми немає",
+    "file_counts": {
+      ".json": 37,
+      ".md": 2,
+      "<none>": 2,
+      ".fish": 1,
+      ".go": 1,
+      ".bash": 1,
+      ".zsh": 1,
+      ".yml": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "Hunner",
+    "path": "Прочее/Semple-Интеграции/Hunner",
+    "ecosystem": "python",
+    "entry": "hunner.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 61,
+    "first_line": "\u001b[0m\u001b[95m",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "hunner.py надрукував 61 рядків з джерела",
+    "file_counts": {
+      ".py": 7,
+      "<none>": 1,
+      ".md": 1,
+      ".txt": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "OpenVulnScan",
+    "path": "Прочее/Semple-Интеграции/OpenVulnScan",
+    "ecosystem": "python",
+    "entry": "app.py",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "flag",
+    "exit_code": 1,
+    "help_lines": 9,
+    "first_line": "Traceback (most recent call last):",
+    "error_head": "ModuleNotFoundError: No module named 'zapv2'",
+    "flags": [],
+    "ecosystems_detail": "help упав, код 1: ModuleNotFoundError: No module named 'zapv2'",
+    "file_counts": {
+      ".py": 59,
+      ".pyc": 26,
+      ".html": 24,
+      ".png": 7,
+      ".yml": 3,
+      "<none>": 2,
+      ".txt": 2,
+      ".md": 1,
+      ".ico": 1,
+      ".sh": 1,
+      ".svg": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "VulnHeist",
+    "path": "Прочее/Semple-Интеграции/VulnHeist",
+    "ecosystem": "python",
+    "entry": "Nmap_scan.py",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "flag",
+    "exit_code": 1,
+    "help_lines": 4,
+    "first_line": "Traceback (most recent call last):",
+    "error_head": "ModuleNotFoundError: No module named 'libnmap'",
+    "flags": [
+      {
+        "name": "-S",
+        "origin": "source"
+      },
+      {
+        "name": "-O",
+        "origin": "source"
+      },
+      {
+        "name": "-Oa",
+        "origin": "source"
+      },
+      {
+        "name": "-x",
+        "origin": "source"
+      },
+      {
+        "name": "-E",
+        "origin": "source"
+      },
+      {
+        "name": "-v",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "help упав, код 1: ModuleNotFoundError: No module named 'libnmap'",
+    "file_counts": {
+      ".py": 4,
+      "<none>": 1,
+      ".md": 1,
+      ".pyc": 1
+    },
+    "flag_count": 6,
+    "printed": 0
+  },
+  {
+    "tool": "VulnViper",
+    "path": "Прочее/Semple-Интеграции/VulnViper",
+    "ecosystem": "python",
+    "entry": "vulnviper.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 22,
+    "first_line": "usage: vulnviper.py [-h] [-p PORT] [-s SSL_PORT] [-o OUTPUT] [-t THREADS] [-m TIMEOUT] [-a USER_AGENT] [-f] [-v] target",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-m",
+        "origin": "help"
+      },
+      {
+        "name": "-a",
+        "origin": "help"
+      },
+      {
+        "name": "-f",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "--port",
+        "origin": "help"
+      },
+      {
+        "name": "--ssl-port",
+        "origin": "help"
+      },
+      {
+        "name": "--output",
+        "origin": "help"
+      },
+      {
+        "name": "--threads",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "--user-agent",
+        "origin": "help"
+      },
+      {
+        "name": "--follow-redirects",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "vulnviper.py надрукував 22 рядків з джерела",
+    "file_counts": {
+      ".py": 1,
+      ".md": 1
+    },
+    "flag_count": 18,
+    "printed": 18
+  },
+  {
+    "tool": "XSSTRON",
+    "path": "Прочее/Semple-Интеграции/XSSTRON",
+    "ecosystem": "node",
+    "entry": "index.js",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "source",
+    "exit_code": 1,
+    "help_lines": 24,
+    "first_line": "node:internal/modules/cjs/loader:1568",
+    "error_head": "Node.js v24.21.0",
+    "flags": [],
+    "ecosystems_detail": "help упав, код 1: Node.js v24.21.0",
+    "file_counts": {
+      ".js": 7,
+      ".css": 6,
+      ".html": 4,
+      ".jsx": 4,
+      ".json": 2,
+      ".md": 1,
+      ".svg": 1,
+      ".woff": 1,
+      ".eot": 1,
+      ".woff2": 1,
+      ".ttf": 1,
+      ".otf": 1,
+      ".ico": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "XSSniper",
+    "path": "Прочее/Semple-Интеграции/XSSniper",
+    "ecosystem": "python",
+    "entry": "XSSniper.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 49,
+    "first_line": "__   __ _____ _____       _",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "-l",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "--max-depth",
+        "origin": "help"
+      },
+      {
+        "name": "--user-agent",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "--no-browser-verify",
+        "origin": "help"
+      },
+      {
+        "name": "--waf-bypass",
+        "origin": "help"
+      },
+      {
+        "name": "--waf",
+        "origin": "help"
+      },
+      {
+        "name": "--encoding",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "--discover-params",
+        "origin": "help"
+      },
+      {
+        "name": "--all-payloads",
+        "origin": "help"
+      },
+      {
+        "name": "--report-format",
+        "origin": "help"
+      },
+      {
+        "name": "--verify-ssl",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "--url",
+        "origin": "help"
+      },
+      {
+        "name": "--list",
+        "origin": "help"
+      },
+      {
+        "name": "--threads",
+        "origin": "help"
+      },
+      {
+        "name": "--delay",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "--crawl",
+        "origin": "help"
+      },
+      {
+        "name": "--output",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "source"
+      },
+      {
+        "name": "--parameters",
+        "origin": "source"
+      },
+      {
+        "name": "--payloads",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "XSSniper.py надрукував 49 рядків з джерела",
+    "file_counts": {
+      ".md": 4,
+      ".py": 3,
+      ".txt": 2,
+      "<none>": 1,
+      ".json": 1,
+      ".sh": 1,
+      ".pyc": 1
+    },
+    "flag_count": 30,
+    "printed": 27
+  },
+  {
+    "tool": "arachni",
+    "path": "Прочее/Semple-Интеграции/arachni",
+    "ecosystem": "ruby",
+    "entry": "bin/arachni",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "source",
+    "exit_code": 1,
+    "help_lines": 25,
+    "first_line": "/usr/share/rubygems-integration/all/gems/bundler-4.0.20/lib/bundler/resolver.rb:375:in `raise_not_found!': Could not find gem 'pry' in locally installed gems. (Bundler::GemNotFound)",
+    "error_head": "from /home/kali/Desktop/Request-Rider/Прочее/Semple-Интеграции/arachni/bin/arachni:10:in `<main>'",
+    "flags": [],
+    "ecosystems_detail": "help упав, код 1: from /home/kali/Desktop/Request-Rider/Прочее/Semple-Интеграции/arachni/bin/arachni:10:in `<main>'",
+    "file_counts": {
+      ".rb": 1049,
+      "<none>": 68,
+      ".erb": 46,
+      ".txt": 17,
+      ".js": 15,
+      ".yaml": 12,
+      ".pem": 9,
+      ".css": 8,
+      ".png": 3,
+      ".md": 2,
+      ".svg": 2,
+      ".woff": 2,
+      ".eot": 2,
+      ".ttf": 2,
+      ".yml": 2,
+      ".gemspec": 1,
+      ".otf": 1,
+      ".xsd": 1,
+      ".afr": 1,
+      ".tpl": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "cariddi",
+    "path": "Прочее/Semple-Интеграции/cariddi",
+    "ecosystem": "go",
+    "entry": "cmd/cariddi/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 68,
+    "first_line": "Usage of cariddi:",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "-cache",
+        "origin": "help"
+      },
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "-debug",
+        "origin": "help"
+      },
+      {
+        "name": "-e",
+        "origin": "help"
+      },
+      {
+        "name": "-ef",
+        "origin": "help"
+      },
+      {
+        "name": "-err",
+        "origin": "help"
+      },
+      {
+        "name": "-examples",
+        "origin": "help"
+      },
+      {
+        "name": "-ext",
+        "origin": "help"
+      },
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "-headers",
+        "origin": "help"
+      },
+      {
+        "name": "-headersfile",
+        "origin": "help"
+      },
+      {
+        "name": "-json",
+        "origin": "help"
+      },
+      {
+        "name": "-md",
+        "origin": "help"
+      },
+      {
+        "name": "-i",
+        "origin": "help"
+      },
+      {
+        "name": "-ie",
+        "origin": "help"
+      },
+      {
+        "name": "-info",
+        "origin": "help"
+      },
+      {
+        "name": "-intensive",
+        "origin": "help"
+      },
+      {
+        "name": "-it",
+        "origin": "help"
+      },
+      {
+        "name": "-oh",
+        "origin": "help"
+      },
+      {
+        "name": "-ot",
+        "origin": "help"
+      },
+      {
+        "name": "-plain",
+        "origin": "help"
+      },
+      {
+        "name": "-proxy",
+        "origin": "help"
+      },
+      {
+        "name": "-rua",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "-sf",
+        "origin": "help"
+      },
+      {
+        "name": "-sr",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-ua",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "cmd/cariddi/main.go надрукував 68 рядків з бінарника",
+    "file_counts": {
+      ".go": 32,
+      ".yml": 10,
+      ".md": 3,
+      "<none>": 2,
+      ".yaml": 2,
+      ".mod": 1,
+      ".bat": 1,
+      ".sum": 1
+    },
+    "flag_count": 30,
+    "printed": 30
+  },
+  {
+    "tool": "creepyCrawler",
+    "path": "Прочее/Semple-Интеграции/creepyCrawler",
+    "ecosystem": "python",
+    "entry": "creepyCrawler.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 29,
+    "first_line": "usage: creepyCrawler.py [-h] --url URL [--email EMAIL] [--threads THREADS] [--limit LIMIT] [--proxy PROXY] [--headers HEADERS] [--cookies COOKIES] [--fireprox] [--region REGION]",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--url",
+        "origin": "help"
+      },
+      {
+        "name": "--email",
+        "origin": "help"
+      },
+      {
+        "name": "--threads",
+        "origin": "help"
+      },
+      {
+        "name": "--limit",
+        "origin": "help"
+      },
+      {
+        "name": "--proxy",
+        "origin": "help"
+      },
+      {
+        "name": "--headers",
+        "origin": "help"
+      },
+      {
+        "name": "--cookies",
+        "origin": "help"
+      },
+      {
+        "name": "--fireprox",
+        "origin": "help"
+      },
+      {
+        "name": "--region",
+        "origin": "help"
+      },
+      {
+        "name": "--access_key",
+        "origin": "help"
+      },
+      {
+        "name": "--secret_access_key",
+        "origin": "help"
+      },
+      {
+        "name": "--json",
+        "origin": "help"
+      },
+      {
+        "name": "--headless",
+        "origin": "help"
+      },
+      {
+        "name": "--robots",
+        "origin": "help"
+      },
+      {
+        "name": "--sitemap",
+        "origin": "help"
+      },
+      {
+        "name": "--suppress_progress",
+        "origin": "help"
+      },
+      {
+        "name": "--comments",
+        "origin": "help"
+      },
+      {
+        "name": "--tags",
+        "origin": "help"
+      },
+      {
+        "name": "--ips",
+        "origin": "help"
+      },
+      {
+        "name": "--js",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "--search",
+        "origin": "source"
+      },
+      {
+        "name": "--pages",
+        "origin": "source"
+      },
+      {
+        "name": "--profile_name",
+        "origin": "source"
+      },
+      {
+        "name": "--session_token",
+        "origin": "source"
+      },
+      {
+        "name": "--command",
+        "origin": "source"
+      },
+      {
+        "name": "--api_id",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "creepyCrawler.py надрукував 29 рядків з джерела",
+    "file_counts": {
+      ".pyc": 7,
+      ".py": 6,
+      ".png": 5,
+      "<none>": 3,
+      ".md": 2,
+      ".txt": 2,
+      ".gif": 1,
+      ".sh": 1
+    },
+    "flag_count": 28,
+    "printed": 22
+  },
+  {
+    "tool": "dalfox",
+    "path": "Прочее/Semple-Интеграции/dalfox",
+    "ecosystem": "rust",
+    "entry": "src/main.rs",
+    "is_copy": false,
+    "probe_status": "blocked",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "потрібен cargo build; cargo у середовищі відсутній",
+    "flags": [],
+    "ecosystems_detail": "help упав, код None: потрібен cargo build; cargo у середовищі відсутній",
+    "file_counts": {
+      ".rs": 247,
+      ".toml": 78,
+      ".md": 75,
+      ".html": 32,
+      ".cr": 22,
+      ".yml": 18,
+      ".woff2": 18,
+      "<none>": 7,
+      ".txt": 6,
+      ".js": 6,
+      ".png": 6,
+      ".webp": 6,
+      ".json": 6,
+      ".svg": 3,
+      ".css": 3,
+      ".lock": 2,
+      ".tmpl": 2,
+      ".ico": 2,
+      ".nix": 1,
+      ".har": 1,
+      ".yaml": 1,
+      ".jpg": 1,
+      ".webmanifest": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "darkweb_scanner",
+    "path": "Прочее/Semple-Интеграции/darkweb_scanner",
+    "ecosystem": "python",
+    "entry": "vulnscan.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 14,
+    "first_line": "usage: vulnscan.py [-h] [-t TARGET] [-T TARGETS] [-d DEPTH] [--delay DELAY] [--timeout TIMEOUT] [-r REPORT] [--batch]",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-T",
+        "origin": "help"
+      },
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "--delay",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "--batch",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "--target",
+        "origin": "help"
+      },
+      {
+        "name": "--targets",
+        "origin": "help"
+      },
+      {
+        "name": "--depth",
+        "origin": "help"
+      },
+      {
+        "name": "--report",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "vulnscan.py надрукував 14 рядків з джерела",
+    "file_counts": {
+      ".py": 39,
+      ".pyc": 32,
+      ".txt": 7,
+      "<none>": 1,
+      ".md": 1
+    },
+    "flag_count": 13,
+    "printed": 13
+  },
+  {
+    "tool": "depx",
+    "path": "Прочее/Semple-Интеграции/depx",
+    "ecosystem": "go",
+    "entry": "cmd/depx/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 32,
+    "first_line": "depx — malicious package & supply-chain intelligence.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "--config",
+        "origin": "help"
+      },
+      {
+        "name": "--disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-e",
+        "origin": "help"
+      },
+      {
+        "name": "--ecosystem",
+        "origin": "help"
+      },
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "-j",
+        "origin": "help"
+      },
+      {
+        "name": "--json",
+        "origin": "help"
+      },
+      {
+        "name": "-n",
+        "origin": "help"
+      },
+      {
+        "name": "--limit",
+        "origin": "help"
+      },
+      {
+        "name": "--list",
+        "origin": "help"
+      },
+      {
+        "name": "--no-color",
+        "origin": "help"
+      },
+      {
+        "name": "--silent",
+        "origin": "help"
+      },
+      {
+        "name": "--since",
+        "origin": "help"
+      },
+      {
+        "name": "--update",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "-V",
+        "origin": "help"
+      },
+      {
+        "name": "--version",
+        "origin": "help"
+      },
+      {
+        "name": "limit",
+        "origin": "source"
+      },
+      {
+        "name": "list",
+        "origin": "source"
+      },
+      {
+        "name": "since",
+        "origin": "source"
+      },
+      {
+        "name": "raw",
+        "origin": "source"
+      },
+      {
+        "name": "exclude-pkg",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "output-format",
+        "origin": "source"
+      },
+      {
+        "name": "sarif-export",
+        "origin": "source"
+      },
+      {
+        "name": "require-clean",
+        "origin": "source"
+      },
+      {
+        "name": "sbom-export",
+        "origin": "source"
+      },
+      {
+        "name": "sbom-format",
+        "origin": "source"
+      },
+      {
+        "name": "json",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "no-color",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "ecosystem",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "update",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/depx/main.go надрукував 32 рядків з бінарника",
+    "file_counts": {
+      ".go": 148,
+      ".yml": 7,
+      ".json": 7,
+      ".sh": 6,
+      ".md": 3,
+      "<none>": 2,
+      ".png": 2,
+      ".mod": 1,
+      ".sum": 1
+    },
+    "flag_count": 39,
+    "printed": 19
+  },
+  {
+    "tool": "dirsearch",
+    "path": "Прочее/Semple-Интеграции/dirsearch",
+    "ecosystem": "python",
+    "entry": "__main__.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "module",
+    "exit_code": 0,
+    "help_lines": 106,
+    "first_line": "Usage: dirsearch.py [-u|--url] URL [-e|--extensions] EXTENSIONS [options]",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "--url",
+        "origin": "help"
+      },
+      {
+        "name": "-e",
+        "origin": "help"
+      },
+      {
+        "name": "--extensions",
+        "origin": "help"
+      },
+      {
+        "name": "--version",
+        "origin": "help"
+      },
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "--help-all",
+        "origin": "help"
+      },
+      {
+        "name": "-hh",
+        "origin": "help"
+      },
+      {
+        "name": "-l",
+        "origin": "help"
+      },
+      {
+        "name": "--urls-file",
+        "origin": "help"
+      },
+      {
+        "name": "--stdin",
+        "origin": "help"
+      },
+      {
+        "name": "--cidr",
+        "origin": "help"
+      },
+      {
+        "name": "--raw",
+        "origin": "help"
+      },
+      {
+        "name": "--scheme",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "--session",
+        "origin": "help"
+      },
+      {
+        "name": "--config",
+        "origin": "help"
+      },
+      {
+        "name": "-w",
+        "origin": "help"
+      },
+      {
+        "name": "--wordlists",
+        "origin": "help"
+      },
+      {
+        "name": "--wordlist-categories",
+        "origin": "help"
+      },
+      {
+        "name": "-f",
+        "origin": "help"
+      },
+      {
+        "name": "--force-extensions",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-extensions",
+        "origin": "help"
+      },
+      {
+        "name": "--prefixes",
+        "origin": "help"
+      },
+      {
+        "name": "--suffixes",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "--threads",
+        "origin": "help"
+      },
+      {
+        "name": "-a",
+        "origin": "help"
+      },
+      {
+        "name": "--async",
+        "origin": "help"
+      },
+      {
+        "name": "--sync",
+        "origin": "help"
+      },
+      {
+        "name": "--no-async",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "--recursive",
+        "origin": "help"
+      },
+      {
+        "name": "-R",
+        "origin": "help"
+      },
+      {
+        "name": "--max-recursion-depth",
+        "origin": "help"
+      },
+      {
+        "name": "--recursion-status",
+        "origin": "help"
+      },
+      {
+        "name": "-i",
+        "origin": "help"
+      },
+      {
+        "name": "--include-status",
+        "origin": "help"
+      },
+      {
+        "name": "-x",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-status",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-sizes",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-text",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-regex",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude-redirect",
+        "origin": "help"
+      },
+      {
+        "name": "--max-time",
+        "origin": "help"
+      },
+      {
+        "name": "--target-max-time",
+        "origin": "help"
+      },
+      {
+        "name": "-m",
+        "origin": "help"
+      },
+      {
+        "name": "--http-method",
+        "origin": "help"
+      },
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "--data",
+        "origin": "help"
+      },
+      {
+        "name": "-H",
+        "origin": "help"
+      },
+      {
+        "name": "--header",
+        "origin": "help"
+      },
+      {
+        "name": "-F",
+        "origin": "help"
+      },
+      {
+        "name": "--follow-redirects",
+        "origin": "help"
+      },
+      {
+        "name": "--random-agent",
+        "origin": "help"
+      },
+      {
+        "name": "--auth",
+        "origin": "help"
+      },
+      {
+        "name": "--auth-type",
+        "origin": "help"
+      },
+      {
+        "name": "--user-agent",
+        "origin": "help"
+      },
+      {
+        "name": "--cookie",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "--delay",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "--proxy",
+        "origin": "help"
+      },
+      {
+        "name": "--tor",
+        "origin": "help"
+      },
+      {
+        "name": "--max-rate",
+        "origin": "help"
+      },
+      {
+        "name": "--retries",
+        "origin": "help"
+      },
+      {
+        "name": "--crawl",
+        "origin": "help"
+      },
+      {
+        "name": "--full-url",
+        "origin": "help"
+      },
+      {
+        "name": "--no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-q",
+        "origin": "help"
+      },
+      {
+        "name": "--quiet-mode",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "-O",
+        "origin": "help"
+      },
+      {
+        "name": "--output-formats",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "--output-file",
+        "origin": "help"
+      },
+      {
+        "name": "--save-response",
+        "origin": "help"
+      },
+      {
+        "name": "--save-response-jsonl",
+        "origin": "help"
+      },
+      {
+        "name": "--log",
+        "origin": "help"
+      },
+      {
+        "name": "--no-force-reinstall",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "__main__.py надрукував 106 рядків з джерела",
+    "file_counts": {
+      ".py": 223,
+      ".txt": 53,
+      ".md": 39,
+      ".pyc": 29,
+      ".rs": 18,
+      ".yml": 12,
+      "<none>": 6,
+      ".toml": 3,
+      ".png": 3,
+      ".ini": 1,
+      ".cfg": 1,
+      ".spec": 1,
+      ".sh": 1,
+      ".lock": 1,
+      ".xml": 1,
+      ".html": 1
+    },
+    "flag_count": 82,
+    "printed": 81
+  },
+  {
+    "tool": "fuzzing-templates",
+    "path": "Прочее/Semple-Интеграции/fuzzing-templates",
+    "ecosystem": "data",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "data-only",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "корпус даних, програми немає",
+    "file_counts": {
+      ".yaml": 21,
+      ".md": 7,
+      ".yml": 4,
+      "<none>": 2
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "gosearch",
+    "path": "Прочее/Semple-Интеграции/gosearch",
+    "ecosystem": "go",
+    "entry": "main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 15,
+    "first_line": "Usage of /tmp/opencode/caps/gosearch:",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-b",
+        "origin": "help"
+      },
+      {
+        "name": "-breach-directory",
+        "origin": "help"
+      },
+      {
+        "name": "-no-false-positives",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-output",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "-username",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "main.go надрукував 15 рядків з бінарника",
+    "file_counts": {
+      ".go": 19,
+      ".png": 5,
+      ".yml": 3,
+      ".md": 2,
+      ".mod": 2,
+      ".sum": 2,
+      "<none>": 1,
+      ".json": 1
+    },
+    "flag_count": 7,
+    "printed": 7
+  },
+  {
+    "tool": "jaeles",
+    "path": "Прочее/Semple-Интеграции/jaeles",
+    "ecosystem": "go",
+    "entry": "main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 124,
+    "first_line": ",+izzir,",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "--concurrency",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "--output",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "--signs",
+        "origin": "help"
+      },
+      {
+        "name": "-x",
+        "origin": "help"
+      },
+      {
+        "name": "--exclude",
+        "origin": "help"
+      },
+      {
+        "name": "-L",
+        "origin": "help"
+      },
+      {
+        "name": "--level",
+        "origin": "help"
+      },
+      {
+        "name": "-G",
+        "origin": "help"
+      },
+      {
+        "name": "--passive",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "--params",
+        "origin": "help"
+      },
+      {
+        "name": "-H",
+        "origin": "help"
+      },
+      {
+        "name": "--headers",
+        "origin": "help"
+      },
+      {
+        "name": "--hh",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "--debug",
+        "origin": "help"
+      },
+      {
+        "name": "--proxy",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "--no-db",
+        "origin": "help"
+      },
+      {
+        "name": "-S",
+        "origin": "help"
+      },
+      {
+        "name": "--selectorFile",
+        "origin": "help"
+      },
+      {
+        "name": "-J",
+        "origin": "help"
+      },
+      {
+        "name": "--format-input",
+        "origin": "help"
+      },
+      {
+        "name": "-f",
+        "origin": "help"
+      },
+      {
+        "name": "--found",
+        "origin": "help"
+      },
+      {
+        "name": "-O",
+        "origin": "help"
+      },
+      {
+        "name": "--summaryOutput",
+        "origin": "help"
+      },
+      {
+        "name": "--passiveOutput",
+        "origin": "help"
+      },
+      {
+        "name": "--passiveSummary",
+        "origin": "help"
+      },
+      {
+        "name": "--sp",
+        "origin": "help"
+      },
+      {
+        "name": "--single",
+        "origin": "help"
+      },
+      {
+        "name": "--sverbose",
+        "origin": "help"
+      },
+      {
+        "name": "-N",
+        "origin": "help"
+      },
+      {
+        "name": "--no-output",
+        "origin": "help"
+      },
+      {
+        "name": "--chunk",
+        "origin": "help"
+      },
+      {
+        "name": "-I",
+        "origin": "help"
+      },
+      {
+        "name": "--inline",
+        "origin": "help"
+      },
+      {
+        "name": "-q",
+        "origin": "help"
+      },
+      {
+        "name": "--quiet",
+        "origin": "help"
+      },
+      {
+        "name": "-Q",
+        "origin": "help"
+      },
+      {
+        "name": "--quietFormat",
+        "origin": "help"
+      },
+      {
+        "name": "-R",
+        "origin": "help"
+      },
+      {
+        "name": "--report",
+        "origin": "help"
+      },
+      {
+        "name": "--title",
+        "origin": "help"
+      },
+      {
+        "name": "--html",
+        "origin": "help"
+      },
+      {
+        "name": "--json",
+        "origin": "help"
+      },
+      {
+        "name": "--local",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "--dr",
+        "origin": "help"
+      },
+      {
+        "name": "--fi",
+        "origin": "help"
+      },
+      {
+        "name": "--lc",
+        "origin": "help"
+      },
+      {
+        "name": "--at",
+        "origin": "help"
+      },
+      {
+        "name": "--ba",
+        "origin": "help"
+      },
+      {
+        "name": "-U",
+        "origin": "help"
+      },
+      {
+        "name": "--host",
+        "origin": "help"
+      },
+      {
+        "name": "--port",
+        "origin": "help"
+      },
+      {
+        "name": "--signDir",
+        "origin": "help"
+      },
+      {
+        "name": "-B",
+        "origin": "help"
+      },
+      {
+        "name": "--repo",
+        "origin": "help"
+      },
+      {
+        "name": "mics",
+        "origin": "source"
+      },
+      {
+        "name": "yes",
+        "origin": "source"
+      },
+      {
+        "name": "user",
+        "origin": "source"
+      },
+      {
+        "name": "pass",
+        "origin": "source"
+      },
+      {
+        "name": "repo",
+        "origin": "source"
+      },
+      {
+        "name": "key",
+        "origin": "source"
+      },
+      {
+        "name": "raw",
+        "origin": "source"
+      },
+      {
+        "name": "html",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "rootDir",
+        "origin": "source"
+      },
+      {
+        "name": "signDir",
+        "origin": "source"
+      },
+      {
+        "name": "scanID",
+        "origin": "source"
+      },
+      {
+        "name": "proxy",
+        "origin": "source"
+      },
+      {
+        "name": "timeout",
+        "origin": "source"
+      },
+      {
+        "name": "retry",
+        "origin": "source"
+      },
+      {
+        "name": "delay",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "json",
+        "origin": "source"
+      },
+      {
+        "name": "passiveOutput",
+        "origin": "source"
+      },
+      {
+        "name": "passiveSummary",
+        "origin": "source"
+      },
+      {
+        "name": "summaryOutput",
+        "origin": "source"
+      },
+      {
+        "name": "summaryVuln",
+        "origin": "source"
+      },
+      {
+        "name": "sverbose",
+        "origin": "source"
+      },
+      {
+        "name": "report",
+        "origin": "source"
+      },
+      {
+        "name": "title",
+        "origin": "source"
+      },
+      {
+        "name": "passive",
+        "origin": "source"
+      },
+      {
+        "name": "level",
+        "origin": "source"
+      },
+      {
+        "name": "sp",
+        "origin": "source"
+      },
+      {
+        "name": "concurrency",
+        "origin": "source"
+      },
+      {
+        "name": "threads",
+        "origin": "source"
+      },
+      {
+        "name": "selectorFile",
+        "origin": "source"
+      },
+      {
+        "name": "signs",
+        "origin": "source"
+      },
+      {
+        "name": "exclude",
+        "origin": "source"
+      },
+      {
+        "name": "local",
+        "origin": "source"
+      },
+      {
+        "name": "params",
+        "origin": "source"
+      },
+      {
+        "name": "headers",
+        "origin": "source"
+      },
+      {
+        "name": "log",
+        "origin": "source"
+      },
+      {
+        "name": "found",
+        "origin": "source"
+      },
+      {
+        "name": "format-input",
+        "origin": "source"
+      },
+      {
+        "name": "save-raw",
+        "origin": "source"
+      },
+      {
+        "name": "no-output",
+        "origin": "source"
+      },
+      {
+        "name": "no-background",
+        "origin": "source"
+      },
+      {
+        "name": "refresh",
+        "origin": "source"
+      },
+      {
+        "name": "no-db",
+        "origin": "source"
+      },
+      {
+        "name": "single",
+        "origin": "source"
+      },
+      {
+        "name": "quietFormat",
+        "origin": "source"
+      },
+      {
+        "name": "quiet",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      },
+      {
+        "name": "debug",
+        "origin": "source"
+      },
+      {
+        "name": "chunk",
+        "origin": "source"
+      },
+      {
+        "name": "chunk-threads",
+        "origin": "source"
+      },
+      {
+        "name": "chunk-size",
+        "origin": "source"
+      },
+      {
+        "name": "chunk-dir",
+        "origin": "source"
+      },
+      {
+        "name": "chunk-limit",
+        "origin": "source"
+      },
+      {
+        "name": "inline",
+        "origin": "source"
+      },
+      {
+        "name": "fi",
+        "origin": "source"
+      },
+      {
+        "name": "dr",
+        "origin": "source"
+      },
+      {
+        "name": "ba",
+        "origin": "source"
+      },
+      {
+        "name": "lc",
+        "origin": "source"
+      },
+      {
+        "name": "at",
+        "origin": "source"
+      },
+      {
+        "name": "hh",
+        "origin": "source"
+      },
+      {
+        "name": "no-auth",
+        "origin": "source"
+      },
+      {
+        "name": "action",
+        "origin": "source"
+      },
+      {
+        "name": "url",
+        "origin": "source"
+      },
+      {
+        "name": "urls",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "main.go надрукував 124 рядків з бінарника",
+    "file_counts": {
+      ".go": 70,
+      ".yaml": 11,
+      "<none>": 3,
+      ".md": 1,
+      ".mod": 1,
+      ".sum": 1,
+      ".yml": 1
+    },
+    "flag_count": 130,
+    "printed": 64
+  },
+  {
+    "tool": "katana",
+    "path": "Прочее/Semple-Интеграции/katana",
+    "ecosystem": "go",
+    "entry": "cmd/katana/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 126,
+    "first_line": "Katana is a fast crawler focused on execution in automation pipelines offering both headless and non-headless crawling.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "-list",
+        "origin": "help"
+      },
+      {
+        "name": "-resume",
+        "origin": "help"
+      },
+      {
+        "name": "-e",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "-resolvers",
+        "origin": "help"
+      },
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "-depth",
+        "origin": "help"
+      },
+      {
+        "name": "-jc",
+        "origin": "help"
+      },
+      {
+        "name": "-js-crawl",
+        "origin": "help"
+      },
+      {
+        "name": "-jsl",
+        "origin": "help"
+      },
+      {
+        "name": "-jsluice",
+        "origin": "help"
+      },
+      {
+        "name": "-ct",
+        "origin": "help"
+      },
+      {
+        "name": "-crawl-duration",
+        "origin": "help"
+      },
+      {
+        "name": "-kf",
+        "origin": "help"
+      },
+      {
+        "name": "-known-files",
+        "origin": "help"
+      },
+      {
+        "name": "-mrs",
+        "origin": "help"
+      },
+      {
+        "name": "-max-response-size",
+        "origin": "help"
+      },
+      {
+        "name": "-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-time-stable",
+        "origin": "help"
+      },
+      {
+        "name": "-aff",
+        "origin": "help"
+      },
+      {
+        "name": "-automatic-form-fill",
+        "origin": "help"
+      },
+      {
+        "name": "-fx",
+        "origin": "help"
+      },
+      {
+        "name": "-form-extraction",
+        "origin": "help"
+      },
+      {
+        "name": "-retry",
+        "origin": "help"
+      },
+      {
+        "name": "-proxy",
+        "origin": "help"
+      },
+      {
+        "name": "-td",
+        "origin": "help"
+      },
+      {
+        "name": "-tech-detect",
+        "origin": "help"
+      },
+      {
+        "name": "-H",
+        "origin": "help"
+      },
+      {
+        "name": "-headers",
+        "origin": "help"
+      },
+      {
+        "name": "-config",
+        "origin": "help"
+      },
+      {
+        "name": "-fc",
+        "origin": "help"
+      },
+      {
+        "name": "-form-config",
+        "origin": "help"
+      },
+      {
+        "name": "-flc",
+        "origin": "help"
+      },
+      {
+        "name": "-field-config",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "-strategy",
+        "origin": "help"
+      },
+      {
+        "name": "-iqp",
+        "origin": "help"
+      },
+      {
+        "name": "-ignore-query-params",
+        "origin": "help"
+      },
+      {
+        "name": "-fsu",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-similar",
+        "origin": "help"
+      },
+      {
+        "name": "-fst",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-similar-threshold",
+        "origin": "help"
+      },
+      {
+        "name": "-tlsi",
+        "origin": "help"
+      },
+      {
+        "name": "-tls-impersonate",
+        "origin": "help"
+      },
+      {
+        "name": "-dr",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-redirects",
+        "origin": "help"
+      },
+      {
+        "name": "-pc",
+        "origin": "help"
+      },
+      {
+        "name": "-path-climb",
+        "origin": "help"
+      },
+      {
+        "name": "-kb",
+        "origin": "help"
+      },
+      {
+        "name": "-knowledge-base",
+        "origin": "help"
+      },
+      {
+        "name": "-kb-secrets",
+        "origin": "help"
+      },
+      {
+        "name": "-kb-validate-secrets",
+        "origin": "help"
+      },
+      {
+        "name": "-kb-endpoints",
+        "origin": "help"
+      },
+      {
+        "name": "-mdp",
+        "origin": "help"
+      },
+      {
+        "name": "-max-domain-pages",
+        "origin": "help"
+      },
+      {
+        "name": "-health-check",
+        "origin": "help"
+      },
+      {
+        "name": "-hc",
+        "origin": "help"
+      },
+      {
+        "name": "-elog",
+        "origin": "help"
+      },
+      {
+        "name": "-error-log",
+        "origin": "help"
+      },
+      {
+        "name": "-pprof-server",
+        "origin": "help"
+      },
+      {
+        "name": "-hl",
+        "origin": "help"
+      },
+      {
+        "name": "-headless",
+        "origin": "help"
+      },
+      {
+        "name": "-hh",
+        "origin": "help"
+      },
+      {
+        "name": "-hybrid",
+        "origin": "help"
+      },
+      {
+        "name": "-sc",
+        "origin": "help"
+      },
+      {
+        "name": "-system-chrome",
+        "origin": "help"
+      },
+      {
+        "name": "-sb",
+        "origin": "help"
+      },
+      {
+        "name": "-show-browser",
+        "origin": "help"
+      },
+      {
+        "name": "-ho",
+        "origin": "help"
+      },
+      {
+        "name": "-headless-options",
+        "origin": "help"
+      },
+      {
+        "name": "-nos",
+        "origin": "help"
+      },
+      {
+        "name": "-no-sandbox",
+        "origin": "help"
+      },
+      {
+        "name": "--no-sandbox",
+        "origin": "help"
+      },
+      {
+        "name": "-cdd",
+        "origin": "help"
+      },
+      {
+        "name": "-chrome-data-dir",
+        "origin": "help"
+      },
+      {
+        "name": "-scp",
+        "origin": "help"
+      },
+      {
+        "name": "-system-chrome-path",
+        "origin": "help"
+      },
+      {
+        "name": "-noi",
+        "origin": "help"
+      },
+      {
+        "name": "-no-incognito",
+        "origin": "help"
+      },
+      {
+        "name": "-cwu",
+        "origin": "help"
+      },
+      {
+        "name": "-chrome-ws-url",
+        "origin": "help"
+      },
+      {
+        "name": "-xhr",
+        "origin": "help"
+      },
+      {
+        "name": "-xhr-extraction",
+        "origin": "help"
+      },
+      {
+        "name": "-mfc",
+        "origin": "help"
+      },
+      {
+        "name": "-max-failure-count",
+        "origin": "help"
+      },
+      {
+        "name": "-ed",
+        "origin": "help"
+      },
+      {
+        "name": "-enable-diagnostics",
+        "origin": "help"
+      },
+      {
+        "name": "-pls",
+        "origin": "help"
+      },
+      {
+        "name": "-page-load-strategy",
+        "origin": "help"
+      },
+      {
+        "name": "-dwt",
+        "origin": "help"
+      },
+      {
+        "name": "-dom-wait-time",
+        "origin": "help"
+      },
+      {
+        "name": "-csp",
+        "origin": "help"
+      },
+      {
+        "name": "-captcha-solver-provider",
+        "origin": "help"
+      },
+      {
+        "name": "-csk",
+        "origin": "help"
+      },
+      {
+        "name": "-captcha-solver-key",
+        "origin": "help"
+      },
+      {
+        "name": "-al",
+        "origin": "help"
+      },
+      {
+        "name": "-auto-login",
+        "origin": "help"
+      },
+      {
+        "name": "-rf",
+        "origin": "help"
+      },
+      {
+        "name": "-recorded-flow",
+        "origin": "help"
+      },
+      {
+        "name": "-cs",
+        "origin": "help"
+      },
+      {
+        "name": "-crawl-scope",
+        "origin": "help"
+      },
+      {
+        "name": "-cos",
+        "origin": "help"
+      },
+      {
+        "name": "-crawl-out-scope",
+        "origin": "help"
+      },
+      {
+        "name": "-fs",
+        "origin": "help"
+      },
+      {
+        "name": "-field-scope",
+        "origin": "help"
+      },
+      {
+        "name": "-ns",
+        "origin": "help"
+      },
+      {
+        "name": "-no-scope",
+        "origin": "help"
+      },
+      {
+        "name": "-do",
+        "origin": "help"
+      },
+      {
+        "name": "-display-out-scope",
+        "origin": "help"
+      },
+      {
+        "name": "-mr",
+        "origin": "help"
+      },
+      {
+        "name": "-match-regex",
+        "origin": "help"
+      },
+      {
+        "name": "-fr",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-regex",
+        "origin": "help"
+      },
+      {
+        "name": "-f",
+        "origin": "help"
+      },
+      {
+        "name": "-field",
+        "origin": "help"
+      },
+      {
+        "name": "-output-template",
+        "origin": "help"
+      },
+      {
+        "name": "-sf",
+        "origin": "help"
+      },
+      {
+        "name": "-store-field",
+        "origin": "help"
+      },
+      {
+        "name": "-em",
+        "origin": "help"
+      },
+      {
+        "name": "-extension-match",
+        "origin": "help"
+      },
+      {
+        "name": "-ef",
+        "origin": "help"
+      },
+      {
+        "name": "-extension-filter",
+        "origin": "help"
+      },
+      {
+        "name": "-ndef",
+        "origin": "help"
+      },
+      {
+        "name": "-no-default-ext-filter",
+        "origin": "help"
+      },
+      {
+        "name": "-mdc",
+        "origin": "help"
+      },
+      {
+        "name": "-match-condition",
+        "origin": "help"
+      },
+      {
+        "name": "-fdc",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-condition",
+        "origin": "help"
+      },
+      {
+        "name": "-duf",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-unique-filter",
+        "origin": "help"
+      },
+      {
+        "name": "-pcs",
+        "origin": "help"
+      },
+      {
+        "name": "-page-content-similar",
+        "origin": "help"
+      },
+      {
+        "name": "-sdd",
+        "origin": "help"
+      },
+      {
+        "name": "-similarity-deduplication",
+        "origin": "help"
+      },
+      {
+        "name": "-pcsm",
+        "origin": "help"
+      },
+      {
+        "name": "-page-content-similar-mode",
+        "origin": "help"
+      },
+      {
+        "name": "-pcsd",
+        "origin": "help"
+      },
+      {
+        "name": "-page-content-similar-distance",
+        "origin": "help"
+      },
+      {
+        "name": "-pcst",
+        "origin": "help"
+      },
+      {
+        "name": "-page-content-similar-threshold",
+        "origin": "help"
+      },
+      {
+        "name": "-pcsn",
+        "origin": "help"
+      },
+      {
+        "name": "-page-content-similar-budget",
+        "origin": "help"
+      },
+      {
+        "name": "-fpt",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-page-type",
+        "origin": "help"
+      },
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "-concurrency",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "-parallelism",
+        "origin": "help"
+      },
+      {
+        "name": "-rd",
+        "origin": "help"
+      },
+      {
+        "name": "-delay",
+        "origin": "help"
+      },
+      {
+        "name": "-rl",
+        "origin": "help"
+      },
+      {
+        "name": "-rate-limit",
+        "origin": "help"
+      },
+      {
+        "name": "-rlm",
+        "origin": "help"
+      },
+      {
+        "name": "-rate-limit-minute",
+        "origin": "help"
+      },
+      {
+        "name": "-hrl",
+        "origin": "help"
+      },
+      {
+        "name": "-host-rate-limit",
+        "origin": "help"
+      },
+      {
+        "name": "-hrlm",
+        "origin": "help"
+      },
+      {
+        "name": "-host-rate-limit-minute",
+        "origin": "help"
+      },
+      {
+        "name": "-up",
+        "origin": "help"
+      },
+      {
+        "name": "-update",
+        "origin": "help"
+      },
+      {
+        "name": "-duc",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-output",
+        "origin": "help"
+      },
+      {
+        "name": "-ot",
+        "origin": "help"
+      },
+      {
+        "name": "-sr",
+        "origin": "help"
+      },
+      {
+        "name": "-store-response",
+        "origin": "help"
+      },
+      {
+        "name": "-srd",
+        "origin": "help"
+      },
+      {
+        "name": "-store-response-dir",
+        "origin": "help"
+      },
+      {
+        "name": "-ncb",
+        "origin": "help"
+      },
+      {
+        "name": "-no-clobber",
+        "origin": "help"
+      },
+      {
+        "name": "-sfd",
+        "origin": "help"
+      },
+      {
+        "name": "-store-field-dir",
+        "origin": "help"
+      },
+      {
+        "name": "-or",
+        "origin": "help"
+      },
+      {
+        "name": "-omit-raw",
+        "origin": "help"
+      },
+      {
+        "name": "-ob",
+        "origin": "help"
+      },
+      {
+        "name": "-omit-body",
+        "origin": "help"
+      },
+      {
+        "name": "-lof",
+        "origin": "help"
+      },
+      {
+        "name": "-list-output-fields",
+        "origin": "help"
+      },
+      {
+        "name": "-eof",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-output-fields",
+        "origin": "help"
+      },
+      {
+        "name": "-j",
+        "origin": "help"
+      },
+      {
+        "name": "-jsonl",
+        "origin": "help"
+      },
+      {
+        "name": "-nc",
+        "origin": "help"
+      },
+      {
+        "name": "-no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-silent",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "-verbose",
+        "origin": "help"
+      },
+      {
+        "name": "-debug",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      },
+      {
+        "name": "list",
+        "origin": "source"
+      },
+      {
+        "name": "resume",
+        "origin": "source"
+      },
+      {
+        "name": "exclude",
+        "origin": "source"
+      },
+      {
+        "name": "resolvers",
+        "origin": "source"
+      },
+      {
+        "name": "depth",
+        "origin": "source"
+      },
+      {
+        "name": "js-crawl",
+        "origin": "source"
+      },
+      {
+        "name": "jsluice",
+        "origin": "source"
+      },
+      {
+        "name": "crawl-duration",
+        "origin": "source"
+      },
+      {
+        "name": "known-files",
+        "origin": "source"
+      },
+      {
+        "name": "max-response-size",
+        "origin": "source"
+      },
+      {
+        "name": "timeout",
+        "origin": "source"
+      },
+      {
+        "name": "time-stable",
+        "origin": "source"
+      },
+      {
+        "name": "automatic-form-fill",
+        "origin": "source"
+      },
+      {
+        "name": "form-extraction",
+        "origin": "source"
+      },
+      {
+        "name": "retry",
+        "origin": "source"
+      },
+      {
+        "name": "proxy",
+        "origin": "source"
+      },
+      {
+        "name": "tech-detect",
+        "origin": "source"
+      },
+      {
+        "name": "headers",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "form-config",
+        "origin": "source"
+      },
+      {
+        "name": "field-config",
+        "origin": "source"
+      },
+      {
+        "name": "strategy",
+        "origin": "source"
+      },
+      {
+        "name": "ignore-query-params",
+        "origin": "source"
+      },
+      {
+        "name": "filter-similar",
+        "origin": "source"
+      },
+      {
+        "name": "filter-similar-threshold",
+        "origin": "source"
+      },
+      {
+        "name": "tls-impersonate",
+        "origin": "source"
+      },
+      {
+        "name": "disable-redirects",
+        "origin": "source"
+      },
+      {
+        "name": "path-climb",
+        "origin": "source"
+      },
+      {
+        "name": "knowledge-base",
+        "origin": "source"
+      },
+      {
+        "name": "kb-secrets",
+        "origin": "source"
+      },
+      {
+        "name": "kb-validate-secrets",
+        "origin": "source"
+      },
+      {
+        "name": "kb-endpoints",
+        "origin": "source"
+      },
+      {
+        "name": "max-domain-pages",
+        "origin": "source"
+      },
+      {
+        "name": "hc",
+        "origin": "source"
+      },
+      {
+        "name": "error-log",
+        "origin": "source"
+      },
+      {
+        "name": "pprof-server",
+        "origin": "source"
+      },
+      {
+        "name": "headless",
+        "origin": "source"
+      },
+      {
+        "name": "hybrid",
+        "origin": "source"
+      },
+      {
+        "name": "system-chrome",
+        "origin": "source"
+      },
+      {
+        "name": "show-browser",
+        "origin": "source"
+      },
+      {
+        "name": "headless-options",
+        "origin": "source"
+      },
+      {
+        "name": "no-sandbox",
+        "origin": "source"
+      },
+      {
+        "name": "chrome-data-dir",
+        "origin": "source"
+      },
+      {
+        "name": "system-chrome-path",
+        "origin": "source"
+      },
+      {
+        "name": "no-incognito",
+        "origin": "source"
+      },
+      {
+        "name": "chrome-ws-url",
+        "origin": "source"
+      },
+      {
+        "name": "xhr-extraction",
+        "origin": "source"
+      },
+      {
+        "name": "max-failure-count",
+        "origin": "source"
+      },
+      {
+        "name": "enable-diagnostics",
+        "origin": "source"
+      },
+      {
+        "name": "page-load-strategy",
+        "origin": "source"
+      },
+      {
+        "name": "dom-wait-time",
+        "origin": "source"
+      },
+      {
+        "name": "recorded-flow",
+        "origin": "source"
+      },
+      {
+        "name": "crawl-scope",
+        "origin": "source"
+      },
+      {
+        "name": "crawl-out-scope",
+        "origin": "source"
+      },
+      {
+        "name": "field-scope",
+        "origin": "source"
+      },
+      {
+        "name": "no-scope",
+        "origin": "source"
+      },
+      {
+        "name": "display-out-scope",
+        "origin": "source"
+      },
+      {
+        "name": "match-regex",
+        "origin": "source"
+      },
+      {
+        "name": "filter-regex",
+        "origin": "source"
+      },
+      {
+        "name": "field",
+        "origin": "source"
+      },
+      {
+        "name": "store-field",
+        "origin": "source"
+      },
+      {
+        "name": "extension-match",
+        "origin": "source"
+      },
+      {
+        "name": "extension-filter",
+        "origin": "source"
+      },
+      {
+        "name": "no-default-ext-filter",
+        "origin": "source"
+      },
+      {
+        "name": "match-condition",
+        "origin": "source"
+      },
+      {
+        "name": "filter-condition",
+        "origin": "source"
+      },
+      {
+        "name": "disable-unique-filter",
+        "origin": "source"
+      },
+      {
+        "name": "page-content-similar",
+        "origin": "source"
+      },
+      {
+        "name": "similarity-deduplication",
+        "origin": "source"
+      },
+      {
+        "name": "page-content-similar-mode",
+        "origin": "source"
+      },
+      {
+        "name": "page-content-similar-distance",
+        "origin": "source"
+      },
+      {
+        "name": "page-content-similar-threshold",
+        "origin": "source"
+      },
+      {
+        "name": "page-content-similar-budget",
+        "origin": "source"
+      },
+      {
+        "name": "filter-page-type",
+        "origin": "source"
+      },
+      {
+        "name": "concurrency",
+        "origin": "source"
+      },
+      {
+        "name": "parallelism",
+        "origin": "source"
+      },
+      {
+        "name": "delay",
+        "origin": "source"
+      },
+      {
+        "name": "rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "rate-limit-minute",
+        "origin": "source"
+      },
+      {
+        "name": "host-rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "host-rate-limit-minute",
+        "origin": "source"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "output-template",
+        "origin": "source"
+      },
+      {
+        "name": "store-response",
+        "origin": "source"
+      },
+      {
+        "name": "store-response-dir",
+        "origin": "source"
+      },
+      {
+        "name": "no-clobber",
+        "origin": "source"
+      },
+      {
+        "name": "store-field-dir",
+        "origin": "source"
+      },
+      {
+        "name": "omit-raw",
+        "origin": "source"
+      },
+      {
+        "name": "omit-body",
+        "origin": "source"
+      },
+      {
+        "name": "list-output-fields",
+        "origin": "source"
+      },
+      {
+        "name": "exclude-output-fields",
+        "origin": "source"
+      },
+      {
+        "name": "jsonl",
+        "origin": "source"
+      },
+      {
+        "name": "no-color",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "debug",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/katana/main.go надрукував 126 рядків з бінарника",
+    "file_counts": {
+      ".go": 165,
+      ".yml": 13,
+      ".md": 6,
+      ".js": 6,
+      "<none>": 3,
+      ".sh": 2,
+      ".disabled": 2,
+      ".yaml": 2,
+      ".mod": 1,
+      ".toml": 1,
+      ".sum": 1,
+      ".json": 1
+    },
+    "flag_count": 290,
+    "printed": 192
+  },
+  {
+    "tool": "lonkero",
+    "path": "Прочее/Semple-Интеграции/lonkero",
+    "ecosystem": "rust",
+    "entry": "src/cli/main.rs",
+    "is_copy": false,
+    "probe_status": "blocked",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "потрібен cargo build; cargo у середовищі відсутній",
+    "flags": [],
+    "ecosystems_detail": "help упав, код None: потрібен cargo build; cargo у середовищі відсутній",
+    "file_counts": {
+      ".rs": 271,
+      ".js": 15,
+      ".yml": 7,
+      ".toml": 3,
+      ".md": 3,
+      "<none>": 2,
+      ".lock": 1,
+      ".rlib": 1,
+      ".json": 1,
+      ".html": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "naabu",
+    "path": "Прочее/Semple-Интеграции/naabu",
+    "ecosystem": "go",
+    "entry": "cmd/naabu/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 118,
+    "first_line": "Naabu is a port scanning tool written in Go that allows you to enumerate open ports for hosts in a fast and reliable manner.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-host",
+        "origin": "help"
+      },
+      {
+        "name": "-list",
+        "origin": "help"
+      },
+      {
+        "name": "-l",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-hosts",
+        "origin": "help"
+      },
+      {
+        "name": "-eh",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-file",
+        "origin": "help"
+      },
+      {
+        "name": "-ef",
+        "origin": "help"
+      },
+      {
+        "name": "-port",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "-top-ports",
+        "origin": "help"
+      },
+      {
+        "name": "-tp",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-ports",
+        "origin": "help"
+      },
+      {
+        "name": "-ep",
+        "origin": "help"
+      },
+      {
+        "name": "-ports-file",
+        "origin": "help"
+      },
+      {
+        "name": "-pf",
+        "origin": "help"
+      },
+      {
+        "name": "-port-threshold",
+        "origin": "help"
+      },
+      {
+        "name": "-pts",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-cdn",
+        "origin": "help"
+      },
+      {
+        "name": "-ec",
+        "origin": "help"
+      },
+      {
+        "name": "-display-cdn",
+        "origin": "help"
+      },
+      {
+        "name": "-cdn",
+        "origin": "help"
+      },
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "-rate",
+        "origin": "help"
+      },
+      {
+        "name": "-tw",
+        "origin": "help"
+      },
+      {
+        "name": "-tx-workers",
+        "origin": "help"
+      },
+      {
+        "name": "-up",
+        "origin": "help"
+      },
+      {
+        "name": "-update",
+        "origin": "help"
+      },
+      {
+        "name": "-duc",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-output",
+        "origin": "help"
+      },
+      {
+        "name": "-lof",
+        "origin": "help"
+      },
+      {
+        "name": "-list-output-fields",
+        "origin": "help"
+      },
+      {
+        "name": "-eof",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-output-fields",
+        "origin": "help"
+      },
+      {
+        "name": "-j",
+        "origin": "help"
+      },
+      {
+        "name": "-json",
+        "origin": "help"
+      },
+      {
+        "name": "-csv",
+        "origin": "help"
+      },
+      {
+        "name": "-oX",
+        "origin": "help"
+      },
+      {
+        "name": "-xml-output",
+        "origin": "help"
+      },
+      {
+        "name": "-oG",
+        "origin": "help"
+      },
+      {
+        "name": "-grep-output",
+        "origin": "help"
+      },
+      {
+        "name": "-oA",
+        "origin": "help"
+      },
+      {
+        "name": "-output-all",
+        "origin": "help"
+      },
+      {
+        "name": "-config",
+        "origin": "help"
+      },
+      {
+        "name": "-scan-all-ips",
+        "origin": "help"
+      },
+      {
+        "name": "-sa",
+        "origin": "help"
+      },
+      {
+        "name": "-ip-version",
+        "origin": "help"
+      },
+      {
+        "name": "-iv",
+        "origin": "help"
+      },
+      {
+        "name": "-scan-type",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "-source-ip",
+        "origin": "help"
+      },
+      {
+        "name": "-connect-payload",
+        "origin": "help"
+      },
+      {
+        "name": "-cp",
+        "origin": "help"
+      },
+      {
+        "name": "-interface-list",
+        "origin": "help"
+      },
+      {
+        "name": "-il",
+        "origin": "help"
+      },
+      {
+        "name": "-interface",
+        "origin": "help"
+      },
+      {
+        "name": "-i",
+        "origin": "help"
+      },
+      {
+        "name": "-nmap",
+        "origin": "help"
+      },
+      {
+        "name": "-nmap-cli",
+        "origin": "help"
+      },
+      {
+        "name": "-sV",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "-proxy",
+        "origin": "help"
+      },
+      {
+        "name": "-proxy-auth",
+        "origin": "help"
+      },
+      {
+        "name": "-dns-order",
+        "origin": "help"
+      },
+      {
+        "name": "-sr",
+        "origin": "help"
+      },
+      {
+        "name": "-system-resolver",
+        "origin": "help"
+      },
+      {
+        "name": "-resume",
+        "origin": "help"
+      },
+      {
+        "name": "-stream",
+        "origin": "help"
+      },
+      {
+        "name": "-passive",
+        "origin": "help"
+      },
+      {
+        "name": "-irt",
+        "origin": "help"
+      },
+      {
+        "name": "-input-read-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-no-stdin",
+        "origin": "help"
+      },
+      {
+        "name": "-sn",
+        "origin": "help"
+      },
+      {
+        "name": "-host-discovery",
+        "origin": "help"
+      },
+      {
+        "name": "-show-dead",
+        "origin": "help"
+      },
+      {
+        "name": "-Pn",
+        "origin": "help"
+      },
+      {
+        "name": "-skip-host-discovery",
+        "origin": "help"
+      },
+      {
+        "name": "-wn",
+        "origin": "help"
+      },
+      {
+        "name": "-with-host-discovery",
+        "origin": "help"
+      },
+      {
+        "name": "-ps",
+        "origin": "help"
+      },
+      {
+        "name": "-probe-tcp-syn",
+        "origin": "help"
+      },
+      {
+        "name": "-pa",
+        "origin": "help"
+      },
+      {
+        "name": "-probe-tcp-ack",
+        "origin": "help"
+      },
+      {
+        "name": "-pe",
+        "origin": "help"
+      },
+      {
+        "name": "-probe-icmp-echo",
+        "origin": "help"
+      },
+      {
+        "name": "-pp",
+        "origin": "help"
+      },
+      {
+        "name": "-probe-icmp-timestamp",
+        "origin": "help"
+      },
+      {
+        "name": "-pm",
+        "origin": "help"
+      },
+      {
+        "name": "-probe-icmp-address-mask",
+        "origin": "help"
+      },
+      {
+        "name": "-arp",
+        "origin": "help"
+      },
+      {
+        "name": "-arp-ping",
+        "origin": "help"
+      },
+      {
+        "name": "-nd",
+        "origin": "help"
+      },
+      {
+        "name": "-nd-ping",
+        "origin": "help"
+      },
+      {
+        "name": "-rev-ptr",
+        "origin": "help"
+      },
+      {
+        "name": "-sD",
+        "origin": "help"
+      },
+      {
+        "name": "-service-discovery",
+        "origin": "help"
+      },
+      {
+        "name": "-service-version",
+        "origin": "help"
+      },
+      {
+        "name": "-sV-fast",
+        "origin": "help"
+      },
+      {
+        "name": "-sV-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-sV-workers",
+        "origin": "help"
+      },
+      {
+        "name": "-sV-probes",
+        "origin": "help"
+      },
+      {
+        "name": "-uP",
+        "origin": "help"
+      },
+      {
+        "name": "-udp-probes",
+        "origin": "help"
+      },
+      {
+        "name": "-retries",
+        "origin": "help"
+      },
+      {
+        "name": "-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-warm-up-time",
+        "origin": "help"
+      },
+      {
+        "name": "-T",
+        "origin": "help"
+      },
+      {
+        "name": "-timing",
+        "origin": "help"
+      },
+      {
+        "name": "-ping",
+        "origin": "help"
+      },
+      {
+        "name": "-verify",
+        "origin": "help"
+      },
+      {
+        "name": "-ss",
+        "origin": "help"
+      },
+      {
+        "name": "-smart-scan",
+        "origin": "help"
+      },
+      {
+        "name": "-pt",
+        "origin": "help"
+      },
+      {
+        "name": "-prediction-threshold",
+        "origin": "help"
+      },
+      {
+        "name": "-npp",
+        "origin": "help"
+      },
+      {
+        "name": "-no-port-priority",
+        "origin": "help"
+      },
+      {
+        "name": "-shard",
+        "origin": "help"
+      },
+      {
+        "name": "-seed",
+        "origin": "help"
+      },
+      {
+        "name": "-health-check",
+        "origin": "help"
+      },
+      {
+        "name": "-hc",
+        "origin": "help"
+      },
+      {
+        "name": "-debug",
+        "origin": "help"
+      },
+      {
+        "name": "-verbose",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "-no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-nc",
+        "origin": "help"
+      },
+      {
+        "name": "-silent",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      },
+      {
+        "name": "-stats",
+        "origin": "help"
+      },
+      {
+        "name": "-si",
+        "origin": "help"
+      },
+      {
+        "name": "-stats-interval",
+        "origin": "help"
+      },
+      {
+        "name": "-mp",
+        "origin": "help"
+      },
+      {
+        "name": "-metrics-port",
+        "origin": "help"
+      },
+      {
+        "name": "-auth",
+        "origin": "help"
+      },
+      {
+        "name": "-ac",
+        "origin": "help"
+      },
+      {
+        "name": "-auth-config",
+        "origin": "help"
+      },
+      {
+        "name": "-pd",
+        "origin": "help"
+      },
+      {
+        "name": "-dashboard",
+        "origin": "help"
+      },
+      {
+        "name": "-tid",
+        "origin": "help"
+      },
+      {
+        "name": "-team-id",
+        "origin": "help"
+      },
+      {
+        "name": "-aid",
+        "origin": "help"
+      },
+      {
+        "name": "-asset-id",
+        "origin": "help"
+      },
+      {
+        "name": "-aname",
+        "origin": "help"
+      },
+      {
+        "name": "-asset-name",
+        "origin": "help"
+      },
+      {
+        "name": "-pdu",
+        "origin": "help"
+      },
+      {
+        "name": "-dashboard-upload",
+        "origin": "help"
+      },
+      {
+        "name": "host",
+        "origin": "source"
+      },
+      {
+        "name": "l",
+        "origin": "source"
+      },
+      {
+        "name": "eh",
+        "origin": "source"
+      },
+      {
+        "name": "ef",
+        "origin": "source"
+      },
+      {
+        "name": "p",
+        "origin": "source"
+      },
+      {
+        "name": "tp",
+        "origin": "source"
+      },
+      {
+        "name": "ep",
+        "origin": "source"
+      },
+      {
+        "name": "pf",
+        "origin": "source"
+      },
+      {
+        "name": "pts",
+        "origin": "source"
+      },
+      {
+        "name": "ec",
+        "origin": "source"
+      },
+      {
+        "name": "cdn",
+        "origin": "source"
+      },
+      {
+        "name": "c",
+        "origin": "source"
+      },
+      {
+        "name": "rate",
+        "origin": "source"
+      },
+      {
+        "name": "tx-workers",
+        "origin": "source"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "list-output-fields",
+        "origin": "source"
+      },
+      {
+        "name": "exclude-output-fields",
+        "origin": "source"
+      },
+      {
+        "name": "json",
+        "origin": "source"
+      },
+      {
+        "name": "csv",
+        "origin": "source"
+      },
+      {
+        "name": "xml-output",
+        "origin": "source"
+      },
+      {
+        "name": "grep-output",
+        "origin": "source"
+      },
+      {
+        "name": "output-all",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "sa",
+        "origin": "source"
+      },
+      {
+        "name": "iv",
+        "origin": "source"
+      },
+      {
+        "name": "s",
+        "origin": "source"
+      },
+      {
+        "name": "source-ip",
+        "origin": "source"
+      },
+      {
+        "name": "cp",
+        "origin": "source"
+      },
+      {
+        "name": "il",
+        "origin": "source"
+      },
+      {
+        "name": "i",
+        "origin": "source"
+      },
+      {
+        "name": "nmap",
+        "origin": "source"
+      },
+      {
+        "name": "nmap-cli",
+        "origin": "source"
+      },
+      {
+        "name": "r",
+        "origin": "source"
+      },
+      {
+        "name": "proxy",
+        "origin": "source"
+      },
+      {
+        "name": "proxy-auth",
+        "origin": "source"
+      },
+      {
+        "name": "dns-order",
+        "origin": "source"
+      },
+      {
+        "name": "system-resolver",
+        "origin": "source"
+      },
+      {
+        "name": "resume",
+        "origin": "source"
+      },
+      {
+        "name": "stream",
+        "origin": "source"
+      },
+      {
+        "name": "passive",
+        "origin": "source"
+      },
+      {
+        "name": "input-read-timeout",
+        "origin": "source"
+      },
+      {
+        "name": "no-stdin",
+        "origin": "source"
+      },
+      {
+        "name": "host-discovery",
+        "origin": "source"
+      },
+      {
+        "name": "show-dead",
+        "origin": "source"
+      },
+      {
+        "name": "skip-host-discovery",
+        "origin": "source"
+      },
+      {
+        "name": "with-host-discovery",
+        "origin": "source"
+      },
+      {
+        "name": "probe-tcp-syn",
+        "origin": "source"
+      },
+      {
+        "name": "probe-tcp-ack",
+        "origin": "source"
+      },
+      {
+        "name": "probe-icmp-echo",
+        "origin": "source"
+      },
+      {
+        "name": "probe-icmp-timestamp",
+        "origin": "source"
+      },
+      {
+        "name": "probe-icmp-address-mask",
+        "origin": "source"
+      },
+      {
+        "name": "arp-ping",
+        "origin": "source"
+      },
+      {
+        "name": "nd-ping",
+        "origin": "source"
+      },
+      {
+        "name": "rev-ptr",
+        "origin": "source"
+      },
+      {
+        "name": "probe-ip-protocol",
+        "origin": "source"
+      },
+      {
+        "name": "probe-udp",
+        "origin": "source"
+      },
+      {
+        "name": "probe-stcp-init",
+        "origin": "source"
+      },
+      {
+        "name": "discovery-ignore-rst",
+        "origin": "source"
+      },
+      {
+        "name": "service-discovery",
+        "origin": "source"
+      },
+      {
+        "name": "service-version",
+        "origin": "source"
+      },
+      {
+        "name": "sV-fast",
+        "origin": "source"
+      },
+      {
+        "name": "sV-timeout",
+        "origin": "source"
+      },
+      {
+        "name": "sV-workers",
+        "origin": "source"
+      },
+      {
+        "name": "sV-probes",
+        "origin": "source"
+      },
+      {
+        "name": "udp-probes",
+        "origin": "source"
+      },
+      {
+        "name": "retries",
+        "origin": "source"
+      },
+      {
+        "name": "warm-up-time",
+        "origin": "source"
+      },
+      {
+        "name": "timing",
+        "origin": "source"
+      },
+      {
+        "name": "ping",
+        "origin": "source"
+      },
+      {
+        "name": "verify",
+        "origin": "source"
+      },
+      {
+        "name": "smart-scan",
+        "origin": "source"
+      },
+      {
+        "name": "prediction-threshold",
+        "origin": "source"
+      },
+      {
+        "name": "no-port-priority",
+        "origin": "source"
+      },
+      {
+        "name": "shard",
+        "origin": "source"
+      },
+      {
+        "name": "seed",
+        "origin": "source"
+      },
+      {
+        "name": "hc",
+        "origin": "source"
+      },
+      {
+        "name": "debug",
+        "origin": "source"
+      },
+      {
+        "name": "v",
+        "origin": "source"
+      },
+      {
+        "name": "nc",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      },
+      {
+        "name": "stats",
+        "origin": "source"
+      },
+      {
+        "name": "stats-interval",
+        "origin": "source"
+      },
+      {
+        "name": "metrics-port",
+        "origin": "source"
+      },
+      {
+        "name": "auth",
+        "origin": "source"
+      },
+      {
+        "name": "auth-config",
+        "origin": "source"
+      },
+      {
+        "name": "dashboard",
+        "origin": "source"
+      },
+      {
+        "name": "team-id",
+        "origin": "source"
+      },
+      {
+        "name": "asset-id",
+        "origin": "source"
+      },
+      {
+        "name": "asset-name",
+        "origin": "source"
+      },
+      {
+        "name": "dashboard-upload",
+        "origin": "source"
+      },
+      {
+        "name": "0.0.0.0",
+        "origin": "source"
+      },
+      {
+        "name": "128.199.158.128",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/naabu/main.go надрукував 118 рядків з бінарника",
+    "file_counts": {
+      ".go": 128,
+      ".yml": 10,
+      "<none>": 5,
+      ".md": 4,
+      ".sh": 3,
+      ".png": 2,
+      ".yaml": 2,
+      ".txt": 2,
+      ".toml": 1,
+      ".mod": 1,
+      ".sum": 1,
+      ".gz": 1,
+      ".py": 1
+    },
+    "flag_count": 240,
+    "printed": 146
+  },
+  {
+    "tool": "nmap-vulners",
+    "path": "Прочее/Semple-Интеграции/nmap-vulners",
+    "ecosystem": "nse",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "no-entry",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "екосистему визначено, точку входу ні",
+    "file_counts": {
+      ".py": 21,
+      ".lua": 11,
+      ".json": 5,
+      ".yml": 5,
+      ".nse": 3,
+      "<none>": 3,
+      ".md": 2,
+      ".txt": 2,
+      ".ps1": 1,
+      ".sh": 1,
+      ".xml": 1,
+      ".gif": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "nuclei-action",
+    "path": "Прочее/Semple-Интеграции/nuclei-action",
+    "ecosystem": "action",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "no-entry",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "екосистему визначено, точку входу ні",
+    "file_counts": {
+      ".js": 17,
+      ".yaml": 7,
+      ".map": 6,
+      ".md": 5,
+      ".lock": 1,
+      ".json": 1,
+      "<none>": 1,
+      ".yml": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "nuclei-burp-plugin",
+    "path": "Прочее/Semple-Интеграции/nuclei-burp-plugin",
+    "ecosystem": "data",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "data-only",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "корпус даних, програми немає",
+    "file_counts": {
+      ".java": 62,
+      ".png": 8,
+      ".yml": 5,
+      ".json": 3,
+      ".md": 2,
+      ".gif": 2,
+      "<none>": 1,
+      ".xml": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "nuclei-templates-labs",
+    "path": "Прочее/Semple-Интеграции/nuclei-templates-labs",
+    "ecosystem": "lab",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "no-entry",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "екосистему визначено, точку входу ні",
+    "file_counts": {
+      ".md": 27,
+      ".yml": 24,
+      "<none>": 10,
+      ".txt": 3,
+      ".java": 3,
+      ".py": 2,
+      ".js": 1,
+      ".yaml": 1,
+      ".zip": 1,
+      ".sql": 1,
+      ".php": 1,
+      ".xml": 1,
+      ".conf": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "pdtm",
+    "path": "Прочее/Semple-Интеграции/pdtm",
+    "ecosystem": "go",
+    "entry": "cmd/pdtm/pdtm.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 35,
+    "first_line": "pdtm is a simple and easy-to-use golang based tool for managing open source projects from ProjectDiscovery",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-config",
+        "origin": "help"
+      },
+      {
+        "name": "-bp",
+        "origin": "help"
+      },
+      {
+        "name": "-binary-path",
+        "origin": "help"
+      },
+      {
+        "name": "-i",
+        "origin": "help"
+      },
+      {
+        "name": "-install",
+        "origin": "help"
+      },
+      {
+        "name": "-ia",
+        "origin": "help"
+      },
+      {
+        "name": "-install-all",
+        "origin": "help"
+      },
+      {
+        "name": "-ip",
+        "origin": "help"
+      },
+      {
+        "name": "-install-path",
+        "origin": "help"
+      },
+      {
+        "name": "-igp",
+        "origin": "help"
+      },
+      {
+        "name": "-install-go-path",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "-update",
+        "origin": "help"
+      },
+      {
+        "name": "-ua",
+        "origin": "help"
+      },
+      {
+        "name": "-update-all",
+        "origin": "help"
+      },
+      {
+        "name": "-up",
+        "origin": "help"
+      },
+      {
+        "name": "-self-update",
+        "origin": "help"
+      },
+      {
+        "name": "-duc",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "-remove",
+        "origin": "help"
+      },
+      {
+        "name": "-ra",
+        "origin": "help"
+      },
+      {
+        "name": "-remove-all",
+        "origin": "help"
+      },
+      {
+        "name": "-rp",
+        "origin": "help"
+      },
+      {
+        "name": "-remove-path",
+        "origin": "help"
+      },
+      {
+        "name": "-sp",
+        "origin": "help"
+      },
+      {
+        "name": "-show-path",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "-verbose",
+        "origin": "help"
+      },
+      {
+        "name": "-silent",
+        "origin": "help"
+      },
+      {
+        "name": "-nc",
+        "origin": "help"
+      },
+      {
+        "name": "-no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-changelog",
+        "origin": "help"
+      },
+      {
+        "name": "-dc",
+        "origin": "help"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "binary-path",
+        "origin": "source"
+      },
+      {
+        "name": "install",
+        "origin": "source"
+      },
+      {
+        "name": "install-all",
+        "origin": "source"
+      },
+      {
+        "name": "install-path",
+        "origin": "source"
+      },
+      {
+        "name": "install-go-path",
+        "origin": "source"
+      },
+      {
+        "name": "update",
+        "origin": "source"
+      },
+      {
+        "name": "update-all",
+        "origin": "source"
+      },
+      {
+        "name": "remove",
+        "origin": "source"
+      },
+      {
+        "name": "remove-all",
+        "origin": "source"
+      },
+      {
+        "name": "remove-path",
+        "origin": "source"
+      },
+      {
+        "name": "show-path",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "no-color",
+        "origin": "source"
+      },
+      {
+        "name": "dc",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/pdtm/pdtm.go надрукував 35 рядків з бінарника",
+    "file_counts": {
+      ".go": 23,
+      ".yml": 8,
+      ".md": 4,
+      "<none>": 3,
+      ".yaml": 3,
+      ".mod": 1,
+      ".sum": 1
+    },
+    "flag_count": 53,
+    "printed": 35
+  },
+  {
+    "tool": "public-bugbounty-programs",
+    "path": "Прочее/Semple-Интеграции/public-bugbounty-programs",
+    "ecosystem": "go",
+    "entry": "cmd/bbp-scope/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 7,
+    "first_line": "Usage of /tmp/opencode/caps/bbp-scope:",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-exclude",
+        "origin": "help"
+      },
+      {
+        "name": "-out",
+        "origin": "help"
+      },
+      {
+        "name": "-repo",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "cmd/bbp-scope/main.go надрукував 7 рядків з бінарника",
+    "file_counts": {
+      ".go": 6,
+      ".yaml": 4,
+      "<none>": 3,
+      ".md": 2,
+      ".json": 2,
+      ".mod": 1,
+      ".sum": 1,
+      ".txt": 1,
+      ".yml": 1
+    },
+    "flag_count": 3,
+    "printed": 3
+  },
+  {
+    "tool": "retire.js",
+    "path": "Прочее/Semple-Интеграции/retire.js",
+    "ecosystem": "node",
+    "entry": "node/lib/retire.js",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "help упав, код 0: ",
+    "file_counts": {
+      ".ts": 39,
+      ".js": 36,
+      ".json": 30,
+      ".md": 16,
+      ".png": 13,
+      ".html": 8,
+      ".yml": 6,
+      "<none>": 5,
+      ".sh": 3,
+      ".pem": 2,
+      ".xsd": 2,
+      ".py": 1,
+      ".bat": 1,
+      ".1": 1,
+      ".2": 1,
+      ".1^headers^": 1,
+      ".2^headers^": 1,
+      ".mjs": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "scapy",
+    "path": "Прочее/Semple-Интеграции/scapy",
+    "ecosystem": "python",
+    "entry": "scapy/main.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "flag",
+    "exit_code": 0,
+    "help_lines": 6,
+    "first_line": "Usage: scapy.py [-c new_startup_file] [-p new_prestart_file] [-C] [-P] [-H]",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-c",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "-C",
+        "origin": "help"
+      },
+      {
+        "name": "-P",
+        "origin": "help"
+      },
+      {
+        "name": "-H",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "scapy/main.py надрукував 6 рядків з джерела",
+    "file_counts": {
+      ".py": 413,
+      ".uts": 223,
+      ".png": 45,
+      ".rst": 35,
+      ".gz": 24,
+      ".raw": 23,
+      ".svg": 20,
+      ".pcap": 16,
+      ".md": 13,
+      "<none>": 11,
+      ".sh": 11,
+      ".pem": 10,
+      ".yml": 9,
+      ".pyc": 8,
+      ".utsc": 7,
+      ".ipynb": 7,
+      ".ps1": 4,
+      ".bat": 3,
+      ".vim": 3,
+      ".txt": 3,
+      ".pdf": 3,
+      ".ini": 2,
+      ".der": 2,
+      ".rst_t": 2,
+      ".ldif": 2,
+      ".toml": 1,
+      ".in": 1,
+      ".pcapng": 1,
+      ".1": 1,
+      ".drawio": 1,
+      ".gif": 1,
+      ".jpg": 1,
+      ".typed": 1
+    },
+    "flag_count": 5,
+    "printed": 5
+  },
+  {
+    "tool": "spidersuite",
+    "path": "Прочее/Semple-Интеграции/spidersuite",
+    "ecosystem": "data",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "data-only",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "корпус даних, програми немає",
+    "file_counts": {
+      ".md": 3,
+      ".yml": 3,
+      ".png": 2,
+      "<none>": 1,
+      ".mp4": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "subfinder",
+    "path": "Прочее/Semple-Интеграции/subfinder",
+    "ecosystem": "go",
+    "entry": "cmd/subfinder/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 61,
+    "first_line": "Subfinder is a subdomain discovery tool that discovers subdomains for websites by using passive online sources.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "-domain",
+        "origin": "help"
+      },
+      {
+        "name": "-dL",
+        "origin": "help"
+      },
+      {
+        "name": "-list",
+        "origin": "help"
+      },
+      {
+        "name": "-s",
+        "origin": "help"
+      },
+      {
+        "name": "-sources",
+        "origin": "help"
+      },
+      {
+        "name": "-ls",
+        "origin": "help"
+      },
+      {
+        "name": "-recursive",
+        "origin": "help"
+      },
+      {
+        "name": "-all",
+        "origin": "help"
+      },
+      {
+        "name": "-es",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-sources",
+        "origin": "help"
+      },
+      {
+        "name": "-m",
+        "origin": "help"
+      },
+      {
+        "name": "-match",
+        "origin": "help"
+      },
+      {
+        "name": "-f",
+        "origin": "help"
+      },
+      {
+        "name": "-filter",
+        "origin": "help"
+      },
+      {
+        "name": "-match-regex",
+        "origin": "help"
+      },
+      {
+        "name": "-filter-regex",
+        "origin": "help"
+      },
+      {
+        "name": "-rl",
+        "origin": "help"
+      },
+      {
+        "name": "-rate-limit",
+        "origin": "help"
+      },
+      {
+        "name": "-rls",
+        "origin": "help"
+      },
+      {
+        "name": "-rate-limits",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-up",
+        "origin": "help"
+      },
+      {
+        "name": "-update",
+        "origin": "help"
+      },
+      {
+        "name": "-duc",
+        "origin": "help"
+      },
+      {
+        "name": "-disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-output",
+        "origin": "help"
+      },
+      {
+        "name": "-oJ",
+        "origin": "help"
+      },
+      {
+        "name": "-json",
+        "origin": "help"
+      },
+      {
+        "name": "-oD",
+        "origin": "help"
+      },
+      {
+        "name": "-output-dir",
+        "origin": "help"
+      },
+      {
+        "name": "-cs",
+        "origin": "help"
+      },
+      {
+        "name": "-collect-sources",
+        "origin": "help"
+      },
+      {
+        "name": "-oI",
+        "origin": "help"
+      },
+      {
+        "name": "-ip",
+        "origin": "help"
+      },
+      {
+        "name": "-active",
+        "origin": "help"
+      },
+      {
+        "name": "-config",
+        "origin": "help"
+      },
+      {
+        "name": "-pc",
+        "origin": "help"
+      },
+      {
+        "name": "-provider-config",
+        "origin": "help"
+      },
+      {
+        "name": "-r",
+        "origin": "help"
+      },
+      {
+        "name": "-rL",
+        "origin": "help"
+      },
+      {
+        "name": "-rlist",
+        "origin": "help"
+      },
+      {
+        "name": "-nW",
+        "origin": "help"
+      },
+      {
+        "name": "-proxy",
+        "origin": "help"
+      },
+      {
+        "name": "-ei",
+        "origin": "help"
+      },
+      {
+        "name": "-exclude-ip",
+        "origin": "help"
+      },
+      {
+        "name": "-mr",
+        "origin": "help"
+      },
+      {
+        "name": "-max-results",
+        "origin": "help"
+      },
+      {
+        "name": "-silent",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "-nc",
+        "origin": "help"
+      },
+      {
+        "name": "-no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-list-sources",
+        "origin": "help"
+      },
+      {
+        "name": "-stats",
+        "origin": "help"
+      },
+      {
+        "name": "-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-max-time",
+        "origin": "help"
+      },
+      {
+        "name": "-rsr",
+        "origin": "help"
+      },
+      {
+        "name": "-response-size-read",
+        "origin": "help"
+      },
+      {
+        "name": "domain",
+        "origin": "source"
+      },
+      {
+        "name": "list",
+        "origin": "source"
+      },
+      {
+        "name": "sources",
+        "origin": "source"
+      },
+      {
+        "name": "recursive",
+        "origin": "source"
+      },
+      {
+        "name": "all",
+        "origin": "source"
+      },
+      {
+        "name": "exclude-sources",
+        "origin": "source"
+      },
+      {
+        "name": "match",
+        "origin": "source"
+      },
+      {
+        "name": "filter",
+        "origin": "source"
+      },
+      {
+        "name": "match-regex",
+        "origin": "source"
+      },
+      {
+        "name": "filter-regex",
+        "origin": "source"
+      },
+      {
+        "name": "rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "rate-limits",
+        "origin": "source"
+      },
+      {
+        "name": "t",
+        "origin": "source"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "json",
+        "origin": "source"
+      },
+      {
+        "name": "output-dir",
+        "origin": "source"
+      },
+      {
+        "name": "collect-sources",
+        "origin": "source"
+      },
+      {
+        "name": "ip",
+        "origin": "source"
+      },
+      {
+        "name": "config",
+        "origin": "source"
+      },
+      {
+        "name": "provider-config",
+        "origin": "source"
+      },
+      {
+        "name": "r",
+        "origin": "source"
+      },
+      {
+        "name": "rlist",
+        "origin": "source"
+      },
+      {
+        "name": "active",
+        "origin": "source"
+      },
+      {
+        "name": "proxy",
+        "origin": "source"
+      },
+      {
+        "name": "exclude-ip",
+        "origin": "source"
+      },
+      {
+        "name": "max-results",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "version",
+        "origin": "source"
+      },
+      {
+        "name": "v",
+        "origin": "source"
+      },
+      {
+        "name": "no-color",
+        "origin": "source"
+      },
+      {
+        "name": "list-sources",
+        "origin": "source"
+      },
+      {
+        "name": "stats",
+        "origin": "source"
+      },
+      {
+        "name": "timeout",
+        "origin": "source"
+      },
+      {
+        "name": "max-time",
+        "origin": "source"
+      },
+      {
+        "name": "response-size-read",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/subfinder/main.go надрукував 61 рядків з бінарника",
+    "file_counts": {
+      ".go": 115,
+      ".yml": 10,
+      ".md": 7,
+      "<none>": 3,
+      ".png": 2,
+      ".mod": 1,
+      ".sum": 1
+    },
+    "flag_count": 96,
+    "printed": 60
+  },
+  {
+    "tool": "titus",
+    "path": "Прочее/Semple-Интеграции/titus",
+    "ecosystem": "go",
+    "entry": "cmd/titus/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 24,
+    "first_line": "Titus is a fast secrets scanner that finds credentials in code, files, and git history.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "-q",
+        "origin": "help"
+      },
+      {
+        "name": "--quiet",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "api-key",
+        "origin": "source"
+      },
+      {
+        "name": "token",
+        "origin": "source"
+      },
+      {
+        "name": "boards",
+        "origin": "source"
+      },
+      {
+        "name": "rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "guilds",
+        "origin": "source"
+      },
+      {
+        "name": "channels",
+        "origin": "source"
+      },
+      {
+        "name": "file",
+        "origin": "source"
+      },
+      {
+        "name": "type",
+        "origin": "source"
+      },
+      {
+        "name": "format",
+        "origin": "source"
+      },
+      {
+        "name": "score-timeout",
+        "origin": "source"
+      },
+      {
+        "name": "score-budget",
+        "origin": "source"
+      },
+      {
+        "name": "validate-workers",
+        "origin": "source"
+      },
+      {
+        "name": "datastore",
+        "origin": "source"
+      },
+      {
+        "name": "subdomain",
+        "origin": "source"
+      },
+      {
+        "name": "email",
+        "origin": "source"
+      },
+      {
+        "name": "group",
+        "origin": "source"
+      },
+      {
+        "name": "user",
+        "origin": "source"
+      },
+      {
+        "name": "url",
+        "origin": "source"
+      },
+      {
+        "name": "no-clone",
+        "origin": "source"
+      },
+      {
+        "name": "git",
+        "origin": "source"
+      },
+      {
+        "name": "jitter",
+        "origin": "source"
+      },
+      {
+        "name": "yes",
+        "origin": "source"
+      },
+      {
+        "name": "rules",
+        "origin": "source"
+      },
+      {
+        "name": "include",
+        "origin": "source"
+      },
+      {
+        "name": "exclude",
+        "origin": "source"
+      },
+      {
+        "name": "include-noisy",
+        "origin": "source"
+      },
+      {
+        "name": "rules-include",
+        "origin": "source"
+      },
+      {
+        "name": "rules-exclude",
+        "origin": "source"
+      },
+      {
+        "name": "ruleset",
+        "origin": "source"
+      },
+      {
+        "name": "refresh-token",
+        "origin": "source"
+      },
+      {
+        "name": "client-id",
+        "origin": "source"
+      },
+      {
+        "name": "tenant-id",
+        "origin": "source"
+      },
+      {
+        "name": "client-secret",
+        "origin": "source"
+      },
+      {
+        "name": "scope",
+        "origin": "source"
+      },
+      {
+        "name": "drive-id",
+        "origin": "source"
+      },
+      {
+        "name": "concurrency",
+        "origin": "source"
+      },
+      {
+        "name": "max-file-size",
+        "origin": "source"
+      },
+      {
+        "name": "extract",
+        "origin": "source"
+      },
+      {
+        "name": "page",
+        "origin": "source"
+      },
+      {
+        "name": "workspace",
+        "origin": "source"
+      },
+      {
+        "name": "teamspace",
+        "origin": "source"
+      },
+      {
+        "name": "org",
+        "origin": "source"
+      },
+      {
+        "name": "skip-forks",
+        "origin": "source"
+      },
+      {
+        "name": "username",
+        "origin": "source"
+      },
+      {
+        "name": "base-url",
+        "origin": "source"
+      },
+      {
+        "name": "spaces",
+        "origin": "source"
+      },
+      {
+        "name": "cookie",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "docker",
+        "origin": "source"
+      },
+      {
+        "name": "context-lines",
+        "origin": "source"
+      },
+      {
+        "name": "incremental",
+        "origin": "source"
+      },
+      {
+        "name": "validate",
+        "origin": "source"
+      },
+      {
+        "name": "store-blobs",
+        "origin": "source"
+      },
+      {
+        "name": "extract-max-size",
+        "origin": "source"
+      },
+      {
+        "name": "extract-max-total",
+        "origin": "source"
+      },
+      {
+        "name": "extract-max-depth",
+        "origin": "source"
+      },
+      {
+        "name": "sqlite-row-limit",
+        "origin": "source"
+      },
+      {
+        "name": "workers",
+        "origin": "source"
+      },
+      {
+        "name": "readers",
+        "origin": "source"
+      },
+      {
+        "name": "ignore",
+        "origin": "source"
+      },
+      {
+        "name": "accessibility",
+        "origin": "source"
+      },
+      {
+        "name": "score-scope",
+        "origin": "source"
+      },
+      {
+        "name": "asana-include-attachments",
+        "origin": "source"
+      },
+      {
+        "name": "asana-attachment-max-size",
+        "origin": "source"
+      },
+      {
+        "name": "asana-rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "asana-concurrency",
+        "origin": "source"
+      },
+      {
+        "name": "gdrive-rate-limit",
+        "origin": "source"
+      },
+      {
+        "name": "gdrive-concurrency",
+        "origin": "source"
+      },
+      {
+        "name": "instance",
+        "origin": "source"
+      },
+      {
+        "name": "password",
+        "origin": "source"
+      },
+      {
+        "name": "oauth-token",
+        "origin": "source"
+      },
+      {
+        "name": "tables",
+        "origin": "source"
+      },
+      {
+        "name": "allow-insecure-http",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "quiet",
+        "origin": "source"
+      },
+      {
+        "name": "projects",
+        "origin": "source"
+      },
+      {
+        "name": "allow-insecure",
+        "origin": "source"
+      },
+      {
+        "name": "site",
+        "origin": "source"
+      },
+      {
+        "name": "color",
+        "origin": "source"
+      },
+      {
+        "name": "show-rejected",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/titus/main.go надрукував 24 рядків з бінарника",
+    "file_counts": {
+      ".go": 397,
+      ".yml": 335,
+      ".yaml": 172,
+      ".java": 24,
+      ".json": 15,
+      ".md": 9,
+      "<none>": 8,
+      ".js": 8,
+      ".png": 7,
+      ".kts": 4,
+      ".txt": 4,
+      ".sh": 3,
+      ".jar": 3,
+      ".html": 3,
+      ".css": 3,
+      ".properties": 2,
+      ".bat": 1,
+      ".mod": 1,
+      ".sum": 1,
+      ".conf": 1,
+      ".wasm": 1,
+      ".csv": 1,
+      ".ipa": 1,
+      ".zip": 1,
+      ".pptx": 1,
+      ".crx": 1,
+      ".apk": 1,
+      ".py": 1,
+      ".xlsx": 1,
+      ".eml": 1,
+      ".xpi": 1,
+      ".docx": 1,
+      ".ear": 1,
+      ".db": 1,
+      ".pdf": 1,
+      ".rtf": 1,
+      ".odt": 1,
+      ".sqlite": 1,
+      ".ipynb": 1,
+      ".ods": 1,
+      ".gz": 1,
+      ".tar": 1,
+      ".tgz": 1,
+      ".war": 1,
+      ".odp": 1
+    },
+    "flag_count": 86,
+    "printed": 6
+  },
+  {
+    "tool": "vexor",
+    "path": "Прочее/Semple-Интеграции/vexor",
+    "ecosystem": "go",
+    "entry": "cmd/vexor/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 19,
+    "first_line": "Usage of /tmp/opencode/caps/vexor:",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-H",
+        "origin": "help"
+      },
+      {
+        "name": "-banner",
+        "origin": "help"
+      },
+      {
+        "name": "-marker",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "-p",
+        "origin": "help"
+      },
+      {
+        "name": "-t",
+        "origin": "help"
+      },
+      {
+        "name": "-timeout",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "help"
+      },
+      {
+        "name": "-version",
+        "origin": "help"
+      }
+    ],
+    "ecosystems_detail": "cmd/vexor/main.go надрукував 19 рядків з бінарника",
+    "file_counts": {
+      ".go": 23,
+      ".md": 11,
+      "<none>": 3,
+      ".py": 3,
+      ".yml": 3,
+      ".html": 2,
+      ".png": 2,
+      ".mod": 1,
+      ".sh": 1
+    },
+    "flag_count": 9,
+    "printed": 9
+  },
+  {
+    "tool": "vulncov",
+    "path": "Прочее/Semple-Интеграции/vulncov",
+    "ecosystem": "python",
+    "entry": "vulncov/main.py",
+    "is_copy": false,
+    "probe_status": "failed",
+    "launched_from": "flag",
+    "exit_code": 1,
+    "help_lines": 4,
+    "first_line": "Traceback (most recent call last):",
+    "error_head": "ImportError: attempted relative import with no known parent package",
+    "flags": [
+      {
+        "name": "-er",
+        "origin": "source"
+      },
+      {
+        "name": "--exclude_rule_regex",
+        "origin": "source"
+      },
+      {
+        "name": "-o",
+        "origin": "source"
+      },
+      {
+        "name": "--vulncov_output_file",
+        "origin": "source"
+      },
+      {
+        "name": "-lls",
+        "origin": "source"
+      },
+      {
+        "name": "--ollama_server",
+        "origin": "source"
+      },
+      {
+        "name": "-llm",
+        "origin": "source"
+      },
+      {
+        "name": "--ollama_model",
+        "origin": "source"
+      },
+      {
+        "name": "-q",
+        "origin": "source"
+      },
+      {
+        "name": "--quiet",
+        "origin": "source"
+      },
+      {
+        "name": "-p",
+        "origin": "source"
+      },
+      {
+        "name": "--pytest_folder",
+        "origin": "source"
+      },
+      {
+        "name": "-t",
+        "origin": "source"
+      },
+      {
+        "name": "--target_app",
+        "origin": "source"
+      },
+      {
+        "name": "-req",
+        "origin": "source"
+      },
+      {
+        "name": "--req_file",
+        "origin": "source"
+      },
+      {
+        "name": "-ve",
+        "origin": "source"
+      },
+      {
+        "name": "--venv_path",
+        "origin": "source"
+      },
+      {
+        "name": "-sc",
+        "origin": "source"
+      },
+      {
+        "name": "--semgrep_config",
+        "origin": "source"
+      },
+      {
+        "name": "-os",
+        "origin": "source"
+      },
+      {
+        "name": "--semgrep_output_file",
+        "origin": "source"
+      },
+      {
+        "name": "-oc",
+        "origin": "source"
+      },
+      {
+        "name": "--coverage_output_file",
+        "origin": "source"
+      },
+      {
+        "name": "-s",
+        "origin": "source"
+      },
+      {
+        "name": "--semgrep_json_file",
+        "origin": "source"
+      },
+      {
+        "name": "-c",
+        "origin": "source"
+      },
+      {
+        "name": "--coverage_json_file",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "help упав, код 1: ImportError: attempted relative import with no known parent package",
+    "file_counts": {
+      ".py": 16,
+      ".pyc": 11,
+      ".txt": 3,
+      ".json": 3,
+      "<none>": 1,
+      ".md": 1,
+      ".png": 1,
+      ".cfg": 1
+    },
+    "flag_count": 28,
+    "printed": 0
+  },
+  {
+    "tool": "vulnscout",
+    "path": "Прочее/Semple-Интеграции/vulnscout",
+    "ecosystem": "webapp",
+    "entry": null,
+    "is_copy": false,
+    "probe_status": "no-entry",
+    "launched_from": "none",
+    "exit_code": null,
+    "help_lines": 0,
+    "first_line": "",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "екосистему визначено, точку входу ні",
+    "file_counts": {
+      ".py": 271,
+      ".tsx": 84,
+      ".ts": 61,
+      ".json": 36,
+      ".md": 26,
+      "<none>": 12,
+      ".sh": 9,
+      ".adoc": 4,
+      ".txt": 4,
+      ".js": 3,
+      ".svg": 3,
+      ".yml": 3,
+      ".ini": 2,
+      ".yaml": 2,
+      ".png": 2,
+      ".csv": 2,
+      ".jpeg": 2,
+      ".0-only": 1,
+      ".pyi": 1,
+      ".db": 1,
+      ".html": 1,
+      ".cjs": 1,
+      ".css": 1,
+      ".zst": 1,
+      ".mako": 1,
+      ".rst": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "vulnx",
+    "path": "Прочее/Semple-Интеграции/vulnx",
+    "ecosystem": "go",
+    "entry": "cmd/vulnx/main.go",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "binary",
+    "exit_code": 0,
+    "help_lines": 43,
+    "first_line": "vulnx — the swiss army knife for vulnerability intel",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-d",
+        "origin": "help"
+      },
+      {
+        "name": "--debug",
+        "origin": "help"
+      },
+      {
+        "name": "--debug-req",
+        "origin": "help"
+      },
+      {
+        "name": "--debug-resp",
+        "origin": "help"
+      },
+      {
+        "name": "--disable-update-check",
+        "origin": "help"
+      },
+      {
+        "name": "-h",
+        "origin": "help"
+      },
+      {
+        "name": "--help",
+        "origin": "help"
+      },
+      {
+        "name": "-j",
+        "origin": "help"
+      },
+      {
+        "name": "--json",
+        "origin": "help"
+      },
+      {
+        "name": "--no-color",
+        "origin": "help"
+      },
+      {
+        "name": "-o",
+        "origin": "help"
+      },
+      {
+        "name": "--output",
+        "origin": "help"
+      },
+      {
+        "name": "--proxy",
+        "origin": "help"
+      },
+      {
+        "name": "--silent",
+        "origin": "help"
+      },
+      {
+        "name": "--timeout",
+        "origin": "help"
+      },
+      {
+        "name": "--update",
+        "origin": "help"
+      },
+      {
+        "name": "-v",
+        "origin": "help"
+      },
+      {
+        "name": "--verbose",
+        "origin": "help"
+      },
+      {
+        "name": "fields",
+        "origin": "source"
+      },
+      {
+        "name": "facet-size",
+        "origin": "source"
+      },
+      {
+        "name": "query",
+        "origin": "source"
+      },
+      {
+        "name": "limit",
+        "origin": "source"
+      },
+      {
+        "name": "offset",
+        "origin": "source"
+      },
+      {
+        "name": "sort-asc",
+        "origin": "source"
+      },
+      {
+        "name": "sort-desc",
+        "origin": "source"
+      },
+      {
+        "name": "term-facets",
+        "origin": "source"
+      },
+      {
+        "name": "range-facets",
+        "origin": "source"
+      },
+      {
+        "name": "highlight",
+        "origin": "source"
+      },
+      {
+        "name": "detailed",
+        "origin": "source"
+      },
+      {
+        "name": "product",
+        "origin": "source"
+      },
+      {
+        "name": "vendor",
+        "origin": "source"
+      },
+      {
+        "name": "severity",
+        "origin": "source"
+      },
+      {
+        "name": "vuln-status",
+        "origin": "source"
+      },
+      {
+        "name": "vuln-age",
+        "origin": "source"
+      },
+      {
+        "name": "kev",
+        "origin": "source"
+      },
+      {
+        "name": "template",
+        "origin": "source"
+      },
+      {
+        "name": "poc",
+        "origin": "source"
+      },
+      {
+        "name": "hackerone",
+        "origin": "source"
+      },
+      {
+        "name": "remote-exploit",
+        "origin": "source"
+      },
+      {
+        "name": "cvss-score",
+        "origin": "source"
+      },
+      {
+        "name": "epss-score",
+        "origin": "source"
+      },
+      {
+        "name": "tags",
+        "origin": "source"
+      },
+      {
+        "name": "vuln-type",
+        "origin": "source"
+      },
+      {
+        "name": "disable-update-check",
+        "origin": "source"
+      },
+      {
+        "name": "file",
+        "origin": "source"
+      },
+      {
+        "name": "api-key",
+        "origin": "source"
+      },
+      {
+        "name": "test",
+        "origin": "source"
+      },
+      {
+        "name": "debug",
+        "origin": "source"
+      },
+      {
+        "name": "verbose",
+        "origin": "source"
+      },
+      {
+        "name": "proxy",
+        "origin": "source"
+      },
+      {
+        "name": "timeout",
+        "origin": "source"
+      },
+      {
+        "name": "debug-req",
+        "origin": "source"
+      },
+      {
+        "name": "debug-resp",
+        "origin": "source"
+      },
+      {
+        "name": "json",
+        "origin": "source"
+      },
+      {
+        "name": "output",
+        "origin": "source"
+      },
+      {
+        "name": "silent",
+        "origin": "source"
+      },
+      {
+        "name": "no-color",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "cmd/vulnx/main.go надрукував 43 рядків з бінарника",
+    "file_counts": {
+      ".go": 37,
+      ".yml": 10,
+      ".md": 7,
+      "<none>": 5,
+      ".sh": 4,
+      ".toml": 1,
+      ".yaml": 1,
+      ".mod": 1,
+      ".sum": 1,
+      ".png": 1,
+      ".txt": 1,
+      ".json": 1
+    },
+    "flag_count": 57,
+    "printed": 18
+  },
+  {
+    "tool": "web-vulnerability",
+    "path": "Прочее/Semple-Интеграции/web-vulnerability",
+    "ecosystem": "python",
+    "entry": "web-vulnerability.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 8,
+    "first_line": "Discovered 0 URLs on https://www.example.com:",
+    "error_head": "",
+    "flags": [],
+    "ecosystems_detail": "web-vulnerability.py надрукував 8 рядків з джерела",
+    "file_counts": {
+      ".md": 2,
+      ".py": 1,
+      "<none>": 1,
+      ".yml": 1
+    },
+    "flag_count": 0,
+    "printed": 0
+  },
+  {
+    "tool": "xsser",
+    "path": "Прочее/Semple-Интеграции/xsser",
+    "ecosystem": "python",
+    "entry": "core/main.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 7,
+    "first_line": "[Error] Cannot import lib: pycurl.",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-headless",
+        "origin": "source"
+      },
+      {
+        "name": "-no-remote",
+        "origin": "source"
+      },
+      {
+        "name": "-no-first-run",
+        "origin": "source"
+      },
+      {
+        "name": "-app",
+        "origin": "source"
+      },
+      {
+        "name": "-safe-mode",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "core/main.py надрукував 7 рядків з джерела",
+    "file_counts": {
+      ".py": 31,
+      "<none>": 17,
+      ".txt": 11,
+      ".pyc": 8,
+      ".md": 5,
+      ".png": 4,
+      ".toml": 1,
+      ".in": 1,
+      ".ui": 1,
+      ".desktop": 1,
+      ".jpg": 1,
+      ".dat": 1,
+      ".wrapper": 1
+    },
+    "flag_count": 5,
+    "printed": 0
+  },
+  {
+    "tool": "xsstrike",
+    "path": "Прочее/Semple-Интеграции/xsstrike",
+    "ecosystem": "python",
+    "entry": "xsstrike.py",
+    "is_copy": false,
+    "probe_status": "ran",
+    "launched_from": "source",
+    "exit_code": 0,
+    "help_lines": 27,
+    "first_line": "\u001b[91m",
+    "error_head": "",
+    "flags": [
+      {
+        "name": "-m",
+        "origin": "help"
+      },
+      {
+        "name": "--break-system-packages",
+        "origin": "help"
+      },
+      {
+        "name": "-u",
+        "origin": "source"
+      },
+      {
+        "name": "--url",
+        "origin": "source"
+      },
+      {
+        "name": "--data",
+        "origin": "source"
+      },
+      {
+        "name": "-e",
+        "origin": "source"
+      },
+      {
+        "name": "--encode",
+        "origin": "source"
+      },
+      {
+        "name": "--fuzzer",
+        "origin": "source"
+      },
+      {
+        "name": "--update",
+        "origin": "source"
+      },
+      {
+        "name": "--timeout",
+        "origin": "source"
+      },
+      {
+        "name": "--proxy",
+        "origin": "source"
+      },
+      {
+        "name": "--crawl",
+        "origin": "source"
+      },
+      {
+        "name": "--json",
+        "origin": "source"
+      },
+      {
+        "name": "--path",
+        "origin": "source"
+      },
+      {
+        "name": "--seeds",
+        "origin": "source"
+      },
+      {
+        "name": "-f",
+        "origin": "source"
+      },
+      {
+        "name": "--file",
+        "origin": "source"
+      },
+      {
+        "name": "-l",
+        "origin": "source"
+      },
+      {
+        "name": "--level",
+        "origin": "source"
+      },
+      {
+        "name": "--headers",
+        "origin": "source"
+      },
+      {
+        "name": "-t",
+        "origin": "source"
+      },
+      {
+        "name": "--threads",
+        "origin": "source"
+      },
+      {
+        "name": "-d",
+        "origin": "source"
+      },
+      {
+        "name": "--delay",
+        "origin": "source"
+      },
+      {
+        "name": "--skip",
+        "origin": "source"
+      },
+      {
+        "name": "--skip-dom",
+        "origin": "source"
+      },
+      {
+        "name": "--blind",
+        "origin": "source"
+      },
+      {
+        "name": "--console-log-level",
+        "origin": "source"
+      },
+      {
+        "name": "--file-log-level",
+        "origin": "source"
+      },
+      {
+        "name": "--log-file",
+        "origin": "source"
+      }
+    ],
+    "ecosystems_detail": "xsstrike.py надрукував 27 рядків з джерела",
+    "file_counts": {
+      ".py": 27,
+      "<none>": 15,
+      ".md": 5,
+      ".pyc": 4,
+      ".yml": 2,
+      ".json": 2,
+      ".txt": 1,
+      ".html": 1,
+      ".install": 1,
+      ".conf": 1,
+      ".patch": 1,
+      ".sh": 1
+    },
+    "flag_count": 30,
+    "printed": 2
+  }
+]
