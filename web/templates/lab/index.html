@@ -5555,9 +5555,9 @@ function activeScanRequest() {
     max_pages: number('scanner-active-max-pages'),
     max_depth: number('scanner-active-max-depth', 2),
     concurrency: number('scanner-active-concurrency', 8),
-    delay_ms: number('scanner-active-delay'),
-    blind_delay_ms: number('scanner-active-blind-delay'),
-    timeout_ms: number('scanner-active-timeout', 15000),
+    delay_ms: Math.max(0, number('scanner-active-delay', 0)),
+    blind_delay_ms: Math.max(0, number('scanner-active-blind-delay', 0)),
+    timeout_ms: Math.max(0, number('scanner-active-timeout', 15000)),
     same_origin: Boolean($('scanner-active-same-origin')?.checked),
     follow_redirects: Boolean($('scanner-active-follow-redirects')?.checked),
     // The two wordlists travel as the text they are. An empty textarea sends an
@@ -5599,19 +5599,46 @@ function activeScanStats(progress = {}, report = null) {
   return rows;
 }
 
+let activeScanTicker = null;
+function stopActiveScanTicker() {
+  if (activeScanTicker) {
+    window.clearInterval(activeScanTicker);
+    activeScanTicker = null;
+  }
+}
+
+function startActiveScanTicker() {
+  stopActiveScanTicker();
+  activeScanTicker = window.setInterval(() => {
+    if (!activeScanRun?.startedAt || ['completed', 'failed', 'cancelled'].includes(activeScanRun?.state)) {
+      stopActiveScanTicker();
+      return;
+    }
+    const node = $('scanner-active-progress-elapsed');
+    if (node && $('scanner-active-progress') && !$('scanner-active-progress').hidden) {
+      const elapsed = Math.floor((Date.now() - activeScanRun.startedAt) / 1000);
+      node.textContent = `${Math.floor(elapsed / 60)}:${String(Math.floor(elapsed % 60)).padStart(2, '0')}`;
+    }
+  }, 250);
+}
+
 function applyActiveScanProgress(progress = {}, report = null, {label, note} = {}) {
   const state = activeScanRun || {};
+  const isTerminal = ['completed', 'failed', 'cancelled'].includes(progress.phase || state.state);
+  if (isTerminal) {
+    stopActiveScanTicker();
+  }
   setScanProgress({
     prefix: 'scanner-active-progress',
     phase: progress.phase || state.state || 'running',
     percent: activeScanPercent(progress),
-    elapsed: state.startedAt ? Math.round((Date.now() - state.startedAt) / 1000) : undefined,
+    elapsed: state.startedAt ? Math.floor((Date.now() - state.startedAt) / 1000) : undefined,
     stats: activeScanStats(progress, report),
     label,
     // The panel's own note line is where an operator looks after a failure, so the
     // reason the engine gave is written there too and not only in the status line.
     note,
-    done: ['completed', 'failed', 'cancelled'].includes(progress.phase || state.state),
+    done: isTerminal,
     failed: (progress.phase || state.state) === 'failed'
   });
 }
@@ -5826,6 +5853,7 @@ function setScannerStatusLine(text) {
 // the page is unloading — and leaving the subscription open in any of them keeps
 // a table painting for a run nobody is watching.
 function closeActiveScanStream() {
+  stopActiveScanTicker();
   if (activeScanStream) {
     activeScanStream.close();
     activeScanStream = null;
@@ -5864,16 +5892,21 @@ function openActiveScanStream(jobId) {
     activeScanRun.state = progress.phase || activeScanRun.state;
     activeScanRun.progress = progress;
     applyActiveScanProgress(progress, null);
+    refreshHistoryDuringScan();
   });
   // One proven row, appended the moment it was proven. This is the event that
   // makes the table live: everything else the stream carries is a counter.
   source.addEventListener('finding', event => {
     applyActiveScanLiveFinding(JSON.parse(event.data));
+    refreshHistoryDuringScan();
   });
   source.addEventListener('done', event => {
     // The terminal snapshot carries the report with the proofs and the tier
     // upgrades the live rows could not have, so it replaces them wholesale.
     finishActiveScan(JSON.parse(event.data));
+    if ($('history')?.classList.contains('active')) {
+      loadHistoryWithFilters();
+    }
   });
   source.addEventListener('error', () => {
     // EventSource reports a closed stream and a transport failure the same way,
@@ -5951,6 +5984,7 @@ function finishActiveScan(answer) {
     applyActiveScanProgress(activeScanRun.progress, answer.result || null);
     return false;
   }
+  stopActiveScanTicker();
   closeActiveScanStream();
   // The report block was hidden while the run filled the table; it comes back with
   // the finished run, so the page ends in the same shape it had before the run
@@ -5978,6 +6012,7 @@ async function startActiveScan() {
   }
   activeScanRun = {state: 'queued', startedAt: Date.now(), progress: {}, jobId: null, url: request.url};
   setScannerView('active');
+  startActiveScanTicker();
   applyActiveScanProgress({phase: 'queued'}, null);
   setScannerStatusLine(tr('scanner.activeStarting'));
   try {
@@ -6012,11 +6047,24 @@ async function pollActiveScan() {
   const jobId = activeScanRun?.jobId;
   if (!jobId) return;
   try {
-    const answer = await readJSON(await fetch(`/api/scanner/active/jobs/${encodeURIComponent(jobId)}`));
+    const res = await fetch(`/api/scanner/active/jobs/${encodeURIComponent(jobId)}`);
+    if (res.status === 404) {
+      try { localStorage.removeItem('rr-active-scan-job'); } catch (e) {}
+      stopActiveScanTicker();
+      closeActiveScanStream();
+      return;
+    }
+    const answer = await readJSON(res);
     if (!answer) return;
     if (finishActiveScan(answer)) return;
     window.setTimeout(pollActiveScan, 1000);
   } catch (error) {
+    if (error.status === 404) {
+      try { localStorage.removeItem('rr-active-scan-job'); } catch (e) {}
+      stopActiveScanTicker();
+      closeActiveScanStream();
+      return;
+    }
     setScannerStatusLine(`${tr('scanner.activeFailed')} ${error?.message || error}`);
     showToast(tr('scanner.activeFailedShort'), String(error?.message || error), 'error');
   }
@@ -6031,6 +6079,9 @@ async function cancelActiveScan() {
       method: 'POST',
       headers: {'Content-Type': 'application/json'}
     }));
+    if ($('history')?.classList.contains('active')) {
+      loadHistoryWithFilters();
+    }
   } finally {
     // Whatever is watching the run keeps watching it: a stop that lands between
     // two events is still observed by the next one, and the run ends as
@@ -6042,19 +6093,42 @@ async function cancelActiveScan() {
 
 // restoreActiveScanRun re-attaches the browser to a run that is still alive after a
 // reload. It never starts anything by itself.
-function restoreActiveScanRun() {
+async function restoreActiveScanRun() {
   let jobId = '';
   try { jobId = localStorage.getItem('rr-active-scan-job') || ''; } catch (error) { return; }
   if (!jobId) return;
-  // The target is read from the field because the stream's backlog carries rows
-  // but not the URL the operator typed, and a restored run that shows rows with
-  // no target named would leave them unattributed.
-  const url = ($('scanner-url')?.value || '').trim();
-  activeScanRun = {state: 'running', startedAt: Date.now(), progress: {}, jobId, url};
+
+  let snapshot = null;
+  try {
+    const response = await fetch(`/api/scanner/active/jobs/${encodeURIComponent(jobId)}`, {cache: 'no-store'});
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    snapshot = await response.json();
+  } catch (error) {
+    try { localStorage.removeItem('rr-active-scan-job'); } catch (e) {}
+    return;
+  }
+  if (!snapshot || !snapshot.state) {
+    try { localStorage.removeItem('rr-active-scan-job'); } catch (e) {}
+    return;
+  }
+  if (['completed', 'failed', 'cancelled'].includes(snapshot.state)) {
+    try { localStorage.removeItem('rr-active-scan-job'); } catch (e) {}
+    if (snapshot.result) {
+      renderActiveScan({
+        url: snapshot.result.target || '',
+        result: snapshot.result,
+        state: snapshot.state,
+        error: snapshot.error
+      });
+    }
+    return;
+  }
+
+  const url = ($('scanner-url')?.value || snapshot.url || '').trim();
+  activeScanRun = {state: snapshot.state || 'running', startedAt: Date.now(), progress: snapshot.progress || {}, jobId, url};
   setScannerView('active', {persist: false});
-  applyActiveScanProgress({phase: 'running'});
-  // Attaching replays the run's backlog, so a reload in the middle of a scan
-  // brings back the rows already proved instead of an empty table.
+  startActiveScanTicker();
+  applyActiveScanProgress(activeScanRun.progress);
   if (!openActiveScanStream(jobId)) pollActiveScan();
 }
 
@@ -7872,7 +7946,7 @@ function followScannerJob(jobId, {onFinish, onError} = {}) {
       setScanProgress({
         phase: progress.phase || 'running',
         percent: scannerRun.percent,
-        elapsed: typeof progress.elapsed_seconds === 'number' ? progress.elapsed_seconds : (Date.now() - started) / 1000,
+        elapsed: (Date.now() - started) / 1000,
         stats,
         note: scanProgressNote(progress)
       });

@@ -213,9 +213,32 @@ def _active_scan_request(payload):
     # be a run that holds a stranger's connection open for a length nobody chose.
     # `max_depth` legitimately takes -1 for "no limit", which is why this check
     # lives here and not in `_active_scan_int`.
+    if request["delay_ms"] < 0:
+        raise ValueError("delay_ms must not be negative")
     if request["blind_delay_ms"] < 0:
         raise ValueError("blind_delay_ms must not be negative")
+    if request["timeout_ms"] < 0:
+        raise ValueError("timeout_ms must not be negative")
     return request
+
+
+def _active_done_payload(chunk):
+    """Read the terminal state out of one SSE frame, or None if it has none.
+
+    The frame is forwarded to the browser byte for byte; this only reads it, so a
+    malformed frame settles nothing instead of raising inside the stream.
+    """
+    for line in chunk.split(b"\n"):
+        text = line.strip()
+        if not text.startswith(b"data:"):
+            continue
+        try:
+            payload = json.loads(text[5:].strip().decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return None
+        if isinstance(payload, dict) and payload.get("state"):
+            return payload
+    return None
 
 
 @csrf_exempt
@@ -242,6 +265,12 @@ def scanner_active_job_stream(request, job_id):
 
     def stream():
         started = time.monotonic()
+        settled = False
+        frame = b""
+        is_done_frame = False
+        last_persist_at = time.monotonic()
+        job = _active_scan_job(job_id)
+        project = job.project if job else getattr(request, "active_project", None)
         try:
             while time.monotonic() - started < SSE_MAX_LIFETIME:
                 try:
@@ -254,12 +283,39 @@ def scanner_active_job_stream(request, job_id):
                     continue
                 if not chunk:
                     break
+                frame += chunk
+                if b"event: done" in frame:
+                    is_done_frame = True
+                if not chunk.strip():
+                    if is_done_frame and not settled:
+                        settled = True
+                        payload = _active_done_payload(frame)
+                        if isinstance(payload, dict):
+                            _apply_active_scan_outcome(
+                                job_id,
+                                payload.get("state", "completed"),
+                                payload.get("result"),
+                            )
+                        else:
+                            _persist_tool_history(project)
+                            _settle_active_scan_job(job_id, status="completed", ingested=False)
+                        is_done_frame = False
+                    elif not settled:
+                        now = time.monotonic()
+                        if now - last_persist_at >= 3.0:
+                            last_persist_at = now
+                            _persist_tool_history(project)
+                    frame = b""
                 yield chunk
         except (OSError, ValueError):
             # The browser went away mid-stream; releasing the socket is the point.
             return
         finally:
             response.close()
+            if not settled:
+                job_cur = _active_scan_job(job_id)
+                if job_cur and not job_cur.settled:
+                    _persist_tool_history(job_cur.project or getattr(request, "active_project", None))
 
     result = StreamingHttpResponse(stream(), content_type="text/event-stream")
     result["Cache-Control"] = "no-cache"
@@ -418,6 +474,11 @@ def scanner_active_jobs(request, job_id=None, action=None):
         if request.method not in {"POST", "DELETE"}:
             return JsonResponse({"error": "method not allowed"}, status=405)
         status, result = call_engine(f"{ENGINE_ACTIVE_JOBS_PATH}/{job_id}/cancel", {})
+        if status in (200, 202):
+            job = _active_scan_job(job_id)
+            project = job.project if job else getattr(request, "active_project", None)
+            _persist_tool_history(project)
+            _settle_active_scan_job(job_id, status="cancelled", ingested=False)
         return JsonResponse(result, status=status)
 
     if request.method == "GET":

@@ -99,22 +99,83 @@ def cancel_active_agent_requests():
     return len(controls)
 
 
-def _read_provider_response(request, timeout, control):
+def _socks5_connect(proxy_address, target_host, target_port, timeout=None):
+    """Establish a TCP socket via SOCKS5 using remote domain name resolution.
+
+    Using ATYP=3 (domain name) guarantees that the target hostname is resolved
+    remotely by the SOCKS5 proxy (Tor or any other proxy), preventing local DNS leaks.
+    """
+    proxy_address = str(proxy_address or "").strip()
+    if not proxy_address or ":" not in proxy_address:
+        raise ValueError(f"invalid SOCKS5 proxy address: {proxy_address!r}")
+    proxy_host, proxy_port_text = proxy_address.rsplit(":", 1)
+    proxy_port = int(proxy_port_text)
+    sock = socket.create_connection((proxy_host.strip("[]"), proxy_port), timeout=timeout)
+    # 1. Version identifier / method selection message (VER=5, NMETHODS=1, METHOD 0=NO_AUTH)
+    sock.sendall(b"\x05\x01\x00")
+    auth_resp = sock.recv(2)
+    if len(auth_resp) < 2 or auth_resp[0] != 5 or auth_resp[1] != 0:
+        sock.close()
+        raise ConnectionError(f"SOCKS5 proxy authentication rejected (response: {auth_resp!r})")
+    # 2. SOCKS5 request (VER=5, CMD=1, RSV=0, ATYP=3 domainname)
+    host_bytes = target_host.encode("utf-8")
+    req = b"\x05\x01\x00\x03" + bytes([len(host_bytes)]) + host_bytes + int(target_port).to_bytes(2, "big")
+    sock.sendall(req)
+    reply = sock.recv(4)
+    if len(reply) < 4 or reply[0] != 5:
+        sock.close()
+        raise ConnectionError(f"Invalid SOCKS5 reply from proxy: {reply!r}")
+    if reply[1] != 0:
+        sock.close()
+        raise ConnectionError(f"SOCKS5 connect refused by proxy with status {reply[1]}")
+    atyp = reply[3]
+    if atyp == 1:
+        sock.recv(6)
+    elif atyp == 3:
+        addr_len = sock.recv(1)
+        if addr_len:
+            sock.recv(addr_len[0] + 2)
+    elif atyp == 4:
+        sock.recv(18)
+    return sock
+
+
+def _read_provider_response(request, timeout, control, proxy_address=None):
     parsed = urlsplit(request.full_url)
     target = urlunsplit(("", "", parsed.path or "/", parsed.query, ""))
-    if parsed.scheme == "https":
-        connection = http.client.HTTPSConnection(
-            parsed.hostname,
-            parsed.port,
-            timeout=timeout,
-            context=ssl.create_default_context(),
-        )
+    proxy_address = str(proxy_address or "").strip()
+    if proxy_address and not _is_loopback(parsed.hostname):
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        sock = _socks5_connect(proxy_address, parsed.hostname, port, timeout=timeout)
+        if parsed.scheme == "https":
+            connection = http.client.HTTPSConnection(
+                parsed.hostname,
+                parsed.port,
+                timeout=timeout,
+                context=ssl.create_default_context(),
+            )
+            connection.sock = connection._context.wrap_socket(sock, server_hostname=parsed.hostname)
+        else:
+            connection = http.client.HTTPConnection(
+                parsed.hostname,
+                parsed.port,
+                timeout=timeout,
+            )
+            connection.sock = sock
     else:
-        connection = http.client.HTTPConnection(
-            parsed.hostname,
-            parsed.port,
-            timeout=timeout,
-        )
+        if parsed.scheme == "https":
+            connection = http.client.HTTPSConnection(
+                parsed.hostname,
+                parsed.port,
+                timeout=timeout,
+                context=ssl.create_default_context(),
+            )
+        else:
+            connection = http.client.HTTPConnection(
+                parsed.hostname,
+                parsed.port,
+                timeout=timeout,
+            )
     control.attach(connection)
     try:
         connection.request(
@@ -367,13 +428,14 @@ class OpenAICompatibleProvider:
 
     name = "openai_compatible"
 
-    def __init__(self, endpoint=None, model=None, api_key=None, timeout=None, retry_attempts=None, retry_base_delay=0):
+    def __init__(self, endpoint=None, model=None, api_key=None, timeout=None, retry_attempts=None, retry_base_delay=0, proxy_address=None):
         self.endpoint = endpoint or os.environ.get("AGENT_LLM_ENDPOINT", "").strip()
         self.model = model or os.environ.get("AGENT_LLM_MODEL", "").strip()
         self.api_key = api_key or os.environ.get("AGENT_LLM_API_KEY", "").strip()
         self.timeout = None if timeout is None else float(timeout)
         self.retry_attempts = None if retry_attempts is None else max(0, int(retry_attempts))
         self.retry_base_delay = max(0, float(retry_base_delay))
+        self.proxy_address = str(proxy_address or "").strip()
 
     def _request_json(self, request, cancel_event=None):
         control = _register_provider_request(_ProviderRequestControl())
@@ -384,7 +446,7 @@ class OpenAICompatibleProvider:
             while self.retry_attempts is None or attempt <= self.retry_attempts:
                 control.raise_if_cancelled()
                 try:
-                    return _read_provider_response(request, self.timeout, control)
+                    return _read_provider_response(request, self.timeout, control, proxy_address=self.proxy_address)
                 except _ProviderHTTPError as error:
                     if error.status not in (429, 503) or (self.retry_attempts is not None and attempt >= self.retry_attempts):
                         detail = error.body.decode("utf-8", errors="replace")
@@ -524,6 +586,7 @@ def get_agent_provider(name="ollama", **config):
             model=model,
             api_key=api_key,
             timeout=config.get("timeout"),
+            proxy_address=config.get("proxy_address"),
         )
     raise AgentProviderError(f"unknown provider: {name}")
 

@@ -4109,7 +4109,8 @@ def scanner_nuclei_job_stream(request, job_id):
         started = time.monotonic()
         settled = False
         frame = b""
-        pending_done = b""
+        is_done_frame = False
+        last_persist_at = time.monotonic()
         try:
             while time.monotonic() - started < SSE_MAX_LIFETIME:
                 try:
@@ -4135,7 +4136,7 @@ def scanner_nuclei_job_stream(request, job_id):
                 # the browser still sees the frame the moment it is complete.
                 frame += chunk
                 if b"event: done" in frame:
-                    pending_done = pending_done or frame
+                    is_done_frame = True
                 if not chunk.strip():
                     # A blank line ENDS an SSE frame — it is the terminator, not
                     # filler, and an `EventSource` dispatches nothing without it.
@@ -4150,10 +4151,15 @@ def scanner_nuclei_job_stream(request, job_id):
                     #
                     # `traffic_stream` in this same file is the working reference:
                     # it forwards every line, terminator included.
-                    if pending_done:
+                    if is_done_frame and not settled:
                         settled = True
-                        _settle_nuclei_job(job_id, _nuclei_done_payload(pending_done))
-                        pending_done = b""
+                        _settle_nuclei_job(job_id, _nuclei_done_payload(frame))
+                        is_done_frame = False
+                    elif not settled:
+                        now = time.monotonic()
+                        if now - last_persist_at >= 3.0:
+                            last_persist_at = now
+                            _persist_tool_history(getattr(request, "active_project", None))
                     frame = b""
                 yield chunk
         except (OSError, ValueError):
@@ -4532,6 +4538,11 @@ def agent_chat(request):
         active_project = getattr(request, "active_project", None)
         try:
             with _outbound_runtime().operation("ai", active_project.id if active_project else None) as operation:
+                route_status, route_data = call_engine_get("/route")
+                if route_status == 200 and isinstance(route_data, dict):
+                    proxy_address = str(route_data.get("address") or "").strip()
+                    if proxy_address:
+                        config["proxy_address"] = proxy_address
                 result = generate_agent_chat(
                     messages,
                     provider=provider,
@@ -6011,12 +6022,17 @@ def _workflow_tool_runner(node_type, params, context):
             raise WorkflowCancelled()
         prompt = str(params.get("prompt") or "Analyze the attached QA evidence.")
         messages = [{"role": "user", "content": prompt}]
+        proxy_address = ""
+        route_status, route_data = call_engine_get("/route")
+        if route_status == 200 and isinstance(route_data, dict):
+            proxy_address = str(route_data.get("address") or "").strip()
         try:
             result = generate_agent_chat(
                 messages,
                 provider=str(params.get("provider", "ollama")),
                 endpoint=params.get("endpoint"),
                 model=params.get("model"),
+                proxy_address=proxy_address,
                 context={"attached_evidence": {"workflow_input": input_value}},
                 cancel_event=(
                     context["outbound_operation"].cancelled

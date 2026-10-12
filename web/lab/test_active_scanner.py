@@ -569,6 +569,85 @@ class ActiveScannerGatewayTests(TestCase):
         response = self.client.get("/api/scanner/active/jobs")
         self.assertEqual(response.status_code, 400)
 
+    def test_cancel_persists_tool_history_and_settles_job(self):
+        from lab import active_scanner_views
+
+        active_scanner_views._remember_active_scan_job(
+            "active-c1", self.project, "http://target.test/"
+        )
+        with mock.patch(
+            "lab.active_scanner_views.call_engine",
+            return_value=(200, {"job_id": "active-c1", "state": "cancelled"}),
+        ), mock.patch("lab.active_scanner_views._persist_tool_history") as persist:
+            response = self.client.post("/api/scanner/active/jobs/active-c1/cancel")
+
+        self.assertEqual(response.status_code, 200)
+        persist.assert_called_once_with(self.project)
+        job = ActiveScanJob.objects.get(job_id="active-c1")
+        self.assertTrue(job.settled)
+        self.assertEqual(job.status, "cancelled")
+
+    def test_stream_settles_and_persists_on_terminal_frame(self):
+        from lab import active_scanner_views
+
+        active_scanner_views._remember_active_scan_job(
+            "active-s1", self.project, "http://target.test/"
+        )
+
+        class FakeStream:
+            def __init__(self, frames):
+                self.lines = frames
+                self.index = 0
+
+            def readline(self):
+                if self.index < len(self.lines):
+                    line = self.lines[self.index]
+                    self.index += 1
+                    return line
+                return b""
+
+            def close(self):
+                return None
+
+        report = {
+            "target": "http://target.test/",
+            "findings": [
+                {
+                    "id": "ACT-1", "tier": "verified", "module": "sqli",
+                    "endpoint": "http://target.test/p", "severity": "HIGH",
+                }
+            ],
+            "stats": {"requests": 15, "verified": 1},
+        }
+        done_payload = json.dumps({"job_id": "active-s1", "state": "completed", "result": report})
+        frames = [
+            b"id: 1\n",
+            b"event: progress\n",
+            b"data: {\"phase\": \"running\", \"requests\": 5}\n",
+            b"\n",
+            b"id: 2\n",
+            b"event: done\n",
+            f"data: {done_payload}\n".encode(),
+            b"\n",
+        ]
+
+        with mock.patch(
+            "lab.active_scanner_views.open_engine_stream",
+            return_value=FakeStream(frames),
+        ), mock.patch("lab.active_scanner_views._persist_tool_history") as persist:
+            response = self.client.get("/api/scanner/active/jobs/active-s1/stream")
+            content = b"".join(response.streaming_content).decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("event: done", content)
+        persist.assert_called_once_with(self.project)
+        job = ActiveScanJob.objects.get(job_id="active-s1")
+        self.assertTrue(job.settled)
+        self.assertTrue(job.ingested)
+        run = ScannerRun.objects.filter(project=self.project, engine="active").first()
+        self.assertIsNotNone(run)
+        self.assertEqual(run.summary["findings_count"], 1)
+
 
 class ActiveScannerReportShapeTests(TestCase):
     """The ingest must not invent a severity the run did not report."""

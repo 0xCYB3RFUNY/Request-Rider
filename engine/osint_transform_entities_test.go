@@ -51,6 +51,8 @@ func (r *ptrResolver) lookupHostReverse(_ context.Context, address string) ([]st
 func (r *ptrResolver) describe() string { return "a table" }
 
 func (r *ptrResolver) lookupTXT(context.Context, string) ([]string, error) { return nil, nil }
+func (r *ptrResolver) lookupMX(context.Context, string) ([]string, error)  { return nil, nil }
+func (r *ptrResolver) lookupNS(context.Context, string) ([]string, error)  { return nil, nil }
 
 func transformResultFor(transform, value string, options map[string]interface{}, confirm bool) osintTransformInput {
 	return osintTransformInput{

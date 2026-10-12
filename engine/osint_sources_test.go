@@ -167,6 +167,8 @@ func (r txtResolver) describe() string { return "a table" }
 func (r txtResolver) lookupTXT(_ context.Context, name string) ([]string, error) {
 	return r.records[strings.ToLower(name)], nil
 }
+func (r txtResolver) lookupMX(context.Context, string) ([]string, error) { return nil, nil }
+func (r txtResolver) lookupNS(context.Context, string) ([]string, error) { return nil, nil }
 
 func TestSharedHostNamesStopsAtItsOwnBoundAndSaysSo(t *testing.T) {
 	var many []string

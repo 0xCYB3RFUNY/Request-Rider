@@ -845,9 +845,12 @@ harden_run_secret_permissions() {
 ensure_web_venv() {
   step 'Python-оточення web'
   mkdir -p "$LOG_DIR"
-  if [ ! -x "$VENV_DIR/bin/python" ] || ! "$VENV_DIR/bin/python" -c 'import pip' >/dev/null 2>&1; then
+  local py_sys_ver py_venv_ver
+  py_sys_ver="$(python3 -c 'import sys; print(sys.version_info[:2])' 2>/dev/null || true)"
+  py_venv_ver="$("$VENV_DIR/bin/python" -c 'import sys; print(sys.version_info[:2])' 2>/dev/null || true)"
+  if [ ! -x "$VENV_DIR/bin/python" ] || [ "$py_sys_ver" != "$py_venv_ver" ] || ! "$VENV_DIR/bin/python" -c 'import pip' >/dev/null 2>&1; then
     info 'створюємо venv'
-    python3 -m venv "$VENV_DIR" || die 'не вдалося створити web/.venv'
+    python3 -m venv --clear "$VENV_DIR" || die 'не вдалося створити web/.venv'
   else
     skip 'web/.venv — вже існує'
   fi
@@ -926,9 +929,12 @@ _worker_imports_ok() {
 
 ensure_worker_venv() {
   step 'Python-оточення browser-worker'
-  if [ ! -x "$WORKER_VENV_DIR/bin/python" ]; then
+  local py_sys_ver py_venv_ver
+  py_sys_ver="$(python3 -c 'import sys; print(sys.version_info[:2])' 2>/dev/null || true)"
+  py_venv_ver="$("$WORKER_VENV_DIR/bin/python" -c 'import sys; print(sys.version_info[:2])' 2>/dev/null || true)"
+  if [ ! -x "$WORKER_VENV_DIR/bin/python" ] || [ "$py_sys_ver" != "$py_venv_ver" ] || ! "$WORKER_VENV_DIR/bin/python" -c 'import pip' >/dev/null 2>&1; then
     info 'створюємо venv'
-    python3 -m venv "$WORKER_VENV_DIR" || die 'не вдалося створити browser-worker/.venv'
+    python3 -m venv --clear "$WORKER_VENV_DIR" || die 'не вдалося створити browser-worker/.venv'
   else
     skip 'browser-worker/.venv — вже існує'
   fi

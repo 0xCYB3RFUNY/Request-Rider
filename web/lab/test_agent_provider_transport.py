@@ -140,3 +140,99 @@ class UnchangedContractTests(unittest.TestCase):
 
         os.environ.pop("RR_AGENT_ALLOW_INSECURE_PROVIDER", None)
         _validate_provider_endpoint(PROVIDER_PRESETS["ollama"][1], "ollama")
+
+
+class AgentProviderSocks5Tests(unittest.TestCase):
+    def test_socks5_connect_sends_remote_domain_resolution_request(self) -> None:
+        from lab.agent_services import _socks5_connect
+
+        class FakeSocket:
+            def __init__(self):
+                self.sent = bytearray()
+                self._recv_queue = [
+                    b"\x05\x00",  # method selection: no auth
+                    b"\x05\x00\x00\x01\x00\x00\x00\x00\x00\x00",  # success reply
+                ]
+
+            def sendall(self, data):
+                self.sent.extend(data)
+
+            def recv(self, num):
+                if not self._recv_queue:
+                    return b""
+                item = self._recv_queue[0]
+                chunk = item[:num]
+                remaining = item[num:]
+                if remaining:
+                    self._recv_queue[0] = remaining
+                else:
+                    self._recv_queue.pop(0)
+                return chunk
+
+            def close(self):
+                pass
+
+        fake_sock = FakeSocket()
+        with mock.patch("socket.create_connection", return_value=fake_sock):
+            sock = _socks5_connect("127.0.0.1:9050", "api.openai.com", 443, timeout=5)
+            self.assertIs(sock, fake_sock)
+
+        # Check handshake:
+        # 1. VER=5, NMETHODS=1, METHOD=0
+        self.assertEqual(fake_sock.sent[:3], b"\x05\x01\x00")
+        # 2. CONNECT request with ATYP=3 (domain name)
+        req = fake_sock.sent[3:]
+        self.assertEqual(req[:4], b"\x05\x01\x00\x03")
+        target_len = req[4]
+        self.assertEqual(target_len, len(b"api.openai.com"))
+        self.assertEqual(req[5 : 5 + target_len], b"api.openai.com")
+        port = int.from_bytes(req[5 + target_len : 5 + target_len + 2], "big")
+        self.assertEqual(port, 443)
+
+    def test_remote_provider_uses_socks5_when_configured(self) -> None:
+        from urllib.request import Request
+        from lab.agent_services import OpenAICompatibleProvider
+
+        provider = OpenAICompatibleProvider(
+            endpoint="https://api.openai.com/v1/chat/completions",
+            model="gpt-4o-mini",
+            api_key="test-key",
+            proxy_address="127.0.0.1:9050",
+        )
+        with mock.patch("lab.agent_services._socks5_connect") as mock_connect, \
+             mock.patch("http.client.HTTPSConnection") as mock_https:
+            mock_sock = mock.MagicMock()
+            mock_connect.return_value = mock_sock
+            mock_conn_instance = mock.MagicMock()
+            mock_conn_instance._context = mock.MagicMock()
+            mock_conn_instance.getresponse.return_value.status = 200
+            mock_conn_instance.getresponse.return_value.read.return_value = b'{"choices":[{"message":{"content":"{\\"message\\":\\"ok\\"}"}}]}'
+            mock_conn_instance.getresponse.return_value.headers = {}
+            mock_https.return_value = mock_conn_instance
+
+            res = provider.chat([{"role": "user", "content": "hi"}])
+            self.assertEqual(res, {"message": "ok"})
+            mock_connect.assert_called_once_with("127.0.0.1:9050", "api.openai.com", 443, timeout=None)
+
+    def test_loopback_target_bypasses_socks5_proxy(self) -> None:
+        from urllib.request import Request
+        from lab.agent_services import OpenAICompatibleProvider
+
+        provider = OpenAICompatibleProvider(
+            endpoint="http://127.0.0.1:11434/v1/chat/completions",
+            model="llama3.1",
+            api_key="",
+            proxy_address="127.0.0.1:9050",
+        )
+        with mock.patch("lab.agent_services._socks5_connect") as mock_connect, \
+             mock.patch("http.client.HTTPConnection") as mock_http:
+            mock_conn_instance = mock.MagicMock()
+            mock_conn_instance.getresponse.return_value.status = 200
+            mock_conn_instance.getresponse.return_value.read.return_value = b'{"choices":[{"message":{"content":"{\\"message\\":\\"local ok\\"}"}}]}'
+            mock_conn_instance.getresponse.return_value.headers = {}
+            mock_http.return_value = mock_conn_instance
+
+            res = provider.chat([{"role": "user", "content": "hi"}])
+            self.assertEqual(res, {"message": "local ok"})
+            # Verify socks5 connect was NOT called because target is loopback!
+            mock_connect.assert_not_called()

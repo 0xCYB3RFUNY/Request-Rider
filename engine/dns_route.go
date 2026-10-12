@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -42,6 +43,10 @@ type routeResolver interface {
 	lookupHostReverse(ctx context.Context, address string) ([]string, error)
 	// lookupTXT returns the text records published for a name.
 	lookupTXT(ctx context.Context, name string) ([]string, error)
+	// lookupMX returns the MX exchange hosts published for a name.
+	lookupMX(ctx context.Context, name string) ([]string, error)
+	// lookupNS returns the NS name server hosts published for a name.
+	lookupNS(ctx context.Context, name string) ([]string, error)
 	// describe names the mechanism in a warning, so a run that could not
 	// resolve says which resolver it was talking to.
 	describe() string
@@ -74,6 +79,40 @@ func (r systemResolver) lookupTXT(ctx context.Context, name string) ([]string, e
 		resolver = net.DefaultResolver
 	}
 	return resolver.LookupTXT(ctx, name)
+}
+
+func (r systemResolver) lookupMX(ctx context.Context, name string) ([]string, error) {
+	resolver := r.resolver
+	if resolver == nil {
+		resolver = net.DefaultResolver
+	}
+	records, err := resolver.LookupMX(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, 0, len(records))
+	for _, record := range records {
+		result = append(result, strings.TrimSuffix(record.Host, "."))
+	}
+	sort.Strings(result)
+	return result, nil
+}
+
+func (r systemResolver) lookupNS(ctx context.Context, name string) ([]string, error) {
+	resolver := r.resolver
+	if resolver == nil {
+		resolver = net.DefaultResolver
+	}
+	records, err := resolver.LookupNS(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, 0, len(records))
+	for _, record := range records {
+		result = append(result, strings.TrimSuffix(record.Host, "."))
+	}
+	sort.Strings(result)
+	return result, nil
 }
 
 func (r systemResolver) describe() string { return "the system resolver" }
@@ -218,6 +257,135 @@ func (r dohResolver) askTXT(ctx context.Context, queryURL string) ([]string, err
 			records = append(records, value)
 		}
 	}
+	return records, nil
+}
+
+func (r dohResolver) lookupMX(ctx context.Context, name string) ([]string, error) {
+	question := name
+	if !strings.HasSuffix(question, ".") {
+		question += "."
+	}
+	query := "?name=" + urlQueryEscape(question) + "&type=MX"
+	var lastErr error
+	for _, endpoint := range r.resolvers() {
+		records, err := r.askMX(ctx, endpoint+query)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return records, nil
+	}
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no DNS-over-HTTPS resolver answered")
+	}
+	return nil, lastErr
+}
+
+func (r dohResolver) askMX(ctx context.Context, queryURL string) ([]string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("User-Agent", indexUserAgent)
+	request.Header.Set("Accept", "application/dns-json")
+	response, err := r.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	body, err := readControlPlaneBody(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("the DNS-over-HTTPS resolver returned HTTP %d", response.StatusCode)
+	}
+	var answer dohAnswer
+	if json.Unmarshal(body, &answer) != nil {
+		return nil, fmt.Errorf("the DNS-over-HTTPS answer could not be read")
+	}
+	if answer.Status == 3 {
+		return nil, nil
+	}
+	records := make([]string, 0, len(answer.Answer))
+	for _, record := range answer.Answer {
+		if record.Type != 15 {
+			continue
+		}
+		parts := strings.Fields(record.Data)
+		host := ""
+		if len(parts) >= 2 {
+			host = parts[1]
+		} else if len(parts) == 1 {
+			host = parts[0]
+		}
+		host = strings.TrimSuffix(strings.TrimSpace(host), ".")
+		if host != "" {
+			records = append(records, host)
+		}
+	}
+	sort.Strings(records)
+	return records, nil
+}
+
+func (r dohResolver) lookupNS(ctx context.Context, name string) ([]string, error) {
+	question := name
+	if !strings.HasSuffix(question, ".") {
+		question += "."
+	}
+	query := "?name=" + urlQueryEscape(question) + "&type=NS"
+	var lastErr error
+	for _, endpoint := range r.resolvers() {
+		records, err := r.askNS(ctx, endpoint+query)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return records, nil
+	}
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no DNS-over-HTTPS resolver answered")
+	}
+	return nil, lastErr
+}
+
+func (r dohResolver) askNS(ctx context.Context, queryURL string) ([]string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, queryURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("User-Agent", indexUserAgent)
+	request.Header.Set("Accept", "application/dns-json")
+	response, err := r.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	body, err := readControlPlaneBody(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("the DNS-over-HTTPS resolver returned HTTP %d", response.StatusCode)
+	}
+	var answer dohAnswer
+	if json.Unmarshal(body, &answer) != nil {
+		return nil, fmt.Errorf("the DNS-over-HTTPS answer could not be read")
+	}
+	if answer.Status == 3 {
+		return nil, nil
+	}
+	records := make([]string, 0, len(answer.Answer))
+	for _, record := range answer.Answer {
+		if record.Type != 2 {
+			continue
+		}
+		host := strings.TrimSuffix(strings.TrimSpace(record.Data), ".")
+		if host != "" {
+			records = append(records, host)
+		}
+	}
+	sort.Strings(records)
 	return records, nil
 }
 

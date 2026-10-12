@@ -1551,20 +1551,16 @@ func (s *server) osint(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "INVALID_TARGET_URL", fmt.Errorf("url must be an absolute http or https URL"))
 		return
 	}
-	lease, routeContext, release := s.bindRouteContext(r.Context())
+	_, routeContext, release := s.bindRouteContext(r.Context())
 	defer release()
-	resolver := net.DefaultResolver
-	if lease != nil {
-		resolver = lease.resolver()
-	} else if s.routes != nil {
-		resolver = s.routes.resolver()
-	}
-	sourceIP := s.ensureSourceIP(routeContext)
 	transport, err := s.toolRouteTransport(input.toolRunRoute)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_TOOL_PROXY", err)
 		return
 	}
+	client := &http.Client{Transport: transport, Timeout: 20 * time.Second}
+	resolver := resolverForContext(routeContext, client, s)
+	sourceIP := s.ensureSourceIP(routeContext)
 	result, err := runOSINTWithResolverContext(
 		withToolTransport(routeContext, transport), parsed, input.WAFCheck, resolver, transport,
 	)
@@ -2233,10 +2229,10 @@ func runOSINT(target *url.URL, wafCheck bool) (map[string]interface{}, error) {
 }
 
 func runOSINTWithResolver(target *url.URL, wafCheck bool, resolver *net.Resolver, transport http.RoundTripper) (map[string]interface{}, error) {
-	return runOSINTWithResolverContext(context.Background(), target, wafCheck, resolver, transport)
+	return runOSINTWithResolverContext(context.Background(), target, wafCheck, systemResolver{resolver: resolver}, transport)
 }
 
-func runOSINTWithResolverContext(ctx context.Context, target *url.URL, wafCheck bool, resolver *net.Resolver, transport http.RoundTripper) (map[string]interface{}, error) {
+func runOSINTWithResolverContext(ctx context.Context, target *url.URL, wafCheck bool, resolver routeResolver, transport http.RoundTripper) (map[string]interface{}, error) {
 	// Each section is collected independently so a DNS, TLS, or HTTP failure
 	// can be reported as partial results instead of hiding all available data.
 	hostname := target.Hostname()
@@ -2287,8 +2283,8 @@ func runOSINTWithResolverContext(ctx context.Context, target *url.URL, wafCheck 
 	return result, nil
 }
 
-func lookupHostWithRetryWithResolverContext(ctx context.Context, hostname string, resolver *net.Resolver) ([]string, error) {
-	return resolver.LookupHost(ctx, hostname)
+func lookupHostWithRetryWithResolverContext(ctx context.Context, hostname string, resolver routeResolver) ([]string, error) {
+	return resolver.lookupHost(ctx, hostname)
 }
 
 func fetchOSINTPageWithTransportContext(ctx context.Context, target *url.URL, transport http.RoundTripper) (map[string]interface{}, []string, error) {
@@ -2383,34 +2379,26 @@ func flattenHeaders(headers http.Header) map[string]string {
 	return result
 }
 
-func lookupMXWithResolverContext(ctx context.Context, hostname string, resolver *net.Resolver) []string {
-	records, err := resolver.LookupMX(ctx, hostname)
+func lookupMXWithResolverContext(ctx context.Context, hostname string, resolver routeResolver) []string {
+	records, err := resolver.lookupMX(ctx, hostname)
 	if err != nil {
 		return []string{}
 	}
-	result := make([]string, 0, len(records))
-	for _, record := range records {
-		result = append(result, strings.TrimSuffix(record.Host, "."))
-	}
-	sort.Strings(result)
-	return result
+	sort.Strings(records)
+	return records
 }
 
-func lookupNSWithResolverContext(ctx context.Context, hostname string, resolver *net.Resolver) []string {
-	records, err := resolver.LookupNS(ctx, hostname)
+func lookupNSWithResolverContext(ctx context.Context, hostname string, resolver routeResolver) []string {
+	records, err := resolver.lookupNS(ctx, hostname)
 	if err != nil {
 		return []string{}
 	}
-	result := make([]string, 0, len(records))
-	for _, record := range records {
-		result = append(result, strings.TrimSuffix(record.Host, "."))
-	}
-	sort.Strings(result)
-	return result
+	sort.Strings(records)
+	return records
 }
 
-func lookupTXTWithResolverContext(ctx context.Context, hostname string, resolver *net.Resolver) []string {
-	records, err := resolver.LookupTXT(ctx, hostname)
+func lookupTXTWithResolverContext(ctx context.Context, hostname string, resolver routeResolver) []string {
+	records, err := resolver.lookupTXT(ctx, hostname)
 	if err != nil {
 		return []string{}
 	}
@@ -2655,13 +2643,10 @@ func (s *server) runSafeScanner(target *url.URL) (map[string]interface{}, error)
 }
 
 func (s *server) runSafeScannerContext(ctx context.Context, target *url.URL) (map[string]interface{}, error) {
-	resolver := net.DefaultResolver
-	if lease, ok := routeLeaseFromContext(ctx); ok {
-		resolver = lease.resolver()
-	} else if s.routes != nil {
-		resolver = s.routes.resolver()
-	}
-	return runSafeScannerWithResolverContext(ctx, target, resolver, s.toolRunTransport(ctx))
+	transport := s.toolRunTransport(ctx)
+	client := &http.Client{Transport: transport, Timeout: 20 * time.Second}
+	resolver := resolverForContext(ctx, client, s)
+	return runSafeScannerWithResolverContext(ctx, target, resolver, transport)
 }
 
 // toolRunTransport is the transport of the current run: the recording proxy when
@@ -2678,10 +2663,10 @@ func runSafeScanner(target *url.URL) (map[string]interface{}, error) {
 }
 
 func runSafeScannerWithResolver(target *url.URL, resolver *net.Resolver, transport http.RoundTripper) (map[string]interface{}, error) {
-	return runSafeScannerWithResolverContext(context.Background(), target, resolver, transport)
+	return runSafeScannerWithResolverContext(context.Background(), target, systemResolver{resolver: resolver}, transport)
 }
 
-func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, resolver *net.Resolver, transport http.RoundTripper) (map[string]interface{}, error) {
+func runSafeScannerWithResolverContext(ctx context.Context, target *url.URL, resolver routeResolver, transport http.RoundTripper) (map[string]interface{}, error) {
 	base, err := runOSINTWithResolverContext(ctx, target, true, resolver, transport)
 	if err != nil {
 		return nil, err
