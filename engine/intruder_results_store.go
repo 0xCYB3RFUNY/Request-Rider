@@ -91,23 +91,19 @@ func (s *intruderResultStore) Len() int {
 	return len(s.index)
 }
 
-// Read returns the results from the given offset onwards, which is exactly the
-// incremental read the browser performs while an attack runs.
+// Read returns all results from the given offset onwards.
 func (s *intruderResultStore) Read(since int) ([]map[string]interface{}, error) {
+	return s.ReadLimit(since, 0)
+}
+
+// ReadLimit returns up to limit results starting from since. If limit <= 0,
+// all remaining results are returned.
+func (s *intruderResultStore) ReadLimit(since, limit int) ([]map[string]interface{}, error) {
 	if s == nil {
 		return nil, fmt.Errorf("result store is not available")
 	}
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	// A closed store is reopened rather than declared lost. The spill path closes
-	// the handle the moment an append fails, and the findings already written are
-	// exactly the ones a full disk or a quota error puts at risk: refusing to read
-	// them would discard the evidence the run had already produced, which is the
-	// one outcome "no evidence is ever lost" is meant to rule out.
-	//
-	// The reopened handle stays local: storing it in s.file would leave the field
-	// pointing at a handle this function closes on return, and the next Append
-	// would write to a closed file.
 	reader := s.file
 	if reader == nil {
 		if s.path == "" {
@@ -129,9 +125,13 @@ func (s *intruderResultStore) Read(since int) ([]map[string]interface{}, error) 
 	if since > len(s.index) {
 		since = len(s.index)
 	}
-	results := make([]map[string]interface{}, 0, len(s.index)-since)
+	slice := s.index[since:]
+	if limit > 0 && len(slice) > limit {
+		slice = slice[:limit]
+	}
+	results := make([]map[string]interface{}, 0, len(slice))
 	var buffer []byte
-	for _, ref := range s.index[since:] {
+	for _, ref := range slice {
 		if cap(buffer) < int(ref.length) {
 			buffer = make([]byte, ref.length)
 		}

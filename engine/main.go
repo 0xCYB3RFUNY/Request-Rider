@@ -347,15 +347,14 @@ func (a *attack) resultCount() int {
 	return len(a.results)
 }
 
-// resultsFrom returns the findings from the given offset, which is the
-// incremental read the browser performs.
-func (a *attack) resultsFrom(since int) ([]map[string]interface{}, int, error) {
+// resultsFrom returns the findings from the given offset, capped by limit if positive.
+func (a *attack) resultsFrom(since, limit int) ([]map[string]interface{}, int, error) {
 	a.mu.RLock()
 	store := a.store
 	memory := a.results
 	a.mu.RUnlock()
 	if store != nil {
-		results, err := store.Read(since)
+		results, err := store.ReadLimit(since, limit)
 		return results, store.Len(), err
 	}
 	if since < 0 {
@@ -364,7 +363,11 @@ func (a *attack) resultsFrom(since int) ([]map[string]interface{}, int, error) {
 	if since > len(memory) {
 		since = len(memory)
 	}
-	return append([]map[string]interface{}{}, memory[since:]...), len(memory), nil
+	slice := memory[since:]
+	if limit > 0 && len(slice) > limit {
+		slice = slice[:limit]
+	}
+	return append([]map[string]interface{}{}, slice...), len(memory), nil
 }
 
 type suppressRequestLogsKey struct{}
@@ -3736,7 +3739,7 @@ func (s *server) intruder(w http.ResponseWriter, r *http.Request) {
 	s.attacksMu.Lock()
 	s.attacks[attackID] = job
 	s.attacksMu.Unlock()
-	writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, job, 0))
+	writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, job, 0, 0))
 	go func() {
 		// Calibration happens inside the run goroutine, not inside the POST, so
 		// a slow or hanging login form cannot hang the browser's start request.
@@ -4081,7 +4084,7 @@ func (s *server) intruderStatus(w http.ResponseWriter, r *http.Request) {
 			attackJob.finishedAt = time.Now().UTC()
 		}
 		attackJob.mu.Unlock()
-		writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, attackJob, 0))
+		writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, attackJob, 0, 0))
 		return
 	}
 	if r.Method == http.MethodPost {
@@ -4112,7 +4115,7 @@ func (s *server) intruderStatus(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "INVALID_ATTACK_ACTION", fmt.Errorf("action must be pause or resume"))
 			return
 		}
-		writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, attackJob, 0))
+		writeJSON(w, http.StatusAccepted, s.attackSnapshot(attackID, attackJob, 0, 0))
 		return
 	}
 	if r.Method != http.MethodGet {
@@ -4124,7 +4127,11 @@ func (s *server) intruderStatus(w http.ResponseWriter, r *http.Request) {
 	if since < 0 {
 		since = 0
 	}
-	writeJSON(w, http.StatusOK, s.attackSnapshot(attackID, attackJob, since))
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit <= 0 {
+		limit = 500
+	}
+	writeJSON(w, http.StatusOK, s.attackSnapshot(attackID, attackJob, since, limit))
 }
 
 func waitForAttack(ctx context.Context, job *attack) bool {
@@ -4158,7 +4165,7 @@ func parseEventCursor(r *http.Request) uint64 {
 	return cursor
 }
 
-func (s *server) attackSnapshot(id uint64, attackJob *attack, since int) map[string]interface{} {
+func (s *server) attackSnapshot(id uint64, attackJob *attack, since, limit int) map[string]interface{} {
 	attackJob.mu.RLock()
 	status, total, completed, failed := attackJob.status, attackJob.total, attackJob.completed, attackJob.failed
 	detection, baselines, calibrating := attackJob.detection, attackJob.baselines, attackJob.calibrating
@@ -4166,9 +4173,9 @@ func (s *server) attackSnapshot(id uint64, attackJob *attack, since int) map[str
 	attackJob.mu.RUnlock()
 	// The read happens outside the lock: a hundred thousand result lines are
 	// read from disk, and the run must stay observable while that happens.
-	results, count, err := attackJob.resultsFrom(since)
+	results, count, err := attackJob.resultsFrom(since, limit)
 	if err != nil {
-		log.Printf("[INTRUDER %d] results_read_error offset=%d error=%v", id, since, logError(err))
+		log.Printf("[INTRUDER %d] results_read_error offset=%d limit=%d error=%v", id, since, limit, logError(err))
 	}
 	if since > count {
 		since = count

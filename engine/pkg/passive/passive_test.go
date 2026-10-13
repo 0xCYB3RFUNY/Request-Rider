@@ -48,6 +48,71 @@ func TestStoreKeepsMostRecentEvents(t *testing.T) {
 	}
 }
 
+func TestStoreBoundsEventRetention(t *testing.T) {
+	store := NewStore()
+	store.SetMaxEvents(3)
+
+	for i := 1; i <= 6; i++ {
+		id := store.Add(Event{Method: fmt.Sprintf("M%d", i)})
+		store.Update(id, func(e *Event) {
+			e.Status = 200
+		})
+	}
+
+	events := store.List()
+	if len(events) != 3 {
+		t.Fatalf("expected 3 bounded events, got %d", len(events))
+	}
+	if events[0].Method != "M4" || events[2].Method != "M6" {
+		t.Fatalf("expected events M4..M6, got %s..%s", events[0].Method, events[2].Method)
+	}
+
+	replay := store.ListSince(0)
+	if len(replay) != 3 {
+		t.Fatalf("expected replay backlog bounded to 3, got %d", len(replay))
+	}
+}
+
+func TestProxyBoundsCapturedBodySize(t *testing.T) {
+	t.Setenv("RR_MAX_BODY_CAPTURE_BYTES", "64")
+	largeData := strings.Repeat("A", 1024)
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		_, _ = w.Write([]byte(largeData))
+	}))
+	defer backend.Close()
+
+	store := NewStore()
+	proxy := NewProxy(store, http.DefaultTransport)
+	proxyServer := httptest.NewServer(proxy.Handler())
+	defer proxyServer.Close()
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			Proxy: func(*http.Request) (*url.URL, error) {
+				return url.Parse(proxyServer.URL)
+			},
+		},
+	}
+	resp, err := client.Get(backend.URL)
+	if err != nil {
+		t.Fatalf("client request failed: %v", err)
+	}
+	_ = resp.Body.Close()
+
+	events := store.List()
+	if len(events) == 0 {
+		t.Fatal("expected captured event in store")
+	}
+	event := events[0]
+	if event.ResponseSize != 1024 {
+		t.Fatalf("expected accurate ResponseSize=1024, got %d", event.ResponseSize)
+	}
+	if len(event.ResponseBody) != 64 {
+		t.Fatalf("expected ResponseBody capped to 64 bytes in RAM, got %d", len(event.ResponseBody))
+	}
+}
+
 func TestStoreClearRemovesSnapshotAndReplay(t *testing.T) {
 	store := NewStore()
 	store.Add(Event{Method: "GET"})

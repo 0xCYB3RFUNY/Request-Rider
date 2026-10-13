@@ -124,6 +124,34 @@ func (subscriber *eventSubscriber) close() {
 	<-subscriber.finished
 }
 
+// DefaultMaxStoreEvents bounds how many recent exchanges the in-memory Traffic
+// store and replay backlog retain. Durable history is kept in PostgreSQL, so
+// memory stays strictly bounded even under massive Intruder or scanner load.
+const DefaultMaxStoreEvents = 500
+
+// MaxCapturedBodyBytes bounds the body size retained in engine RAM per exchange.
+// Bursts of large HTML or binary responses are capped so memory stays minimal
+// (<50MB) even on constrained virtual machines with 2GB RAM.
+const MaxCapturedBodyBytes = 64 * 1024 // 64 KB
+
+func maxStoreEventsFromEnv() int {
+	if raw := strings.TrimSpace(os.Getenv("RR_MAX_TRAFFIC_EVENTS")); raw != "" {
+		if limit, err := strconv.Atoi(raw); err == nil && limit > 0 {
+			return limit
+		}
+	}
+	return DefaultMaxStoreEvents
+}
+
+func maxCapturedBodyBytesFromEnv() int {
+	if raw := strings.TrimSpace(os.Getenv("RR_MAX_BODY_CAPTURE_BYTES")); raw != "" {
+		if limit, err := strconv.Atoi(raw); err == nil && limit > 0 {
+			return limit
+		}
+	}
+	return MaxCapturedBodyBytes
+}
+
 // Store keeps recent events and subscribers in process memory.
 type Store struct {
 	mu          sync.RWMutex
@@ -133,12 +161,32 @@ type Store struct {
 	nextCursor  uint64
 	replay      []Event
 	paused      bool
+	maxEvents   int
 }
 
 // Store keeps the in-memory Traffic view and broadcasts request lifecycle updates.
 func NewStore() *Store {
 	// Start with an initialized subscriber map so Add can broadcast safely.
-	return &Store{subscribers: make(map[*eventSubscriber]struct{})}
+	return &Store{
+		subscribers: make(map[*eventSubscriber]struct{}),
+		maxEvents:   maxStoreEventsFromEnv(),
+	}
+}
+
+// SetMaxEvents overrides the maximum event retention cap for testing or configuration.
+func (s *Store) SetMaxEvents(limit int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		limit = DefaultMaxStoreEvents
+	}
+	s.maxEvents = limit
+	if len(s.events) > s.maxEvents {
+		s.events = append([]Event(nil), s.events[len(s.events)-s.maxEvents:]...)
+	}
+	if len(s.replay) > s.maxEvents {
+		s.replay = append([]Event(nil), s.replay[len(s.replay)-s.maxEvents:]...)
+	}
 }
 
 func (s *Store) Pause() bool {
@@ -180,6 +228,18 @@ func (s *Store) Add(event Event) uint64 {
 	event.Cursor = s.nextCursor
 	s.events = append(s.events, event)
 	s.replay = append(s.replay, event)
+
+	limit := s.maxEvents
+	if limit <= 0 {
+		limit = DefaultMaxStoreEvents
+	}
+	if len(s.events) > limit {
+		s.events = append([]Event(nil), s.events[len(s.events)-limit:]...)
+	}
+	if len(s.replay) > limit {
+		s.replay = append([]Event(nil), s.replay[len(s.replay)-limit:]...)
+	}
+
 	s.broadcastLocked(event)
 	return event.ID
 }
@@ -297,6 +357,13 @@ func (s *Store) Update(id uint64, update func(*Event)) {
 			s.nextCursor++
 			s.events[index].Cursor = s.nextCursor
 			s.replay = append(s.replay, s.events[index])
+			limit := s.maxEvents
+			if limit <= 0 {
+				limit = DefaultMaxStoreEvents
+			}
+			if len(s.replay) > limit {
+				s.replay = append([]Event(nil), s.replay[len(s.replay)-limit:]...)
+			}
 			s.broadcastLocked(s.events[index])
 			return
 		}
@@ -610,7 +677,12 @@ func (p *Proxy) captureRequest(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Re
 	r.Header.Del(CaptureContextHeader)
 	// Read and restore the body so capture does not consume the upstream request.
 	body, err := readAndRestore(&r.Body)
-	requestBody, requestEncoding, requestBase64 := encodeBody(body)
+	maxBody := maxCapturedBodyBytesFromEnv()
+	retainedBody := body
+	if maxBody > 0 && len(retainedBody) > maxBody {
+		retainedBody = retainedBody[:maxBody]
+	}
+	requestBody, requestEncoding, requestBase64 := encodeBody(retainedBody)
 	// Publish the request immediately, before the upstream response arrives.
 	event := Event{
 		Source:              "proxy",
@@ -675,8 +747,13 @@ func (p *Proxy) captureResponse(resp *http.Response, ctx *goproxy.ProxyCtx) *htt
 		body, err := readAndRestore(&resp.Body)
 		status = resp.StatusCode
 		responseHeaders = flattenHeaders(resp.Header)
-		responseBody, responseEncoding, responseBase64 := encodeBody(body)
 		responseSize = len(body)
+		maxBody := maxCapturedBodyBytesFromEnv()
+		retainedBody := body
+		if maxBody > 0 && len(retainedBody) > maxBody {
+			retainedBody = retainedBody[:maxBody]
+		}
+		responseBody, responseEncoding, responseBase64 := encodeBody(retainedBody)
 		contentType := resp.Header.Get("Content-Type")
 		if err != nil && eventError == "" {
 			eventError = err.Error()

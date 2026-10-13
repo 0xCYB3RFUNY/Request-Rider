@@ -1653,6 +1653,7 @@ ensure_engine() {
   info "запускаємо engine на 127.0.0.1:$ENGINE_PORT, проксі на 127.0.0.1:$PROXY_PORT"
   (
     cd "$ENGINE_DIR"
+    GOMEMLIMIT="${GOMEMLIMIT:-2GiB}" \
     PROXY_LISTEN_ADDR="127.0.0.1:$PROXY_PORT" \
     ENGINE_LISTEN_ADDR="127.0.0.1:$ENGINE_PORT" \
     exec "$ENGINE_BINARY"
@@ -2146,6 +2147,7 @@ restart_engine() {
   info "запускаємо engine на 127.0.0.1:$ENGINE_PORT, проксі на 127.0.0.1:$PROXY_PORT"
   (
     cd "$ENGINE_DIR"
+    GOMEMLIMIT="${GOMEMLIMIT:-2GiB}" \
     PROXY_LISTEN_ADDR="127.0.0.1:$PROXY_PORT" \
     ENGINE_LISTEN_ADDR="127.0.0.1:$ENGINE_PORT" \
     exec "$ENGINE_BINARY"

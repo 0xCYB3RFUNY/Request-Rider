@@ -61,6 +61,12 @@ func TestIntruderResultStoreKeepsEveryResultAndReadsFromAnOffset(t *testing.T) {
 	if err != nil || len(empty) != 0 {
 		t.Fatalf("read past end = %v %v", empty, err)
 	}
+
+	// ReadLimit caps the number of results returned in one query.
+	limited, err := store.ReadLimit(0, 2)
+	if err != nil || len(limited) != 2 {
+		t.Fatalf("read limit 2 = %d results, want 2: %v", len(limited), err)
+	}
 }
 
 func TestIntruderResultStoreWritesToDiskNotMemory(t *testing.T) {
@@ -97,7 +103,7 @@ func TestAttackFallsBackToMemoryWithoutAStore(t *testing.T) {
 	if attack.resultCount() != 3 {
 		t.Fatalf("count = %d, want 3", attack.resultCount())
 	}
-	results, count, err := attack.resultsFrom(1)
+	results, count, err := attack.resultsFrom(1, 0)
 	if err != nil || count != 3 || len(results) != 2 {
 		t.Fatalf("from 1 = %v count=%d err=%v", results, count, err)
 	}

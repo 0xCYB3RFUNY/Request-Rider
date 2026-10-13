@@ -141,7 +141,11 @@ func (j *NucleiJob) watchOutput(path string) {
 	defer handle.Close()
 	reader := bufio.NewReader(handle)
 	for {
-		<-ticker.C
+		select {
+		case <-j.done:
+			return
+		case <-ticker.C:
+		}
 		for {
 			line, readErr := reader.ReadString('\n')
 			if readErr != nil {

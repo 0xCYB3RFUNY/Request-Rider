@@ -490,7 +490,7 @@ func buildNucleiArgs(target, dir string, request NucleiRequest) ([]string, error
 		omitRaw = *options.OmitRaw
 	}
 	if omitRaw {
-		args = append(args, "-or")
+		args = append(args, "-or", "-ot")
 	}
 	// Environment defaults stay a fallback: an explicit option always wins, and
 	// nothing is injected when neither is set.

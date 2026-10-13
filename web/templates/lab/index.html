@@ -16874,7 +16874,7 @@ function setAttackRunning(running) {
 // UI poll cadence is now its own value: it tracks the pacing when the operator
 // asked for a slow attack, but never drops below a floor that keeps the
 // gateway idle between updates.
-const ATTACK_POLL_MIN_MS = 250;
+const ATTACK_POLL_MIN_MS = 600;
 const ATTACK_POLL_MAX_MS = 2000;
 
 function attackPollDelay() {
@@ -17511,7 +17511,7 @@ async function pollAttack() {
   if (!activeAttackId) return;
   const pollGeneration = attackPollGeneration;
   try {
-    const data = await readJSON(await fetch(`/api/intruder?attack_id=${encodeURIComponent(activeAttackId)}&since=${attackResultCursor}`));
+    const data = await readJSON(await fetch(`/api/intruder?attack_id=${encodeURIComponent(activeAttackId)}&since=${attackResultCursor}&limit=500`));
     if (pollGeneration !== attackPollGeneration) return;
     renderAttack(data);
     if (data.status === 'completed' || data.status === 'cancelled') {
@@ -17534,7 +17534,10 @@ async function pollAttack() {
       queueWorkspacePersistence();
       return;
     }
-    attackPollTimer = setTimeout(pollAttack, attackPollDelay());
+    // If we received a full batch (500) and are behind completed count, fetch next batch promptly.
+    const hasMorePending = Number(data.completed || 0) > attackResultCursor;
+    const delay = hasMorePending && (data.results || []).length >= 500 ? 50 : attackPollDelay();
+    attackPollTimer = setTimeout(pollAttack, delay);
   } catch (error) {
     $('attack-status').textContent = `Error: ${error.message}`;
     activeAttackId = null;

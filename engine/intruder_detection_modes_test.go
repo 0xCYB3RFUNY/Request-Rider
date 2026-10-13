@@ -63,7 +63,7 @@ func runIntruderAgainstLoginForm(t *testing.T, form *loginPageForm, mode intrude
 		}
 	}
 	srv.runAttack(1, run, context.Background(), base, jobs, 0, 1)
-	results, count, readErr := run.resultsFrom(0)
+	results, count, readErr := run.resultsFrom(0, 0)
 	if readErr != nil {
 		t.Fatalf("read results: %v", readErr)
 	}

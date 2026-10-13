@@ -105,8 +105,8 @@ func TestBuildNucleiArgsMapsEveryOptionToOneFlag(t *testing.T) {
 			t.Fatalf("%s is missing from %v", flag, args)
 		}
 	}
-	if hasArg(args, "-or") {
-		t.Fatalf("omit_raw=false must not add -or: %v", args)
+	if hasArg(args, "-or") || hasArg(args, "-ot") {
+		t.Fatalf("omit_raw=false must not add -or or -ot: %v", args)
 	}
 	// `-nc -v` replaces `-silent`, and this test is what says so. An untouched
 	// options panel must still produce a run whose stderr carries the
@@ -144,8 +144,8 @@ func TestBuildNucleiArgsDefaultsAreConservative(t *testing.T) {
 	if hasArg(args, "-u") || hasArg(args, "-pt") {
 		t.Fatalf("run used a legacy target or protocol-type flag: %v", args)
 	}
-	if !hasArg(args, "-or") {
-		t.Fatalf("omit_raw must default to true: %v", args)
+	if !hasArg(args, "-or") || !hasArg(args, "-ot") {
+		t.Fatalf("omit_raw and omit_template must default to true: %v", args)
 	}
 	if hasArg(args, "-ni") {
 		t.Fatalf("interactsh must stay enabled unless explicitly disabled: %v", args)
