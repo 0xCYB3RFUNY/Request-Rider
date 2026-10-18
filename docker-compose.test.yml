@@ -1,0 +1,220 @@
+# RequestRider — изолированный тестовый стенд.
+#
+# Отдельный файл, а не `profiles:` в docker-compose.yml: профиль на
+# существующем сервисе убирает его из запуска по умолчанию, то есть
+# ломает рабочий стенд. Здесь стенд описан целиком и включается явно.
+#
+#   docker compose -p rr_test -f docker-compose.test.yml --profile test up -d
+#
+# Изоляция обеспечивается тремя вещами, и ни одной из них не хватает
+# в одиночку:
+#
+#   1. `-p rr_test` даёт свою сеть и свои тома. Тома НЕ названы
+#      вручную: имя тома с префиксом проекта не даст рабочему стенду
+#      подхватить тестовую базу, и наоборот.
+#   2. Порты сдвинуты в отдельный диапазон, поэтому стенд поднимается
+#      рядом с рабочим и не занимает его :8000/:8081/:8090.
+#   3. База называется requestrider_test, а не requestrider.
+#
+# Чего здесь НЕТ и почему — это решения по измерениям, а не по вкусу:
+#
+#   * tor. `start.sh` поднимает Tor только при ROUTE_ADDRESS или
+#     RR_ROUTE_VIA_TOR; типичный стенд — Direct. E2E не должен зависеть
+#     от внешней сети Tor: тест, который падает от чужой сети, не
+#     проверяет наш код.
+#   * celery и engine-results. AGENTS.md фиксирует измерение: с
+#     WORKFLOW_CELERY_ENABLED=1 тот же набор из 463 тестов даёт
+#     58 errors и 3 failures, а без флагов — OK. Для тестового стенда
+#     брокерный путь не просто не нужен, он делает тесты красными.
+#     Поэтому флаги здесь не выставлены намеренно.
+#
+name: rr_test
+
+services:
+  redis:
+    profiles: ["test"]
+    image: redis:7-alpine
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+    ports:
+      - "127.0.0.1:16379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  postgres:
+    profiles: ["test"]
+    image: postgres:15-alpine
+    ports:
+      - "127.0.0.1:15432:5432"
+    environment:
+      POSTGRES_DB: requestrider_test
+      POSTGRES_USER: requestrider
+      # Пароль стенда — фиксированный и несекретный: он существует
+      # только для локального контейнера, который никто не публикует.
+      # Требование POSTGRES_PASSWORD в рабочем compose вынуждает
+      # экспортировать настоящий пароль в .env; здесь это не нужно.
+      POSTGRES_PASSWORD: rr_test_only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U requestrider -d requestrider_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  engine:
+    profiles: ["test"]
+    build: ./engine
+    # Этот сервис — владелец сетевого пространства стенда: `browser-worker`
+    # работает в его namespace, поэтому публикуется здесь, а не на нем.
+    #
+    # Наружу (127.0.0.1) — только для хоста: E2E идёт с хоста и должен
+    # видеть приложение и фикстуры. Внутри сети соседи обращаются по
+    # `engine:<порт>` — то есть к тому же IP, ведь это один namespace.
+    ports:
+      - "127.0.0.1:18000:8000"   # Django (живёт в namespace движка)
+      - "127.0.0.1:18080:8080"   # пассивный прокси
+      - "127.0.0.1:18081:8081"   # API движка
+      - "127.0.0.1:18090:8090"   # browser-worker
+    environment:
+      CA_DIR: /data/ca
+      PROXY_LISTEN_ADDR: 0.0.0.0:8080
+      ENGINE_LISTEN_ADDR: 0.0.0.0:8081
+      # Явний дозвіл на не-loopback bind — саме для цього змінна й існує
+      # («Binding a control-plane listener to a reachable interface is a
+      # deliberate, visible act»). Без неї движок відмовляється стартувати:
+      # виміряно 2026-10-01, `engine refuses to bind 0.0.0.0:8081: not
+      # loopback`. Це не обхід правила, а його застосування: стенд
+      # слухає 0.0.0.0 лише всередині власної мережі `rr_test`.
+      RR_ALLOW_NON_LOOPBACK_BIND: "1"
+      # ROUTE_ADDRESS намеренно отсутствует — см. шапку файла.
+      ENGINE_BROKER_URL: redis://redis:6379/0
+      # Тестовый движок ищет httpx так же, как рабочий: `RR_HTTPX_BIN` или
+      # `bin/httpx` относительно cwd и исполняемого файла, но НЕ PATH — при
+      # `ENTRYPOINT ["/engine"]` это только `/bin/httpx`, где на alpine лежит
+      # busybox без апплета `httpx`. Без этого рядка `http_probe` отвечал бы
+      # `HTTPX_BINARY_MISSING` на каждом запуске. Файл собран отдельно,
+      # поэтому переменная нужна и здесь, а не наследуется от основного
+      # compose: у тестового стенда свой файл.
+      RR_HTTPX_BIN: /usr/local/bin/httpx
+    volumes:
+      # CA на каждый запуск заново: общий каталог CA означал бы, что
+      # тестовый движок доверяет сертификату рабочего, и наоборот.
+      - test_ca:/data/ca
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  browser-worker:
+    profiles: ["test"]
+    build: ./browser-worker
+    # Общий с движком сетевой namespace сохраняет единый loopback для
+    # локальных взаимодействий приложения и browser-worker.
+    #
+    # Здесь тот же адрес использует Django, поэтому BROWSER_WORKER_URL
+    # указывает на `engine:8090`, а не на имя этого сервиса: имя
+    # `browser-worker` резолвится только внутри его собственной сети,
+    # которой у него теперь нет.
+    network_mode: "service:engine"
+    environment:
+      PORT: 8090
+      # Тот же аргумент, что в рабочем compose: 127.0.0.1 внутри
+      # контейнера принимает только собственный loopback, а Docker
+      # публикует порт через DNAT на eth0.
+      HOST: 0.0.0.0
+      # Те саме, що й для движка: worker відмовляється слухати не
+      # loopback без цього дозволу (worker.py, `RR_ALLOW_NON_LOOPBACK_BIND`).
+      RR_ALLOW_NON_LOOPBACK_BIND: "1"
+    depends_on:
+      engine:
+        condition: service_started
+
+  web:
+    profiles: ["test"]
+    build: ./web
+    # Django живе в тому ж namespace, що й рухій, worker і фікстури.
+    #
+    # Причина виміряна, а не вибрана: `withInternalAccess` у
+    # `engine/internal_auth.go` відкидає запит, у якого `r.Host` не є
+    # loopback. Django не надсилає заголовок `Host`, тому urllib
+    # підставляє його з URL, і на іменній адресі рухій відповідає
+    # `{"reason":"FORBIDDEN_HOST","error":"request host \"engine:8081\" is not loopback"}`.
+    # Виміряно 2026-10-01 на живому стенді: `/api/execute` віддавав рівно
+    # це, і три тести same-origin падали на ньому.
+    #
+    # Нативний стенд цього не бачить — там `ENGINE_URL` уже loopback.
+    # Розбіжність проявляється лише там, де адреса іменні, тобто
+    # рівно в контейнері.
+    #
+    # Спільний.namespace робить `127.0.0.1:8081` з контейнера web самим
+    # рухієм. Послаблення перевірки не робиться і не потрібне.
+    network_mode: "service:engine"
+    environment:
+      ENGINE_URL: http://127.0.0.1:8081
+      # browser-worker живет в namespace движка, поэтому
+      # обращаться к нему по имени сервиса нельзя: имя резолвится
+      # в собственной сети worker, которой у него теперь нет.
+      # Адрес тот же — IP контейнера `engine`, ведь это один namespace.
+      BROWSER_WORKER_URL: http://127.0.0.1:8090
+      PASSIVE_PROXY_URL: http://127.0.0.1:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: requestrider_test
+      POSTGRES_USER: requestrider
+      POSTGRES_PASSWORD: rr_test_only
+      CELERY_BROKER_URL: redis://redis:6379/0
+      # Шаблон тестової БД створює сам runner (core.testdb.ensure_test_template),
+      # щоб `manage.py test` був зелений на чистому кластері без ручного
+      # bootstrap. Имя перекрыто здесь, потому что рабочий кластер может
+      # уже использовать свой.
+      POSTGRES_TEST_TEMPLATE: requestrider_utf8_tmpl
+      # Оба флага — «0», а не «true»: см. шапку файла и измерение в
+      # AGENTS.md. Это самая частая причина, по которой тестовый стенд
+      # «зелёный» локально и красный в контейнере.
+      WORKFLOW_CELERY_ENABLED: "0"
+      WORKFLOW_ENGINE_BROKER_ENABLED: "0"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/').close()"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      # Тести, які читають дерево репозитория, а не только код Django.
+      #
+      # Виміряно 2026-10-01 на першому прогоні: 7 errors, усі одного
+      # класу — `FileNotFoundError` на `/.gitignore`, `/contracts/…` і
+      # `/engine/pkg/intruder/intruder.go`. Образ `web` копіює лише
+      # каталог `web/`, а ці тести йдуть від `parents[2]`, тобто
+      # шукають їх у корені репозиторію. Продукт тут ні до чого: це
+      # питання, що бачить контейнер, а не що він робить.
+      #
+      # Точки монтування саме такі, які тести обчислюють: `web/` у
+      # образі лежить у `/app`, тому корінь репозиторію — це `/`.
+      - ./.gitignore:/.gitignore:ro
+      - ./contracts:/contracts:ro
+      - ./engine:/engine:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      engine:
+        condition: service_started
+      browser-worker:
+        condition: service_started
+volumes:
+  # Именованные тома с префиксом проекта: рабочий стенд их не увидит.
+  # Тома данных postgres/redis в тестовом стенде НЕ нужны — база
+  # пересоздаётся на каждый `test_stand.sh down -v`, и накапливать в ней
+  # нечего, а именно накопление и делает результат теста зависимым от
+  # истории. Поэтому postgres и redis здесь без volumes вообще.
+  test_ca: {}

