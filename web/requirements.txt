@@ -1,0 +1,8 @@
+Django>=5.2,<6
+psycopg[binary]>=3.2,<4
+celery>=5.5,<6
+# Celery's Redis transport needs a Redis client; kombu does not bundle one.
+# The engine task transport does not use this package: it speaks RESP directly,
+# so the Go engine reads the same contract JSON the Django side writes
+# (lab/broker_transport.py).
+redis>=5,<7

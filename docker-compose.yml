@@ -1,0 +1,215 @@
+services:
+  # Redis is the broker for the engine task transport, chosen by the URL scheme
+  # in CELERY_BROKER_URL and ENGINE_BROKER_URL. Persistence is on (AOF) because a
+  # queued task that disappears on restart is lost work.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-requestrider}
+      POSTGRES_USER: ${POSTGRES_USER:-requestrider}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  tor:
+    build: ./tor
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${TOR_PORT:-9050}:9050"
+  engine:
+    build: ./engine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PROXY_PORT:-8080}:8080"
+      - "127.0.0.1:${ENGINE_PORT:-8081}:8081"
+    environment:
+      CA_DIR: /data/ca
+      PROXY_LISTEN_ADDR: 0.0.0.0:8080
+      ENGINE_LISTEN_ADDR: 0.0.0.0:8081
+      ROUTE_ADDRESS: tor:9050
+      ENGINE_BROKER_URL: redis://redis:6379/0
+      # `httpxBinary()` (engine/osint_http_probe.go:64) перевіряє `RR_HTTPX_BIN`
+      # і `bin/httpx` відносно cwd та виконуваного файлу, але НЕ PATH. Із
+      # `ENTRYPOINT ["/engine"]` це дає лише `/bin/httpx`, де на alpine живе
+      # busybox без аплету `httpx`, — без цього рядка кожен запуск трансформу
+      # `http_probe` відповідав би `HTTPX_BINARY_MISSING`. Нативний стенд
+      # отримує його зі свого `bin/httpx` і цим рядком не скористається.
+      RR_HTTPX_BIN: /usr/local/bin/httpx
+      # Shared HMAC key for the task/result envelopes (audit A06-04). Empty means
+      # compatibility mode — nothing is signed or verified, loudly. Set it from the
+      # host (`export RR_ENGINE_BROKER_KEY=$(cat data/run/broker_key)`) to close it.
+      RR_ENGINE_BROKER_KEY: ${RR_ENGINE_BROKER_KEY:-}
+    volumes:
+      - ./data/ca:/data/ca
+    depends_on:
+      tor:
+        condition: service_started
+      redis:
+        condition: service_healthy
+  browser-worker:
+    build: ./browser-worker
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WORKER_PORT:-8090}:8090"
+    environment:
+      PORT: 8090
+      # worker.py defaults HOST to 127.0.0.1, which inside a container accepts
+      # only the container's own loopback. Docker publishes a port by DNAT-ing
+      # to the container's eth0 address, and the `web` service reaches
+      # browser-worker by service name, so both paths are refused unless the
+      # worker binds every interface. This mirrors how the engine already sets
+      # PROXY_LISTEN_ADDR/ENGINE_LISTEN_ADDR to 0.0.0.0.
+      HOST: 0.0.0.0
+  web:
+    build: ./web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"
+    environment:
+      ENGINE_URL: http://engine:8081
+      BROWSER_WORKER_URL: http://browser-worker:8090
+      PASSIVE_PROXY_URL: http://engine:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-requestrider}
+      POSTGRES_USER: ${POSTGRES_USER:-requestrider}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      WORKFLOW_ENGINE_BROKER_ENABLED: "true"
+      # Shared HMAC key for the task/result envelopes (audit A06-04); empty means
+      # compatibility mode. The web gateway signs every task it publishes.
+      RR_ENGINE_BROKER_KEY: ${RR_ENGINE_BROKER_KEY:-}
+      # The AI Agent node reads these three and refuses to run without them
+      # ("AGENT_LLM_ENDPOINT and AGENT_LLM_MODEL are required"), so a compose
+      # stack without them has a dead node with no visible cause. The key is
+      # optional on purpose: a local OpenAI-compatible endpoint needs no key,
+      # and a hardcoded default would be a secret in the repository.
+      AGENT_LLM_ENDPOINT: ${AGENT_LLM_ENDPOINT:-}
+      AGENT_LLM_MODEL: ${AGENT_LLM_MODEL:-}
+      AGENT_LLM_API_KEY: ${AGENT_LLM_API_KEY:-}
+      # A workflow tool node publishes its engine task to the broker and
+      # releases its worker; the answer comes back to `engine-results`, which
+      # is a *different container*. With the process-local runtime that answer
+      # has nowhere to resume: resume_waiting_workflow_run() calls
+      # get_runtime().start_recovered() in a process that holds no runtime, the
+      # node re-raises EngineTaskDeferred, and the run ends `failed` with
+      # "engine task ... is running outside the graph worker" instead of
+      # `waiting`. Routing runs through Celery gives the resume a durable
+      # owner: every mode above then hands the run to the celery worker, and
+      # the result consumer dispatches the same task.
+      WORKFLOW_CELERY_ENABLED: "true"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/').close()"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      engine:
+        condition: service_started
+      browser-worker:
+        condition: service_started
+
+  celery:
+    build: ./web
+    command: celery -A core worker --loglevel=info
+    restart: unless-stopped
+    environment:
+      # A Celery worker executes workflow runs, and a tool node (repeater,
+      # intruder, target, scanner, osint, oast) is dispatched by
+      # views.workflow_tool_runner, which reads these three names and falls
+      # back to 127.0.0.1 when they are unset. Inside this container 127.0.0.1
+      # is the worker itself, so every tool node failed with connection refused.
+      ENGINE_URL: http://engine:8081
+      BROWSER_WORKER_URL: http://browser-worker:8090
+      PASSIVE_PROXY_URL: http://engine:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-requestrider}
+      POSTGRES_USER: ${POSTGRES_USER:-requestrider}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      # Shared HMAC key for the task envelopes this worker publishes (audit A06-04).
+      RR_ENGINE_BROKER_KEY: ${RR_ENGINE_BROKER_KEY:-}
+      # This worker is the process that owns a resumed run, so it must agree
+      # with `web` on the mode: resume_waiting_workflow_run() dispatches here
+      # only when the flag is on, and stays in a process-local runtime when it
+      # is off - which is the run that no container can resume.
+      WORKFLOW_CELERY_ENABLED: "true"
+      WORKFLOW_ENGINE_BROKER_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+  engine-results:
+    build: ./web
+    command: python manage.py consume_engine_results
+    restart: unless-stopped
+    environment:
+      # consume_engine_results persists results read from the broker and can
+      # re-apply workflow state, which reaches the engine and the browser
+      # worker through the same three names as the Celery worker above.
+      ENGINE_URL: http://engine:8081
+      BROWSER_WORKER_URL: http://browser-worker:8090
+      PASSIVE_PROXY_URL: http://engine:8080
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-requestrider}
+      POSTGRES_USER: ${POSTGRES_USER:-requestrider}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      # Shared HMAC key for the result envelopes this consumer verifies (audit A06-04).
+      RR_ENGINE_BROKER_KEY: ${RR_ENGINE_BROKER_KEY:-}
+      # This consumer is what receives the engine answer and asks for the run
+      # to continue. It reads WORKFLOW_CELERY_ENABLED from *its own* environ,
+      # so without the flag here it would look for a process-local runtime
+      # inside a container that only consumes results and hold nothing.
+      WORKFLOW_CELERY_ENABLED: "true"
+      WORKFLOW_ENGINE_BROKER_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
