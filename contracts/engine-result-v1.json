@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "task_id": "6f0e8400-e29b-41d4-a716-446655440000",
+  "event_id": "7f0e8400-e29b-41d4-a716-446655440001",
+  "state": "completed",
+  "occurred_at": "2026-09-27T09:00:02Z",
+  "progress": {
+    "phase": "completed",
+    "completed": 1
+  },
+  "result": {
+    "pages": []
+  },
+  "sig": "hmac-sha256 hex over the canonical envelope without this field (web/lab/broker_auth.py, engine/broker_auth.go)"
+}

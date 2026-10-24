@@ -1,0 +1,100 @@
+  <section id="scanner" class="tab">
+    <div id="workspace-tabs-scanner" class="workspace-tabs" aria-label="Scanner workspaces" data-i18n-aria-label="a11y.workspacesScanner"></div>
+    <div class="workspace-title"><span data-i18n="scanner.title">Scanner</span><span class="muted" data-i18n="scanner.subtitle">Read-only reconnaissance</span></div>
+    <div class="scanner-view-switch" role="tablist" aria-label="Scanner view" data-i18n-aria-label="a11y.scannerView">
+      <button type="button" id="scanner-view-cms" role="tab" data-view="cms" aria-selected="true" aria-controls="scanner-panel-cms" data-i18n="scanner.viewCms">CMS scan</button>
+      <button type="button" id="scanner-view-active" role="tab" data-view="active" aria-selected="false" aria-controls="scanner-panel-active" data-i18n="scanner.viewActive">Active &amp; Corpus Scanner</button>
+    </div>
+    <div class="toolbar"><span class="muted" data-i18n="scanner.targetLabel">Target</span><input id="scanner-url" type="url" data-i18n-placeholder="scanner.urlPlaceholder" placeholder="https://example.test/" aria-label="Scanner target URL" data-i18n-aria-label="scanner.urlPlaceholder" style="flex:1;min-width:260px"></div>
+
+    <section id="scanner-panel-cms" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-cms" data-scanner-panel="cms">
+      <div class="hint" data-i18n="scanner.disclaimer">Scanner Pro performs read-only reconnaissance: CMS fingerprints, public paths, TLS, cookies, methods, headers, and configuration exposure signals. It does not exploit, fuzz, brute-force, or bypass access controls.</div>
+      <div class="toolbar">
+        <label class="scanner-type-control" for="scanner-profile"><span class="muted" data-i18n="scanner.profileLabel">Profile</span><select id="scanner-profile"><option value="generic_web" data-i18n="scanner.profileGenericWeb">Generic Web</option><option value="cms" data-i18n="scanner.profileCMS">CMS Focus</option><option value="api" data-i18n="scanner.profileAPI">API &amp; Cloud</option><option value="security_headers" data-i18n="scanner.profileSecurityHeaders">Security Headers (Passive)</option></select></label>
+        <button type="button" class="primary" id="scanner-run" data-i18n="scanner.run">Run Safe CMS Recon</button>
+        <button type="button" id="scanner-clear" data-i18n="scanner.clear">Clear</button>
+        <span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="cms"><button type="button" id="scanner-export-cms" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export cms scan" data-i18n-aria-label="scanner.exportCmsAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list" role="menu" hidden><button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button><button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button><button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.exportCsvHint">One row per file</span></button></div></div>
+        <button type="button" id="scanner-send-ai" data-i18n="button.sendScannerAI">Send scan to AI</button>
+        <button type="button" id="scanner-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+      </div>
+      <div class="workspace-title" id="scanner-cms-findings-title" hidden><span data-i18n="scanner.cmsFindingsTitle">Reconnaissance Findings</span><span id="scanner-cms-findings-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div class="toolbar" id="scanner-cms-filter-bar" hidden><input id="scanner-cms-filter" data-i18n-placeholder="scanner.cmsFilterHint" placeholder="Filter by finding, category, evidence or recommendation" style="flex:1;min-width:200px"><select id="scanner-cms-severity"><option value="" data-i18n="scanner.activeAllSeverities">All severities</option><option value="high">HIGH</option><option value="medium">MEDIUM</option><option value="low">LOW</option><option value="info">INFO</option></select><select id="scanner-cms-category"><option value="" data-i18n="scanner.cmsAllCategories">All categories</option><option value="cms">CMS</option><option value="admin">Admin</option><option value="api">API</option><option value="headers">Headers</option><option value="cookie">Cookie</option><option value="tls">TLS</option><option value="waf">WAF</option><option value="misconfiguration">Misconfiguration</option><option value="debug">Debug</option><option value="general">General</option></select></div>
+      <div class="exchange-list" id="scanner-cms-results" hidden><table><colgroup><col style="width:10%"><col style="width:12%"><col style="width:28%"><col style="width:25%"><col style="width:25%"></colgroup><thead><tr><th data-i18n="scanner.cmsColumnSeverity">Severity</th><th data-i18n="scanner.cmsColumnCategory">Category</th><th data-i18n="scanner.cmsColumnFinding">Finding</th><th data-i18n="scanner.cmsColumnEvidence">Evidence</th><th data-i18n="scanner.cmsColumnRecommendation">Recommendation</th></tr></thead><tbody id="scanner-cms-body"></tbody></table></div>
+      <details id="scanner-cms-raw-wrap" class="scanner-raw-details" style="margin-top:10px" open><summary class="muted" style="cursor:pointer;font-size:12px;user-select:none" data-i18n="scanner.cmsRawSummary">Diagnostic Raw Log</summary><pre id="scanner-findings" data-i18n="scanner.empty" style="margin-top:6px">Enter an authorized URL and run Safe CMS Recon.</pre></details>
+    </section>
+
+    <section id="scanner-panel-active" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-active" data-scanner-panel="active" hidden>
+      <div class="hint" data-i18n="scanner.activeHint">The active scanner crawls the target, finds every injectable surface, probes it with nine detector modules, correlates confirmed findings into attack chains, and runs the entire published vulnerability check corpus. A finding is rated only when its impact was demonstrated; everything else is marked unverified and capped below high.</div>
+      <div class="toolbar">
+        <button type="button" class="primary" id="scanner-active-run" data-i18n="scanner.activeRun">Start active scan</button>
+        <button type="button" id="scanner-corpus-run" data-i18n="scanner.corpusRun">Run corpus checks</button>
+        <button type="button" id="scanner-corpus-cancel" data-i18n="scanner.corpusCancel" data-i18n-title="scanner.corpusCancelTitle" hidden>Stop corpus</button>
+        <span class="status-badge" id="scanner-corpus-status" role="status" aria-live="polite"></span>
+        <span class="hint" id="scanner-corpus-skipped" aria-live="polite"></span>
+        <span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="active"><button type="button" id="scanner-export-active" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export active scan" data-i18n-aria-label="scanner.exportActiveAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list" role="menu" hidden><button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button><button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button><button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.activeExportCsvHint">One row per finding</span></button></div></div>
+      </div>
+      <div id="scanner-active-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-active-progress-phase" class="scanner-progress-phase"></span>
+          <span id="scanner-active-progress-pct" class="scanner-progress-pct"></span>
+          <span id="scanner-active-progress-elapsed" class="scanner-progress-elapsed"></span>
+          <button type="button" id="scanner-active-pause" class="scanner-progress-cancel" data-i18n="scanner.activePause" hidden>Pause</button>
+          <button type="button" id="scanner-active-resume" class="scanner-progress-cancel" data-i18n="scanner.activeResume" hidden>Resume</button>
+          <button type="button" id="scanner-active-cancel" class="scanner-progress-cancel" data-i18n="scanner.progressCancel">Cancel</button>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="scanner-active-progress-bar"><div class="scanner-progress-fill" id="scanner-active-progress-fill"></div><div class="scanner-progress-indeterminate" id="scanner-active-progress-indeterminate"></div></div>
+        <div class="scanner-progress-stats" id="scanner-active-progress-stats"></div>
+        <p class="scanner-progress-checkpoint" id="scanner-active-progress-checkpoint" role="status" aria-live="polite" hidden></p>
+        <div class="toolbar scanner-active-recovery" id="scanner-active-recovery" hidden>
+          <button type="button" id="scanner-active-resend" data-i18n="scanner.activeResend">Resend requests that never answered</button>
+          <span class="muted" id="scanner-active-resend-summary"></span>
+        </div>
+        <p class="scanner-progress-note" id="scanner-active-progress-note" hidden></p>
+      </div>
+      <div id="scanner-corpus-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-corpus-progress-phase" class="scanner-progress-phase"></span>
+          <span id="scanner-corpus-progress-pct" class="scanner-progress-pct"></span>
+          <span id="scanner-corpus-progress-elapsed" class="scanner-progress-elapsed"></span>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="scanner-corpus-progress-bar"><div class="scanner-progress-fill" id="scanner-corpus-progress-fill"></div><div class="scanner-progress-indeterminate" id="scanner-corpus-progress-indeterminate"></div></div>
+        <div class="scanner-progress-stats" id="scanner-corpus-progress-stats"></div>
+      </div>
+      <div class="hint" id="scanner-corpus-stats" aria-live="polite"></div>
+      <details id="scanner-active-options-wrap" open><summary data-i18n="scanner.optionsTitle">Scan options</summary>
+        <div class="scanner-options-primary">
+          <label class="scanner-option"><span data-i18n="scanner.activeMaxPages">Max pages</span><input id="scanner-active-max-pages" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeMaxDepth">Link depth</span><input id="scanner-active-max-depth" type="number" min="-1" step="1" placeholder="2"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeConcurrency">Workers</span><input id="scanner-active-concurrency" type="number" min="0" step="1" placeholder="8"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeDelay">Delay between probes (ms)</span><input id="scanner-active-delay" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeBlindDelay">Blind delay (ms)</span><input id="scanner-active-blind-delay" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeTimeout">Request timeout (ms)</span><input id="scanner-active-timeout" type="number" min="0" step="1" placeholder="15000"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeFailurePause">Pause after failures</span><input id="scanner-active-failure-pause" type="number" min="-1" step="1" placeholder="20"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeRecordedLimit">Requests kept for resend</span><input id="scanner-active-recorded" type="number" min="-1" step="1" placeholder="200"></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-same-origin" checked><span data-i18n="scanner.activeSameOrigin">Stay on the same host</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-follow-redirects"><span data-i18n="scanner.optFollowRedirects">Follow redirects</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-include-corpus" checked><span data-i18n="scanner.activeIncludeCorpus">Include published corpus checks</span></label>
+        </div>
+        <div class="scanner-options-primary">
+          <label class="scanner-option scanner-option-wide"><span data-i18n="scanner.activeParams">Hidden parameter names, one per line</span><textarea id="scanner-active-params" rows="3" spellcheck="false" data-i18n-placeholder="scanner.activeParamsHint" placeholder="report_token&#10;debug"></textarea></label>
+          <label class="scanner-option scanner-option-wide"><span data-i18n="scanner.activeWordlist">Path wordlist, one path per line</span><textarea id="scanner-active-wordlist" rows="3" spellcheck="false" data-i18n-placeholder="scanner.activeWordlistHint" placeholder="/admin/&#10;/.env"></textarea></label>
+        </div>
+        <p class="hint" data-i18n="scanner.activeWordlistsNote">Both lists are yours and both are optional: an empty list means the run does not spend a single request on that probe. The parameter names are what the Target crawl read out of the application's own JavaScript — copy them from the Target panel — and the wordlist is a path dictionary.</p>
+        <p class="hint" data-i18n="scanner.activeOptionsHint">Every field is a number you chose: 0 for pages and delay means no bound, −1 for depth means follow links without a depth limit, and no value here reduces what the run can look at. The run stops when you cancel it or the target stops answering.</p>
+      </details>
+      <div class="workspace-title" id="scanner-active-findings-title" hidden><span data-i18n="scanner.activeFindingsTitle">Findings</span><span id="scanner-active-findings-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div class="toolbar" id="scanner-active-filter-bar" hidden><input id="scanner-active-filter" data-i18n-placeholder="scanner.activeFilterHint" placeholder="Filter by title, module, endpoint or evidence" style="flex:1;min-width:200px"><select id="scanner-active-severity"><option value="" data-i18n="scanner.activeAllSeverities">All severities</option><option value="critical">CRITICAL</option><option value="high">HIGH</option><option value="medium">MEDIUM</option><option value="low">LOW</option><option value="info">INFO</option></select><label class="muted"><input type="checkbox" id="scanner-active-verified-only"> <span data-i18n="scanner.activeProvenOnly">Proven impact only</span></label></div>
+      <div class="exchange-list" id="scanner-active-results" hidden><table><colgroup><col style="width:11%"><col style="width:12%"><col style="width:11%"><col style="width:33%"><col style="width:33%"></colgroup><thead><tr><th data-i18n="scanner.activeColumnSeverity">Severity</th><th data-i18n="scanner.activeColumnProof">Proof</th><th data-i18n="scanner.activeColumnModule">Module</th><th data-i18n="scanner.activeColumnEndpoint">Endpoint</th><th data-i18n="scanner.activeColumnEvidence">Evidence</th></tr></thead><tbody id="scanner-active-body"></tbody></table></div>
+      <p class="scanner-plan" id="scanner-active-plan" hidden></p>
+      <details id="scanner-corpus-details-wrap" hidden style="display:none"><summary data-i18n="scanner.corpusDetailsTitle">Corpus Database Checks &amp; Details</summary>
+        <div class="toolbar" id="scanner-corpus-bar" style="margin-top:8px"><input id="scanner-corpus-filter" data-i18n-placeholder="scanner.corpusFilter" placeholder="Filter by path, check or evidence" style="flex:1;min-width:200px"></div>
+        <div class="exchange-list" id="scanner-corpus-findings" hidden><table><colgroup><col style="width:7%"><col style="width:8%"><col style="width:31%"><col style="width:8%"><col style="width:22%"><col style="width:24%"></colgroup><thead><tr><th data-i18n="scanner.corpusColId">#</th><th data-i18n="scanner.corpusColMethod">Method</th><th data-i18n="scanner.corpusColPath">Path</th><th data-i18n="scanner.corpusColStatus">Status</th><th data-i18n="scanner.corpusColCheck">Check</th><th data-i18n="scanner.corpusColEvidence">Evidence</th></tr></thead><tbody id="scanner-corpus-rows"></tbody></table></div>
+        <div class="scanner-more" id="scanner-corpus-more" hidden><button type="button" class="scanner-more-btn" id="scanner-corpus-more-btn" data-i18n="scanner.corpusShowMore">Show more</button></div>
+        <div class="hint" id="scanner-corpus-note" aria-live="polite"></div>
+      </details>
+    </section>
+
+    <div id="scanner-status" class="status"></div>
+  </section>

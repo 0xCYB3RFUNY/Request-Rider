@@ -1,0 +1,45 @@
+  <section id="repeater" class="tab active">
+    <div id="workspace-tabs-repeater" class="workspace-tabs" aria-label="Repeater workspaces" data-i18n-aria-label="a11y.workspacesRepeater"></div>
+    <div class="toolbar"><span class="muted" data-i18n="repeater.rawEditor">Редактор raw HTTP-запиту</span><input id="repeater-host" placeholder="Host" data-i18n-placeholder="host" aria-label="Repeater target host" data-i18n-aria-label="a11y.repeaterHost" style="min-width:180px"><input id="repeater-path" placeholder="Шлях / запит" data-i18n-placeholder="path" aria-label="Repeater request path" data-i18n-aria-label="a11y.repeaterPath" style="flex:1;min-width:220px"><button class="primary" id="send" data-i18n="button.send">Надіслати</button><button id="copy" data-i18n="button.copyResponse">Копіювати відповідь</button>    <button id="repeater-compare-response" data-i18n="repeater.compareResponse">Compare response</button><button id="clear" data-i18n="button.clear">Очистити</button><button type="button" id="repeater-send-ai" data-i18n="button.sendExchangeAI">Send exchange to AI</button><button type="button" id="repeater-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+    <button type="button" id="repeater-copy-curl" title="Copy as cURL" data-i18n-title="row.copyCurl"><span aria-hidden="true">📋</span> cURL</button>
+    <button type="button" id="repeater-inspector-btn" title="Toggle request inspector" data-i18n-title="a11y.toggleInspector" style="margin-left:auto"><span aria-hidden="true">🔍</span> <span data-i18n="repeater.inspectorButton">Inspector</span></button>
+    </div>
+    <!-- P0: HTTP Request Inspector -->
+    <div id="req-inspector-wrap">
+      <div id="req-inspector-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="req-inspector-body">
+        <span><span aria-hidden="true">🔍</span> <span data-i18n="repeater.inspectorTitle">Request Inspector — Query Params · Headers · Body</span></span>
+        <span class="ri-arrow">▾</span>
+      </div>
+      <div id="req-inspector-body" role="region">
+        <div class="ri-section" id="ri-params-section">
+          <div class="ri-tabs">
+            <button type="button" class="active" id="ri-tab-params" data-i18n="repeater.queryParams" data-ri-tab="params">Query params</button>
+            <button type="button" id="ri-tab-body" data-i18n="repeater.bodyParams" data-ri-tab="body">Body params</button>
+          </div>
+          <div id="ri-params-view">
+            <table class="ri-table" id="ri-params-table"><thead><tr><th data-i18n="table.key">Key</th><th data-i18n="table.value">Value</th><th></th></tr></thead><tbody id="ri-params-tbody"></tbody></table>
+            <button type="button" id="ri-add-param" data-i18n="repeater.addParam" style="margin-top:5px;font-size:11px;min-height:26px;padding:3px 8px">+ Add param</button>
+          </div>
+          <div id="ri-body-view" style="display:none">
+            <table class="ri-table" id="ri-body-table"><thead><tr><th data-i18n="table.key">Key</th><th data-i18n="table.value">Value</th><th></th></tr></thead><tbody id="ri-body-tbody"></tbody></table>
+          </div>
+        </div>
+        <div class="ri-section" id="ri-headers-section">
+          <h4 data-i18n="repeater.headers">Headers</h4>
+          <table class="ri-table" id="ri-headers-table"><thead><tr><th data-i18n="table.name">Name</th><th data-i18n="table.value">Value</th></tr></thead><tbody id="ri-headers-tbody"></tbody></table>
+        </div>
+        <div class="ri-section" id="ri-raw-section">
+          <h4 data-i18n="repeater.raw">Raw</h4>
+          <pre id="ri-raw-preview" class="code-editor"></pre>
+        </div>
+      </div>
+    </div>
+    <!-- Raw Repeater workbench mirrors the reference request/response split view. -->
+    <div class="workspace">
+      <section><div class="workspace-title"><span data-i18n="label.request">Запит</span><span class="muted" data-i18n="repeater.shortcut">Ctrl/Cmd + Enter для надсилання</span></div><div class="raw-editor-stack"><pre id="repeater-raw-highlight" class="raw-editor-highlight" aria-hidden="true"></pre><textarea id="repeater-raw-request" class="code-editor raw-editor" spellcheck="false" placeholder="GET /api/echo?value=test HTTP/1.1&#10;Host: 127.0.0.1:3000&#10;Accept: application/json&#10;&#10;"></textarea></div></section>
+      <section>
+        <div class="workspace-title"><span data-i18n="label.response">Відповідь</span><span id="repeater-response-meta" class="muted"></span></div>
+        <pre id="response" class="code-editor" data-i18n="response.empty">Відповідь з'явиться тут.</pre>
+      </section>
+    </div>
+  </section>

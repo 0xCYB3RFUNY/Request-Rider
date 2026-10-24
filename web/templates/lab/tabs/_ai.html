@@ -1,0 +1,169 @@
+  <section id="ai" class="tab">
+    <div id="workspace-tabs-ai" class="workspace-tabs" aria-label="AI workspaces" data-i18n-aria-label="a11y.workspacesAi"></div>
+    <div class="ai-main-container">
+      <!-- AI Sidebar -->
+      <aside class="ai-sidebar" id="ai-sidebar">
+        <div class="ai-sidebar-header">
+          <div class="ai-sidebar-title">
+            <svg viewBox="0 0 24 24" class="ai-icon-sm" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 2a10 10 0 0 1 10 10"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>AI SecOps</span>
+          </div>
+          <button type="button" class="ai-icon-btn" id="ai-clear-chat" title="Clear chat" data-i18n-title="ai.clear">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+
+        <div class="ai-sidebar-section">
+          <div class="ai-sidebar-section-title" data-i18n="ai.quickPresets">Quick audit presets</div>
+          <div class="ai-presets-list">
+            <button type="button" class="ai-preset-card" data-preset="vuln_analysis">
+              <span class="ai-preset-icon">🛡️</span>
+              <div class="ai-preset-info">
+                <strong data-i18n="ai.presetVulnTitle">Vulnerability analysis</strong>
+                <small data-i18n="ai.presetVulnDesc">Scan OWASP Top-10 & BOLA/IDOR</small>
+              </div>
+            </button>
+            <button type="button" class="ai-preset-card" data-preset="headers_check">
+              <span class="ai-preset-icon">🔒</span>
+              <div class="ai-preset-info">
+                <strong data-i18n="ai.presetHeadersTitle">Security Headers & CSP</strong>
+                <small data-i18n="ai.presetHeadersDesc">Audit headers and cookies</small>
+              </div>
+            </button>
+            <button type="button" class="ai-preset-card" data-preset="poc_generator">
+              <span class="ai-preset-icon">⚡</span>
+              <div class="ai-preset-info">
+                <strong data-i18n="ai.presetPocTitle">PoC exploit generation</strong>
+                <small data-i18n="ai.presetPocDesc">Generate test payload</small>
+              </div>
+            </button>
+            <button type="button" class="ai-preset-card" data-preset="report_summary">
+              <span class="ai-preset-icon">📝</span>
+              <div class="ai-preset-info">
+                <strong data-i18n="ai.presetReportTitle">Security report</strong>
+                <small data-i18n="ai.presetReportDesc">Findings summary and remediation</small>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="ai-sidebar-section ai-sidebar-attached-section">
+          <div id="agent-attached-evidence" class="agent-attached" aria-live="polite"></div>
+        </div>
+      </aside>
+
+      <!-- AI Main Chat Pane -->
+      <main class="ai-chat-pane">
+        <!-- Compact Clean Header Bar -->
+        <header class="ai-chat-header">
+          <div class="ai-model-selector-bar">
+            <div class="ai-status-indicator" id="ai-status-indicator" title="LLM Ready">
+              <span class="ai-status-dot"></span>
+              <span class="ai-status-text" id="ai-status-label">Ready</span>
+            </div>
+            <div class="ai-provider-pill">
+              <label for="agent-provider" class="sr-only" data-i18n="ai.provider">Provider</label>
+              <select id="agent-provider">
+                <option value="ollama">Ollama (local)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic Claude</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="groq">Groq</option>
+                <option value="mistral">Mistral</option>
+                <option value="openai_compatible">Custom OpenAI-compatible</option>
+              </select>
+            </div>
+            <div class="ai-model-badge" id="ai-current-model-badge" title="Current model" data-i18n-title="ai.currentModelTooltip">
+              llama3.1
+            </div>
+          </div>
+
+          <div class="ai-header-actions">
+            <label class="ai-project-ctx-toggle ai-react-agent-toggle" title="Autonomous investigation with tool execution (ReAct Loop: traffic search, endpoint testing, vulnerability logging)" data-i18n-title="ai.reactAgentTooltip">
+              <input id="agent-react-autonomous-mode" type="checkbox" checked>
+              <span class="ai-ctx-label" style="color:#c084fc;font-weight:600" data-i18n="ai.reactAgentLabel">⚡ Autonomous Agent (ReAct)</span>
+            </label>
+
+            <label class="ai-project-ctx-toggle" title="Include active Project context" data-i18n-title="ai.useProjectContext">
+              <input id="agent-use-project-context" type="checkbox">
+              <span class="ai-ctx-label" data-i18n="ai.useProjectContext">Project context</span>
+            </label>
+            <span id="agent-project-context-hint" class="muted ai-ctx-hint" aria-live="polite"></span>
+
+            <button type="button" class="ai-header-btn" id="ai-open-settings" title="Advanced model settings" data-i18n-title="ai.settingsTooltip">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span data-i18n="ai.settingsLabel">Settings</span>
+            </button>
+            <div class="export-menu" data-export-menu="ai">
+              <button type="button" id="ai-export-btn" class="export-export-trigger ai-header-btn" aria-haspopup="menu" aria-expanded="false" title="Export audit results and dialogue" data-i18n-title="ai.exportTooltip" style="display:inline-flex;align-items:center;gap:4px">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span data-i18n="ai.exportLabel">Export</span>
+                <svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="export-menu-list" role="menu" hidden>
+                <button type="button" role="menuitem" data-format="html">
+                  <b data-i18n="ai.exportHtmlTitle">HTML Report</b>
+                  <span data-i18n="ai.exportHtmlDesc">Interactive audit report</span>
+                </button>
+                <button type="button" role="menuitem" data-format="json">
+                  <b data-i18n="ai.exportJsonTitle">JSON Export</b>
+                  <span data-i18n="ai.exportJsonDesc">Dialogue and ReAct steps</span>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="ai-header-btn" id="ai-send-automation" data-i18n-title="button.sendAutomation">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span data-i18n="ai.sendToAutomation">To Automation</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Log -->
+        <div id="agent-chat-log" class="agent-chat-log" aria-live="polite">
+          <div class="agent-empty" data-i18n="agent.startConversation">Start a QA conversation.</div>
+        </div>
+
+        <!-- Modern Claude/ChatGPT Style Input Bar -->
+        <div class="ai-chat-input-container">
+          <!-- Quick action chips -->
+          <div class="ai-quick-chips">
+            <button type="button" class="ai-chip" data-preset-chip="sqli" data-i18n="ai.chipSqliLabel">💉 Test SQLi & IDOR</button>
+            <button type="button" class="ai-chip" data-preset-chip="cookies" data-i18n="ai.chipCookiesLabel">🍪 Check Cookies & Auth</button>
+            <button type="button" class="ai-chip" data-preset-chip="poc" data-i18n="ai.chipPocLabel">🎯 PoC for Repeater</button>
+            <button type="button" class="ai-chip" data-preset-chip="summary" data-i18n="ai.chipSummaryLabel">📋 Report summary</button>
+          </div>
+
+          <div class="ai-input-box-wrapper" id="ai-input-box-wrapper">
+            <div id="ai-attached-files-bar" class="ai-attached-files-bar" style="display:none"></div>
+            <textarea id="agent-chat-input" rows="1" placeholder="Ask a security question or attach crawler/scanner report (Ctrl+Enter to send)..." data-i18n-placeholder="ai.chatPlaceholder"></textarea>
+            <div class="ai-input-box-footer">
+              <div class="ai-input-left-tools">
+                <button type="button" class="ai-attach-file-btn" id="ai-attach-file-btn" title="Attach report (HTML, JSON, HAR, TXT, CSV)" data-i18n-title="ai.attachReportTitle">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                  <span data-i18n="ai.attachReportLabel">Attach report</span>
+                </button>
+                <input type="file" id="ai-file-input" accept=".json,.html,.htm,.txt,.log,.har,.xml,.csv,.md" multiple hidden>
+                <div class="ai-input-hints">
+                  <span class="ai-kbd-hint">Ctrl + Enter</span> <span data-i18n="ai.kbdSend">to send</span>
+                </div>
+              </div>
+              <button type="button" class="ai-send-button" id="agent-chat-send" title="Send message" data-i18n-title="button.sendChat">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Hidden native inputs strictly hidden via inline style for safety -->
+    <div style="display:none !important">
+      <input id="agent-endpoint" type="url" data-i18n-placeholder="ai.endpoint">
+      <input id="agent-model" data-i18n-placeholder="ai.model">
+      <input id="agent-api-key" type="password" autocomplete="off" data-i18n-placeholder="ai.apiKey">
+    </div>
+  </section>

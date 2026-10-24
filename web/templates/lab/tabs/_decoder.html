@@ -1,0 +1,27 @@
+  <section id="decoder" class="tab">
+    <div id="workspace-tabs-decoder" class="workspace-tabs" aria-label="Decoder workspaces" data-i18n-aria-label="a11y.workspacesDecoder"></div>
+    <div class="workspace-title"><span data-i18n="decoder.title">Decoder</span><span class="muted" data-i18n="decoder.subtitle">Encode, decode and transform request data</span></div>
+    <div class="toolbar">
+      <select id="decoder-operation" aria-label="Decoder operation" data-i18n-aria-label="decoder.operation">
+        <option value="urlEncode">URL encode</option><option value="urlDecode">URL decode</option>
+        <option value="base64Encode">Base64 encode</option><option value="base64Decode">Base64 decode</option>
+        <option value="base64UrlEncode">Base64 URL-safe encode</option><option value="base64UrlDecode">Base64 URL-safe decode</option>
+        <option value="htmlEncode">HTML encode</option><option value="htmlDecode">HTML decode</option>
+        <option value="hexEncode">Hex encode</option><option value="hexDecode">Hex decode</option>
+        <option value="asciiHexEncode">ASCII Hex encode</option><option value="asciiHexDecode">ASCII Hex decode</option>
+        <option value="octalEncode">Octal encode</option><option value="octalDecode">Octal decode</option>
+        <option value="gzipEncode">Gzip encode</option><option value="gzipDecode">Gzip decode</option>
+        <option value="byteEncode">Byte encode</option><option value="byteDecode">Byte decode</option>
+        <option value="jsonPretty">JSON pretty-print</option><option value="jsonMinify">JSON minify</option>
+        <option value="sha256">SHA-256 hash</option>
+      </select>
+      <button type="button" class="primary" id="decoder-apply" data-i18n="decoder.apply">Apply</button>
+      <button type="button" id="decoder-swap" data-i18n="decoder.swap">Swap input/output</button>
+      <button type="button" id="decoder-clear" data-i18n="decoder.clear">Clear</button>
+      <button type="button" id="decoder-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+    </div>
+    <div class="comparer-grid">
+      <section><div class="workspace-title"><span data-i18n="decoder.input">Input</span><span class="muted" data-i18n="decoder.inputHint">Text or hexadecimal data</span></div><textarea id="decoder-input" spellcheck="false" data-i18n-placeholder="decoder.inputPlaceholder" placeholder="Paste a value, request fragment or response body"></textarea></section>
+      <section><div class="workspace-title"><span data-i18n="decoder.output">Output</span><span id="decoder-status" class="muted"></span></div><textarea id="decoder-output" spellcheck="false" readonly data-i18n-placeholder="decoder.outputPlaceholder" placeholder="Decoded value will appear here"></textarea></section>
+    </div>
+  </section>

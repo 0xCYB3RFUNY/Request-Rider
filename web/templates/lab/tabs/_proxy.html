@@ -1,0 +1,35 @@
+  <section id="proxy" class="tab">
+    <div id="workspace-tabs-proxy" class="workspace-tabs" aria-label="Proxy workspaces" data-i18n-aria-label="a11y.workspacesProxy"></div>
+    <div class="workspace">
+      <section>
+        <div class="workspace-title"><span data-i18n="proxy.title">Proxy route</span><span class="muted" data-i18n="proxy.subtitle">Shared outbound route for active tools</span></div>
+        <div class="grid">
+          <label for="route-address" data-i18n="proxy.address">SOCKS5 address</label>
+          <input id="route-address" type="text" value="" placeholder="host:port (empty = direct)" data-i18n-placeholder="route.address">
+        </div>
+        <div class="hint" data-i18n="proxy.hint">Repeater, Intruder, Target, OSINT, Scanner and the passive proxy share this route. Apply/Cancel route cancels active old-route operations, including AI and Automation.</div>
+        <div class="toolbar"><button type="button" class="primary" id="route-apply" data-i18n="route.apply">Apply route</button><button type="button" id="route-cancel" data-i18n="route.cancel">Cancel route</button><span id="route-status" class="muted" aria-live="polite"></span></div>
+        <div class="toolbar">
+          <input id="route-check-url" type="url" value="https://check.torproject.org/" placeholder="https://check.torproject.org/" data-i18n-placeholder="proxy.targetPlaceholder" style="flex:1;min-width:260px">
+          <label style="padding-top:0;text-transform:none"><span data-i18n="proxy.timeout">Timeout ms</span> <input id="route-check-timeout" type="number" min="1000"  step="500" value="15000" style="width:110px"></label>
+          <button type="button" id="route-check" data-i18n="proxy.check">Check connection</button>
+        </div>
+        <div id="route-check-status" class="status"></div>
+        <div class="hint proxy-check-sites">
+          <strong data-i18n="proxy.checkSitesTitle">Сайти для ручної перевірки</strong>
+          <span data-i18n="proxy.checkSitesHint">Відкривайте їх у браузері з proxy 127.0.0.1:8080 або перевіряйте через активний маршрут.</span>
+          <span class="proxy-check-links">
+            <a href="https://check.torproject.org/" target="_blank" rel="noopener noreferrer" data-i18n="proxy.torCheck">Tor Check</a>
+            <a href="https://ifconfig.me/ip" target="_blank" rel="noopener noreferrer">ifconfig.me</a>
+            <a href="https://icanhazip.com/" target="_blank" rel="noopener noreferrer">icanhazip</a>
+            <a href="https://ipinfo.io/json" target="_blank" rel="noopener noreferrer">ipinfo.io</a>
+          </span>
+        </div>
+      </section>
+      <section>
+        <div class="workspace-title"><span data-i18n="proxy.current">Current route</span></div>
+        <pre id="route-summary">Loading route...</pre>
+        <pre id="route-check-result" data-i18n="proxy.checkEmpty">Run a route check to see target status, latency and external IP.</pre>
+      </section>
+    </div>
+  </section>

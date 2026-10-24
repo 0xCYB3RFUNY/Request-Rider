@@ -1,0 +1,276 @@
+<script nonce="{{ csp_nonce }}">
+function ctxMenuModel(source) {
+  const inspect = {key: 'inspect', icon: '🔍', label: tr('row.inspect')};
+  const repeater = {key: 'repeater', icon: '↩', label: tr('row.sendRepeater')};
+  const intruder = {key: 'intruder', icon: '⚡', label: tr('row.sendIntruder')};
+  const compareReq = {key: 'compare-req', icon: '↔', label: tr('button.compareRequest')};
+  const compareResp = {key: 'compare-resp', icon: '↔', label: tr('button.compareResponse')};
+  const decodeReq = {key: 'decode-req', icon: '{}', label: tr('button.decodeRequest')};
+  const decodeResp = {key: 'decode-resp', icon: '{}', label: tr('button.decodeResponse')};
+  const tag = {key: 'tag', icon: '🏷', label: tr('button.tagNote')};
+  const curl = {key: 'curl', icon: '📋', label: tr('row.copyCurl')};
+  const json = {key: 'json', icon: '📄', label: tr('row.copyJson')};
+  const copy = {key: 'copy', icon: '📋', label: tr('button.copy')};
+  const save = {key: 'save', icon: '📋', label: tr('button.saveRow')};
+  const exportEvidence = {key: 'export-evidence', icon: '📤', label: tr('target.exportEvidence')};
+  const remove = {key: 'delete', icon: '🗑', label: tr('button.remove'), danger: true};
+  const scanner = {key: 'scanner', icon: '🔍', label: tr('nav.scanner')};
+  const compare = {key: 'compare', icon: '↔', label: tr('button.compare')};
+  const workflow = {key: 'workflow', icon: '🚀', label: tr('button.sendAutomation')};
+  switch (source) {
+    case 'traffic':
+      return [inspect, repeater, intruder, 'sep', compareReq, compareResp, decodeReq, decodeResp, tag, 'sep', curl, json, save, workflow];
+    case 'history':
+      return [inspect, repeater, intruder, 'sep', compareReq, compareResp, decodeReq, decodeResp, tag, 'sep', curl, json, copy, remove, workflow];
+    case 'attack':
+      return [inspect, compare, repeater, workflow];
+    case 'target':
+      // The evidence export sits next to the two send-actions because it is the
+      // third thing an analyst does with a row: hand it to somebody. It is
+      // offered on every row, not only on the ones with a finding, because a row
+      // without a finding still has a URL, a status and a content type, and the
+      // export is of the row.
+      return [exportEvidence, repeater, intruder, workflow];
+    default:
+      return [repeater, intruder, scanner, workflow];
+  }
+}
+
+async function sendRequestToAutomation(request) {
+  try {
+    const headers = {...(request?.headers || request?.request_headers || {})};
+    const params = {
+      method: request?.method || 'GET',
+      url: request?.url || '',
+      headers,
+      body: request?.body ?? request?.request_body ?? '',
+      delay_ms: 0
+    };
+    if (!params.url) throw new Error(tr('automation.emptyRepeater'));
+    const index = workflowNodes.length;
+    const node = {
+      id: `repeater_row_${Date.now().toString(36)}`,
+      type: 'repeater',
+      name: 'Repeater request',
+      params: cloneWorkspaceValue(params),
+      position: {x: 90 + (index % 4) * 230, y: 90 + Math.floor(index / 4) * 150},
+      disabled: false
+    };
+    workflowNodes.push(node);
+    let trigger = workflowNodes.find(item => item.type === 'manual_trigger' && !item.disabled);
+    if (!workflowNodes.some(item => !item.disabled && ['manual_trigger', 'schedule_trigger', 'webhook_trigger'].includes(item.type))) {
+      trigger = {
+        id: 'manual_trigger_from_tool',
+        type: 'manual_trigger',
+        name: workflowNodeLabel('manual_trigger'),
+        position: {x: 90, y: 90},
+        params: {},
+        disabled: false
+      };
+      workflowNodes.unshift(trigger);
+    }
+    if (trigger && !workflowConnections.some(edge => edge.source === trigger.id && edge.target === node.id)) {
+      workflowConnections.push({source: trigger.id, target: node.id, source_handle: 'main', target_handle: 'main'});
+    }
+    workflowSelectedNodeId = node.id;
+    workflowMarkDirty();
+    syncWorkflowAutomationContext();
+    document.querySelector('[data-tab="automation"]')?.click();
+    const saved = await saveWorkflow();
+    if (!saved) return;
+    $('session-status').textContent = `${tr('button.sendAutomation')}: ${workflowNodeLabel(node.type)}`;
+  } catch (error) {
+    $('session-status').textContent = `${tr('automation.transferError')}: ${error.message}`;
+  }
+}
+
+async function ctxRunAction(source, action, resolved) {
+  const {item, ref, request} = resolved;
+  switch (action) {
+    case 'inspect': {
+      // Both listings draw row columns only, so `Inspect` reads the complete
+      // exchange through the same resolver the row click uses. Without it this
+      // menu showed an empty body for every row the operator had not opened yet,
+      // and a summary row from the database would have looked like a broken one.
+      if (source === 'history') {
+        const targets = ['history-request-inspector', 'history-response-inspector'];
+        const record = await ensureHistoryRecord(ref, {loading: targets});
+        if (!record) return;
+        $('history-request-inspector').innerHTML = highlightHTTPText(formatRequest(record));
+        $('history-response-inspector').innerHTML = highlightHTTPText(formatResponse(record));
+      } else if (source === 'traffic') {
+        const targets = ['traffic-request-inspector', 'traffic-response-inspector'];
+        const event = await ensureTrafficEvent(ref, {loading: targets});
+        if (!event) return;
+        $('traffic-request-inspector').innerHTML = highlightHTTPText(formatRequest(event));
+        $('traffic-response-inspector').innerHTML = highlightHTTPText(formatResponse(event));
+      } else if (source === 'attack') {
+        showAttackResult(resolved.result);
+      }
+      break;
+    }
+    case 'repeater':
+      loadTrafficItem(item, 'repeater');
+      break;
+    case 'intruder':
+      loadTrafficItem(item, 'intruder');
+      break;
+    case 'compare': {
+      const result = resolved.result || {};
+      sendToComparer(formatResponse({
+        status: result.status,
+        status_text: result.status_text,
+        response_headers: result.headers || {},
+        response_body: result.body || '',
+        response_body_base64: result.body_base64,
+        error: result.error
+      }));
+      break;
+    }
+    case 'compare-req':
+      sendToComparer(formatRequest(item), 'left');
+      break;
+    case 'compare-resp':
+      sendToComparer(formatResponse(item), 'right');
+      break;
+    case 'decode-req':
+      sendToDecoder(formatRequest(item));
+      break;
+    case 'decode-resp':
+      sendToDecoder(formatResponse(item));
+      break;
+    case 'tag':
+      await promptAnnotation(item, source === 'history' ? 'history' : 'traffic');
+      break;
+    case 'curl': {
+      const ok = await copyCurlToClipboard(buildCurlFromItem(item));
+      const icon = ctxMenu.querySelector('[data-ctx-action="curl"] .ctx-icon');
+      if (icon) icon.textContent = ok ? '✓' : '✗';
+      setTimeout(closeCtxMenu, 800);
+      return;
+    }
+    case 'json':
+      await copyCurlToClipboard(JSON.stringify({request: formatRequest(item), response: formatResponse(item)}, null, 2));
+      setTimeout(closeCtxMenu, 400);
+      return;
+    case 'copy':
+      await navigator.clipboard.writeText(JSON.stringify(item, null, 2));
+      break;
+    case 'save':
+      // The namespaced key names a durable row unambiguously: its `id` is the
+      // proxy event id, which a live event of another session can also carry.
+      downloadJSON(`traffic-${(source === 'traffic' ? trafficRowKey(item) : item.id) || ref}.json`, {
+        format: 'intruder-lab-http-exchange',
+        version: 1,
+        id: item.id,
+        request: formatRequest(item),
+        response: formatResponse(item),
+        item
+      });
+      break;
+    case 'delete':
+      await fetch(`/api/history/${item.id}`, {method: 'DELETE'});
+      loadHistoryWithFilters();
+      break;
+    case 'scanner': {
+      const net = resolved.network || {};
+      try {
+        const parsed = new URL(net.url);
+        $('scanner-url').value = parsed.origin + parsed.pathname;
+      } catch {
+        showToast('Scanner', 'Invalid target URL.', 'warning');
+        break;
+      }
+      document.querySelector('[data-tab="scanner"]').click();
+      break;
+    }
+    case 'export-evidence':
+      exportTargetRowEvidence(resolved, source);
+      break;
+    case 'workflow':
+      closeCtxMenu();
+      await sendRequestToAutomation(request);
+      return;
+    default:
+      break;
+  }
+  closeCtxMenu();
+}
+
+function ctxRowLabel(source, resolved) {
+  const {item, ref} = resolved;
+  const short = (value, length) => {
+    const text = String(value || '').trim();
+    return text;
+  };
+  if (source === 'attack') {
+    const result = resolved.result || {};
+    return `#${ref} · ${result.status ?? result.status_text ?? (result.error ? 'ERROR' : 'result')}`;
+  }
+  if (source === 'target' || source === 'network') {
+    return `#${ref} · ${short(item.url, 52) || 'target'}`;
+  }
+  return `#${ref} · ${short(item.method || 'GET', 8)} ${short(item.host || item.url, 44)}`.trim();
+}
+
+function openRowMenu(source, ref, anchorRect) {
+  const resolved = ctxResolve(source, ref);
+  if (!resolved || !ctxMenu) return;
+  ctxOpenKey = `${source}:${ref}`;
+  ctxMenu.innerHTML = `<div class="ctx-menu-head">${escapeHTML(ctxRowLabel(source, resolved))}</div>` + ctxMenuModel(source).map(entry => entry === 'sep'
+    ? '<hr>'
+    : `<button type="button" data-ctx-action="${entry.key}"${entry.danger ? ' class="danger"' : ''}><span class="ctx-icon">${entry.icon}</span> ${escapeHTML(entry.label)}</button>`
+  ).join('');
+  ctxMenu.style.display = 'block';
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const mw = ctxMenu.offsetWidth, mh = ctxMenu.offsetHeight;
+  let left = Math.min(anchorRect.right, vw - mw - 8);
+  let top = anchorRect.bottom + 4;
+  if (top + mh > vh - 8) top = Math.max(8, anchorRect.top - mh - 4);
+  ctxMenu.style.left = `${Math.max(8, left)}px`;
+  ctxMenu.style.top = `${top}px`;
+  ctxMenu.onclick = event => {
+    const button = event.target.closest('[data-ctx-action]');
+    if (!button) return;
+    ctxRunAction(source, button.dataset.ctxAction, resolved);
+  };
+}
+
+function closeCtxMenu() {
+  if (!ctxMenu) return;
+  ctxMenu.style.display = 'none';
+  ctxMenu.onclick = null;
+  ctxOpenKey = null;
+}
+
+// Close on outside click / Escape / scroll / resize
+document.addEventListener('click', e => { if (ctxMenu && !ctxMenu.contains(e.target) && !e.target.classList.contains('ctx-trigger')) closeCtxMenu(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && ctxMenu && ctxMenu.style.display === 'block') {
+    closeCtxMenu();
+    ctxLastTrigger?.focus?.();
+  }
+});
+document.addEventListener('scroll', () => { if (ctxMenu && ctxMenu.style.display === 'block') closeCtxMenu(); }, true);
+window.addEventListener('resize', () => { if (ctxMenu && ctxMenu.style.display === 'block') closeCtxMenu(); });
+
+// Wire ⋯ triggers in Traffic, History, Intruder and Target tables via delegation
+document.addEventListener('click', e => {
+  const trigger = e.target.closest('[data-ctx-traffic],[data-ctx-history],[data-ctx-attack],[data-ctx-target],[data-ctx-network]');
+  if (!trigger) return;
+  e.stopPropagation();
+  const dataset = trigger.dataset;
+  const source = dataset.ctxTraffic !== undefined ? 'traffic'
+    : dataset.ctxHistory !== undefined ? 'history'
+    : dataset.ctxAttack !== undefined ? 'attack'
+    : dataset.ctxTarget !== undefined ? 'target' : 'network';
+  const ref = dataset.ctxTraffic ?? dataset.ctxHistory ?? dataset.ctxAttack ?? dataset.ctxTarget ?? dataset.ctxNetwork;
+  ctxLastTrigger = trigger;
+  if (ctxOpenKey === `${source}:${ref}` && ctxMenu && ctxMenu.style.display === 'block') {
+    closeCtxMenu();
+    return;
+  }
+  openRowMenu(source, String(ref), trigger.getBoundingClientRect());
+});
+
+</script>

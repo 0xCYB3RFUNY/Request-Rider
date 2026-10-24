@@ -1,0 +1,92 @@
+// --- Versioned UI Preferences (Layout, split ratios, shortcuts, view modes) ---
+const UI_PREFS_STORAGE_KEY = 'requestrider-ui-preferences-v1';
+const UI_PREFS_SCHEMA_VERSION = 1;
+
+function defaultUIPreferences() {
+  return {
+    version: UI_PREFS_SCHEMA_VERSION,
+    layout: {
+      repeaterSplitRatio: '1.08fr 0.92fr',
+      inspectorHeight: 'auto',
+      sidebarCollapsed: false,
+    },
+    shortcuts: {
+      profile: 'default',
+      sendRequest: 'Ctrl+Enter',
+      searchHistory: 'Ctrl+F',
+    },
+    viewModes: {
+      historyDensity: 'compact',
+      trafficAutoScroll: true,
+      rawSyntaxHighlight: true,
+    },
+    tables: {
+      historySort: '-timestamp',
+      trafficSort: '-id',
+    }
+  };
+}
+
+function migrateUIPreferences(stored) {
+  if (!stored || typeof stored !== 'object') return defaultUIPreferences();
+  const current = defaultUIPreferences();
+  if (typeof stored.version !== 'number' || stored.version < 1) {
+    stored.version = 1;
+  }
+  // Migration chain: expandable for v2, v3 in future revisions.
+  return {
+    version: UI_PREFS_SCHEMA_VERSION,
+    layout: Object.assign({}, current.layout, (stored.layout && typeof stored.layout === 'object') ? stored.layout : {}),
+    shortcuts: Object.assign({}, current.shortcuts, (stored.shortcuts && typeof stored.shortcuts === 'object') ? stored.shortcuts : {}),
+    viewModes: Object.assign({}, current.viewModes, (stored.viewModes && typeof stored.viewModes === 'object') ? stored.viewModes : {}),
+    tables: Object.assign({}, current.tables, (stored.tables && typeof stored.tables === 'object') ? stored.tables : {}),
+  };
+}
+
+function loadUIPreferences() {
+  try {
+    const raw = localStorage.getItem(UI_PREFS_STORAGE_KEY);
+    if (!raw) return defaultUIPreferences();
+    const parsed = JSON.parse(raw);
+    return migrateUIPreferences(parsed);
+  } catch (error) {
+    console.warn('Failed to load uiPreferences, falling back to defaults:', error);
+    return defaultUIPreferences();
+  }
+}
+
+function saveUIPreferences(patch) {
+  try {
+    const current = loadUIPreferences();
+    const updated = {
+      ...current,
+      ...patch,
+      layout: { ...current.layout, ...(patch.layout || {}) },
+      shortcuts: { ...current.shortcuts, ...(patch.shortcuts || {}) },
+      viewModes: { ...current.viewModes, ...(patch.viewModes || {}) },
+      tables: { ...current.tables, ...(patch.tables || {}) },
+      version: UI_PREFS_SCHEMA_VERSION,
+    };
+    localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (error) {
+    console.warn('Failed to save uiPreferences:', error);
+    return null;
+  }
+}
+
+function applyUIPreferences() {
+  const prefs = loadUIPreferences();
+  if (prefs?.layout?.repeaterSplitRatio) {
+    const workspaces = document.querySelectorAll('.workspace');
+    workspaces.forEach(el => {
+      if (prefs.layout.repeaterSplitRatio.includes('fr')) {
+        el.style.gridTemplateColumns = prefs.layout.repeaterSplitRatio;
+      }
+    });
+  }
+  if (prefs?.tables?.historySort && $('history-sort')) {
+    const opt = $('history-sort').querySelector(`option[value="${prefs.tables.historySort}"]`);
+    if (opt) $('history-sort').value = prefs.tables.historySort;
+  }
+}

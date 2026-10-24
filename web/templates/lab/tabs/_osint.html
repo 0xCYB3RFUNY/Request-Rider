@@ -1,0 +1,94 @@
+  <section id="osint" class="tab">
+    <div id="workspace-tabs-osint" class="workspace-tabs" aria-label="OSINT workspaces" data-i18n-aria-label="a11y.workspacesOsint"></div>
+    <div class="workspace">
+      <section>
+        <div class="workspace-title"><span data-i18n="osint.title">OSINT workspace</span><span class="muted" data-i18n="osint.subtitle">Passive web intelligence checks</span></div>
+        <label for="osint-url" data-i18n="osint.url">Target URL</label>
+        <input id="osint-url" type="url" placeholder="https://example.test/" aria-label="OSINT target URL" data-i18n-aria-label="osint.url" style="width:100%;margin:6px 0 10px">
+        <label style="padding-top:0;text-transform:none"><input id="osint-waf-check" type="checkbox"> <span data-i18n="osint.wafCheck">Run benign WAF canary</span></label>
+        <div class="hint" data-i18n="osint.disclaimer">Use only against targets you are authorized to assess.</div>
+        <div class="toolbar"><button class="primary" id="osint-run" data-i18n="osint.run">Run OSINT checks</button><button id="osint-clear" data-i18n="osint.clear">Clear</button><button id="osint-export" data-i18n="osint.export" disabled>Export JSON</button><button id="osint-export-csv" data-i18n="osint.exportCsv" disabled>Export CSV</button><button type="button" id="osint-send-ai" data-i18n="button.sendOSINTAI">Send OSINT to AI</button><button type="button" id="osint-send-automation" data-i18n="button.sendAutomation">Send to Automation</button></div>
+        <div id="osint-status" class="status"></div>
+      </section>
+      <section>
+        <div class="workspace-title"><span data-i18n="osint.summary">Summary</span></div>
+        <pre id="osint-summary" data-i18n="osint.empty">Enter a URL and run checks.</pre>
+      </section>
+    </div>
+    <div class="osint-grid">
+      <div class="osint-card"><h3 data-i18n="osint.dns">DNS / IP</h3><pre id="osint-dns" data-i18n="osint.noData">No data.</pre></div>
+      <div class="osint-card"><h3 data-i18n="osint.http">HTTP / redirects</h3><pre id="osint-http" data-i18n="osint.noData">No data.</pre></div>
+      <div class="osint-card"><h3 data-i18n="osint.security">Security / WAF</h3><pre id="osint-security" data-i18n="osint.noData">No data.</pre></div>
+      <div class="osint-card"><h3 data-i18n="osint.tech">Technologies</h3><pre id="osint-tech" data-i18n="osint.noData">No data.</pre></div>
+      <div class="osint-card"><h3 data-i18n="osint.discovery">Discovery</h3><pre id="osint-discovery" data-i18n="osint.noData">No data.</pre></div>
+      <div class="osint-card"><h3 data-i18n="osint.cookies">Cookies</h3><pre id="osint-cookies" data-i18n="osint.noData">No data.</pre></div>
+    </div>
+    <section class="osint-graph-panel" aria-label="OSINT entity graph" data-i18n-aria-label="osint.graphPanelAria">
+      <div>
+        <div class="workspace-title"><span data-i18n="osint.graphTitle">Entity Graph</span><span id="osint-graph-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+        <div class="toolbar">
+          <select id="osint-graph-select" style="min-width:220px"><option value="" data-i18n="osint.noGraph">No graph</option></select>
+          <button type="button" id="osint-graph-create" data-i18n="osint.graphCreate">Create graph</button>
+          <button type="button" id="osint-graph-add" data-i18n="osint.graphAdd">Add entity</button>
+          <button type="button" id="osint-graph-clear" data-i18n="osint.graphClear">Clear graph</button>
+          <button type="button" id="osint-graph-delete" data-i18n="osint.graphDeleteGraph">Delete graph</button>
+          <button type="button" id="osint-graph-refresh" data-i18n="osint.graphRefresh">Refresh</button>
+          <select id="osint-graph-layout-mode" aria-label="Graph layout" data-i18n-aria-label="osint.graphLayoutAria"><option value="grid" data-i18n="osint.graphLayoutGrid">Grid — even spread</option><option value="radial" data-i18n="osint.graphLayoutRadial">Force-directed — relations</option><option value="concentric" data-i18n="osint.graphLayoutConcentric">Concentric — risk levels</option><option value="breadthfirst" data-i18n="osint.graphLayoutBreadth">Breadthfirst — tree</option></select>
+          <button type="button" id="osint-graph-layout" data-i18n="osint.graphLayout">Auto-layout</button>
+          <button type="button" id="osint-graph-export-html" data-i18n="osint.graphExportHtml">Export graph HTML</button>
+          <div class="osint-graph-zoom" aria-label="Graph navigation" data-i18n-aria-label="osint.graphNavAria">
+            <button type="button" id="osint-graph-zoom-out" aria-label="Zoom out" data-i18n-aria-label="osint.graphZoomOut" data-i18n-title="osint.graphZoomOut">−</button>
+            <output id="osint-graph-zoom-value">100%</output>
+            <button type="button" id="osint-graph-zoom-in" aria-label="Zoom in" data-i18n-aria-label="osint.graphZoomIn" data-i18n-title="osint.graphZoomIn">+</button>
+            <button type="button" id="osint-graph-fit" data-i18n="osint.graphFit" data-i18n-title="osint.graphFit">Fit</button>
+            <button type="button" id="osint-graph-reset" data-i18n="osint.graphReset" data-i18n-title="osint.graphReset">Reset</button>
+          </div>
+          <input id="osint-graph-filter" data-i18n-placeholder="osint.graphFilter" placeholder="Filter entities" style="flex:1;min-width:160px">
+        </div>
+        <div class="osint-graph-help">
+          <strong data-i18n="osint.graphHelpTitle">Navigation:</strong>
+          <span data-i18n="osint.graphHelpText">wheel — zoom · drag the background — pan · drag a node — move · click — entity details · right click — transforms</span>
+          <div class="osint-graph-legend" aria-label="Entity types" data-i18n-aria-label="osint.graphLegendAria">
+            <span><i style="background:#43d9a3"></i><b data-i18n="osint.graphLegendDomain">domain</b></span><span><i style="background:#62a8ff"></i><b data-i18n="osint.graphLegendIp">IP</b></span><span><i style="background:#f0b35a"></i><b data-i18n="osint.graphLegendEmail">email</b></span><span><i style="background:#c79aff"></i><b data-i18n="osint.graphLegendUser">user</b></span><span><i style="background:#e97676"></i><b data-i18n="osint.graphLegendRisk">risk</b></span>
+          </div>
+        </div>
+        <div id="osint-transform-status" class="osint-transform-status" data-state="idle" role="status" aria-live="polite" hidden>
+          <span class="osint-transform-state" data-role="state"></span>
+          <span class="osint-transform-detail" data-role="detail"></span>
+          <span class="osint-transform-meta" data-role="meta"></span>
+          <div class="osint-transform-controls" data-role="controls" hidden>
+            <button type="button" id="osint-transform-pause" data-i18n="osint.transformPause">Pause</button>
+            <button type="button" id="osint-transform-resume" data-i18n="osint.transformResume">Continue</button>
+            <button type="button" id="osint-transform-cancel" data-i18n="osint.transformCancel">Cancel</button>
+          </div>
+          <div class="osint-transform-file" data-role="file" hidden>
+            <span data-role="fileDetail"></span>
+            <a id="osint-transform-file-open" target="_blank" rel="noopener" data-i18n="osint.transformFileOpen">Open list</a>
+            <a id="osint-transform-file-download" data-i18n="osint.transformFileDownload">Download</a>
+          </div>
+          <div class="osint-transform-warnings" data-role="warnings" hidden><span data-role="warningsTitle"></span><ul data-role="warningsList"></ul></div>
+        </div>
+        <div class="osint-graph-stage-wrap">
+          <div id="osint-graph-stage" class="osint-graph-stage">
+            <!-- Cytoscape owns this container: it creates the layers, the nodes and
+                 the edges inside it. The id is kept so the existing helpers and the
+                 aria label still resolve. -->
+            <div id="osint-graph-canvas" class="osint-graph-canvas" role="group" aria-label="OSINT entity graph canvas" data-i18n-aria-label="osint.graphCanvasAria"></div>
+            <!-- The keyboard layer. The canvas renderer draws pixels, so the graph
+                 itself cannot be focused; this list is the one control that stands
+                 for it, and the live region announces the entity the operator is
+                 standing on. It is not a visible control: the graph is. -->
+            <label class="osint-graph-a11y" for="osint-graph-focus-list" data-i18n="osint.graphKeyboardLabel">Graph entities — arrow keys to walk, Enter for details</label>
+            <select id="osint-graph-focus-list" class="osint-graph-a11y" aria-describedby="osint-graph-focus-live"></select>
+            <span id="osint-graph-focus-live" class="osint-graph-a11y" role="status" aria-live="polite"></span>
+          </div>
+          <aside id="osint-graph-details" class="osint-graph-drawer" hidden>
+            <div class="workspace-title"><span id="osint-graph-details-title" data-i18n="osint.graphDetails">Entity details</span><button type="button" id="osint-graph-details-close" data-i18n="common.close">×</button></div>
+            <pre id="osint-graph-details-content"></pre>
+            <div id="osint-graph-details-actions" class="toolbar"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+    <div id="osint-graph-menu" class="osint-graph-menu" role="menu" hidden></div>
+  </section>

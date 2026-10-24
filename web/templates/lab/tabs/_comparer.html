@@ -1,0 +1,10 @@
+  <section id="comparer" class="tab">
+    <div id="workspace-tabs-comparer" class="workspace-tabs" aria-label="Comparer workspaces" data-i18n-aria-label="a11y.workspacesComparer"></div>
+    <div class="workspace-title"><span data-i18n="comparer.title">Comparer</span><span class="muted" data-i18n="comparer.subtitle">Compare two requests or responses</span></div>
+    <div class="comparer-grid">
+      <section><div class="workspace-title"><span data-i18n="comparer.left">Left item</span></div><div class="raw-editor-stack"><pre id="comparer-left-highlight" class="raw-editor-highlight" aria-hidden="true"></pre><textarea id="comparer-left" spellcheck="false" data-i18n-placeholder="comparer.firstPlaceholder" placeholder="Paste the first request or response"></textarea></div></section>
+      <section><div class="workspace-title"><span data-i18n="comparer.right">Right item</span></div><div class="raw-editor-stack"><pre id="comparer-right-highlight" class="raw-editor-highlight" aria-hidden="true"></pre><textarea id="comparer-right" spellcheck="false" data-i18n-placeholder="comparer.secondPlaceholder" placeholder="Paste the second request or response"></textarea></div></section>
+    </div>
+    <div class="toolbar"><button type="button" class="primary" id="compare-words" data-i18n="comparer.words">Compare words</button><button type="button" id="compare-bytes" data-i18n="comparer.bytes">Compare bytes</button><button type="button" id="send-comparer-left-decoder" data-i18n="comparer.decodeLeft">Decode left</button><button type="button" id="send-comparer-right-decoder" data-i18n="comparer.decodeRight">Decode right</button><button type="button" id="clear-comparer" data-i18n="button.clear">Clear</button><button type="button" id="swap-comparer" data-i18n="comparer.swap">Swap sides</button><button type="button" id="comparer-send-automation" data-i18n="button.sendAutomation">Send to Automation</button></div>
+    <pre id="comparer-output" class="diff-output" data-i18n="comparer.empty">Comparison results will appear here.</pre>
+  </section>

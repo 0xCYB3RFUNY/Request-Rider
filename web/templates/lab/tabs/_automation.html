@@ -1,0 +1,42 @@
+  <section id="automation" class="tab">
+    <div id="workspace-tabs-automation" class="workspace-tabs" aria-label="Automation workspaces" data-i18n-aria-label="a11y.workspacesAutomation"></div>
+    <div class="automation-shell">
+      <aside class="automation-sidebar">
+        <div class="automation-sidebar-head"><span data-i18n="automation.palette">Nodes</span><button type="button" id="workflow-new" data-i18n-title="automation.new" title="New workflow">+</button></div>
+        <input id="workflow-search" class="automation-search" type="search" data-i18n-placeholder="automation.search" placeholder="Search workflows">
+        <div id="workflow-list" class="automation-list" aria-live="polite"></div>
+        <div id="workflow-palette" class="automation-palette"></div>
+      </aside>
+      <section class="automation-editor">
+        <div class="automation-toolbar">
+          <input id="workflow-name" type="text" data-i18n-placeholder="automation.namePlaceholder" placeholder="Workflow name" aria-label="Workflow name" data-i18n-aria-label="a11y.workflowName">
+          <span id="workflow-project" class="workflow-project"></span>
+          <button type="button" id="workflow-save" class="primary" data-i18n="automation.save">Save</button>
+           <button type="button" id="workflow-save-template" data-i18n="automation.saveTemplate">Save as template</button>
+          <button type="button" id="workflow-run" data-i18n="automation.run">Run</button>
+          <button type="button" id="workflow-activate" data-i18n="automation.activate">Activate</button>
+          <button type="button" id="workflow-delete" data-i18n="automation.delete">Delete</button>
+          <button type="button" id="workflow-refresh-runs" data-i18n="automation.refreshRuns">Refresh runs</button>
+          <button type="button" id="workflow-export" data-i18n="automation.export">Export</button>
+          <button type="button" id="workflow-import" data-i18n="automation.import">Import</button>
+           <button type="button" id="workflow-template-store" data-i18n="automation.templates" title="Open Template Store" data-i18n-title="a11y.openTemplateStore">Templates</button>
+          <input id="workflow-import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+        <div class="automation-canvas-wrap">
+          <div class="workflow-canvas-controls"><button type="button" id="workflow-zoom-out" aria-label="Zoom out" data-i18n-aria-label="a11y.zoomOut">−</button><span id="workflow-zoom-value" title="Reset zoom (100%)" aria-label="Current zoom (click to reset)">100%</span><button type="button" id="workflow-zoom-in" aria-label="Zoom in" data-i18n-aria-label="a11y.zoomIn">+</button><button type="button" id="workflow-fit" data-i18n="automation.fit">Fit</button><button type="button" id="workflow-auto-layout" data-i18n="automation.autoLayout">Auto layout</button></div>
+          <div id="workflow-minimap" aria-label="Workflow minimap" data-i18n-aria-label="a11y.workflowMinimap"><div id="workflow-minimap-content"></div></div>
+          <div id="workflow-canvas" aria-label="Workflow canvas" data-i18n-aria-label="a11y.workflowCanvas">
+            <div id="workflow-content">
+              <svg id="workflow-edges" aria-hidden="true"><defs><marker id="workflow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#73839b"></path></marker></defs></svg>
+              <div id="workflow-nodes"></div>
+            </div>
+          </div>
+          <div id="workflow-canvas-hint" class="automation-canvas-hint" data-i18n="automation.connectHint">Click an output handle, then an input handle to connect nodes.</div>
+        </div>
+        <div class="automation-bottom">
+          <div id="workflow-inspector" class="workflow-inspector"><h3 data-i18n="automation.inspector">Node inspector</h3><div class="hint" data-i18n="automation.selectNode">Select a node to edit it.</div></div>
+          <div class="workflow-runs-panel"><div class="workflow-runs-head"><h3 data-i18n="automation.runs">Executions</h3><span class="workflow-run-actions"><button type="button" id="workflow-run-pause" data-i18n="automation.pause">Pause</button><button type="button" id="workflow-run-resume" data-i18n="automation.resume">Resume</button><button type="button" id="workflow-run-cancel" data-i18n="automation.cancel">Cancel</button></span></div><div id="workflow-runs-list" class="hint" data-i18n="automation.noRuns">No executions yet.</div><pre id="workflow-log" class="workflow-log"></pre></div>
+        </div>
+      </section>
+    </div>
+  </section>

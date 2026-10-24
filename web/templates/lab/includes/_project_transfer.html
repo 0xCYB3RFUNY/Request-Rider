@@ -1,0 +1,2526 @@
+// --- Project transfer ---------------------------------------------------------
+// A project leaves and arrives as one bundle. The bundle is read from the server
+// rather than assembled from the dashboard, so it carries the workspace the
+// database actually holds and not only the sections the hub happens to display.
+let projectBundle = null;
+let projectBundleId = '';
+let projectSummaryBundle = null;
+let projectSummaryBundleId = '';
+
+async function readProjectBundle(summary = false) {
+  if (!activeProjectId) return null;
+  if (summary) {
+    if (projectSummaryBundleId === String(activeProjectId) && projectSummaryBundle) return projectSummaryBundle;
+    const bundle = await readJSON(await fetch(`/api/projects/${encodeURIComponent(activeProjectId)}/export?summary=1`));
+    projectSummaryBundle = bundle;
+    projectSummaryBundleId = String(activeProjectId);
+    return bundle;
+  }
+  if (projectBundleId === String(activeProjectId) && projectBundle) return projectBundle;
+  const bundle = await readJSON(await fetch(`/api/projects/${encodeURIComponent(activeProjectId)}/export`));
+  projectBundle = bundle;
+  projectBundleId = String(activeProjectId);
+  return bundle;
+}
+
+// projectFileName builds a readable, filesystem-safe name. A project name is free
+// text, so it is reduced to characters a download will not mangle and the id
+// keeps two exports of the same project apart.
+function projectFileName(extension) {
+  const project = projectItems.find(item => String(item.id) === String(activeProjectId));
+  const slug = String(project?.name || 'project')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'project';
+  return `project-${activeProjectId || 'none'}-${slug}-${Date.now()}.${extension}`;
+}
+
+// projectCsvRows flattens a bundle into one table with a record-type column. A
+// project holds several kinds of record that have nothing in common but their
+// project, so the CSV states the kind in every row rather than guessing which
+// columns are meaningful for which section.
+function projectCsvRows(bundle) {
+  bundle = bundle || {};
+  const cell = csvCellValue;
+  const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+  const isUk = (curLang === 'uk');
+  const joined = value => (Array.isArray(value) ? value.join(' ') : String(value ?? ''));
+  const headerCols = isUk
+    ? ['тип_запису', 'назва', 'метод', 'статус', 'деталі', 'параметри', 'джерело', 'виявлено']
+    : ['record_type', 'name', 'method', 'status', 'detail', 'parameters', 'source', 'observed_at'];
+  const rows = [headerCols.map(cell).join(',')];
+  const typeMap = isUk ? {
+    endpoint: 'ендпоінт',
+    secret_reference: 'посилання_на_секрет',
+    scanner_run: 'запуск_сканера',
+    target_job: 'завдання_краулера',
+    workflow: 'воркфлоу',
+    osint_graph: 'граф_osint',
+    osint_entity: 'сутність_osint',
+    osint_relation: 'зв’язок_osint',
+    intruder_attack: 'атака_intruder',
+    traffic: 'трафік'
+  } : {};
+  const t = type => (isUk && typeMap[type]) ? typeMap[type] : type;
+  const add = (type, ...values) => rows.push([t(type), ...values].map(cell).join(','));
+  (bundle.endpoints || []).forEach(item => add(
+    'endpoint', item.path, item.method, joined(item.statuses), item.sample_url, joined(item.parameters), '', item.last_seen
+  ));
+  (bundle.secret_references || []).forEach(item => add(
+    'secret_reference', item.key_name, '', '', item.secret_type, item.value_ref, item.source_url, item.created_at
+  ));
+  (bundle.scanner_runs || []).forEach(item => add(
+    'scanner_run', item.url, '', item.engine, item.summary?.highest_severity, joined(item.findings), '', item.created_at
+  ));
+  (bundle.target_jobs || []).forEach(item => add(
+    'target_job', item.url, '', item.status, item.engine_kind, '', '', item.created_at
+  ));
+  (bundle.workflows || []).forEach(item => add(
+    'workflow', item.name, '', item.active ? (isUk ? 'активний' : 'active') : (isUk ? 'неактивний' : 'inactive'), item.schedule || '', String((item.nodes || []).length), '', item.updated_at
+  ));
+  const osint = bundle.osint || {};
+  (osint.graphs || []).forEach(item => add(
+    'osint_graph', item.name, '', item.status, `v${item.version}`, '', item.source, item.updated_at
+  ));
+  (osint.entities || []).forEach(item => add(
+    'osint_entity', item.identity, '', item.type, String(item.risk_score ?? 0), '', '', item.observed_at
+  ));
+  (osint.relations || []).forEach(item => add(
+    'osint_relation', item.type, '', '', String(item.source), '', '', item.observed_at
+  ));
+  (bundle.intruder_attacks || []).forEach(item => add(
+    'intruder_attack', item.name, '', item.attack_type, String((item.payloads || []).length), '', item.status, item.created_at
+  ));
+  // Traffic carries only the row columns here. The complete request and response
+  // for every exchange is in the JSON bundle, which is what the report points at
+  // rather than pretending these columns are the whole record.
+  (bundle.traffic || []).forEach(item => add(
+    'traffic', item.url, item.method, String(item.status_code ?? ''), `${item.response_size ?? 0} B`, '', item.source, item.timestamp
+  ));
+  return rows;
+}
+
+// projectHtmlReport renders the project workspace as a standalone, modern, interactive
+// HTML security audit report in the house dark-glassmorphism style.
+function projectHtmlReport(bundle) {
+  const cell = value => escapeHTML(String(value ?? ''));
+  const listOf = value => (Array.isArray(value) ? value.filter(Boolean) : []);
+  const project = bundle.project || {};
+  const osint = bundle.osint || {};
+  const traffic = listOf(bundle.traffic);
+  const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+  const isUk = (curLang === 'uk');
+
+  // Collect and aggregate all findings from scanner runs
+  const allFindings = [];
+  listOf(bundle.scanner_runs).forEach((run, runIdx) => {
+    listOf(run.findings).forEach((f, fIdx) => {
+      if (!f || typeof f !== 'object') return;
+      const rawSev = String(f.severity || 'INFO').toUpperCase();
+      const sev = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev) ? rawSev : 'INFO';
+      allFindings.push({
+        id: f.id || f.template_id || `FINDING-${runIdx}-${fIdx}`,
+        title: f.title || f.name || f.id || 'Vulnerability',
+        severity: sev,
+        method: f.method || 'GET',
+        endpoint: f.endpoint || f.matched_at || f.url || run.url || project.target || '',
+        module: f.module || f.template_id || run.engine || 'scanner',
+        tier: f.tier || 'potential',
+        description: f.description || '',
+        remediation: f.remediation || f.recommendation || '',
+        evidence: f.evidence || f.extracted_results || '',
+        poc_curl: f.poc_curl || f.curl || '',
+        engine: run.engine || 'scanner',
+        created_at: run.created_at || ''
+      });
+    });
+  });
+
+  const sevCounts = {
+    CRITICAL: allFindings.filter(f => f.severity === 'CRITICAL').length,
+    HIGH: allFindings.filter(f => f.severity === 'HIGH').length,
+    MEDIUM: allFindings.filter(f => f.severity === 'MEDIUM').length,
+    LOW: allFindings.filter(f => f.severity === 'LOW').length,
+    INFO: allFindings.filter(f => f.severity === 'INFO').length,
+  };
+  const totalFindings = allFindings.length;
+
+  let score = 100;
+  score -= sevCounts.CRITICAL * 15;
+  score -= sevCounts.HIGH * 8;
+  score -= sevCounts.MEDIUM * 3;
+  score -= sevCounts.LOW * 1;
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : score >= 40 ? 'D' : 'F';
+  const gradeColor = (grade === 'A' || grade === 'B') ? '#10b981' : (grade === 'C' ? '#fbbf24' : '#ef4444');
+
+  const parts = [];
+  parts.push(`<!doctype html><html lang="${escapeHTML(curLang)}"><head><meta charset="utf-8">`);
+  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1">');
+  parts.push(`<title>RequestRider — ${cell(project.name || 'Project')}</title>`);
+  parts.push(`<style>${EXPORT_REPORT_CSS}</style></head><body>`);
+
+  // Header with branding, project badges and posture score
+  parts.push('<header class="rr-head">');
+  parts.push(EXPORT_REPORT_BRAND);
+  parts.push(`<div class="rr-title">${escapeHTML(tr('nav.projects'))}</div>`);
+  parts.push(`<div class="rr-target" title="${cell(project.target || '')}">🎯 ${cell(project.target || project.name || '')}</div>`);
+  parts.push('<div class="rr-head-actions">');
+  parts.push(`<button type="button" class="rr-btn-action" onclick="window.print()"><span>🖨️</span> ${escapeHTML(tr('projects.reportPrint'))}</button>`);
+  parts.push('</div>');
+  parts.push('<div class="rr-posture-badge">');
+  parts.push(`<div class="rr-grade" style="color:${gradeColor}">${grade}</div>`);
+  parts.push('<div class="rr-posture-info">');
+  parts.push(`<div class="rr-posture-lbl">${escapeHTML(tr('projects.reportPostureScore'))}</div>`);
+  parts.push(`<div class="rr-posture-score">${score} / 100</div>`);
+  parts.push('</div>');
+  parts.push('</div>');
+  parts.push('</header>');
+
+  // Metric Cards
+  parts.push('<section class="rr-cards">');
+  [
+    ['projects.reportVulnerabilities', totalFindings, totalFindings > 0 ? (sevCounts.CRITICAL ? ' bad' : ' warn') : ' ok'],
+    ['projects.reportEndpoints', listOf(bundle.endpoints).length, ''],
+    ['projects.reportScans', listOf(bundle.scanner_runs).length, ''],
+    ['intruder.reportResults', traffic.length, ''],
+    ['projects.reportSecrets', listOf(bundle.secret_references).length, ''],
+    ['projects.reportTargets', listOf(bundle.target_jobs).length, ''],
+    ['projects.reportWorkflows', listOf(bundle.workflows).length, ''],
+    ['projects.reportEntities', listOf(osint.entities).length, '']
+  ].forEach(([key, value, cls]) => {
+    parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr(key))}</span><span class="rr-card-v${cls}">${escapeHTML(String(value))}</span></div>`);
+  });
+  parts.push('</section>');
+
+  // Severity Breakdown Bar
+  if (totalFindings > 0) {
+    parts.push('<div class="rr-sev-bar">');
+    parts.push(`<span class="chip st-crit">${sevCounts.CRITICAL} ${escapeHTML(tr('projects.reportFilterCrit'))}</span>`);
+    parts.push(`<span class="chip st-high">${sevCounts.HIGH} ${escapeHTML(tr('projects.reportFilterHigh'))}</span>`);
+    parts.push(`<span class="chip st-med">${sevCounts.MEDIUM} ${escapeHTML(tr('projects.reportFilterMed'))}</span>`);
+    parts.push(`<span class="chip st-low">${sevCounts.LOW} ${escapeHTML(tr('projects.reportFilterLow'))}</span>`);
+    parts.push(`<span class="chip st-info">${sevCounts.INFO} ${escapeHTML(tr('projects.reportFilterInfo'))}</span>`);
+    parts.push('</div>');
+  }
+
+  parts.push(`<p class="rr-note">${escapeHTML(tr('projects.reportEvidenceNote'))}</p>`);
+
+  // Project Overview
+  const facts = [
+    [tr('common.name'), project.name],
+    [tr('common.target'), project.target],
+    [tr('common.environment'), project.environment],
+    [tr('common.routeProfile'), project.route_profile],
+    [tr('projects.reportSchemaVersion'), project.schema_version],
+    [tr('projects.reportExportedAt'), bundle.exported_at ? String(bundle.exported_at).slice(0, 19).replace('T', ' ') : '']
+  ].filter(([, value]) => String(value ?? '').trim());
+
+  parts.push('<section class="rr-block">');
+  parts.push(`<h2>${escapeHTML(tr('projects.reportOverview'))}</h2><div class="rr-kv">`);
+  facts.forEach(([key, value]) => {
+    parts.push(`<div class="rr-kv-row"><span class="rr-kv-k">${cell(key)}</span><span class="rr-kv-v mono">${cell(value)}</span></div>`);
+  });
+  parts.push('</div>');
+
+  if (String(project.notes || '').trim()) {
+    parts.push(`<h2 class="rr-mt">${escapeHTML(tr('projects.reportNotes'))}</h2><pre>${cell(project.notes)}</pre>`);
+  }
+
+  const tech = project.tech_stack && typeof project.tech_stack === 'object' ? project.tech_stack : {};
+  const techEntries = Object.entries(tech).filter(([, value]) => listOf(value).length || String(value ?? '').trim());
+  if (techEntries.length) {
+    parts.push(`<h2 class="rr-mt">${escapeHTML(tr('projects.reportTech'))}</h2><div class="rr-kv">`);
+    techEntries.forEach(([key, value]) => {
+      const techKeyLabel = isUk ? (key === 'osint' ? 'OSINT аналіз' : (key === 'server' ? 'Web-сервер' : (key === 'frameworks' ? 'Фреймворки' : key))) : key;
+      parts.push(`<div class="rr-kv-row"><span class="rr-kv-k">${cell(techKeyLabel)}</span><span class="rr-kv-v">${cell(listOf(value).join(', ') || value)}</span></div>`);
+    });
+    parts.push('</div>');
+  }
+  parts.push('</section>');
+
+  // Vulnerability Findings Ledger (if any)
+  if (totalFindings > 0) {
+    parts.push('<section class="rr-block">');
+    parts.push(`<h2>🛡️ ${escapeHTML(tr('projects.reportVulnerabilitiesTitle'))} (${totalFindings})</h2>`);
+    parts.push('<div class="rr-tools"><input type="search" data-rr-search placeholder="' + escapeHTML(tr('projects.reportFilter')) + '" aria-label="' + escapeHTML(tr('projects.reportFilter')) + '">');
+    parts.push('<div class="rr-tabs" role="tablist">');
+    parts.push(`<button type="button" role="tab" data-filter="all" class="on" aria-selected="true">${escapeHTML(tr('projects.reportFilterAll'))} (${totalFindings})</button>`);
+    if (sevCounts.CRITICAL) parts.push(`<button type="button" role="tab" data-filter="critical">${escapeHTML(tr('projects.reportFilterCrit'))} (${sevCounts.CRITICAL})</button>`);
+    if (sevCounts.HIGH) parts.push(`<button type="button" role="tab" data-filter="high">${escapeHTML(tr('projects.reportFilterHigh'))} (${sevCounts.HIGH})</button>`);
+    if (sevCounts.MEDIUM) parts.push(`<button type="button" role="tab" data-filter="medium">${escapeHTML(tr('projects.reportFilterMed'))} (${sevCounts.MEDIUM})</button>`);
+    if (sevCounts.LOW) parts.push(`<button type="button" role="tab" data-filter="low">${escapeHTML(tr('projects.reportFilterLow'))} (${sevCounts.LOW})</button>`);
+    if (sevCounts.INFO) parts.push(`<button type="button" role="tab" data-filter="info">${escapeHTML(tr('projects.reportFilterInfo'))} (${sevCounts.INFO})</button>`);
+    parts.push('</div></div>');
+
+    parts.push('<div class="rr-scroll"><table class="rr-table" id="rr-project-vulnerabilities"><thead><tr>');
+    parts.push(`<th style="width:110px" data-sort="sev">${escapeHTML(tr('projects.reportSeverity'))}</th>`);
+    parts.push(`<th style="width:140px" data-sort="engine">${escapeHTML(tr('projects.reportEngine'))}</th>`);
+    parts.push(`<th data-sort="title">${escapeHTML(tr('common.name'))}</th>`);
+    parts.push(`<th data-sort="endpoint">${escapeHTML(tr('common.url'))}</th>`);
+    parts.push(`<th style="width:80px">${escapeHTML(tr('common.details'))}</th>`);
+    parts.push('</tr></thead><tbody>');
+
+    allFindings.forEach((f, idx) => {
+      const sevClass = f.severity === 'CRITICAL' ? 'st-crit' : f.severity === 'HIGH' ? 'st-high' : f.severity === 'MEDIUM' ? 'st-med' : f.severity === 'LOW' ? 'st-low' : 'st-info';
+      const locTitle = (typeof localizeFindingTitle === 'function') ? localizeFindingTitle(f.title) : f.title;
+      const locDesc = (typeof localizeFindingDesc === 'function') ? localizeFindingDesc(f.description) : f.description;
+      const locRem = (typeof localizeFindingRemediation === 'function') ? localizeFindingRemediation(f.remediation) : f.remediation;
+      const rowId = `rr-finding-row-${idx}`;
+      const detailId = `rr-finding-detail-${idx}`;
+      const haystack = [f.severity, f.engine, f.module, locTitle, f.title, f.endpoint, locDesc, locRem].join(' ');
+
+      parts.push(`<tr id="${rowId}" data-status="${f.severity.toLowerCase()}" data-hay="${cell(haystack)}">`);
+      parts.push(`<td><span class="chip ${sevClass}">${cell(f.severity)}</span></td>`);
+      parts.push(`<td><span class="mono" style="font-size:11px">${cell(f.engine)}</span><br><span class="dim">${cell(f.module)}</span></td>`);
+      parts.push(`<td><strong>${cell(locTitle)}</strong></td>`);
+      parts.push(`<td><span class="mono">${cell(f.method)}</span> <span class="mono dim">${cell(f.endpoint)}</span></td>`);
+      parts.push(`<td><button type="button" class="rr-toggle" data-rr-toggle="${detailId}" aria-expanded="false" aria-controls="${detailId}"><svg class="rr-toggle-caret" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M2 1l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${escapeHTML(tr('common.view'))}</span></button></td>`);
+      parts.push('</tr>');
+
+      // Expandable detail row
+      parts.push(`<tr id="${detailId}" data-detail-for="${rowId}" class="rr-detail-row" hidden><td colspan="5"><div class="rr-detail">`);
+      if (locDesc) {
+        parts.push(`<p class="rr-finding-desc">${cell(locDesc)}</p>`);
+      }
+      if (locRem) {
+        parts.push(`<div class="rr-finding-rem"><strong>🛡️ ${escapeHTML(tr('projects.reportRemediation'))}:</strong> ${cell(locRem)}</div>`);
+      }
+      if (f.poc_curl || f.evidence) {
+        parts.push(`<h4 class="rr-detail-h rr-mt">${escapeHTML(tr('projects.reportProofOfConcept'))}</h4>`);
+        parts.push(`<pre>${cell(f.poc_curl || f.evidence)}</pre>`);
+      }
+      parts.push('</div></td></tr>');
+    });
+
+    parts.push('</tbody></table></div>');
+    parts.push(`<p class="rr-empty" hidden>${escapeHTML(tr('intruder.reportNoMatch'))}</p>`);
+    parts.push('</section>');
+  }
+
+  // Generic table builder for remaining sections
+  const table = (id, title, headers, bodyRows, haystack) => {
+    if (!bodyRows.length) {
+      parts.push(`<section class="rr-block"><h2>${escapeHTML(title)}</h2><p class="rr-empty">${escapeHTML(tr('projects.reportEmpty'))}</p></section>`);
+      return;
+    }
+    parts.push('<section class="rr-block">');
+    parts.push(`<h2>${escapeHTML(title)}</h2>`);
+    parts.push('<div class="rr-tools"><input type="search" data-rr-search placeholder="' + escapeHTML(tr('projects.reportFilter')) + '" aria-label="' + escapeHTML(tr('projects.reportFilter')) + '">');
+    parts.push(`<div class="rr-tabs" role="tablist"><button type="button" role="tab" data-filter="all" class="on" aria-selected="true">${escapeHTML(tr('intruder.reportAll'))} (${escapeHTML(String(bodyRows.length))})</button></div></div>`);
+    if (bodyRows.length >= 500) {
+      parts.push(`<p class="rr-note">${escapeHTML(tr('projects.reportLargeSection', {rows: bodyRows.length}))}</p>`);
+    }
+    parts.push(`<div class="rr-scroll"><table class="rr-table" id="${id}"><thead><tr>`);
+    headers.forEach(header => parts.push(header.sort ? `<th data-sort="${header.sort}">${escapeHTML(header.label)}</th>` : `<th>${escapeHTML(header.label)}</th>`));
+    parts.push('</tr></thead><tbody>');
+    bodyRows.forEach(row => {
+      parts.push(`<tr data-status="all" data-hay="${cell(haystack(row))}">`);
+      row.forEach(value => parts.push(`<td>${value}</td>`));
+      parts.push('</tr>');
+    });
+    parts.push('</tbody></table></div>');
+    parts.push(`<p class="rr-empty" hidden>${escapeHTML(tr('intruder.reportNoMatch'))}</p>`);
+    parts.push('</section>');
+  };
+
+  const statusChip = value => `<span class="chip st-muted">${cell(value ?? '—')}</span>`;
+
+  // Endpoints Table
+  table('rr-project-endpoints', tr('projects.reportEndpointsTitle'), [
+    {label: tr('table.method'), sort: 'method'},
+    {label: tr('intruder.reportPath'), sort: 'path'},
+    {label: tr('projects.reportStatuses'), sort: 'statuses'},
+    {label: tr('projects.reportParameters'), sort: 'parameters'},
+    {label: tr('intruder.reportObserved'), sort: 'observed'}
+  ], listOf(bundle.endpoints).map(item => [
+    `<span class="mono">${cell(item.method)}</span>`,
+    `<span class="mono">${cell(item.path)}</span>`,
+    listOf(item.statuses).length ? listOf(item.statuses).map(statusChip).join(' ') : '<span class="dim">—</span>',
+    `<span class="mono">${cell(listOf(item.parameters).join(', ') || '—')}</span>`,
+    `<span class="mono dim">${cell(String(item.last_seen || '').slice(0, 19).replace('T', ' '))}</span>`
+  ]), item => [item.method, item.path, listOf(item.statuses), listOf(item.parameters), item.last_seen].flat().join(' '));
+
+  // Scanner Runs Table
+  table('rr-project-scans', tr('projects.reportScansTitle'), [
+    {label: tr('projects.reportEngine'), sort: 'engine'},
+    {label: tr('common.url'), sort: 'url'},
+    {label: tr('projects.reportHighest'), sort: 'highest'},
+    {label: tr('projects.reportFindings'), sort: 'findings'},
+    {label: tr('intruder.reportObserved'), sort: 'observed'}
+  ], listOf(bundle.scanner_runs).map(item => [
+    `<span class="mono">${cell(item.engine)}</span>`,
+    `<span class="mono">${cell(item.url || '—')}</span>`,
+    statusChip(item.summary?.highest_severity),
+    `<span class="mono">${cell(String(listOf(item.findings).length))}</span>`,
+    `<span class="mono dim">${cell(String(item.created_at || '').slice(0, 19).replace('T', ' '))}</span>`
+  ]), item => [item.engine, item.url, item.summary?.highest_severity, item.findings?.length, item.created_at].join(' '));
+
+  // OSINT Graphs Table
+  table('rr-project-graphs', tr('projects.reportGraphsTitle'), [
+    {label: tr('projects.reportGraph'), sort: 'name'},
+    {label: tr('projects.reportStatus'), sort: 'status'},
+    {label: tr('projects.reportEntities'), sort: 'entities'},
+    {label: tr('projects.reportRelations'), sort: 'relations'},
+    {label: tr('intruder.reportObserved'), sort: 'observed'}
+  ], listOf(osint.graphs).map((item, index) => {
+    const entities = listOf(osint.entities).filter(entity => entity.graph === index).length;
+    const relations = listOf(osint.relations).filter(relation => relation.graph === index).length;
+    return [
+      `<span class="mono">${cell(item.name || `v${item.version}`)}</span>`,
+      statusChip(item.status),
+      `<span class="mono">${escapeHTML(String(entities))}</span>`,
+      `<span class="mono">${escapeHTML(String(relations))}</span>`,
+      `<span class="mono dim">${cell(String(item.updated_at || '').slice(0, 19).replace('T', ' '))}</span>`
+    ];
+  }), (item, index) => [item.name, item.status, item.version, item.updated_at].join(' '));
+
+  // Workflows Table
+  table('rr-project-workflows', tr('projects.reportWorkflowsTitle'), [
+    {label: tr('common.name'), sort: 'name'},
+    {label: tr('projects.reportStatus'), sort: 'status'},
+    {label: tr('projects.reportNodes'), sort: 'nodes'},
+    {label: tr('projects.reportSchedule'), sort: 'schedule'},
+    {label: tr('intruder.reportObserved'), sort: 'observed'}
+  ], listOf(bundle.workflows).map(item => [
+    `<span class="mono">${cell(item.name)}</span>`,
+    statusChip(item.active ? 'active' : 'inactive'),
+    `<span class="mono">${escapeHTML(String(listOf(item.nodes).length))}</span>`,
+    `<span class="mono">${cell(item.schedule || '—')}</span>`,
+    `<span class="mono dim">${cell(String(item.updated_at || '').slice(0, 19).replace('T', ' '))}</span>`
+  ]), item => [item.name, item.active, item.schedule, item.nodes?.length, item.updated_at].join(' '));
+
+  // Secret references Table
+  table('rr-project-secrets', tr('projects.reportSecretsTitle'), [
+    {label: tr('projects.reportSecretType'), sort: 'type'},
+    {label: tr('projects.reportKey'), sort: 'key'},
+    {label: tr('projects.reportRef'), sort: 'ref'},
+    {label: tr('projects.reportSource'), sort: 'source'}
+  ], listOf(bundle.secret_references).map(item => [
+    statusChip(item.secret_type),
+    `<span class="mono">${cell(item.key_name)}</span>`,
+    `<span class="mono">${cell(item.value_ref || '—')}</span>`,
+    `<span class="mono">${cell(item.source_url || '—')}</span>`
+  ]), item => [item.secret_type, item.key_name, item.value_ref, item.source_url].join(' '));
+
+  // Traffic Table
+  table('rr-project-traffic', tr('projects.reportTrafficTitle'), [
+    {label: tr('table.method'), sort: 'method'},
+    {label: tr('table.url'), sort: 'url'},
+    {label: tr('table.status'), sort: 'status'},
+    {label: tr('projects.reportSize'), sort: 'size'},
+    {label: tr('projects.reportSource'), sort: 'source'},
+    {label: tr('intruder.reportObserved'), sort: 'observed'}
+  ], traffic.map(item => {
+    const status = Number(item.status_code);
+    const bucket = status >= 200 && status < 300 ? '2xx' : status >= 400 && status < 500 ? '4xx' : status >= 500 ? '5xx' : 'error';
+    return [
+      `<span class="mono">${cell(item.method)}</span>`,
+      `<span class="mono">${cell(item.url)}</span>`,
+      `<span class="chip st-${bucket}">${cell(item.status_code ?? '—')}</span>`,
+      `<span class="mono">${escapeHTML(String(item.response_size ?? 0))}</span>`,
+      `<span class="mono dim">${cell(item.source || '')}</span>`,
+      `<span class="mono dim">${cell(String(item.timestamp || '').slice(0, 19).replace('T', ' '))}</span>`
+    ];
+  }), item => [item.method, item.url, item.status_code, item.response_size, item.source, item.host, item.timestamp].flat().join(' '));
+
+  parts.push(`<footer class="rr-foot">${escapeHTML(tr('scanner.exportGenerated'))}: ${escapeHTML(new Date().toISOString())} · RequestRider Multi-Engine Audit</footer>`);
+  parts.push('<' + 'script>' + EXPORT_REPORT_JS + '<' + '/scr' + 'ipt>');
+  parts.push('</body></html>');
+  return parts.join('\n');
+}
+
+async function exportProjectBundle(format) {
+  if (!activeProjectId || !format) return;
+  const status = $('project-transfer-status');
+  try {
+    if (status) status.textContent = tr('projects.exportWorking');
+    const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+    if (format === 'sarif') {
+      window.location.href = `/api/projects/${encodeURIComponent(activeProjectId)}/fusion-report?format=sarif&download=1&lang=${encodeURIComponent(curLang)}`;
+      flashExportMenu('project', 'SARIF 2.1.0');
+      return;
+    }
+    if (format === 'fusion-html') {
+      const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+      window.open(`/api/projects/${encodeURIComponent(activeProjectId)}/fusion-report?format=html&lang=${encodeURIComponent(curLang)}`, '_blank');
+      flashExportMenu('project', 'Fusion HTML');
+      return;
+    }
+    if (format === 'json') {
+      window.location.href = `/api/projects/${encodeURIComponent(activeProjectId)}/export?download=1`;
+      flashExportMenu('project', 'JSON');
+      return;
+    }
+    const bundle = await readProjectBundle(true);
+    if (!bundle) return;
+    if (format === 'csv') {
+      downloadTarget(projectFileName('csv'), scannerCsvText(projectCsvRows(bundle)), 'text/csv;charset=utf-8');
+      flashExportMenu('project', 'CSV');
+    } else if (format === 'html') {
+      downloadTarget(projectFileName('html'), projectHtmlReport(bundle), 'text/html;charset=utf-8');
+      flashExportMenu('project', 'HTML');
+    }
+  } catch (error) {
+    showToast(tr('projects.exportFailed'), error.message, 'error');
+  } finally {
+    if (status) status.textContent = '';
+  }
+}
+
+$('project-import').addEventListener('click', () => $('project-import-file').click());
+$('project-import-file').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+  const status = $('project-transfer-status');
+  // Import creates a second workspace rather than overwriting this one, so the
+  // operator is told which project they are about to add before the file is
+  // sent. An accidental import should be recoverable by deleting one project.
+  if (!(await requestConfirmDialog(tr('projects.importConfirm', {name: file.name})))) return;
+  try {
+    if (status) status.textContent = tr('projects.importWorking');
+    const response = await fetch('/api/projects/import', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+      body: await file.text()
+    });
+    const data = await readJSON(response);
+    await setActiveProjectContext(data.project.id);
+    await loadProjects();
+    const report = data.report || {};
+    const written = Object.entries(report)
+      .filter(([key]) => !['project_id', 'project_name'].includes(key))
+      .map(([key, value]) => `${tr(`projects.reportCount.${key}`)}: ${value}`)
+      .join(' · ');
+    showToast(tr('projects.importDone', {name: data.project.name}), written || tr('projects.importEmpty'), 'success');
+  } catch (error) {
+    showToast(tr('projects.importFailed'), error.message, 'error');
+  } finally {
+    if (status) status.textContent = '';
+  }
+});
+
+// The export control follows the active project: with none selected there is
+// nothing to write, so it stays disabled instead of opening onto an empty file.
+document.querySelector('.export-menu[data-export-menu="project"]')
+  ?.addEventListener('click', event => {
+    if (event.target.closest('.export-menu-list')) return;
+    if (activeProjectId) {
+      projectBundle = null;
+      projectBundleId = '';
+    }
+  });
+loadProjects().catch(error => { $('session-status').textContent = `Project load error: ${error.message}`; });
+
+// Transfer the currently configured tool workspace into a typed workflow node.
+function automationTargetMode() {
+  return !targetModeReady ? 'navigation' : targetMode.value;
+}
+
+function automationNodeFromTool(kind) {
+  const make = (type, params, name) => ({
+    type,
+    name: name || workflowNodeLabel(type),
+    params: cloneWorkspaceValue(params || {})
+  });
+  if (kind === 'repeater') {
+    const raw = $('repeater-raw-request').value.trim();
+    if (!raw) throw new Error(tr('automation.emptyRepeater'));
+    return make('repeater', {...parseRawRequest(raw), delay_ms: 0}, 'Repeater request');
+  }
+  if (kind === 'target') {
+    const engine = $('target-engine')?.value || 'static';
+    const browser = engine === 'browser';
+    const mode = automationTargetMode();
+    const params = {
+      url: $('target-url').value.trim(),
+      engine: browser ? 'browser' : 'static',
+      browser: $('target-browser')?.value || 'firefox',
+      mode,
+      max_pages: Number($('target-max-pages').value ?? 0),
+      max_depth: Number($('target-max-depth').value ?? -1),
+      delay_ms: Number($('target-delay').value || 0),
+      same_origin: Boolean($('target-same-origin')?.checked),
+      capture_context_id: targetCaptureContextId || null
+    };
+    if (browser) {
+      params.actions = [];
+      params.allow_state_changing_actions = mode === 'form';
+      params.auto_interact = mode === 'form';
+      params.auto_fill = targetAutoScope !== 'clicks';
+      params.auto_click = targetAutoScope !== 'forms';
+    }
+    return make(browser ? 'target_browser' : 'target', params, browser ? 'Target browser crawl' : 'Target site map');
+  }
+  if (kind === 'osint') {
+    return make('osint', {
+      url: $('osint-url').value.trim(),
+      waf_check: Boolean($('osint-waf-check')?.checked)
+    }, 'OSINT checks');
+  }
+  if (kind === 'scanner') {
+    return make('scanner', {
+      url: $('scanner-url').value.trim(),
+      profile: 'generic_web'
+    }, 'Scanner recon');
+  }
+  if (kind === 'intruder') {
+    const raw = $('intruder-raw-request').value.trim();
+    if (!raw) throw new Error(tr('automation.emptyIntruder'));
+    return make('intruder', {
+      base_request: parseIntruderRaw(raw),
+      mode: $('mode').value,
+      payloads: dictionaries.map(dictionary => Array.isArray(dictionary.values) ? [...dictionary.values] : []),
+      transformations: cloneWorkspaceValue(transformations),
+      delay_ms: readDelay(),
+      concurrency: readConcurrency()
+    }, 'Intruder attack');
+  }
+  if (kind === 'decoder') {
+    return make('decoder', {
+      operation: $('decoder-operation')?.value || 'urlEncode',
+      input: $('decoder-input').value
+    }, 'Decoder transform');
+  }
+  if (kind === 'comparer') {
+    return make('comparer', {
+      mode: comparerMode,
+      left: $('comparer-left').value,
+      right: $('comparer-right').value
+    }, 'Response comparer');
+  }
+  if (kind === 'ai') {
+    return make('ai_agent', {
+      prompt: $('agent-chat-input').value.trim() || 'Analyze the attached QA evidence.',
+      provider: $('agent-provider')?.value || 'ollama',
+      endpoint: $('agent-endpoint')?.value.trim() || '',
+      model: $('agent-model')?.value.trim() || ''
+    }, 'AI analysis');
+  }
+  throw new Error(`Unsupported tool transfer: ${kind}`);
+}
+
+function syncWorkflowAutomationContext() {
+  const context = [...workspaceContexts.values()].find(item => item.kind === 'automation');
+  if (!context) return;
+  context.state = {
+    workflowId: workflowCurrentId,
+    name: $('workflow-name')?.value || tr('automation.newDraft'),
+    nodes: cloneWorkspaceValue(workflowNodes),
+    connections: cloneWorkspaceValue(workflowConnections),
+    selectedNodeId: workflowSelectedNodeId,
+    currentRun: cloneWorkspaceValue(workflowCurrentRun)
+  };
+}
+
+async function sendToolToAutomation(kind, selectedNode = null) {
+  try {
+    const incoming = automationNodeFromTool(kind);
+    let node = selectedNode && workflowToolKinds[selectedNode.type] === kind
+      ? selectedNode
+      : workflowNodes.find(item => item.type === incoming.type);
+    if (node) {
+      node.type = incoming.type;
+      node.name = incoming.name;
+      node.params = incoming.params;
+    } else {
+      const index = workflowNodes.length;
+      node = {
+        ...incoming,
+        id: `${incoming.type}_tool_${Date.now().toString(36)}`,
+        position: {x: 90 + (index % 4) * 230, y: 90 + Math.floor(index / 4) * 150},
+        disabled: false
+      };
+      workflowNodes.push(node);
+    }
+    const hasActiveTrigger = workflowNodes.some(item => !item.disabled
+      && ['manual_trigger', 'schedule_trigger', 'webhook_trigger'].includes(item.type));
+    let trigger = workflowNodes.find(item => item.type === 'manual_trigger' && !item.disabled);
+    if (!hasActiveTrigger) {
+      trigger = {
+        id: 'manual_trigger_from_tool',
+        type: 'manual_trigger',
+        name: workflowNodeLabel('manual_trigger'),
+        position: {x: 90, y: 90},
+        params: {},
+        disabled: false
+      };
+      workflowNodes.unshift(trigger);
+    }
+    if (trigger && !workflowConnections.some(edge => edge.source === trigger.id && edge.target === node.id)) {
+      workflowConnections.push({source: trigger.id, target: node.id, source_handle: 'main', target_handle: 'main'});
+    }
+    workflowSelectedNodeId = node.id;
+    workflowMarkDirty();
+    syncWorkflowAutomationContext();
+    document.querySelector('[data-tab="automation"]')?.click();
+    const saved = await saveWorkflow();
+    if (!saved) return;
+    $('session-status').textContent = `${tr('button.sendAutomation')}: ${workflowNodeLabel(node.type)}`;
+  } catch (error) {
+    $('session-status').textContent = `${tr('automation.transferError')}: ${error.message}`;
+  }
+}
+
+function setRequestEditorFields(prefix, request) {
+  const value = request || {};
+  const raw = formatRequest({
+    method: value.method || 'GET',
+    url: value.url || '/',
+    headers: value.headers || value.request_headers || {},
+    body: value.body ?? value.request_body ?? ''
+  });
+  $(`${prefix}-raw-request`).value = raw;
+  let parsed = null;
+  try { parsed = new URL(value.url || ''); } catch { /* Relative request. */ }
+  const host = parsed?.host || value.headers?.Host || value.headers?.host || value.request_headers?.Host || value.request_headers?.host || '';
+  const path = parsed ? `${parsed.pathname || '/'}${parsed.search}` : (value.url || '/');
+  if (prefix === 'repeater') {
+    $('repeater-host').value = host;
+    $('repeater-path').value = path;
+  } else {
+    $('intruder-host').value = parsed?.hostname || host.split(':')[0] || '';
+    $('intruder-port').value = parsed?.port || '';
+    $('intruder-https').checked = parsed?.protocol === 'https:';
+  }
+}
+
+function openWorkflowNodeInTool(node) {
+  const kind = workflowToolKinds[node?.type];
+  if (!kind) return;
+  const params = node.params || {};
+  document.querySelector(`nav .nav-tab[data-tab="${kind}"]`)?.click();
+  if (kind === 'repeater') {
+    setRequestEditorFields('repeater', params);
+  } else if (kind === 'target') {
+    $('target-url').value = params.url || '';
+    $('target-engine').value = node.type === 'target_browser' || params.engine === 'browser' ? 'browser' : 'static';
+    $('target-browser').value = params.browser || 'firefox';
+    if (targetModeReady) {
+      targetMode.value = params.mode || 'navigation';
+      pendingTargetMode = targetMode.value;
+    }
+    $('target-max-pages').value = params.max_pages ?? 0;
+    $('target-max-depth').value = params.max_depth ?? -1;
+    $('target-delay').value = params.delay_ms ?? 0;
+    $('target-navigation-timeout').value = params.navigation_timeout_ms ?? 0;
+    $('target-auto-wait').value = params.auto_wait_timeout_ms ?? 15000;
+    $('target-same-origin').checked = params.same_origin !== false;
+    targetCaptureContextId = String(params.capture_context_id || '');
+    targetAutoScope = params.auto_fill === false ? 'clicks' : params.auto_click === false ? 'forms' : 'both';
+    renderTargetAutoScope();
+    updateTargetCaptureControls();
+  } else if (kind === 'osint') {
+    $('osint-url').value = params.url || '';
+    $('osint-waf-check').checked = Boolean(params.waf_check);
+  } else if (kind === 'scanner') {
+    $('scanner-url').value = params.url || '';
+  } else if (kind === 'intruder') {
+    setRequestEditorFields('intruder', params.base_request || {});
+    $('mode').value = params.mode || 'sniper';
+    $('intruder-delay').value = params.delay_ms ?? 150;
+    $('intruder-concurrency').value = params.concurrency ?? 1;
+    const payloadSets = Array.isArray(params.payloads) ? params.payloads : [];
+    dictionaries.splice(0, dictionaries.length, ...(payloadSets.length ? payloadSets.map((values, index) => ({
+      name: tr('intruder.dictionaryDefault', {index: index + 1}),
+      values: Array.isArray(values) ? [...values] : []
+    })) : [{name: tr('intruder.dictionaryDefault', {index: 1}), values: []}]));
+    transformations = Array.isArray(params.transformations) ? cloneWorkspaceValue(params.transformations) : [];
+    renderDictionaries();
+    renderTransformations();
+    } else if (kind === 'decoder') {
+    const operation = params.operation || 'urlEncode';
+    const select = $('decoder-operation');
+    if (![...select.options].some(option => option.value === operation)) {
+      const option = document.createElement('option');
+      option.value = operation;
+      option.textContent = operation;
+      select.appendChild(option);
+    }
+    select.value = operation;
+    $('decoder-input').value = params.input ?? '';
+    $('decoder-output').value = '';
+    $('decoder-status').textContent = '';
+  } else if (kind === 'comparer') {
+    comparerMode = params.mode === 'bytes' ? 'bytes' : 'words';
+    $('comparer-left').value = params.left ?? '';
+    $('comparer-right').value = params.right ?? '';
+    $('comparer-output').textContent = tr('comparer.empty');
+  } else if (kind === 'ai') {
+    $('agent-provider').value = params.provider || 'ollama';
+    $('agent-endpoint').value = params.endpoint || '';
+    $('agent-model').value = params.model || '';
+    $('agent-chat-input').value = params.prompt || '';
+    updateAgentProviderFields();
+  }
+  const context = [...workspaceContexts.values()].find(item => item.kind === kind);
+  if (context) context.state = captureWorkspaceState(kind);
+  queueWorkspacePersistence();
+  $('session-status').textContent = `${tr('automation.openTool')}: ${workflowNodeLabel(node.type)}`;
+}
+
+
+// Workflow editor and runtime controls.  The graph is stored in the server-side
+// Workflow API; this layer only owns the editable draft and the live view.
+function workflowCatalogEntry(type) {
+  return workflowNodeCatalog.find(item => item.type === type) || {type, label: type, inputs: ['main'], outputs: ['main'], defaults: {}};
+}
+
+function workflowNodeLabel(type) {
+  const translated = tr(`automation.node.${type}`);
+  return translated === `automation.node.${type}` ? (workflowCatalogEntry(type).label || type) : translated;
+}
+
+function workflowDefaultParams(type) {
+  return cloneWorkspaceValue(workflowCatalogEntry(type).defaults || {});
+}
+
+function workflowSelectedNode() {
+  return workflowNodes.find(node => node.id === workflowSelectedNodeId) || null;
+}
+
+function workflowMarkDirty() {
+  workflowDirty = true;
+  queueWorkspacePersistence();
+}
+
+function workflowProjectLabel() {
+  const project = projectItems.find(item => String(item.id) === String(activeProjectId));
+  return project?.name || tr('projects.none');
+}
+
+function renderWorkflowPalette() {
+  const container = $('workflow-palette');
+  if (!container) return;
+  container.innerHTML = '';
+  const groups = [
+    [tr('automation.groupTriggers'), ['manual_trigger', 'schedule_trigger', 'webhook_trigger']],
+    [tr('automation.groupTools'), ['repeater', 'repeater_burst', 'last_byte_sync', 'target', 'target_browser', 'oast_listener', 'oast_collect', 'osint', 'scanner', 'intruder', 'decoder', 'comparer', 'ai_agent']],
+    [tr('automation.groupLogic'), ['condition', 'merge', 'set', 'template', 'delay', 'output']]
+  ];
+  groups.forEach(([title, types]) => {
+    const heading = document.createElement('div');
+    heading.className = 'automation-palette-group';
+    heading.textContent = title;
+    container.appendChild(heading);
+    types.forEach(type => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'automation-palette-item';
+      button.title = workflowNodeLabel(type);
+      button.draggable = true;
+      button.dataset.workflowType = type;
+      button.innerHTML = `<span class="automation-palette-icon">${type === 'condition' ? '?' : type === 'output' ? '↗' : type.includes('trigger') ? '⚡' : '•'}</span><span>${escapeHTML(workflowNodeLabel(type))}</span>`;
+      button.addEventListener('click', () => addWorkflowNode(type));
+      button.addEventListener('dragstart', event => {
+        event.dataTransfer.setData('text/requestrider-workflow-node', type);
+        event.dataTransfer.effectAllowed = 'copy';
+      });
+      container.appendChild(button);
+    });
+  });
+}
+
+const templateCategoryLabels = {
+  recon_asset_discovery: 'Recon & Asset Discovery',
+  api_microservices: 'API & Microservices',
+  fuzzing_injection: 'Fuzzing & Injection Chains',
+  ai_llm_security: 'AI & LLM Security',
+  compliance_devsecops: 'Compliance & DevSecOps',
+  auth_sessions: 'Auth & Sessions',
+  cloud_infrastructure: 'Cloud & Infrastructure',
+  business_logic: 'Business Logic & FinTech',
+  oast_security: 'OAST & Blind Injection'
+};
+
+function templateCategoryLabel(category) {
+  const labels = language === 'uk' ? {
+    recon_asset_discovery: 'Розвідка та периметр',
+    api_microservices: 'API та мікросервіси',
+    fuzzing_injection: 'Фаззинг та ін’єкції',
+    ai_llm_security: 'Безпека AI та LLM',
+    compliance_devsecops: 'Compliance та DevSecOps',
+    auth_sessions: 'Автентифікація та сесії',
+    cloud_infrastructure: 'Cloud та інфраструктура',
+    business_logic: 'Бізнес-логіка та FinTech',
+    oast_security: 'OAST та blind injection'
+  } : templateCategoryLabels;
+  return labels[category] || category || tr('automation.templateAll');
+}
+
+function templateRiskLabel(level) {
+  const labels = {info: 'Info', low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical'};
+  return labels[level] || level || '—';
+}
+
+function templateExecutionLabel(execution) {
+  const labels = {passive: 'Passive', interactive: 'Interactive', active: 'Active'};
+  return labels[execution] || execution || '—';
+}
+
+function templateSearchText(template) {
+  const meta = template.meta || {};
+  const nodeTypes = (template.workflow?.nodes || []).map(node => workflowNodeLabel(node.type)).join(' ');
+  return [meta.title, meta.description, meta.category, ...(meta.tags || []), nodeTypes].join(' ').toLowerCase();
+}
+
+function filteredWorkflowTemplates() {
+  const query = workflowTemplateSearch.trim().toLowerCase();
+  return workflowTemplates.filter(template => {
+    const meta = template.meta || {};
+    if (query && !templateSearchText(template).includes(query)) return false;
+    if (workflowTemplateCategory && meta.category !== workflowTemplateCategory) return false;
+    if (workflowTemplateExecution && meta.execution !== workflowTemplateExecution) return false;
+    if (workflowTemplateRisk && meta.risk_level !== workflowTemplateRisk) return false;
+    return true;
+  });
+}
+
+function templateCardMarkup(template, featured = false) {
+  const meta = template.meta || {};
+  const tags = (meta.tags || []).map(tag => `<span class="template-store-badge">${escapeHTML(tag)}</span>`).join('');
+  const activeBadge = meta.requires_confirmation ? '<span class="template-store-badge active">Confirmation</span>' : '';
+  const oastBadge = meta.requires_oast ? '<span class="template-store-badge">OAST</span>' : '';
+  const aiBadge = meta.ai_enhanced ? '<span class="template-store-badge">AI</span>' : '';
+  const nodeCount = (template.workflow?.nodes || []).length;
+  const time = Number(meta.estimated_execution_time_sec || 0);
+  const timeLabel = time >= 60 ? `${Math.round(time / 60)}m` : `${time}s`;
+  return `<article class="template-store-card${featured ? ' featured' : ''}" data-template-id="${escapeHTML(template.template_id)}">
+    <div class="template-store-badges"><span class="template-store-badge ${escapeHTML(meta.risk_level || 'info')}">${escapeHTML(templateRiskLabel(meta.risk_level))}</span><span class="template-store-badge">${escapeHTML(templateExecutionLabel(meta.execution))}</span>${activeBadge}${oastBadge}${aiBadge}${tags}</div>
+    <h4>${escapeHTML(meta.title || template.template_id)}</h4>
+    <p>${escapeHTML(meta.description || '')}</p>
+    <div class="template-store-card-meta"><span>${escapeHTML(tr('automation.templateNodes'))}: ${nodeCount}</span><span>~${escapeHTML(timeLabel)}</span></div>
+    <div class="template-store-card-actions"><button type="button" data-template-action="preview">${escapeHTML(tr('automation.templatePreview'))}</button>${featured ? '' : `<button type="button" data-template-action="import">${escapeHTML(tr('automation.templateImport'))}</button>`}</div>
+  </article>`;
+}
+
+function selectedWorkflowTemplate() {
+  return workflowTemplates.find(template => template.template_id === workflowTemplateSelectedId) || null;
+}
+
+function templateVariableValues(template) {
+  const values = {};
+  (template.required_variables || []).forEach(variable => {
+    const field = document.querySelector(`[data-template-variable="${CSS.escape(variable.key)}"]`);
+    values[variable.key] = field ? field.value : (variable.default ?? '');
+  });
+  return values;
+}
+
+function templateVariableMarkup(template, currentValues = {}) {
+  const variables = template.required_variables || [];
+  if (!variables.length) return `<div class="hint">${escapeHTML(tr('automation.templateVariables'))}: —</div>`;
+  return `<strong>${escapeHTML(tr('automation.templateVariables'))}</strong>${variables.map(variable => {
+    const type = variable.type === 'number' ? 'number' : 'url';
+    const required = variable.required ? 'required' : '';
+    const placeholder = escapeHTML(variable.placeholder || variable.label || variable.key);
+    const value = currentValues[variable.key] ?? variable.default ?? '';
+    return `<div class="template-store-variable"><label for="template-variable-${escapeHTML(variable.key)}">${escapeHTML(variable.label || variable.key)}${variable.required ? ' *' : ''}</label><input id="template-variable-${escapeHTML(variable.key)}" data-template-variable="${escapeHTML(variable.key)}" type="${type}" value="${escapeHTML(value)}" placeholder="${placeholder}" ${required}></div>`;
+  }).join('')}`;
+}
+
+function materializeTemplateValue(value, variables) {
+  if (typeof value === 'string') {
+    return value.replace(new RegExp('\\{\\{\\s*([a-zA-Z0-9_.-]+)\\s*\\}\\}', 'g'), (placeholder, key) => (
+      Object.prototype.hasOwnProperty.call(variables, key) ? String(variables[key] ?? '') : placeholder
+    ));
+  }
+  if (Array.isArray(value)) return value.map(item => materializeTemplateValue(item, variables));
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, materializeTemplateValue(item, variables)]));
+  }
+  return value;
+}
+
+function missingTemplateVariables(template) {
+  const values = templateVariableValues(template);
+  return (template.required_variables || []).filter(variable => variable.required && !String(values[variable.key] || '').trim());
+}
+
+function updateTemplateValidation(template = selectedWorkflowTemplate()) {
+  if (!template) return;
+  const meta = template.meta || {};
+  const missing = missingTemplateVariables(template);
+  const needsConfirmation = Boolean(meta.requires_confirmation) && !workflowTemplateScopeConfirmed;
+  const importButton = $('template-preview-import');
+  if (importButton) importButton.disabled = Boolean(missing.length || needsConfirmation);
+  let hints = $('template-preview-hints');
+  if (!hints) {
+    const variables = $('template-preview-variables');
+    if (variables) {
+      hints = document.createElement('div');
+      hints.id = 'template-preview-hints';
+      variables.after(hints);
+    }
+  }
+  if (hints) {
+    const messages = [];
+    if (missing.length) messages.push(`<div class="hint">${escapeHTML(tr('automation.templateRequired'))}</div>`);
+    if (needsConfirmation) messages.push(`<div class="hint">${escapeHTML(tr('automation.templateConfirm'))}</div>`);
+    hints.innerHTML = messages.join('');
+  }
+}
+
+function renderTemplatePreview(template = selectedWorkflowTemplate()) {
+  const preview = $('template-store-preview');
+  if (!preview) return;
+  if (!template) {
+    preview.hidden = true;
+    return;
+  }
+  preview.hidden = false;
+  const meta = template.meta || {};
+  $('template-preview-title').textContent = meta.title || template.template_id;
+  const nodes = template.workflow?.nodes || [];
+  $('template-preview-graph').innerHTML = nodes.map((node, index) => `${index ? '<span class="template-preview-arrow">→</span>' : ''}<span class="template-preview-node">${escapeHTML(node.name || workflowNodeLabel(node.type))}</span>`).join('');
+  $('template-preview-details').innerHTML = `<dl><dt>${escapeHTML(tr('automation.templateRisk'))}</dt><dd>${escapeHTML(templateRiskLabel(meta.risk_level))}</dd><dt>${escapeHTML(tr('automation.templateExecution'))}</dt><dd>${escapeHTML(templateExecutionLabel(meta.execution))}</dd><dt>${escapeHTML(tr('automation.templateNodes'))}</dt><dd>${nodes.length}</dd><dt>Version</dt><dd>${escapeHTML(template.version || '—')}</dd><dt>Tags</dt><dd>${escapeHTML((meta.tags || []).join(', '))}</dd></dl><p class="hint">${escapeHTML(meta.description || '')}</p>`;
+  const variables = $('template-preview-variables');
+  const currentValues = templateVariableValues(template);
+  variables.innerHTML = templateVariableMarkup(template, currentValues);
+  updateTemplateValidation(template);
+  variables.querySelectorAll('[data-template-variable]').forEach(field => {
+    field.addEventListener('input', () => updateTemplateValidation(template));
+  });
+}
+
+function renderTemplateStore() {
+  const list = $('template-store-list');
+  if (!list) return;
+  const category = $('template-store-category');
+  if (category) {
+    const currentCategory = workflowTemplateCategory;
+    const categories = [...new Set(workflowTemplates.map(template => template.meta?.category).filter(Boolean))];
+    category.innerHTML = `<option value="">${escapeHTML(tr('automation.templateAll'))}</option>${categories.map(value => `<option value="${escapeHTML(value)}">${escapeHTML(templateCategoryLabel(value))}</option>`).join('')}`;
+    category.value = categories.includes(currentCategory) ? currentCategory : '';
+  }
+  const templates = filteredWorkflowTemplates();
+  $('template-store-count').textContent = `${templates.length} / ${workflowTemplates.length}`;
+  const featured = templates;
+  const featuredContainer = $('template-store-featured');
+  featuredContainer.innerHTML = featured.length ? `<h3>${escapeHTML(tr('automation.templateFeatured'))}</h3><div class="template-store-featured-grid">${featured.map(template => templateCardMarkup(template, true)).join('')}</div>` : '';
+  const remaining = templates.filter(template => !featured.some(item => item.template_id === template.template_id));
+  list.innerHTML = `<h3>${escapeHTML(tr('automation.templateAll'))} (${templates.length})</h3>${remaining.length ? `<div class="template-store-grid">${remaining.map(template => templateCardMarkup(template)).join('')}</div>` : `<div class="hint">${escapeHTML(tr('automation.templateNoResults'))}</div>`}`;
+  if (!templates.some(template => template.template_id === workflowTemplateSelectedId)) workflowTemplateSelectedId = templates[0]?.template_id || '';
+  document.querySelectorAll('#template-store-dialog [data-template-id]').forEach(card => {
+    card.classList.toggle('selected', card.dataset.templateId === workflowTemplateSelectedId);
+    card.addEventListener('click', event => {
+      const action = event.target.closest('[data-template-action]')?.dataset.templateAction;
+      workflowTemplateSelectedId = card.dataset.templateId;
+      renderTemplateStore();
+      if (action === 'import') importSelectedWorkflowTemplate();
+      else renderTemplatePreview();
+    });
+  });
+  renderTemplatePreview();
+}
+
+function redactTemplateSecrets(value, key = '') {
+  if (/authorization|cookie|token|secret|password|api[_-]?key/i.test(key)) return '[redacted]';
+  if (Array.isArray(value)) return value.map(item => redactTemplateSecrets(item));
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([name, item]) => [name, redactTemplateSecrets(item, name)]));
+  return value;
+}
+
+function loadCustomWorkflowTemplates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(workflowTemplateStorageKey) || '[]');
+    workflowCustomTemplates = Array.isArray(saved) ? saved.filter(item => item && item.template_id && item.workflow) : [];
+  } catch (error) {
+    workflowCustomTemplates = [];
+    console.warn('Local workflow templates could not be restored:', error);
+  }
+}
+
+function persistCustomWorkflowTemplates() {
+  localStorage.setItem(workflowTemplateStorageKey, JSON.stringify(workflowCustomTemplates));
+}
+
+function requestTemplateSaveDialog(defaults = {}) {
+  const dialog = document.createElement('dialog');
+  const categories = Object.keys(templateCategoryLabels);
+  dialog.innerHTML = `<form method="dialog"><h3>${escapeHTML(tr('automation.saveTemplate'))}</h3><label>${escapeHTML(tr('automation.templateTitle'))}<input name="name" required value="${escapeHTML(defaults.name || '')}"></label><label>${escapeHTML(tr('automation.templateCategory'))}<select name="category">${categories.map(category => `<option value="${escapeHTML(category)}"${category === (defaults.category || 'compliance_devsecops') ? ' selected' : ''}>${escapeHTML(templateCategoryLabel(category))}</option>`).join('')}</select></label><label>${escapeHTML(tr('automation.templateDescription'))}<textarea name="description">${escapeHTML(defaults.description || '')}</textarea></label><label>${escapeHTML(tr('automation.templateRisk'))}<select name="risk"><option value="info">Info</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></label><label>${escapeHTML(tr('automation.templateExecution'))}<select name="execution"><option value="passive">Passive</option><option value="interactive">Interactive</option><option value="active">Active</option></select></label><div class="toolbar"><button value="cancel">${escapeHTML(tr('common.cancel'))}</button><button value="save" class="primary">${escapeHTML(tr('common.save'))}</button></div></form>`;
+  document.body.appendChild(dialog);
+  dialog.querySelector('[name="risk"]').value = defaults.risk || (workflowNeedsConfirmation() ? 'high' : 'info');
+  dialog.querySelector('[name="execution"]').value = defaults.execution || (workflowNeedsConfirmation() ? 'active' : 'passive');
+  return new Promise(resolve => {
+    dialog.addEventListener('close', () => {
+      const result = dialog.returnValue === 'save' ? Object.fromEntries(['name', 'category', 'description', 'risk', 'execution'].map(field => [field, dialog.querySelector(`[name="${field}"]`).value.trim()])) : null;
+      dialog.remove();
+      resolve(result);
+    }, {once: true});
+    dialog.showModal();
+  });
+}
+
+async function saveWorkflowAsTemplate() {
+  if (!workflowNodes.length) {
+    $('session-status').textContent = tr('automation.noWorkflow');
+    return;
+  }
+  const details = await requestTemplateSaveDialog({
+    name: String($('workflow-name')?.value || '').trim() || 'Custom workflow',
+    description: '',
+    risk: workflowNeedsConfirmation() ? 'high' : 'info',
+    execution: workflowNeedsConfirmation() ? 'active' : 'passive'
+  });
+  if (!details?.name) return;
+  const template = {
+    $schema: 'requestrider.workflow-template/v1',
+    template_id: `user-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    version: '1.0.0',
+    source: 'user',
+    meta: {
+      title: details.name,
+      category: details.category,
+      author: 'My Project',
+      risk_level: details.risk,
+      execution: details.execution,
+      tags: ['Custom'],
+      description: details.description,
+      estimated_execution_time_sec: 30,
+      requires_oast: false,
+      ai_enhanced: workflowNodes.some(node => node.type === 'ai_agent'),
+      requires_confirmation: workflowNeedsConfirmation()
+    },
+    required_variables: [],
+    workflow: {
+      name: details.name,
+      description: details.description,
+      project_id: null,
+      nodes: redactTemplateSecrets(cloneWorkspaceValue(workflowNodes)),
+      connections: cloneWorkspaceValue(workflowConnections)
+    }
+  };
+  workflowCustomTemplates = [template, ...workflowCustomTemplates.filter(item => item.template_id !== template.template_id)];
+  try {
+    persistCustomWorkflowTemplates();
+  } catch (error) {
+    $('session-status').textContent = `Template save error: ${error.message}`;
+    return;
+  }
+  if (workflowTemplates.length) workflowTemplates = [...workflowTemplates.filter(item => item.source !== 'user'), template, ...workflowCustomTemplates.slice(1)];
+  $('session-status').textContent = tr('automation.templateSaved');
+  renderTemplateStore();
+}
+
+async function loadWorkflowTemplates() {
+  try {
+    const data = await readJSON(await fetch('/api/workflow-templates'));
+    const builtinTemplates = Array.isArray(data.items) ? data.items : [];
+    workflowTemplates = [...builtinTemplates, ...workflowCustomTemplates];
+    const category = $('template-store-category');
+    const current = workflowTemplateCategory;
+    const categories = [...new Set(workflowTemplates.map(template => template.meta?.category).filter(Boolean))];
+    category.innerHTML = `<option value="">${escapeHTML(tr('automation.templateAll'))}</option>${categories.map(value => `<option value="${escapeHTML(value)}">${escapeHTML(templateCategoryLabel(value))}</option>`).join('')}`;
+    category.value = categories.includes(current) ? current : '';
+    renderTemplateStore();
+  } catch (error) {
+    workflowTemplates = [...workflowCustomTemplates];
+    if ($('template-store-count')) $('template-store-count').textContent = tr('automation.templateLoadError');
+    console.warn('Template Store could not be loaded:', error);
+  }
+}
+
+async function openTemplateStore() {
+  const dialog = $('template-store-dialog');
+  if (!dialog) return;
+  if (!workflowTemplates.length) await loadWorkflowTemplates();
+  if (!dialog.open) dialog.showModal();
+  renderTemplateStore();
+  $('template-store-search')?.focus();
+}
+
+function closeTemplateStore() {
+  $('template-store-dialog')?.close();
+}
+
+async function importSelectedWorkflowTemplate() {
+  const template = selectedWorkflowTemplate();
+  if (!template) return;
+  const missing = missingTemplateVariables(template);
+  if (missing.length) {
+    $('session-status').textContent = tr('automation.templateRequired');
+    return;
+  }
+  if (template.meta?.requires_confirmation && !workflowTemplateScopeConfirmed) {
+    $('session-status').textContent = tr('automation.templateConfirm');
+    return;
+  }
+  const variables = templateVariableValues(template);
+  const source = cloneWorkspaceValue(template.workflow || {});
+  source.name = `${template.meta?.title || template.template_id} · ${new Date().toISOString().slice(0, 10)}`;
+  source.project_id = activeProjectId || null;
+  source.metadata = {template_id: template.template_id, template_version: template.version || '1.0.0'};
+  source.nodes = materializeTemplateValue(source.nodes || [], variables);
+  source.connections = materializeTemplateValue(source.connections || [], variables);
+  try {
+    const state = {
+      workflowId: null,
+      name: source.name,
+      nodes: source.nodes,
+      connections: source.connections,
+      selectedNodeId: '',
+      currentRun: null
+    };
+    closeTemplateStore();
+    openImportWorkspace('automation', state);
+    workflowDirty = true;
+    workflowCurrentId = null;
+    workflowSelectedNodeId = '';
+    workflowCurrentRun = null;
+    renderWorkflowCanvas();
+    renderWorkflowInspector();
+    renderWorkflowList();
+    queueWorkspacePersistence();
+    $('session-status').textContent = tr('automation.templateImported');
+  } catch (error) {
+    $('session-status').textContent = `Template import error: ${error.message}`;
+  }
+}
+
+function renderWorkflowList() {
+  const container = $('workflow-list');
+  if (!container) return;
+  const query = String($('workflow-search')?.value || '').trim().toLowerCase();
+  container.innerHTML = '';
+  const visible = workflowItems.filter(item => !query || String(item.name || '').toLowerCase().includes(query));
+  if (workflowCurrentId && !workflowItems.some(item => String(item.id) === String(workflowCurrentId)) && !query) {
+    const draft = document.createElement('button');
+    draft.type = 'button';
+    draft.className = 'automation-list-item active';
+    draft.innerHTML = `<span><strong>${escapeHTML($('workflow-name')?.value || tr('automation.newDraft'))}</strong><small>${escapeHTML(tr('automation.savedLocally'))}</small></span>`;
+    draft.addEventListener('click', () => setWorkflowDraft(null));
+    container.appendChild(draft);
+  }
+  if (!visible.length && !container.children.length) {
+    const empty = document.createElement('div');
+    empty.className = 'hint';
+    empty.textContent = tr('automation.noWorkflow');
+    container.appendChild(empty);
+    return;
+  }
+  visible.forEach(item => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `automation-list-item${String(item.id) === String(workflowCurrentId) ? ' active' : ''}`;
+    const details = [item.active ? tr('automation.activate') : '', item.schedule || item.webhook_slug || ''].filter(Boolean).join(' · ');
+    button.innerHTML = `<span><strong>${escapeHTML(item.name || tr('automation.newDraft'))}</strong><small>${escapeHTML(details || `#${item.id}`)}</small></span>`;
+    button.addEventListener('click', () => selectWorkflow(item));
+    container.appendChild(button);
+  });
+}
+
+function setWorkflowDraft(item) {
+  workflowCurrentId = item?.id || null;
+  workflowNodes = Array.isArray(item?.nodes) ? cloneWorkspaceValue(item.nodes) : [];
+  workflowConnections = Array.isArray(item?.connections) ? cloneWorkspaceValue(item.connections) : [];
+  workflowSelectedNodeId = '';
+  workflowCurrentRun = null;
+  // A draft started from the `+` button is unsaved work even before the first node
+  // is dropped, so it is dirty from the start. Without this the canvas counted as
+  // untouched, and a background `loadWorkflows()` — the one that follows a project
+  // switch, or the one at start-up — auto-selected the first existing workflow and
+  // replaced the canvas while the operator was building on it.
+  workflowDirty = !item;
+  if ($('workflow-name')) $('workflow-name').value = item?.name || tr('automation.newDraft');
+  if ($('workflow-project')) $('workflow-project').textContent = workflowProjectLabel();
+  if ($('workflow-activate')) $('workflow-activate').textContent = item?.active ? tr('automation.deactivate') : tr('automation.activate');
+  renderWorkflowList();
+  renderWorkflowCanvas();
+  renderWorkflowInspector();
+  renderWorkflowRuns([]);
+  queueWorkspacePersistence();
+}
+
+async function selectWorkflow(item) {
+  if (!item?.id) {
+    setWorkflowDraft(item);
+    return;
+  }
+  try {
+    const selected = await readJSON(await fetch(`/api/workflows/${item.id}`));
+    const index = workflowItems.findIndex(candidate => String(candidate.id) === String(selected.id));
+    if (index >= 0) workflowItems[index] = selected;
+    else workflowItems.unshift(selected);
+    setWorkflowDraft(selected);
+    await loadWorkflowRuns(selected.id);
+  } catch (error) {
+    $('session-status').textContent = `Workflow load error: ${error.message}`;
+    renderWorkflowList();
+  }
+}
+
+async function loadWorkflowCatalog() {
+  try {
+    const data = await readJSON(await fetch('/api/workflows/node-types'));
+    if (Array.isArray(data.items) && data.items.length) workflowNodeCatalog = data.items;
+  } catch (error) {
+    console.warn('Workflow node catalog could not be loaded:', error);
+  }
+  renderWorkflowPalette();
+  renderWorkflowCanvas();
+  renderWorkflowInspector();
+}
+
+async function loadWorkflows() {
+  try {
+    const query = activeProjectId ? `?project_id=${encodeURIComponent(activeProjectId)}` : '';
+    const data = await readJSON(await fetch(`/api/workflows${query}`));
+    workflowItems = Array.isArray(data.items) ? data.items : [];
+    const current = workflowItems.find(item => String(item.id) === String(workflowCurrentId));
+    if (current) {
+      setWorkflowDraft(current);
+      await loadWorkflowRuns(current.id);
+    } else if (!workflowCurrentId && !workflowNodes.length && !workflowDirty && workflowItems.length) {
+      selectWorkflow(workflowItems[0]);
+    } else {
+      renderWorkflowList();
+      if ($('workflow-project')) $('workflow-project').textContent = workflowProjectLabel();
+    }
+  } catch (error) {
+    $('session-status').textContent = `Workflow load error: ${error.message}`;
+    renderWorkflowList();
+  }
+}
+
+function workflowPayload() {
+  return {
+    name: String($('workflow-name')?.value || '').trim() || tr('automation.newDraft'),
+    project_id: activeProjectId || null,
+    nodes: cloneWorkspaceValue(workflowNodes),
+    connections: cloneWorkspaceValue(workflowConnections)
+  };
+}
+
+async function saveWorkflow() {
+  const payload = workflowPayload();
+  try {
+    const response = await fetch(workflowCurrentId ? `/api/workflows/${workflowCurrentId}` : '/api/workflows', {
+      method: workflowCurrentId ? 'PATCH' : 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await readJSON(response);
+    const index = workflowItems.findIndex(item => String(item.id) === String(data.id));
+    if (index >= 0) workflowItems[index] = data;
+    else workflowItems.unshift(data);
+    workflowCurrentId = data.id;
+    workflowDirty = false;
+    if ($('workflow-project')) $('workflow-project').textContent = workflowProjectLabel();
+    $('session-status').textContent = tr('automation.saved');
+    renderWorkflowList();
+    await loadWorkflowRuns(data.id);
+    return data;
+  } catch (error) {
+    $('session-status').textContent = error.message;
+    return null;
+  }
+}
+
+function workflowConfirmationText() {
+  const urls = workflowNodes.flatMap(node => [node.params?.url, node.params?.base_request?.url]).filter(Boolean).map(String);
+  const oastServers = workflowNodes.filter(node => node.type === 'oast_listener').map(node => node.params?.server_url).filter(Boolean);
+  const burstDetails = workflowNodes.filter(node => node.type === 'repeater_burst').map(node => {
+    const params = node.params || {};
+    return `${String(params.method || 'GET').toUpperCase()} ${String(params.url || '')} · ${Number(params.iterations || 0)}× · concurrency ${Number(params.concurrency || 0)} · delay ${Number(params.delay_ms || 0)} ms · timeout ${Number(params.timeout_ms || 0)} ms`;
+  }).filter(Boolean);
+  const lastByteDetails = workflowNodes.filter(node => node.type === 'last_byte_sync').map(node => {
+    const params = node.params || {};
+    return `${String(params.method || 'POST').toUpperCase()} ${String(params.url || '')} · ${Number(params.iterations || 0)}× · concurrency ${Number(params.concurrency || 0)} · final-byte hold ${Number(params.hold_ms || 50)} ms · timeout ${Number(params.timeout_ms || 0)} ms`;
+  }).filter(Boolean);
+  const estimated = workflowNodes.filter(node => node.type === 'intruder').reduce((sum, node) => {
+    const payloads = node.params?.payloads;
+    return sum + (Array.isArray(payloads) ? payloads.reduce((count, list) => count + (Array.isArray(list) ? list.length : 0), 0) : 0);
+  }, 0) + workflowNodes.filter(node => node.type === 'repeater_burst').reduce((sum, node) => sum + Math.max(0, Number(node.params?.iterations || 0)), 0) + workflowNodes.filter(node => node.type === 'last_byte_sync').reduce((sum, node) => sum + Math.max(0, Number(node.params?.iterations || 0)), 0);
+  return [tr('automation.confirmRun'), urls.length ? `Targets: ${urls.join(', ')}` : '', oastServers.length ? `OAST providers: ${oastServers.join(', ')}` : '', burstDetails.length ? `Burst: ${burstDetails.join('; ')}` : '', lastByteDetails.length ? `Last-Byte: ${lastByteDetails.join('; ')}` : '', estimated ? `Estimated requests: ${estimated}` : ''].filter(Boolean).join('\n');
+}
+
+function workflowNeedsConfirmation() {
+  return workflowNodes.some(node => ['intruder', 'target_browser', 'oast_listener', 'repeater_burst', 'last_byte_sync'].includes(node.type)
+    || (node.type === 'target' && (String(node.params?.engine || '').toLowerCase() === 'browser'
+      || (Array.isArray(node.params?.actions) && node.params.actions.length)))
+    || Boolean(node.params?.__requires_confirmation));
+}
+
+async function runWorkflow() {
+  if ((!workflowCurrentId || workflowDirty) && !(await saveWorkflow())) {
+    $('session-status').textContent = tr('automation.unsaved');
+    return;
+  }
+  if (!workflowNodes.some(node => ['manual_trigger'].includes(node.type))) {
+    $('session-status').textContent = tr('automation.invalidGraph');
+    return;
+  }
+  if (workflowNeedsConfirmation() && !(await requestConfirmDialog(workflowConfirmationText()))) return;
+  const button = $('workflow-run');
+  button.disabled = true;
+  try {
+    const data = await readJSON(await fetch(`/api/workflows/${workflowCurrentId}/run`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({confirm: true, input: {source: 'manual'}})
+    }));
+    workflowCurrentRun = data;
+    renderWorkflowRuns([data]);
+    pollWorkflowRun(data.id);
+  } catch (error) {
+    $('session-status').textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function pollWorkflowRun(runId) {
+  clearTimeout(workflowRunTimer);
+  if (workflowRunSource) {
+    workflowRunSource.close();
+    workflowRunSource = null;
+  }
+  const terminal = new Set(['completed', 'failed', 'cancelled', 'interrupted']);
+  const update = async run => {
+    workflowCurrentRun = run;
+    renderWorkflowRuns([run]);
+    if (terminal.has(run.status)) {
+      if (workflowRunSource) workflowRunSource.close();
+      await loadWorkflowRuns(run.workflow_id);
+    }
+  };
+  const poll = async () => {
+    try {
+      const run = await readJSON(await fetch(`/api/workflows/runs/${runId}`));
+      await update(run);
+      if (!terminal.has(run.status)) workflowRunTimer = setTimeout(poll, 700);
+    } catch (error) {
+      $('session-status').textContent = `Workflow run error: ${error.message}`;
+    }
+  };
+  if (window.EventSource) {
+    const source = new EventSource(`/api/workflows/runs/${runId}/stream`);
+    workflowRunSource = source;
+    source.addEventListener('snapshot', event => {
+      try { update(JSON.parse(event.data)); } catch (error) { console.warn('Invalid workflow stream snapshot:', error); }
+    });
+    source.addEventListener('workflow', event => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'complete') poll();
+        else poll();
+      } catch (error) { console.warn('Invalid workflow stream event:', error); }
+    });
+    source.onerror = () => {
+      source.close();
+      if (workflowRunSource === source) workflowRunSource = null;
+      poll();
+    };
+  } else {
+    poll();
+  }
+}
+
+async function workflowRunAction(action) {
+  if (!workflowCurrentRun?.id) return;
+  try {
+    const run = await readJSON(await fetch(`/api/workflows/runs/${workflowCurrentRun.id}/${action}`, {method:'POST'}));
+    workflowCurrentRun = run;
+    renderWorkflowRuns([run]);
+  } catch (error) { $('session-status').textContent = error.message; }
+}
+
+async function loadWorkflowRuns(workflowId = workflowCurrentId) {
+  if (!workflowId) return;
+  const data = await readJSON(await fetch(`/api/workflows/runs?workflow_id=${encodeURIComponent(workflowId)}`));
+  const runs = Array.isArray(data.items) ? data.items : [];
+  // The listed run is the freshest answer about itself, so it replaces the
+  // copy this page holds. Keeping the old one made `Refresh runs` show a run
+  // that had already finished while the row beside it read `waiting`, and left
+  // Pause and Cancel disabled on a request that was still on its way.
+  if (workflowCurrentRun?.id) {
+    const refreshed = runs.find(run => run.id === workflowCurrentRun.id);
+    if (refreshed) workflowCurrentRun = refreshed;
+  }
+  renderWorkflowRuns(runs);
+}
+
+function renderWorkflowRuns(runs) {
+  const container = $('workflow-runs-list');
+  if (!container) return;
+  if (!runs.length) {
+    container.className = 'hint';
+    container.textContent = tr('automation.noRuns');
+    return;
+  }
+  container.className = '';
+  container.innerHTML = `<table class="workflow-runs-table"><thead><tr><th>${escapeHTML(tr('automation.status'))}</th><th>${escapeHTML(tr('automation.mode'))}</th><th>${escapeHTML(tr('automation.started'))}</th></tr></thead><tbody>${runs.map(run => `<tr data-run-id="${run.id}"><td class="workflow-run-status ${escapeHTML(run.status)}">${escapeHTML(run.status)}</td><td>${escapeHTML(run.mode)}</td><td>${escapeHTML(String(run.started_at || run.created_at || '').slice(0, 19).replace('T', ' '))}</td></tr>`).join('')}</tbody></table>`;
+  container.querySelectorAll('[data-run-id]').forEach(row => row.addEventListener('click', async () => {
+    try {
+      workflowCurrentRun = await readJSON(await fetch(`/api/workflows/runs/${row.dataset.runId}`));
+      renderWorkflowRuns(runs);
+    } catch (error) { $('session-status').textContent = error.message; }
+  }));
+  // The panel follows a run that is actually in this list. A selected run that
+  // is no longer listed would otherwise keep describing a state the list
+  // contradicts, which is how a finished run kept its buttons enabled.
+  const listed = workflowCurrentRun ? runs.find(run => run.id === workflowCurrentRun.id) : null;
+  const current = listed || runs[0];
+  setPayloadPanel('workflow-log', current ? JSON.stringify({
+    status: current.status,
+    current_node: current.current_node,
+    error: current.error,
+    input: current.input ?? null,
+    output: current.output ?? null,
+    timeline: (current.node_executions || []).map(execution => ({
+      node_id: execution.node_id,
+      node_type: execution.node_type,
+      status: execution.status,
+      started_at: execution.started_at,
+      finished_at: execution.finished_at,
+      input: execution.input,
+      output: execution.output,
+      error: execution.error
+    })),
+    logs: current.logs || []
+  }, null, 2) : '');
+  const active = current && ['queued', 'running', 'waiting'].includes(current.status);
+  const paused = current?.status === 'paused';
+  if ($('workflow-run-pause')) $('workflow-run-pause').disabled = !active;
+  if ($('workflow-run-resume')) $('workflow-run-resume').disabled = !paused;
+  if ($('workflow-run-cancel')) $('workflow-run-cancel').disabled = !current || !['queued', 'running', 'paused', 'waiting'].includes(current.status);
+}
+
+async function exportWorkflow() {
+  try {
+    if (workflowDirty && !(await saveWorkflow())) return;
+    const payload = workflowCurrentId
+      ? await readJSON(await fetch(`/api/workflows/${workflowCurrentId}/export`))
+      : {schema: 'requestrider.workflow/v1', workflow: {...workflowPayload(), id: null}};
+    downloadTarget(`requestrider-workflow-${Date.now()}.json`, JSON.stringify(payload, null, 2), 'application/json');
+    $('session-status').textContent = tr('automation.saved');
+  } catch (error) { $('session-status').textContent = error.message; }
+}
+
+function importWorkflowFile(file) {
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const payload = JSON.parse(String(reader.result || '{}'));
+      const data = await readJSON(await fetch('/api/workflows/import', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)}));
+      workflowItems.unshift(data);
+      setWorkflowDraft(data);
+      $('session-status').textContent = tr('automation.saved');
+    } catch (error) { $('session-status').textContent = tr('session.workflowImportError', {error: error.message}); }
+  };
+  reader.onerror = () => { $('session-status').textContent = tr('session.workflowImportUnreadable'); };
+  reader.readAsText(file);
+}
+
+async function toggleWorkflowActive() {
+  if ((!workflowCurrentId || workflowDirty) && !(await saveWorkflow())) return;
+  const current = workflowItems.find(item => String(item.id) === String(workflowCurrentId));
+  const active = !current?.active;
+  if (active && workflowNeedsConfirmation() && !(await requestConfirmDialog(workflowConfirmationText()))) return;
+  try {
+    const data = await readJSON(await fetch(`/api/workflows/${workflowCurrentId}/${active ? 'activate' : 'deactivate'}`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({confirm_active: true})
+    }));
+    const index = workflowItems.findIndex(item => String(item.id) === String(data.id));
+    if (index >= 0) workflowItems[index] = data;
+    renderWorkflowList();
+    $('workflow-activate').textContent = data.active ? tr('automation.deactivate') : tr('automation.activate');
+  } catch (error) { $('session-status').textContent = error.message; }
+}
+
+async function deleteWorkflow() {
+  if (!workflowCurrentId) { setWorkflowDraft(null); return; }
+  if (!(await requestConfirmDialog(`${tr('automation.delete')}: ${$('workflow-name')?.value || ''}?`))) return;
+  try {
+    await readJSON(await fetch(`/api/workflows/${workflowCurrentId}`, {method: 'DELETE'}));
+    workflowItems = workflowItems.filter(item => String(item.id) !== String(workflowCurrentId));
+    workflowCurrentId = null;
+    setWorkflowDraft(null);
+    $('session-status').textContent = tr('automation.deleted');
+  } catch (error) { $('session-status').textContent = error.message; }
+}
+
+function workflowNodeSummary(node) {
+  const params = node.params || {};
+  return String(params.url || params.server_url || params.prompt || params.cron || params.operation || params.mode || params.label || (params.values ? JSON.stringify(params.values) : '') || node.type);
+}
+
+function applyWorkflowViewport() {
+  const canvas = $('workflow-canvas');
+  const content = $('workflow-content');
+  const wrap = canvas?.parentElement;
+  if (!canvas || !content) return;
+  content.style.transform = `translate(${workflowPanX}px, ${workflowPanY}px) scale(${workflowZoom})`;
+  if (wrap) {
+    wrap.style.backgroundPosition = `${workflowPanX}px ${workflowPanY}px`;
+  }
+  if ($('workflow-zoom-value')) $('workflow-zoom-value').textContent = `${Math.round(workflowZoom * 100)}%`;
+}
+
+function workflowCanvasStageMetrics() {
+  const canvas = $('workflow-canvas');
+  if (!canvas) return { width: 0, height: 0, zoom: 1, rect: null };
+  const rect = canvas.getBoundingClientRect();
+  const width = canvas.clientWidth || rect.width;
+  const height = canvas.clientHeight || rect.height;
+  const zoom = width > 0 ? rect.width / width : 1;
+  return { width, height, zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : 1, rect };
+}
+
+function setWorkflowZoom(nextZoom, renderedX = null, renderedY = null) {
+  const level = Math.max(WORKFLOW_MIN_ZOOM, Math.min(WORKFLOW_MAX_ZOOM, nextZoom));
+  if (renderedX != null && renderedY != null && Number.isFinite(renderedX) && Number.isFinite(renderedY) && workflowZoom > 0) {
+    workflowPanX = renderedX - (renderedX - workflowPanX) * (level / workflowZoom);
+    workflowPanY = renderedY - (renderedY - workflowPanY) * (level / workflowZoom);
+  }
+  workflowZoom = level;
+  applyWorkflowViewport();
+}
+
+function zoomWorkflowByFactor(factor, renderedX = null, renderedY = null) {
+  let focusX = renderedX;
+  let focusY = renderedY;
+  if (focusX == null || focusY == null) {
+    const wrap = $('workflow-canvas')?.parentElement;
+    if (wrap) {
+      focusX = wrap.scrollLeft + wrap.clientWidth / 2;
+      focusY = wrap.scrollTop + wrap.clientHeight / 2;
+    }
+  }
+  setWorkflowZoom(workflowZoom * factor, focusX, focusY);
+}
+
+function workflowNodeStatus(nodeId) {
+  const run = workflowCurrentRun;
+  if (!run) return '';
+  if (run.current_node === nodeId) return 'running';
+  const executions = Array.isArray(run.node_executions) ? run.node_executions : [];
+  const execution = executions.find(item => item.node_id === nodeId);
+  if (execution?.status === 'failed') return 'error';
+  if (execution?.status === 'completed') return 'success';
+  if (execution?.status === 'running') return 'running';
+  const events = Array.isArray(run.logs) ? run.logs : [];
+  const nodeEvents = events.filter(event => event.node_id === nodeId);
+  if (nodeEvents.some(event => event.status === 'failed')) return 'error';
+  if (nodeEvents.some(event => event.status === 'completed')) return 'success';
+  if (run.status === 'failed' && run.current_node === nodeId) return 'error';
+  return '';
+}
+
+// workflowCoord reads a node coordinate as a bounded finite number.
+//
+// A position reaches the canvas from three directions that do not all deserve
+// trust: a drag and `addWorkflowNode` produce real numbers, but `setWorkflowDraft`
+// and `restoreWorkspaceState` clone an imported or restored workflow's `nodes`
+// verbatim. That last one is a plain JSON file the analyst can be handed, and the
+// value lands in `element.style.left` — where `"0;background-image:url(//a/p.gif)"`
+// is a **second declaration**, not a coordinate. No script executes in a current
+// browser, but that is controlled CSS inside the app's own origin and a working
+// exfiltration channel; the same value also becomes SVG path data for every edge.
+//
+// Coerced and bounded **at the point of use**, not at import: the canvas is
+// rebuilt from state that never passed import — the same reason the exported report
+// link is checked where it is rendered rather than where it arrives.
+//
+// `Number()` also rejects `Infinity` and `NaN`, which otherwise produce `NaNpx` and
+// make the browser drop the whole declaration, quietly moving the node.
+const WORKFLOW_COORD_MAX = 20000;
+function workflowCoord(value, fallback) {
+  // Empty and whitespace-only are "absent", not zero. The `value || 80` this
+  // replaced agreed with that, and keeping it means a node with a blank coordinate
+  // still lands on the documented default instead of at the canvas origin.
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return fallback;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(Math.max(number, 0), WORKFLOW_COORD_MAX);
+}
+
+function renderWorkflowMinimap() {
+  const container = $('workflow-minimap-content');
+  if (!container) return;
+  container.innerHTML = '';
+  const scale = Math.min(140 / 1800, 82 / 1100);
+  workflowNodes.forEach(node => {
+    const dot = document.createElement('span');
+    dot.className = `workflow-minimap-node ${workflowNodeStatus(node.id)}`;
+    dot.style.left = `${workflowCoord(node.position?.x, 0) * scale}px`;
+    dot.style.top = `${workflowCoord(node.position?.y, 0) * scale}px`;
+    container.appendChild(dot);
+  });
+}
+
+function fitWorkflowCanvas() {
+  if (!workflowNodes.length) {
+    workflowZoom = 1;
+    workflowPanX = workflowPanY = 0;
+    applyWorkflowViewport();
+    return;
+  }
+  const maxX = Math.max(...workflowNodes.map(node => workflowCoord(node.position?.x, 0) + 190), 800);
+  const maxY = Math.max(...workflowNodes.map(node => workflowCoord(node.position?.y, 0) + 100), 500);
+  const wrap = $('workflow-canvas')?.parentElement;
+  const availableWidth = Math.max(320, (wrap?.clientWidth || 800) - 30);
+  const availableHeight = Math.max(220, (wrap?.clientHeight || 500) - 30);
+  workflowZoom = Math.max(.45, Math.min(1.25, Math.min(availableWidth / maxX, availableHeight / maxY)));
+  workflowPanX = 20;
+  workflowPanY = 20;
+  applyWorkflowViewport();
+}
+
+function autoLayoutWorkflow() {
+  const depths = new Map(workflowNodes.map(node => [node.id, 0]));
+  const incoming = new Map(workflowNodes.map(node => [node.id, 0]));
+  workflowConnections.forEach(edge => incoming.set(edge.target, (incoming.get(edge.target) || 0) + 1));
+  const queue = workflowNodes.filter(node => !incoming.get(node.id)).map(node => node.id);
+  const children = new Map(workflowNodes.map(node => [node.id, []]));
+  workflowConnections.forEach(edge => children.get(edge.source)?.push(edge.target));
+  while (queue.length) {
+    const current = queue.shift();
+    (children.get(current) || []).forEach(child => {
+      depths.set(child, Math.max(depths.get(child) || 0, (depths.get(current) || 0) + 1));
+      incoming.set(child, incoming.get(child) - 1);
+      if (incoming.get(child) <= 0) queue.push(child);
+    });
+  }
+  const rows = new Map();
+  workflowNodes.forEach(node => {
+    const depth = depths.get(node.id) || 0;
+    const row = rows.get(depth) || 0;
+    rows.set(depth, row + 1);
+    node.position = {x: 80 + depth * 240, y: 70 + row * 140};
+  });
+  workflowMarkDirty();
+  renderWorkflowCanvas();
+}
+
+function renderWorkflowCanvas() {
+  const nodeLayer = $('workflow-nodes');
+  const edgeLayer = $('workflow-edges');
+  if (!nodeLayer || !edgeLayer) return;
+  nodeLayer.innerHTML = '';
+  edgeLayer.querySelectorAll('path[data-workflow-edge]').forEach(path => path.remove());
+  applyWorkflowViewport();
+  const byId = Object.fromEntries(workflowNodes.map(node => [node.id, node]));
+  workflowConnections.forEach(edge => {
+    const source = byId[edge.source];
+    const target = byId[edge.target];
+    if (!source || !target) return;
+    const sourceNode = {x: workflowCoord(source.position?.x, 80), y: workflowCoord(source.position?.y, 80)};
+    const targetNode = {x: workflowCoord(target.position?.x, 80), y: workflowCoord(target.position?.y, 80)};
+    const x1 = sourceNode.x + 190;
+    const y1 = sourceNode.y + (edge.source_handle === 'false' ? 76 : 47);
+    const x2 = targetNode.x;
+    const y2 = targetNode.y + 47;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.dataset.workflowEdge = 'true';
+    const bend = Math.max(45, Math.abs(x2 - x1) * .45);
+    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`);
+    if (workflowCurrentRun?.current_node === source.id) path.classList.add('active');
+    edgeLayer.appendChild(path);
+  });
+  workflowNodes.forEach(node => {
+    const card = document.createElement('div');
+    card.className = `workflow-node${node.id === workflowSelectedNodeId ? ' selected' : ''}${node.disabled ? ' disabled' : ''} ${workflowNodeStatus(node.id)}`;
+    card.dataset.nodeId = node.id;
+    card.style.left = `${workflowCoord(node.position?.x, 80)}px`;
+    card.style.top = `${workflowCoord(node.position?.y, 80)}px`;
+    const head = document.createElement('div');
+    head.className = 'workflow-node-head';
+    head.textContent = workflowNodeLabel(node.type);
+    const kind = document.createElement('span');
+    kind.className = 'workflow-node-kind';
+    kind.textContent = node.type;
+    head.appendChild(kind);
+    const body = document.createElement('div');
+    body.className = 'workflow-node-body';
+    body.textContent = node.name || workflowNodeSummary(node);
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'workflow-node-delete';
+    remove.textContent = '×';
+    remove.title = tr('automation.delete');
+    remove.addEventListener('click', event => { event.stopPropagation(); deleteWorkflowNode(node.id); });
+    const inputs = workflowCatalogEntry(node.type).inputs || ['main'];
+    const outputs = workflowCatalogEntry(node.type).outputs || ['main'];
+    inputs.forEach(input => {
+      const handle = document.createElement('span');
+      handle.className = 'workflow-node-handle input';
+      handle.dataset.inputHandle = input;
+      handle.title = `${tr('automation.input')}: ${input}`;
+      handle.addEventListener('click', event => { event.stopPropagation(); connectWorkflowNodes(node.id, input); });
+      card.appendChild(handle);
+    });
+    outputs.forEach(output => {
+      const handle = document.createElement('span');
+      handle.className = `workflow-node-handle output ${output === 'true' || output === 'false' ? output : ''}`;
+      handle.dataset.outputHandle = output;
+      handle.title = `${tr('automation.outputPort')}: ${output}`;
+      handle.addEventListener('click', event => { event.stopPropagation(); startWorkflowConnection(node.id, output); });
+      card.appendChild(handle);
+    });
+    card.append(head, body, remove);
+    card.addEventListener('click', () => { workflowSelectedNodeId = node.id; renderWorkflowCanvas(); renderWorkflowInspector(); });
+    card.addEventListener('dblclick', async event => {
+      if (event.target.closest('button,.workflow-node-handle')) return;
+      const name = await requestTextDialog(tr('automation.nodeName'), node.name || workflowNodeLabel(node.type));
+      if (name?.trim()) { node.name = name.trim(); workflowMarkDirty(); renderWorkflowCanvas(); renderWorkflowInspector(); }
+    });
+    card.addEventListener('pointerdown', event => {
+      if (event.target.closest('button,.workflow-node-handle')) return;
+      event.preventDefault();
+      workflowSelectedNodeId = node.id;
+      workflowDrag = {id: node.id, startX: event.clientX, startY: event.clientY, originX: workflowCoord(node.position?.x, 80), originY: workflowCoord(node.position?.y, 80)};
+      card.setPointerCapture?.(event.pointerId);
+      document.querySelectorAll('.workflow-node.selected').forEach(item => item.classList.remove('selected'));
+      card.classList.add('selected');
+      renderWorkflowInspector();
+    });
+    nodeLayer.appendChild(card);
+  });
+  if ($('workflow-canvas-hint')) {
+    $('workflow-canvas-hint').textContent = workflowPendingConnection
+      ? `${workflowNodeLabel(workflowPendingConnection.type)} → ${tr('automation.input')}`
+      : tr('automation.connectHint');
+  }
+  renderWorkflowMinimap();
+}
+
+function startWorkflowConnection(source, sourceHandle) {
+  workflowPendingConnection = {source, handle: sourceHandle};
+  renderWorkflowCanvas();
+}
+
+function connectWorkflowNodes(target, targetHandle) {
+  if (!workflowPendingConnection) return;
+  const {source, handle} = workflowPendingConnection;
+  if (source !== target && !workflowConnections.some(edge => edge.source === source && edge.target === target && edge.source_handle === handle)) {
+    workflowConnections.push({source, target, source_handle: handle, target_handle: targetHandle || 'main'});
+    workflowMarkDirty();
+  }
+  workflowPendingConnection = null;
+  renderWorkflowCanvas();
+}
+
+function deleteWorkflowNode(nodeId) {
+  workflowNodes = workflowNodes.filter(node => node.id !== nodeId);
+  workflowConnections = workflowConnections.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+  if (workflowSelectedNodeId === nodeId) workflowSelectedNodeId = '';
+  workflowMarkDirty();
+  renderWorkflowCanvas();
+  renderWorkflowInspector();
+}
+
+function addWorkflowNode(type, x, y) {
+  const definition = workflowCatalogEntry(type);
+  const id = `${type}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  const automaticPosition = x == null || y == null;
+  const index = workflowNodes.length;
+  const position = automaticPosition
+    ? {x: 90 + (index % 4) * 230, y: 90 + Math.floor(index / 4) * 150}
+    : {x: Math.max(10, Number(x) || 120), y: Math.max(10, Number(y) || 120)};
+  workflowNodes.push({
+    id,
+    type,
+    name: workflowNodeLabel(type),
+    position,
+    params: workflowDefaultParams(type),
+    disabled: false
+  });
+  workflowSelectedNodeId = id;
+  workflowMarkDirty();
+  renderWorkflowCanvas();
+  renderWorkflowInspector();
+}
+
+function workflowFieldLabel(field) {
+  const key = `automation.field.${field.name}`;
+  const translated = tr(key);
+  return translated === key ? (field.label || field.name) : translated;
+}
+
+function workflowFieldValue(params, field) {
+  if (Object.prototype.hasOwnProperty.call(params, field.name)) return params[field.name];
+  if (Object.prototype.hasOwnProperty.call(field, 'default')) return field.default;
+  if (field.kind === 'boolean') return false;
+  if (field.kind === 'number') return 0;
+  if (field.kind === 'json') return null;
+  return '';
+}
+
+function workflowFieldMarkup(field, value) {
+  const name = escapeHTML(field.name);
+  const label = escapeHTML(workflowFieldLabel(field));
+  const kind = field.kind || 'text';
+  if (kind === 'boolean') {
+    return `<label><span>${label}</span><input type="checkbox" data-workflow-param="${name}" data-param-type="boolean" ${value ? 'checked' : ''}></label>`;
+  }
+  if (kind === 'number') {
+    return `<label><span>${label}</span><input type="number" data-workflow-param="${name}" data-param-type="number" value="${escapeHTML(value ?? '')}"></label>`;
+  }
+  if (kind === 'select') {
+    const options = Array.isArray(field.options) ? field.options : [];
+    const values = options.map(option => String(option));
+    if (value != null && !values.includes(String(value))) values.push(String(value));
+    return `<label><span>${label}</span><select data-workflow-param="${name}" data-param-type="string">${values.map(option => `<option value="${escapeHTML(option)}" ${String(option) === String(value ?? '') ? 'selected' : ''}>${escapeHTML(option)}</option>`).join('')}</select></label>`;
+  }
+  if (kind === 'json') {
+    let serialized = 'null';
+    try { serialized = JSON.stringify(value ?? null, null, 2) ?? 'null'; } catch { /* Render an editable placeholder. */ }
+    return `<label><span>${label}</span><textarea class="workflow-param-object" data-workflow-param="${name}" data-param-type="json" placeholder="[]">${escapeHTML(serialized)}</textarea></label>`;
+  }
+  if (kind === 'textarea') {
+    return `<label><span>${label}</span><textarea data-workflow-param="${name}" data-param-type="string" placeholder="${escapeHTML(field.placeholder || '')}">${escapeHTML(value ?? '')}</textarea></label>`;
+  }
+  return `<label><span>${label}</span><input data-workflow-param="${name}" data-param-type="string" value="${escapeHTML(value ?? '')}" placeholder="${escapeHTML(field.placeholder || '')}"></label>`;
+}
+
+function renderWorkflowInspector() {
+  const container = $('workflow-inspector');
+  if (!container) return;
+  const node = workflowSelectedNode();
+  if (!node) {
+    container.innerHTML = `<h3>${escapeHTML(tr('automation.inspector'))}</h3><div class="hint">${escapeHTML(tr('automation.selectNode'))}</div>`;
+    return;
+  }
+  const params = node.params && typeof node.params === 'object' ? node.params : {};
+  node.params = params;
+  const definition = workflowCatalogEntry(node.type);
+  const schema = Array.isArray(definition.fields) ? definition.fields : [];
+  const known = new Set(schema.map(field => field.name));
+  const extras = Object.fromEntries(Object.entries(params).filter(([key]) => !known.has(key)));
+  const fields = schema.map(field => workflowFieldMarkup(field, workflowFieldValue(params, field))).join('');
+  const extraMarkup = schema.length && Object.keys(extras).length
+    ? `<label><span>${escapeHTML(tr('automation.additionalParams'))}</span><textarea id="workflow-extra-params" data-param-type="json">${escapeHTML(JSON.stringify(extras, null, 2))}</textarea></label>`
+    : '';
+  const genericMarkup = !schema.length
+    ? `<label><span>${escapeHTML(tr('automation.params'))}</span><textarea id="workflow-node-params" data-param-type="json">${escapeHTML(JSON.stringify(params, null, 2))}</textarea></label>`
+    : '';
+  const toolKind = workflowToolKinds[node.type];
+  const toolActions = toolKind
+    ? `<button type="button" id="workflow-use-current">${escapeHTML(tr('automation.useCurrent'))}</button><button type="button" id="workflow-open-tool">${escapeHTML(tr('automation.openTool'))}</button>`
+    : '';
+  container.innerHTML = `<h3>${escapeHTML(tr('automation.inspector'))}</h3><label><span>${escapeHTML(tr('automation.nodeName'))}</span><input id="workflow-node-name" value="${escapeHTML(node.name || '')}"></label><label><span>${escapeHTML(tr('automation.disabled'))}</span><input id="workflow-node-disabled" type="checkbox" ${node.disabled ? 'checked' : ''}></label>${fields}${extraMarkup}${genericMarkup}<div class="workflow-inspector-actions">${toolActions}<button type="button" id="workflow-param-add">${escapeHTML(tr('automation.addParam'))}</button><button type="button" id="workflow-node-delete">${escapeHTML(tr('automation.delete'))}</button></div><div id="workflow-inspector-status" class="hint"></div>`;
+  $('workflow-node-name').addEventListener('input', event => { node.name = event.target.value; workflowMarkDirty(); renderWorkflowCanvas(); });
+  $('workflow-node-disabled').addEventListener('change', event => { node.disabled = event.target.checked; workflowMarkDirty(); renderWorkflowCanvas(); });
+  const updateParam = field => {
+    const key = field.dataset.workflowParam;
+    try {
+      let value;
+      if (field.dataset.paramType === 'json') value = JSON.parse(field.value || 'null');
+      else if (field.dataset.paramType === 'number') value = Number(field.value);
+      else if (field.dataset.paramType === 'boolean') value = field.checked;
+      else value = field.value;
+      params[key] = value;
+      if (node.type === 'target_browser' && key === 'mode') {
+        // Form mode is automatic, so it implies both the state-changing
+        // permission and the automatic pass; navigation mode implies neither.
+        params.allow_state_changing_actions = value === 'form';
+        params.auto_interact = value === 'form';
+        params.auto_fill = true;
+        params.auto_click = true;
+      }
+      $('workflow-inspector-status').textContent = '';
+      workflowMarkDirty();
+      renderWorkflowCanvas();
+    } catch (error) { $('workflow-inspector-status').textContent = error.message; }
+  };
+  container.querySelectorAll('[data-workflow-param]').forEach(field => field.addEventListener('change', () => updateParam(field)));
+  $('workflow-extra-params')?.addEventListener('change', event => {
+    try {
+      const extra = JSON.parse(event.target.value || '{}');
+      if (!extra || Array.isArray(extra) || typeof extra !== 'object') throw new Error(tr('automation.objectRequired'));
+      Object.keys(params).filter(key => !known.has(key)).forEach(key => delete params[key]);
+      Object.assign(params, extra);
+      workflowMarkDirty();
+      renderWorkflowInspector();
+    } catch (error) { $('workflow-inspector-status').textContent = error.message; }
+  });
+  $('workflow-node-params')?.addEventListener('change', event => {
+    try {
+      const next = JSON.parse(event.target.value || '{}');
+      if (!next || Array.isArray(next) || typeof next !== 'object') throw new Error(tr('automation.objectRequired'));
+      Object.keys(params).forEach(key => delete params[key]);
+      Object.assign(params, next);
+      workflowMarkDirty();
+      renderWorkflowCanvas();
+    } catch (error) { $('workflow-inspector-status').textContent = error.message; }
+  });
+  $('workflow-use-current')?.addEventListener('click', () => sendToolToAutomation(toolKind, node));
+  $('workflow-open-tool')?.addEventListener('click', () => openWorkflowNodeInTool(node));
+  $('workflow-param-add').addEventListener('click', async () => {
+    const key = await requestTextDialog(tr('automation.addParam'), '');
+    if (!key?.trim()) return;
+    params[key.trim()] = '';
+    workflowMarkDirty();
+    renderWorkflowInspector();
+  });
+  $('workflow-node-delete').addEventListener('click', () => deleteWorkflowNode(node.id));
+}
+
+async function initializeWorkflowUI() {
+  loadCustomWorkflowTemplates();
+  renderWorkflowPalette();
+  renderWorkflowList();
+  renderWorkflowCanvas();
+  renderWorkflowInspector();
+  $('workflow-search')?.addEventListener('input', renderWorkflowList);
+  $('workflow-new')?.addEventListener('click', () => { setWorkflowDraft(null); document.querySelector('[data-tab="automation"]')?.click(); });
+  $('workflow-name')?.addEventListener('input', () => { workflowMarkDirty(); renderWorkflowList(); });
+  $('workflow-save')?.addEventListener('click', saveWorkflow);
+  $('workflow-save-template')?.addEventListener('click', saveWorkflowAsTemplate);
+  $('workflow-run')?.addEventListener('click', runWorkflow);
+  $('workflow-activate')?.addEventListener('click', toggleWorkflowActive);
+  $('workflow-delete')?.addEventListener('click', deleteWorkflow);
+  $('workflow-refresh-runs')?.addEventListener('click', () => loadWorkflowRuns().catch(error => { $('session-status').textContent = error.message; }));
+  $('workflow-export')?.addEventListener('click', exportWorkflow);
+  $('workflow-import')?.addEventListener('click', () => $('workflow-import-file')?.click());
+  $('workflow-import-file')?.addEventListener('change', event => { const [file] = event.target.files || []; if (file) importWorkflowFile(file); event.target.value = ''; });
+  $('workflow-template-store')?.addEventListener('click', openTemplateStore);
+  $('template-store-close')?.addEventListener('click', closeTemplateStore);
+  $('template-preview-close')?.addEventListener('click', () => { workflowTemplateSelectedId = ''; renderTemplateStore(); });
+  $('template-store-search')?.addEventListener('input', event => { workflowTemplateSearch = event.target.value; renderTemplateStore(); });
+  $('template-store-category')?.addEventListener('change', event => { workflowTemplateCategory = event.target.value; renderTemplateStore(); });
+  $('template-store-execution')?.addEventListener('change', event => { workflowTemplateExecution = event.target.value; renderTemplateStore(); });
+  $('template-store-risk')?.addEventListener('change', event => { workflowTemplateRisk = event.target.value; renderTemplateStore(); });
+  $('template-store-scope-confirm')?.addEventListener('change', event => { workflowTemplateScopeConfirmed = event.target.checked; renderTemplateStore(); });
+  $('template-preview-import')?.addEventListener('click', importSelectedWorkflowTemplate);
+  $('template-store-dialog')?.addEventListener('click', event => { if (event.target === $('template-store-dialog')) closeTemplateStore(); });
+  document.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && $('template-store-dialog')?.open) {
+      event.preventDefault();
+      $('template-store-search')?.focus();
+    }
+    if (event.key === 'Escape' && $('template-store-dialog')?.open) closeTemplateStore();
+  });
+  $('workflow-run-pause')?.addEventListener('click', () => workflowRunAction('pause'));
+  $('workflow-run-resume')?.addEventListener('click', () => workflowRunAction('resume'));
+  $('workflow-run-cancel')?.addEventListener('click', () => workflowRunAction('cancel'));
+  $('repeater-send-automation')?.addEventListener('click', () => sendToolToAutomation('repeater'));
+  $('target-send-automation')?.addEventListener('click', () => sendToolToAutomation('target'));
+  $('osint-send-automation')?.addEventListener('click', () => sendToolToAutomation('osint'));
+  $('scanner-send-automation')?.addEventListener('click', () => sendToolToAutomation('scanner'));
+  $('intruder-send-automation')?.addEventListener('click', () => sendToolToAutomation('intruder'));
+  $('decoder-send-automation')?.addEventListener('click', () => sendToolToAutomation('decoder'));
+  $('comparer-send-automation')?.addEventListener('click', () => sendToolToAutomation('comparer'));
+  $('ai-send-automation')?.addEventListener('click', () => sendToolToAutomation('ai'));
+  $('workflow-canvas')?.addEventListener('dragover', event => event.preventDefault());
+  $('workflow-canvas')?.addEventListener('drop', event => {
+    event.preventDefault();
+    const type = event.dataTransfer.getData('text/requestrider-workflow-node');
+    if (!type || !workflowCatalogEntry(type)) return;
+    const stage = workflowCanvasStageMetrics();
+    const canvasX = stage.rect && stage.zoom ? (event.clientX - stage.rect.left) / stage.zoom : 120;
+    const canvasY = stage.rect && stage.zoom ? (event.clientY - stage.rect.top) / stage.zoom : 120;
+    const contentX = (canvasX - workflowPanX) / (workflowZoom || 1);
+    const contentY = (canvasY - workflowPanY) / (workflowZoom || 1);
+    addWorkflowNode(type, contentX, contentY);
+  });
+  const workflowWrap = $('workflow-canvas')?.parentElement || $('workflow-canvas');
+  const onCanvasPointerDown = event => {
+    if (event.target.closest('.workflow-node, .workflow-canvas-controls, #workflow-minimap, button, input, select, textarea, label')) return;
+    if (event.button !== 0 && event.button !== 1 && !event.altKey) return;
+    event.preventDefault();
+    workflowPanning = {
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: workflowPanX,
+      originY: workflowPanY,
+      pointerId: event.pointerId,
+      moved: false
+    };
+    try { workflowWrap.setPointerCapture(event.pointerId); } catch { /* ignore */ }
+    workflowWrap.classList.add('is-panning');
+  };
+  workflowWrap?.addEventListener('pointerdown', onCanvasPointerDown);
+
+  window.addEventListener('pointermove', event => {
+    if (!workflowPanning && !workflowDrag) return;
+    if (workflowPanning) {
+      const stage = workflowCanvasStageMetrics();
+      const scale = stage.zoom || 1;
+      const dx = (event.clientX - workflowPanning.startX) / scale;
+      const dy = (event.clientY - workflowPanning.startY) / scale;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        workflowPanning.moved = true;
+      }
+      workflowPanX = workflowPanning.originX + dx;
+      workflowPanY = workflowPanning.originY + dy;
+      applyWorkflowViewport();
+      return;
+    }
+    if (!workflowDrag) return;
+    const stage = workflowCanvasStageMetrics();
+    const scale = (workflowZoom || 1) * (stage.zoom || 1);
+    const node = workflowNodes.find(item => item.id === workflowDrag.id);
+    if (!node) return;
+    node.position = {
+      x: Math.max(0, workflowDrag.originX + (event.clientX - workflowDrag.startX) / scale),
+      y: Math.max(0, workflowDrag.originY + (event.clientY - workflowDrag.startY) / scale)
+    };
+    const card = [...document.querySelectorAll('[data-node-id]')].find(item => item.dataset.nodeId === workflowDrag.id);
+    if (card) {
+      card.style.left = `${workflowCoord(node.position.x, 80)}px`;
+      card.style.top = `${workflowCoord(node.position.y, 80)}px`;
+    }
+  });
+
+  const endPanningOrDragging = () => {
+    if (workflowPanning) {
+      workflowWrap.classList.remove('is-panning');
+      try {
+        if (workflowPanning.pointerId != null) workflowWrap.releasePointerCapture(workflowPanning.pointerId);
+      } catch { /* ignore */ }
+      const wasMoved = workflowPanning.moved;
+      workflowPanning = null;
+      if (!wasMoved) {
+        if (workflowSelectedNodeId) {
+          workflowSelectedNodeId = '';
+          renderWorkflowCanvas();
+          renderWorkflowInspector();
+        }
+      }
+      return;
+    }
+    if (workflowDrag) {
+      workflowMarkDirty();
+      workflowDrag = null;
+      renderWorkflowCanvas();
+    }
+  };
+  window.addEventListener('pointerup', endPanningOrDragging);
+  window.addEventListener('pointercancel', endPanningOrDragging);
+
+  $('workflow-zoom-in')?.addEventListener('click', () => zoomWorkflowByFactor(WORKFLOW_ZOOM_STEP));
+  $('workflow-zoom-out')?.addEventListener('click', () => zoomWorkflowByFactor(1 / WORKFLOW_ZOOM_STEP));
+  $('workflow-zoom-value')?.addEventListener('click', () => {
+    workflowZoom = 1;
+    workflowPanX = 0;
+    workflowPanY = 0;
+    applyWorkflowViewport();
+  });
+  $('workflow-fit')?.addEventListener('click', fitWorkflowCanvas);
+  $('workflow-auto-layout')?.addEventListener('click', autoLayoutWorkflow);
+  const handleWorkflowWheel = event => {
+    if (event.target.closest('#workflow-minimap, .workflow-inspector, textarea, select, input, button')) return;
+    event.preventDefault();
+    const stage = workflowCanvasStageMetrics();
+    const canvasX = stage.rect && stage.zoom ? (event.clientX - stage.rect.left) / stage.zoom : null;
+    const canvasY = stage.rect && stage.zoom ? (event.clientY - stage.rect.top) / stage.zoom : null;
+    const factor = event.deltaY < 0 ? WORKFLOW_WHEEL_STEP : 1 / WORKFLOW_WHEEL_STEP;
+    zoomWorkflowByFactor(factor, canvasX, canvasY);
+  };
+  workflowWrap?.addEventListener('wheel', handleWorkflowWheel, {passive: false});
+  await loadWorkflowCatalog();
+}
+
+initializeWorkflowUI();
+
+// ══════════════════════════════════════════════════════════════════════════
+// P0 FEATURE: STATUS STRIP — live health polling
+// ══════════════════════════════════════════════════════════════════════════
+(function initStatusStrip() {
+  let engineOk = false;
+
+  function setDot(id, state) {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    dot.className = 'ss-dot ' + state;
+  }
+
+  let engineCheckFailures = 0;
+  async function checkEngine() {
+    const val = document.getElementById('ss-engine-val');
+    const dot = 'ss-engine-dot';
+    try {
+      const res = await fetch('/api/route', {signal: AbortSignal.timeout(8000)});
+      if (res.ok) {
+        const data = await res.json();
+        engineCheckFailures = 0;
+        engineOk = true;
+        lastEngineHealth = true;
+        setDot(dot, 'ok');
+        if (val) val.textContent = tr('status.online');
+        // Update route value from live data only when it still matches the
+        // route currently shown in the editor; a slower poll must not undo a
+        // route change that was just applied.
+        const routeEl = document.getElementById('ss-route-val');
+        const routeDot = document.getElementById('ss-route-dot');
+        const routeInput = document.getElementById('route-address');
+        const responseAddress = data && data.address ? String(data.address) : '';
+        const inputAddress = routeInput ? String(routeInput.value || '').trim() : responseAddress;
+        if (responseAddress === inputAddress) {
+          if (routeEl) routeEl.textContent = responseAddress || tr('proxy.directValue');
+          if (routeDot) routeDot.className = 'ss-dot ok';
+        }
+      } else {
+        throw new Error('not ok');
+      }
+    } catch {
+      engineCheckFailures++;
+      if (engineCheckFailures >= 2 || !lastEngineHealth) {
+        engineOk = false;
+        lastEngineHealth = false;
+        setDot(dot, 'err');
+        if (val) val.textContent = tr('status.offline');
+      }
+    }
+    // Proxy dot: derive from engine health (if engine up, proxy port is managed by engine)
+    setDot('ss-proxy-dot', engineOk ? 'ok' : 'err');
+  }
+
+  function updateProjectStrip() {
+    const el = document.getElementById('ss-project-val');
+    if (!el) return;
+    const label = document.getElementById('active-project-label');
+    el.textContent = label ? (label.textContent.trim() || '—') : '—';
+  }
+
+  // Poll every 30 s, update project label on every tick
+  checkEngine();
+  setInterval(() => { checkEngine(); updateProjectStrip(); }, 30000);
+  // Also update project strip whenever the project label changes
+  const labelEl = document.getElementById('active-project-label');
+  if (labelEl) {
+    new MutationObserver(updateProjectStrip).observe(labelEl, {childList:true, characterData:true, subtree:true});
+    updateProjectStrip();
+  }
+
+  document.getElementById('ss-engine-retry')?.addEventListener('click', () => { checkEngine(); updateProjectStrip(); });
+
+  // Explicit refresh entry point for callers outside this closure. The status
+  // strip owns its own polling; the visibility handler uses this to catch up
+  // immediately when a backgrounded tab is shown again, instead of waiting for
+  // the next 30 s tick.
+  window.refreshStatusStrip = () => { checkEngine(); updateProjectStrip(); };
+})();
+
+// ══════════════════════════════════════════════════════════════════════════
+// P0 FEATURE: COPY AS cURL
+// ══════════════════════════════════════════════════════════════════════════
+function buildCurlFromItem(item) {
+  if (!item) return '';
+  const method = item.method || 'GET';
+  const url = item.url || '/';
+  const headers = item.request_headers || {};
+  const body = item.request_body || item.request_body_base64 ? (item.request_body || '') : '';
+  let curl = `curl -X ${method} '${url}'`;
+  Object.entries(headers).forEach(([k, v]) => {
+    if (k.toLowerCase() === 'host') return; // host is in URL already
+    curl += ` \\
+  -H '${k}: ${String(v).replace(/'/g, "'\''")}'`;
+  });
+  if (body) {
+    const escaped = body.replace(/'/g, "'\\''" );
+    curl += ` \\
+  --data-raw '${escaped}'`;
+  }
+  return curl;
+}
+
+function buildCurlFromRaw(rawText, host) {
+  // Parse raw HTTP request text into curl command
+  const lines = rawText.split(/\r?\n/);
+  if (!lines.length) return '';
+  const firstLine = lines[0].trim();
+  const parts = firstLine.split(' ');
+  const method = parts[0] || 'GET';
+  const path = parts[1] || '/';
+  let hostname = host || '';
+  const headerLines = [];
+  let bodyStart = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '') { bodyStart = i + 1; break; }
+    const colon = lines[i].indexOf(':');
+    if (colon > -1) {
+      const name = lines[i].slice(0, colon).trim();
+      const value = lines[i].slice(colon + 1).trim();
+      if (name.toLowerCase() === 'host') hostname = value;
+      else headerLines.push([name, value]);
+    }
+  }
+  const body = bodyStart > -1 ? lines.slice(bodyStart).join('\n').trim() : '';
+  let url = path.startsWith('http') ? path : `http://${hostname}${path}`;
+  let curl = `curl -X ${method} '${url}'`;
+  if (hostname) curl += ` \\
+  -H 'Host: ${hostname}'`;
+  headerLines.forEach(([k, v]) => {
+    curl += ` \\
+  -H '${k}: ${v.replace(/'/g, "'\\''" )}'`;
+  });
+  if (body) {
+    curl += ` \\
+  --data-raw '${body.replace(/'/g, "'\''")}'`;
+  }
+  return curl;
+}
+
+async function copyCurlToClipboard(curlText) {
+  try {
+    await navigator.clipboard.writeText(curlText);
+    return true;
+  } catch { return false; }
+}
+
+// Repeater → Copy as cURL button
+document.getElementById('repeater-copy-curl')?.addEventListener('click', async () => {
+  const raw = document.getElementById('repeater-raw-request')?.value || '';
+  const host = document.getElementById('repeater-host')?.value || '';
+  const curl = buildCurlFromRaw(raw, host);
+  const ok = await copyCurlToClipboard(curl);
+  const btn = document.getElementById('repeater-copy-curl');
+  if (btn) { btn.textContent = ok ? '✓ Copied!' : '✗ Failed'; setTimeout(() => { btn.textContent = '📋 cURL'; }, 2000); }
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// P0 FEATURE: HTTP REQUEST INSPECTOR (Repeater)
+// ══════════════════════════════════════════════════════════════════════════
+let riActiveTab = 'params';
+
+function riShowTab(tab) {
+  riActiveTab = tab;
+  document.getElementById('ri-params-view').style.display = tab === 'params' ? '' : 'none';
+  document.getElementById('ri-body-view').style.display = tab === 'body' ? '' : 'none';
+  document.getElementById('ri-tab-params').classList.toggle('active', tab === 'params');
+  document.getElementById('ri-tab-body').classList.toggle('active', tab === 'body');
+}
+// Inline `onclick=` attributes are forbidden by the page's Content-Security-Policy
+// (`script-src` carries only a nonce, no `'unsafe-inline'`), so the tab buttons
+// above and the per-row edit buttons declare `data-ri-tab` / `data-ri-edit` and
+// are handled here by delegation instead.
+document.addEventListener('click', event => {
+  const tabButton = event.target.closest('[data-ri-tab]');
+  if (tabButton) {
+    riShowTab(tabButton.dataset.riTab);
+    return;
+  }
+  const editButton = event.target.closest('[data-ri-edit]');
+  if (editButton) {
+    const index = Number(editButton.dataset.riEdit);
+    if (Number.isInteger(index)) riEditParam(index);
+  }
+});
+
+function riParseRaw(rawText) {
+  const lines = rawText.split(/\r?\n/);
+  const firstLine = lines[0] || '';
+  const parts = firstLine.trim().split(' ');
+  const rawPath = parts[1] || '/';
+  const headers = {};
+  let bodyStart = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === '') { bodyStart = i + 1; break; }
+    const colon = lines[i].indexOf(':');
+    if (colon > -1) {
+      headers[lines[i].slice(0, colon).trim()] = lines[i].slice(colon + 1).trim();
+    }
+  }
+  const bodyRaw = bodyStart > -1 ? lines.slice(bodyStart).join('\n').trim() : '';
+  // Parse query params
+  let queryParams = [];
+  try {
+    const url = new URL('http://x' + rawPath);
+    url.searchParams.forEach((v, k) => queryParams.push({k, v}));
+  } catch {}
+  // Parse body params
+  let bodyParams = [];
+  const ct = Object.entries(headers).find(([n]) => n.toLowerCase() === 'content-type')?.[1] || '';
+  if (ct.includes('application/x-www-form-urlencoded') && bodyRaw) {
+    try {
+      new URLSearchParams(bodyRaw).forEach((v, k) => bodyParams.push({k, v}));
+    } catch {}
+  } else if (ct.includes('application/json') && bodyRaw) {
+    try {
+      const obj = JSON.parse(bodyRaw);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        bodyParams = Object.entries(obj).map(([k, v]) => ({k, v: typeof v === 'object' ? JSON.stringify(v) : String(v)}));
+      }
+    } catch {}
+  }
+  return {queryParams, headers: Object.entries(headers), bodyParams, rawPath, bodyRaw};
+}
+
+function riUpdateEditor(rawPath, queryParams) {
+  // Rebuild the URL line in the raw editor with updated query params
+  const textarea = document.getElementById('repeater-raw-request');
+  if (!textarea) return;
+  const lines = textarea.value.split(/\r?\n/);
+  const firstLine = lines[0] || '';
+  const parts = firstLine.split(' ');
+  const method = parts[0] || 'GET';
+  const proto = parts[2] || 'HTTP/1.1';
+  let basePath = rawPath.split('?')[0];
+  const newSearch = queryParams.length ? '?' + queryParams.map(({k, v}) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&') : '';
+  lines[0] = `${method} ${basePath}${newSearch} ${proto}`;
+  textarea.value = lines.join('\n');
+  // Also update the path field
+  const pathField = document.getElementById('repeater-path');
+  if (pathField) pathField.value = basePath + newSearch;
+}
+
+function riRenderTable(tbodyId, rows, editable) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="3" class="ri-empty">None</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(({k, v}, i) => `
+    <tr>
+      <td>${escapeHTML(k)}</td>
+      <td>${escapeHTML(String(v))}</td>
+      ${editable ? `<td><button class="ri-edit-btn" data-ri-edit="${i}">edit</button></td>` : '<td></td>'}
+    </tr>`).join('');
+}
+
+let riCurrentParams = [];
+let riCurrentBodyParams = [];
+let riCurrentRawPath = '/';
+
+function riRefresh() {
+  const raw = document.getElementById('repeater-raw-request')?.value || '';
+  if (!raw.trim()) return;
+  const {queryParams, headers, bodyParams, rawPath} = riParseRaw(raw);
+  riCurrentParams = queryParams;
+  riCurrentBodyParams = bodyParams;
+  riCurrentRawPath = rawPath;
+  riRenderTable('ri-params-tbody', queryParams, true);
+  riRenderTable('ri-body-tbody', bodyParams, false);
+  // Headers
+  const hTbody = document.getElementById('ri-headers-tbody');
+  if (hTbody) {
+    if (!headers.length) {
+      hTbody.innerHTML = `<tr><td colspan="2" class="ri-empty">None</td></tr>`;
+    } else {
+      hTbody.innerHTML = headers.map(([k, v]) => `<tr><td>${escapeHTML(k)}</td><td>${escapeHTML(v)}</td></tr>`).join('');
+    }
+  }
+  const rawPreview = document.getElementById('ri-raw-preview');
+  if (rawPreview) rawPreview.innerHTML = highlightHTTPText(raw);
+}
+
+function riEditParam(index) {
+  const p = riCurrentParams[index];
+  if (!p) return;
+  const newVal = prompt(`Edit value for "${p.k}":`, p.v);
+  if (newVal === null) return;
+  riCurrentParams[index].v = newVal;
+  riRenderTable('ri-params-tbody', riCurrentParams, true);
+  riUpdateEditor(riCurrentRawPath, riCurrentParams);
+}
+
+document.getElementById('ri-add-param')?.addEventListener('click', () => {
+  const k = prompt('Parameter name:');
+  if (!k) return;
+  const v = prompt('Parameter value:', '');
+  if (v === null) return;
+  riCurrentParams.push({k, v});
+  riRenderTable('ri-params-tbody', riCurrentParams, true);
+  riUpdateEditor(riCurrentRawPath, riCurrentParams);
+});
+
+// Toggle inspector open/closed
+const riWrap = document.getElementById('req-inspector-wrap');
+const riToggle = document.getElementById('req-inspector-toggle');
+if (riToggle && riWrap) {
+  const doToggle = () => {
+    const isOpen = riWrap.classList.toggle('open');
+    riToggle.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) riRefresh();
+  };
+  riToggle.addEventListener('click', doToggle);
+  riToggle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doToggle(); } });
+}
+
+// Shortcut: Inspector button in toolbar
+document.getElementById('repeater-inspector-btn')?.addEventListener('click', () => {
+  const wrap = document.getElementById('req-inspector-wrap');
+  if (!wrap) return;
+  if (!wrap.classList.contains('open')) {
+    wrap.classList.add('open');
+    document.getElementById('req-inspector-toggle')?.setAttribute('aria-expanded', 'true');
+    riRefresh();
+  } else {
+    wrap.classList.remove('open');
+    document.getElementById('req-inspector-toggle')?.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// Auto-refresh inspector when textarea changes (debounced)
+let riDebounce = null;
+document.getElementById('repeater-raw-request')?.addEventListener('input', () => {
+  clearTimeout(riDebounce);
+  riDebounce = setTimeout(() => {
+    if (document.getElementById('req-inspector-wrap')?.classList.contains('open')) riRefresh();
+  }, 400);
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// Row action menu (⋯) shared by Traffic, History, Intruder and Target tables.
+// The floating #ctx-menu escapes the scrollable .exchange-list containers,
+// so the menu is never clipped by table overflow. Every row action lives in
+// this menu; the row itself keeps only Inspect / Repeater quick icons.
+// ══════════════════════════════════════════════════════════════════════════
+const ctxMenu = document.getElementById('ctx-menu');
+let ctxLastTrigger = null;
+let ctxOpenKey = null;
+
+function ctxNormalizeRequest(value) {
+  const item = value || {};
+  return {
+    method: item.method || 'GET',
+    url: item.url || '',
+    headers: {...(item.headers || item.request_headers || {})},
+    body: item.body ?? item.request_body ?? ''
+  };
+}
+
+function ctxAttackPseudoItem(result) {
+  const request = result?.request || {};
+  return {
+    method: request.method,
+    url: request.url,
+    request_headers: request.headers || {},
+    request_body: request.body || '',
+    request_body_encoding: request.body_encoding,
+    request_body_base64: request.body_base64,
+    status: result?.status,
+    status_text: result?.status_text,
+    response_headers: result?.headers || {},
+    response_body: result?.body || '',
+    response_body_encoding: result?.body_encoding,
+    response_body_base64: result?.body_base64,
+    response_content_type: result?.body_content_type,
+    error: result?.error
+  };
+}
+
+function ctxResolve(source, ref) {
+  if (source === 'traffic') {
+    const item = trafficRecordForKey(ref);
+    return item ? {item, ref, request: ctxNormalizeRequest(item)} : null;
+  }
+  if (source === 'history') {
+    const item = historyItems.get(ref);
+    return item ? {item, ref, request: ctxNormalizeRequest(item)} : null;
+  }
+  if (source === 'attack') {
+    const result = currentAttackResults[Number(ref)];
+    if (!result) return null;
+    const item = ctxAttackPseudoItem(result);
+    return {item, ref, result, request: ctxNormalizeRequest({method: item.method, url: item.url, headers: item.request_headers, body: item.request_body})};
+  }
+  if (source === 'target') {
+    const page = (currentTargetMap.pages || [])[Number(ref)];
+    if (!page) return null;
+    const item = targetPageItem(page);
+    return {item, ref, request: ctxNormalizeRequest(item)};
+  }
+  if (source === 'network') {
+    const net = document.getElementById('target-results')._networkItems?.[Number(ref)];
+    if (!net) return null;
+    const item = {method: net.method || 'GET', url: net.url || '', request_headers: {}, request_body: ''};
+    return {item, ref, network: net, request: ctxNormalizeRequest(item)};
+  }
+  return null;
+}
