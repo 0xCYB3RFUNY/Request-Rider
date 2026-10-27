@@ -1,0 +1,1472 @@
+// --- login-success detection ------------------------------------------------
+//
+// A brute force against a login form cannot read the answer out of the status
+// code: WordPress, Joomla, Drupal and Django admin all answer 200 for a wrong
+// credential. The engine therefore replays the request with an impossible
+// credential first, learns what a failed login looks like, and marks the results
+// that deviate. The page's part is to say what was compared and to make the
+// verdict impossible to miss, because a verdict nobody sees is not a result.
+
+const DETECTION_SIGNAL_ORDER = ['status', 'redirect', 'cookie', 'length', 'body'];
+
+function detectSignalChips() {
+  return [...($('detect-signals')?.querySelectorAll('[data-detect-signal]') || [])];
+}
+
+function readDetectionRules() {
+  const raw = json($('detect-rules')?.value || '[]');
+  return Array.isArray(raw) ? raw : [];
+}
+
+function writeDetectionRules(rules) {
+  $('detect-rules').value = JSON.stringify(rules);
+  renderDetectionRules(rules);
+}
+
+function renderDetectionRules(rules) {
+  const list = $('detect-rule-list');
+  if (!list) return;
+  if (!rules.length) {
+    list.innerHTML = `<div class="hint" data-i18n="intruder.detectNoRules">No rules: the signals above decide on their own.</div>`;
+    return;
+  }
+  list.innerHTML = rules.map((rule, index) => {
+    const parts = [tr(`intruder.detectRule_${rule.type}`) || rule.type];
+    if (rule.type === 'header_contains' && rule.name) parts.push(`${rule.name}:`);
+    parts.push(rule.regex ? `/${rule.value}/` : rule.value);
+    return `<div class="detect-rule-row"><span class="rule-text">${escapeHTML(parts.join(' '))}</span>` +
+      `<button type="button" class="icon-btn" data-detect-rule-remove="${index}" title="${escapeHTML(tr('intruder.detectRuleRemove'))}" aria-label="${escapeHTML(tr('intruder.detectRuleRemove'))}">✕</button></div>`;
+  }).join('');
+}
+
+function renderDetectionBaseline(detection) {
+  const status = $('detect-rules-status');
+  if (!status) return;
+  if (!detection || !detection.enabled) {
+    status.textContent = tr('intruder.detectOff');
+    return;
+  }
+  if (detection.calibrating) {
+    status.textContent = tr('intruder.detectCalibrating');
+    return;
+  }
+  const baseline = detection.baseline;
+  if (!baseline || !baseline.samples) {
+    status.textContent = tr('intruder.detectUnavailable');
+    return;
+  }
+  const size = baseline.min_length === baseline.max_length
+    ? `${baseline.min_length}`
+    : `${baseline.min_length}–${baseline.max_length}`;
+  status.textContent = tr('intruder.detectBaseline')
+    .replace('{status}', String(baseline.status))
+    .replace('{size}', size)
+    .replace('{samples}', String(baseline.samples))
+    .replace('{tolerance}', String(detection.tolerance ?? 0))
+    .replace('{decided}', tr(detection.decides === 'rules' ? 'intruder.detectDecidedRules' : 'intruder.detectDecidedSignals'));
+}
+
+// renderDetectionBadge is the column cell. It names the reason instead of only
+// showing a coloured word, because a verdict you cannot check is a verdict you
+// cannot trust, and the operator has to be able to tell "the status changed"
+// from "the page grew" without opening the row.
+function renderDetectionBadge(result) {
+  const detection = result.detection;
+  if (!detection) return '<span class="match-empty">–</span>';
+  if (!detection.matched) return '<span class="match-empty">–</span>';
+  const reasons = Array.isArray(detection.reasons) && detection.reasons.length
+    ? detection.reasons
+    : (Array.isArray(detection.signals) ? detection.signals : []);
+  const title = reasons.map(reason => tr(`intruder.detectReason_${reason.split(':')[0]}`) || reason).join(' · ');
+  const shown = reasons.slice(0, 2).map(reason => tr(`intruder.detectReason_${reason.split(':')[0]}`) || reason);
+  // The overflow is parenthesised so it cannot be read as a size delta next to
+  // the byte count printed underneath it.
+  const more = reasons.length > shown.length ? ` (+${reasons.length - shown.length})` : '';
+  const delta = typeof detection.delta === 'number' && detection.delta !== 0
+    ? `<span class="match-reason">${escapeHTML(String(detection.delta > 0 ? '+' : '') + detection.delta)} B</span>`
+    : '';
+  return `<span class="match-badge" title="${escapeHTML(title)}">${escapeHTML(tr('intruder.detectBadge'))}</span>` +
+    `<span class="match-reason">${escapeHTML(shown.join(' · ') + more)}</span>${delta}`;
+}
+
+function readDetectionConfig() {
+  const rules = readDetectionRules();
+  const signals = detectSignalChips()
+    .filter(chip => chip.getAttribute('aria-pressed') === 'true')
+    .map(chip => chip.dataset.detectSignal);
+  return {
+    enabled: Boolean($('detect-enabled')?.checked),
+    signals,
+    tolerance: Math.max(0, Number($('detect-tolerance')?.value || 0) || 0),
+    calibration_requests: Math.max(1, Number($('detect-calibration')?.value || 0) || 3),
+    rules
+  };
+}
+
+$('detect-enabled')?.addEventListener('change', () => renderDetectionBaseline(null));
+$('detect-signals')?.addEventListener('click', event => {
+  const chip = event.target.closest('[data-detect-signal]');
+  if (!chip) return;
+  chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+});
+$('detect-rule-type')?.addEventListener('change', () => {
+  const needsName = $('detect-rule-type').value === 'header_contains';
+  $('detect-rule-name').hidden = !needsName;
+  $('detect-rule-regex').closest('label').style.visibility = $('detect-rule-type').value === 'status_equals' ? 'hidden' : '';
+});
+$('detect-rule-add')?.addEventListener('click', () => {
+  const type = $('detect-rule-type').value;
+  const value = ($('detect-rule-value').value || '').trim();
+  const name = ($('detect-rule-name').value || '').trim();
+  if (!value) {
+    $('detect-rule-value').focus();
+    return;
+  }
+  if (type === 'header_contains' && !name) {
+    $('detect-rule-name').focus();
+    return;
+  }
+  const rules = readDetectionRules();
+  const rule = {type, value};
+  if (type === 'header_contains') rule.name = name;
+  if ($('detect-rule-regex').checked) rule.regex = true;
+  rules.push(rule);
+  writeDetectionRules(rules);
+  $('detect-rule-value').value = '';
+  $('detect-rule-name').value = '';
+});
+$('detect-rule-clear')?.addEventListener('click', () => {
+  writeDetectionRules([]);
+  $('detect-rule-value').value = '';
+  $('detect-rule-name').value = '';
+});
+$('detect-rule-list')?.addEventListener('click', event => {
+  const button = event.target.closest('[data-detect-rule-remove]');
+  if (!button) return;
+  const rules = readDetectionRules();
+  rules.splice(Number(button.dataset.detectRuleRemove), 1);
+  writeDetectionRules(rules);
+});
+$('attack-only-matches')?.addEventListener('change', () => renderFilteredAttackResults());
+
+// attackMatchSummary is the count the operator reads while the run is going: it
+// is the only place that answers "did anything work" without opening a row.
+function attackMatchSummary() {
+  if (!attackDetection || !attackDetection.enabled) return '';
+  const matched = Number(attackDetection.matched || 0);
+  if (attackDetection.calibrating) return `${tr('intruder.detectCalibrating')} · `;
+  return `${matched}/${Number(attackDetection.checked || 0)} ${tr('intruder.detectMatches')} · `;
+}
+
+function attackResultMatches(result) {
+  const query = $('attack-filter').value.trim().toLowerCase();
+  const onlyMatches = Boolean($('attack-only-matches')?.checked);
+  const isMatch = Boolean(result.detection?.matched);
+  if (onlyMatches && !isMatch) return false;
+  if (!query) return true;
+  const payload = Array.isArray(result.payloads) ? result.payloads.join(' ') : '';
+  const request = result.request || {};
+  const reasons = Array.isArray(result.detection?.reasons) ? result.detection.reasons.join(' ') : '';
+  return `${request.method || ''} ${request.url || ''} ${result.status ?? 'error'} ${payload} ${reasons}`.toLowerCase().includes(query);
+}
+
+function attackResultValue(result, field, index) {
+  if (field === 'method') return String(result.method || result.request?.method || '').toUpperCase();
+  if (field === 'url') return String(result.url || result.request?.url || '').toLowerCase();
+  if (field === 'status') return Number(result.status ?? -1);
+  if (field === 'time') return Number(result.time ?? Number.POSITIVE_INFINITY);
+  if (field === 'size') return Number(result.size ?? Number.POSITIVE_INFINITY);
+  if (field === 'payload') return (Array.isArray(result.payloads) ? result.payloads.join('\u0000') : '').toLowerCase();
+  // Matches sort ahead of everything else, and a run without detection sorts
+  // exactly as it did before: no verdict is not "not a match".
+  if (field === 'match') return result.detection ? (result.detection.matched ? 0 : 1) : 2;
+  return index;
+}
+
+function renderFilteredAttackResults() {
+  // Sorting stores original result indexes, allowing the inspector to open
+  // the correct request after filtering and virtualized row rendering.
+  const direction = $('attack-sort-direction').value === 'desc' ? -1 : 1;
+  const field = $('attack-sort').value;
+  if (typeof updateTableSortHeaders === 'function') {
+    updateTableSortHeaders('.attack-table', direction === -1 ? `-${field}` : field);
+  }
+  const hasFilter = Boolean($('attack-filter').value.trim()) || Boolean($('attack-only-matches')?.checked);
+
+  // Fast path: if no filter and sorting is original order asc, avoid map/sort overhead.
+  if (!hasFilter && field === 'index' && direction === 1) {
+    const len = currentAttackResults.length;
+    if (attackVisibleIndices.length !== len) {
+      attackVisibleIndices = new Array(len);
+      for (let i = 0; i < len; i++) attackVisibleIndices[i] = i;
+    }
+    renderAttackRowsWindow();
+    $('attack-status').textContent = `${attackMatchSummary()}${attackStatusText} · ${tr('attack.showing')} ${len}/${len}`;
+    return;
+  }
+
+  attackVisibleIndices = currentAttackResults
+    .map((result, index) => ({result, index}))
+    .filter(item => attackResultMatches(item.result))
+    .sort((left, right) => {
+      const a = attackResultValue(left.result, field, left.index);
+      const b = attackResultValue(right.result, field, right.index);
+      if (a === b) return left.index - right.index;
+      return (a < b ? -1 : 1) * direction;
+    })
+    .map(item => item.index);
+  renderAttackRowsWindow();
+  $('attack-status').textContent = `${attackMatchSummary()}${attackStatusText} · ${tr('attack.showing')} ${attackVisibleIndices.length}/${currentAttackResults.length}`;
+}
+
+
+function renderAttackRowsWindow() {
+  // Render only the rows near the scroll position to keep large attacks
+  // responsive without changing the exported full result set.
+  const list = $('attack-results').closest('.exchange-list');
+  const total = attackVisibleIndices.length;
+  if (!total) {
+    $('attack-results').innerHTML = `<tr><td colspan="9">${tr('state.noAttackResults')}</td></tr>`;
+    return;
+  }
+  const scrollTop = list ? list.scrollTop : 0;
+  const center = Math.floor(scrollTop / attackRowHeight);
+  const start = Math.max(0, center - attackRowWindow);
+  const end = Math.min(total, start + attackRowWindow * 2);
+  const before = start * attackRowHeight;
+  const after = Math.max(0, (total - end) * attackRowHeight);
+  const rows = attackVisibleIndices.slice(start, end).map(resultIndex => {
+    const result = currentAttackResults[resultIndex];
+    const request = result.request || {};
+    const status = result.status_text || result.status || (result.error ? 'ERROR' : 'PENDING');
+    const matchClass = result.detection?.matched ? ' class="intruder-match"' : '';
+    return `<tr data-attack-result="${resultIndex}"${matchClass}><td>${resultIndex + 1}</td><td>${renderMethodBadge(request.method || '-')}</td><td>${formatUrlMarkup(request.url || '-')}</td><td>${escapeHTML((result.payloads || []).join(' | ') || '-')}</td><td>${renderStatusBadge(result.status ?? status)}</td><td>${renderDetectionBadge(result)}</td><td>${result.size ?? '-'} B</td><td>${result.time ?? '-'} ms</td><td><div class="quick-actions"><button type="button" class="icon-btn primary" data-view-attack="${resultIndex}" title="${escapeHTML(tr('row.inspect'))}" aria-label="${escapeHTML(tr('row.inspect'))}">👁</button><button type="button" class="ctx-trigger" data-ctx-attack="${resultIndex}" aria-label="${escapeHTML(tr('row.moreActions'))}" title="${escapeHTML(tr('row.moreActions'))}">⋯</button></div></td></tr>`;
+  });
+  const spacer = height => `<tr aria-hidden="true" class="attack-spacer"><td colspan="9" style="height:${height}px;padding:0;border:0"></td></tr>`;
+  $('attack-results').innerHTML = `${before ? spacer(before) : ''}${rows.join('')}${after ? spacer(after) : ''}`;
+}
+
+function showAttackResult(result) {
+  if (!result) return;
+  const request = result.request || {};
+  const response = {
+    status: result.status,
+    status_text: result.status_text,
+    response_headers: result.headers || {},
+    response_body: result.body || '',
+    response_body_encoding: result.body_encoding,
+    response_body_base64: result.body_base64,
+    response_content_type: result.body_content_type,
+    error: result.error,
+    raw_response: result.raw_response
+  };
+  $('attack-request-inspector').innerHTML = highlightHTTPText(formatRequest({
+    method: request.method,
+    url: request.url,
+    request_headers: request.headers,
+    request_body: request.body,
+    request_body_encoding: request.body_encoding,
+    request_body_base64: request.body_base64
+  }));
+  $('attack-response-inspector').innerHTML = highlightHTTPText(formatResponse(response));
+}
+
+$('attack-results').addEventListener('click', event => {
+  if (event.target.closest('[data-ctx-attack]')) return;
+  const button = event.target.closest('[data-view-attack]');
+  const compare = event.target.closest('[data-comparer-attack]');
+  const row = event.target.closest('[data-attack-result]');
+  if (compare) {
+    const result = currentAttackResults[Number(compare.dataset.comparerAttack)];
+    sendToComparer(formatResponse({status:result.status, status_text:result.status_text, response_headers:result.headers || {}, response_body:result.body || '', response_body_base64:result.body_base64, error:result.error}));
+    return;
+  }
+  if (!button && !row) return;
+  showAttackResult(currentAttackResults[Number((button || row).dataset.viewAttack ?? (button || row).dataset.attackResult)]);
+});
+$('attack-results').closest('.exchange-list').addEventListener('scroll', () => {
+  if (attackRenderFrame) return;
+  attackRenderFrame = requestAnimationFrame(() => {
+    attackRenderFrame = 0;
+    renderAttackRowsWindow();
+  });
+});
+
+function downloadAttack(filename, content, type) {
+  const blob = new Blob([content], {type});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+// attackStatusClass buckets a result for the report filters. A result with no
+// HTTP status is an error, not a 0: it never produced a response, and the report
+// must not present it as one.
+function attackStatusClass(result) {
+  const status = Number(result?.status);
+  if (!Number.isFinite(status) || status <= 0) return 'error';
+  if (status < 300) return '2xx';
+  if (status < 400) return '3xx';
+  if (status < 500) return '4xx';
+  return '5xx';
+}
+
+function intruderReportMatchChip(result) {
+  if (!result?.detection?.matched) return '—';
+  const reasons = listOfReport(result.detection.reasons);
+  const label = reasons.length ? reasons.map(reason => tr(`intruder.detectReason_${reason.split(':')[0]}`) || reason).join(' · ') : tr('intruder.detectBadge');
+  return `<span class="chip st-3xx" title="${escapeHTML(label)}">${escapeHTML(tr('intruder.detectBadge'))}</span>`;
+}
+
+function attackStatusChip(result) {
+  const label = result?.status ?? (result?.error ? tr('intruder.reportError') : '—');
+  return `<span class="chip st-${attackStatusClass(result)}">${escapeHTML(String(label))}</span>`;
+}
+
+// attackReportMeta collects the run context that only the page knows: the attack
+// mode, the target and the dictionaries currently loaded. It travels with the
+// report so an exported document says which attack produced it, not just what it
+// returned.
+function attackReportMeta() {
+  const host = $('intruder-host')?.value?.trim() || '';
+  const port = $('intruder-port')?.value?.trim() || '';
+  return {
+    attack_id: activeAttackId || '',
+    mode: $('mode')?.value || '',
+    host: [host, port].filter(Boolean).join(':'),
+    https: $('intruder-https')?.checked || false,
+    base_request: $('intruder-raw-request')?.value || '',
+    dictionaries: [...document.querySelectorAll('#dictionary-list textarea')].map(node => node.value),
+    result_count: currentAttackResults.length,
+    total: attackReportTotal,
+    completed: attackReportCompleted,
+    failed: attackReportFailed,
+    status: attackReportStatus,
+    project: projectItems.find(item => String(item.id) === String(activeProjectId))?.name || '',
+    project_target: projectItems.find(item => String(item.id) === String(activeProjectId))?.target || ''
+  };
+}
+
+// intruderHtmlReport renders the attack as a standalone, self-contained,
+// interactive HTML report in the house style. Every value is written through
+// escapeHTML and the file references no external asset and embeds no JSON
+// payload, so a payload or a response body can never execute markup and the
+// report keeps working offline. The generated request and the full response
+// travel with every row, because a result without them is not a result.
+const listOfReport = value => (Array.isArray(value) ? value.filter(Boolean) : []);
+
+function intruderHtmlReport(results, meta) {
+  meta = meta || (typeof attackReportMeta === 'function' ? attackReportMeta() : {}) || {};
+  meta.base_request = meta.base_request || '';
+  meta.dictionaries = Array.isArray(meta.dictionaries) ? meta.dictionaries : [];
+  const cell = value => escapeHTML(String(value ?? ''));
+  const listOf = value => (Array.isArray(value) ? value.filter(Boolean) : []);
+  const rows = results.map((result, index) => ({result, index}));
+  const byClass = name => rows.filter(row => attackStatusClass(row.result) === name).length;
+  const counts = {all: rows.length, '2xx': byClass('2xx'), '3xx': byClass('3xx'), '4xx': byClass('4xx'), '5xx': byClass('5xx'), error: byClass('error')};
+  const distinctPayloads = new Set(rows.flatMap(row => listOf(row.result.payloads))).size;
+  const totalTime = rows.reduce((sum, row) => sum + (Number(row.result.time) || 0), 0);
+  const totalSize = rows.reduce((sum, row) => sum + (Number(row.result.size) || 0), 0);
+  const requestText = result => formatRequest({
+    method: result?.request?.method,
+    url: result?.request?.url,
+    headers: result?.request?.headers,
+    body: result?.request?.body,
+    body_encoding: result?.request?.body_encoding,
+    body_base64: result?.request?.body_base64
+  });
+  const responseText = result => formatResponse({
+    status: result?.status,
+    status_text: result?.status_text,
+    response_headers: result?.headers || {},
+    response_body: result?.body || '',
+    response_body_encoding: result?.body_encoding,
+    response_body_base64: result?.body_base64,
+    response_content_type: result?.body_content_type,
+    error: result?.error
+  });
+
+  const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+  const parts = [];
+  parts.push(`<!doctype html><html lang="${escapeHTML(curLang)}"><head><meta charset="utf-8">`);
+  parts.push('<meta name="viewport" content="width=device-width,initial-scale=1">');
+  parts.push(`<title>RequestRider — ${escapeHTML(tr('nav.intruder'))}</title>`);
+  parts.push(`<style>${EXPORT_REPORT_CSS}</style></head><body>`);
+
+  parts.push('<header class="rr-head">');
+  parts.push(EXPORT_REPORT_BRAND);
+  parts.push(`<div class="rr-title">${escapeHTML(tr('nav.intruder'))}</div>`);
+  parts.push(`<div class="rr-target" title="${cell(meta.host || meta.base_request)}">${cell(meta.host || meta.base_request.split('\n')[0] || '')}</div>`);
+  parts.push('</header>');
+
+  parts.push('<section class="rr-cards">');
+  parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr('intruder.reportResults'))}</span><span class="rr-card-v">${escapeHTML(String(counts.all))}</span></div>`);
+  parts.push(`<div class="rr-card"><span class="rr-card-k">2xx</span><span class="rr-card-v ok">${escapeHTML(String(counts['2xx']))}</span></div>`);
+  if (counts['3xx']) {
+    parts.push(`<div class="rr-card"><span class="rr-card-k">3xx</span><span class="rr-card-v">${escapeHTML(String(counts['3xx']))}</span></div>`);
+  }
+  if (counts['4xx']) {
+    parts.push(`<div class="rr-card"><span class="rr-card-k">4xx</span><span class="rr-card-v warn">${escapeHTML(String(counts['4xx']))}</span></div>`);
+  }
+  if (counts['5xx']) {
+    parts.push(`<div class="rr-card"><span class="rr-card-k">5xx</span><span class="rr-card-v bad">${escapeHTML(String(counts['5xx']))}</span></div>`);
+  }
+  if (counts.error) {
+    parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr('intruder.reportError'))}</span><span class="rr-card-v bad">${escapeHTML(String(counts.error))}</span></div>`);
+  }
+  parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr('intruder.reportPayloads'))}</span><span class="rr-card-v">${escapeHTML(String(distinctPayloads))}</span></div>`);
+  parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr('intruder.reportElapsed'))}</span><span class="rr-card-v">${escapeHTML(String(totalTime))} ms</span></div>`);
+  parts.push(`<div class="rr-card"><span class="rr-card-k">${escapeHTML(tr('intruder.reportBytes'))}</span><span class="rr-card-v">${escapeHTML(String(totalSize))}</span></div>`);
+  parts.push('</section>');
+
+  const facts = [
+    [tr('intruder.reportMode'), meta.mode],
+    [tr('intruder.reportTarget'), meta.host],
+    [tr('intruder.reportProject'), meta.project],
+    [tr('intruder.reportAttackId'), meta.attack_id],
+    [tr('intruder.reportStatus'), meta.status],
+    [tr('intruder.reportJobs'), `${meta.completed}/${meta.total}${meta.failed ? ` · ${meta.failed} ${tr('intruder.reportFailed')}` : ''}`],
+    [tr('intruder.reportDictionaries'), meta.dictionaries.filter(value => value.trim()).length],
+    [tr('intruder.detectColumn'), attackDetection?.enabled ? `${Number(attackDetection.matched || 0)}/${Number(attackDetection.checked || 0)} ${tr('intruder.detectMatches')}` : ''],
+    [tr('intruder.detectBaselineShort'), attackDetection?.enabled && attackDetection.baseline?.samples
+      ? `${tr('intruder.detectReason_status')} ${attackDetection.baseline.status} · ${tr('intruder.detectSignalLength')} ${attackDetection.baseline.min_length}${attackDetection.baseline.max_length !== attackDetection.baseline.min_length ? `–${attackDetection.baseline.max_length}` : ''} B · ${attackDetection.baseline.samples}x`
+      : '']
+  ].filter(([, value]) => String(value ?? '').trim());
+  if (facts.length) {
+    parts.push('<section class="rr-block">');
+    parts.push(`<h2>${escapeHTML(tr('intruder.reportRunTitle'))}</h2><div class="rr-kv">`);
+    facts.forEach(([key, value]) => {
+      parts.push(`<div class="rr-kv-row"><span class="rr-kv-k">${cell(key)}</span><span class="rr-kv-v mono">${cell(value)}</span></div>`);
+    });
+    parts.push('</div>');
+    if (meta.base_request.trim()) {
+      parts.push(`<h2 class="rr-mt">${escapeHTML(tr('label.request'))}</h2><pre>${cell(meta.base_request)}</pre>`);
+    }
+    parts.push('</section>');
+  }
+
+  if (!rows.length) {
+    parts.push(`<section class="rr-block"><p class="rr-empty">${escapeHTML(tr('intruder.reportEmpty'))}</p></section>`);
+  } else {
+    parts.push('<section class="rr-block">');
+    parts.push(`<h2>${escapeHTML(tr('intruder.reportResultsTitle'))}</h2>`);
+    parts.push('<div class="rr-tools"><input type="search" data-rr-search placeholder="' + escapeHTML(tr('intruder.reportFilter')) + '" aria-label="' + escapeHTML(tr('intruder.reportFilter')) + '">');
+    parts.push('<div class="rr-tabs" role="tablist">');
+    const matchedCount = rows.filter(row => row.result.detection?.matched).length;
+    const tabs = [['all', tr('intruder.reportAll')], ['2xx', '2xx'], ['3xx', '3xx'], ['4xx', '4xx'], ['5xx', '5xx'], ['error', tr('intruder.reportError')]];
+    // The matched tab only appears when the run actually compared something, so
+    // a report of a run without detection does not grow a tab that counts zero.
+    if (attackDetection?.enabled) tabs.splice(1, 0, ['match', tr('intruder.detectOnlyMatches')]);
+    tabs.forEach(([value, label]) => {
+      const tabCount = value === 'match' ? matchedCount : counts[value];
+      parts.push(`<button type="button" role="tab" data-filter="${value}" class="${value === 'all' ? 'on' : ''}" aria-selected="${value === 'all'}">${escapeHTML(label)} (${escapeHTML(String(tabCount))})</button>`);
+    });
+    parts.push('</div></div>');
+    // A report of a few thousand results is normal for this tool, so the reader
+    // is told plainly that the table holds every result and that the raw
+    // exchanges are loaded on demand, rather than letting a long scroll look
+    // like a truncated export.
+    if (rows.length >= 500) {
+      parts.push(`<p class="rr-note">${escapeHTML(tr('intruder.reportLarge', {rows: rows.length, bytes: totalSize}))}</p>`);
+    }
+    parts.push('<div class="rr-scroll"><table class="rr-table rr-table-results"><thead><tr><th data-sort="index">' + escapeHTML(tr('intruder.reportIndex')) + '</th><th data-sort="method">' + escapeHTML(tr('table.method')) + '</th><th data-sort="url">' + escapeHTML(tr('table.url')) + '</th><th data-sort="payload">' + escapeHTML(tr('table.payload')) + '</th><th data-sort="status">' + escapeHTML(tr('table.status')) + '</th><th data-sort="match">' + escapeHTML(tr('intruder.detectColumn')) + '</th><th data-sort="size">' + escapeHTML(tr('table.length')) + '</th><th data-sort="time">' + escapeHTML(tr('table.time')) + '</th><th>' + escapeHTML(tr('intruder.reportEvidence')) + '</th></tr></thead><tbody>');
+    rows.forEach(({result, index}, position) => {
+      const request = result.request || {};
+      const payloadText = listOf(result.payloads).join(' | ') || '—';
+      const url = request.url || '—';
+      const haystack = [index + 1, request.method, url, payloadText, result.status, result.error, result.size, result.time, listOfReport(result.detection?.reasons).join(' ')].join(' ').toLowerCase();
+      const detailId = `rr-detail-${position}`;
+      parts.push(
+        `<tr id="detail-${position}" data-status="${cell(attackStatusClass(result))}" data-hay="${cell(haystack)}" data-index="${index + 1}" data-method="${cell(request.method || '')}" data-url="${cell(url)}" data-payload="${cell(payloadText)}" data-status-code="${cell(result.status ?? '')}" data-size="${cell(result.size ?? '')}" data-time="${cell(result.time ?? '')}" data-match="${cell(result.detection?.matched ? '1' : '0')}">`
+        + `<td class="mono">${escapeHTML(String(index + 1))}</td>`
+        + `<td class="mono">${cell(request.method || '—')}</td>`
+        + `<td class="mono">${cell(url)}</td>`
+        + `<td class="mono">${cell(payloadText)}</td>`
+        + `<td>${attackStatusChip(result)}</td>`
+        + `<td>${intruderReportMatchChip(result)}</td>`
+        + `<td class="mono">${cell(result.size ?? '—')}</td>`
+        + `<td class="mono">${cell(result.time ?? '—')}</td>`
+        + `<td><button type="button" class="rr-toggle" data-rr-toggle="${detailId}" aria-expanded="false" aria-controls="${detailId}" aria-label="${cell(tr('intruder.reportEvidenceFor', {index: index + 1}))}"><svg class="rr-toggle-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>${escapeHTML(tr('intruder.reportEvidenceShow'))}</button></td>`
+        + '</tr>'
+      );
+      // The raw exchange travels with the row inside an inert template, so a
+      // report with thousands of results keeps every exchange but only lays out
+      // the ones the reader opens. This is the whole point of the report: a
+      // result row you cannot open is not evidence, it is a summary.
+      parts.push(
+        `<tr class="rr-detail-row" id="${detailId}" data-detail-for="detail-${position}" hidden><td colspan="8">`
+        + '<template data-rr-payload><div class="rr-detail">'
+        + `<p class="rr-detail-h">${escapeHTML(tr('intruder.reportRequest'))}</p><pre>${cell(requestText(result))}</pre>`
+        + `<p class="rr-detail-h">${escapeHTML(tr('intruder.reportResponse'))}</p><pre>${cell(responseText(result))}</pre>`
+        + '</div></template>'
+        + '</td></tr>'
+      );
+    });
+    parts.push('</tbody></table></div>');
+    parts.push(`<p class="rr-empty" hidden>${escapeHTML(tr('intruder.reportNoMatch'))}</p>`);
+    parts.push('</section>');
+  }
+
+  parts.push(`<footer class="rr-foot">${escapeHTML(tr('scanner.exportGenerated'))}: ${escapeHTML(new Date().toISOString())} · RequestRider</footer>`);
+  // The report's script tags are assembled from parts on purpose. The HTML
+  // parser ends an inline block at the first closing script tag it sees, even
+  // inside a JS string or comment, so writing one literally here would break
+  // the whole application page.
+  parts.push('<' + 'script>' + EXPORT_REPORT_JS + '<' + '/scr' + 'ipt>');
+  parts.push('</body></html>');
+  return parts.join('\n');
+}
+
+function intruderCsvRows(results) {
+  const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+  const isUk = (curLang === 'uk');
+  const csvCell = csvCellValue;
+  const headerCols = isUk
+    ? ['індекс', 'метод', 'url', 'заголовки_запиту', 'тіло_запиту', 'статус', 'збіг', 'причини_збігу', 'різниця_розміру', 'заголовки_відповіді', 'тіло_відповіді', 'час', 'розмір', 'пейлоади', 'помилка']
+    : ['index', 'method', 'url', 'request_headers', 'request_body', 'status', 'matched', 'match_reasons', 'length_delta', 'response_headers', 'response_body', 'time', 'size', 'payloads', 'error'];
+  const header = headerCols.map(csvCell).join(',');
+  const rows = results.map((result, index) => {
+    let matchedVal = '';
+    if (result.detection) {
+      if (isUk) {
+        matchedVal = result.detection.matched ? 'так' : 'ні';
+      } else {
+        matchedVal = String(Boolean(result.detection.matched));
+      }
+    }
+    const payloadsArr = Array.isArray(result.payloads)
+      ? result.payloads
+      : (result.payloads && typeof result.payloads === 'object' ? Object.values(result.payloads) : []);
+    return [
+      index + 1,
+      result.request?.method || '',
+      result.request?.url || '',
+      JSON.stringify(result.request?.headers || {}),
+      result.request?.body || '',
+      result.status ?? '',
+      matchedVal,
+      (result.detection?.reasons || []).join(' | '),
+      typeof result.detection?.delta === 'number' ? result.detection.delta : '',
+      JSON.stringify(result.headers || {}),
+      result.body || '',
+      result.time ?? '',
+      result.size ?? '',
+      payloadsArr.join('|'),
+      result.error || ''
+    ].map(csvCell).join(',');
+  });
+  return [header, ...rows];
+}
+
+// exportIntruderResults writes the attack in the chosen format. The report is
+// built from the results held in the page, so it is exactly what the operator
+// sees, in the order the attack produced it.
+function exportIntruderResults(format) {
+  const results = currentAttackResults;
+  if (!results.length || !format) return;
+  const stamp = Date.now();
+  if (format === 'json') {
+    downloadAttack(`intruder-exchange-${stamp}.json`, JSON.stringify({
+      format: 'intruder-lab-http-exchange',
+      version: 1,
+      // The whole comparison travels with the export: the baseline, what decided
+      // the run and how many rows matched. A verdict whose baseline stayed in the
+      // browser cannot be checked later.
+      detection: attackDetection || null,
+      results
+    }, null, 2), 'application/json');
+    flashExportMenu('intruder', 'JSON');
+    return;
+  }
+  if (format === 'csv') {
+    downloadAttack(`intruder-results-${stamp}.csv`, '\uFEFF' + intruderCsvRows(results).join('\r\n'), 'text/csv;charset=utf-8');
+    flashExportMenu('intruder', 'CSV');
+    return;
+  }
+  if (format === 'html') {
+    downloadAttack(`intruder-results-${stamp}.html`, intruderHtmlReport(results, attackReportMeta()), 'text/html;charset=utf-8');
+    flashExportMenu('intruder', 'HTML');
+  }
+}
+
+let attackFilterDebounceTimer = null;
+function scheduleFilteredAttackResults(delay = 120) {
+  if (attackFilterDebounceTimer) clearTimeout(attackFilterDebounceTimer);
+  attackFilterDebounceTimer = setTimeout(() => {
+    attackFilterDebounceTimer = null;
+    renderFilteredAttackResults();
+  }, delay);
+}
+
+$('attack-filter').addEventListener('input', () => scheduleFilteredAttackResults(120));
+$('attack-sort').addEventListener('change', renderFilteredAttackResults);
+$('attack-sort-direction').addEventListener('change', renderFilteredAttackResults);
+$('clear-attack-filter').addEventListener('click', () => {
+  if (attackFilterDebounceTimer) {
+    clearTimeout(attackFilterDebounceTimer);
+    attackFilterDebounceTimer = null;
+  }
+  $('attack-filter').value = '';
+  $('attack-sort').value = 'index';
+  $('attack-sort-direction').value = 'asc';
+  renderFilteredAttackResults();
+});
+
+
+async function pollAttack() {
+  if (!activeAttackId) return;
+  const pollGeneration = attackPollGeneration;
+  try {
+    const data = await readJSON(await fetch(`/api/intruder?attack_id=${encodeURIComponent(activeAttackId)}&since=${attackResultCursor}&limit=500`));
+    if (pollGeneration !== attackPollGeneration) return;
+    renderAttack(data);
+    if (data.status === 'completed' || data.status === 'cancelled') {
+      if (data.status === 'completed' && attackResultCursor < Number(data.completed || 0)) {
+        attackPollTimer = setTimeout(pollAttack, attackPollDelay());
+        return;
+      }
+      activeAttackId = null;
+      localStorage.removeItem(activeAttackStorageKey);
+      clearTimeout(attackPollTimer);
+      attackPollTimer = null;
+      setAttackRunning(false);
+      // The finished run is what an operator reloads into, and the snapshot was
+      // written only on tab switches and field edits. Measured 2026-10-02: after
+      // an attack the `intruder-lab-active-attack` key is removed on purpose, so
+      // a reload restored whatever run the snapshot happened to hold — an older
+      // one, with its verdicts, so the table showed credentials that were never
+      // tried. The run reached its end here, so this is the moment the workspace
+      // has to be written.
+      queueWorkspacePersistence();
+      return;
+    }
+    // If we received a full batch (500) and are behind completed count, fetch next batch promptly.
+    const hasMorePending = Number(data.completed || 0) > attackResultCursor;
+    const delay = hasMorePending && (data.results || []).length >= 500 ? 50 : attackPollDelay();
+    attackPollTimer = setTimeout(pollAttack, delay);
+  } catch (error) {
+    $('attack-status').textContent = `Error: ${error.message}`;
+    activeAttackId = null;
+    localStorage.removeItem(activeAttackStorageKey);
+    setAttackRunning(false);
+  }
+}
+
+$('attack').addEventListener('click', async () => {
+  // The server expands markers and executes generated requests in the engine.
+  try {
+    attackPollGeneration += 1;
+    const requestText = $('intruder-raw-request').value;
+    const parsedRequest = parseIntruderRaw(requestText);
+    $('imethod').value = parsedRequest.method;
+    $('iurl').value = parsedRequest.url;
+    $('iheaders').value = JSON.stringify(parsedRequest.headers);
+    $('ibody').value = parsedRequest.body;
+    const markers = markerCount(requestText);
+    if (markers === 0 || markers % 2 !== 0 || markerPositionCount(requestText) === 0) {
+      throw new Error('Add a paired marker such as §name§, {{name}}, or %name%.');
+    }
+    const payloadSets = dictionaries.map(dictionary => dictionary.values);
+    if (!payloadSets.length || payloadSets.some(values => !values.length)) throw new Error('Fill at least one payload dictionary.');
+    const payload = {
+      base_request: parsedRequest,
+      mode:$('mode').value, payloads:payloadSets, transformations:json($('transformations').value || '[]'), delay_ms:readDelay(), concurrency:readConcurrency(),
+      detection: readDetectionConfig()
+    };
+    $('attack-status').textContent = tr('attack.starting');
+    $('attack-results').textContent = '';
+    renderedAttackKey = '';
+    attackResultCursor = 0;
+    attackVisibleIndices = [];
+    const data = await readJSON(await fetch('/api/intruder', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}));
+    activeAttackId = data.attack_id;
+    localStorage.setItem(activeAttackStorageKey, String(activeAttackId));
+    setAttackRunning(true);
+    renderAttack(data);
+    pollAttack();
+  } catch (error) { $('attack-status').textContent = `Error: ${error.message}`; }
+});
+$('cancel-attack').addEventListener('click', async () => {
+  if (!activeAttackId) return;
+  const cancelledAttackId = activeAttackId;
+  const cancelGeneration = ++attackPollGeneration;
+  $('cancel-attack').disabled = true;
+  try {
+    const data = await readJSON(await fetch(`/api/intruder?attack_id=${encodeURIComponent(cancelledAttackId)}`, {method:'DELETE'}));
+    if (cancelGeneration !== attackPollGeneration) return;
+    renderAttack(data);
+    activeAttackId = null;
+    localStorage.removeItem(activeAttackStorageKey);
+    clearTimeout(attackPollTimer);
+    attackPollTimer = null;
+    setAttackRunning(false);
+  } catch (error) { $('attack-status').textContent = `Cancel error: ${error.message}`; }
+});
+function cancelActiveAttack() {
+  const attackId = activeAttackId || localStorage.getItem(activeAttackStorageKey);
+  if (!attackId) return;
+  fetch(`/api/intruder?attack_id=${encodeURIComponent(attackId)}`, {
+    method: 'DELETE'
+  }).catch(() => {});
+}
+async function attackAction(action) {
+  if (!activeAttackId) return;
+  try {
+    const data = await readJSON(await fetch(`/api/intruder?attack_id=${encodeURIComponent(activeAttackId)}&action=${action}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action})
+    }));
+    renderAttack(data);
+  } catch (error) { $('attack-status').textContent = `${action} error: ${error.message}`; }
+}
+$('pause-attack').addEventListener('click', () => attackAction('pause'));
+$('resume-attack').addEventListener('click', () => attackAction('resume'));
+$('save-attack').addEventListener('click', async () => {
+  try {
+    const name = await requestTextDialog('Attack name', `Intruder ${new Date().toLocaleString()}`);
+    if (name === null) return;
+    const request = parseIntruderRaw($('intruder-raw-request').value);
+    const payload = {
+      name,
+      base_request: request,
+      mode:$('mode').value,
+      payloads:dictionaries.map(dictionary => dictionary.values),
+      transformations:json($('transformations').value || '[]'), delay_ms:readDelay(), concurrency:readConcurrency()
+    };
+    const saved = await readJSON(await fetch('/api/intruder/saved', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}));
+    savedAttacks.set(String(saved.id), saved);
+    renderSavedAttacks();
+    $('saved-attacks').value = String(saved.id);
+    $('attack-status').textContent = `Saved attack #${saved.id}`;
+  } catch (error) { $('attack-status').textContent = `Save error: ${error.message}`; }
+});
+$('load-saved-attack').addEventListener('click', () => {
+  const saved = savedAttacks.get($('saved-attacks').value);
+  if (!saved) return;
+  loadSavedAttack(saved);
+  $('attack-status').textContent = `Loaded ${saved.name}`;
+});
+$('rerun-saved-attack').addEventListener('click', async () => {
+  const id = $('saved-attacks').value;
+  if (!id) return;
+  try {
+    attackPollGeneration += 1;
+    const data = await readJSON(await fetch(`/api/intruder/saved/${encodeURIComponent(id)}/run`, {method:'POST'}));
+    activeAttackId = data.attack_id;
+    localStorage.setItem(activeAttackStorageKey, String(activeAttackId));
+    setAttackRunning(true);
+    renderAttack(data);
+    pollAttack();
+  } catch (error) { $('attack-status').textContent = `Run error: ${error.message}`; }
+});
+function renderSavedAttacks() {
+  const select = $('saved-attacks');
+  const selected = select.value;
+  select.innerHTML = `<option value="">${escapeHTML(tr('hint.savedAttacks'))}</option>`;
+  savedAttacks.forEach(saved => {
+    const option = document.createElement('option');
+    option.value = saved.id;
+    option.textContent = `${saved.name} (#${saved.id})`;
+    select.appendChild(option);
+  });
+  select.value = selected;
+}
+function loadSavedAttack(saved) {
+  const request = saved.base_request || {};
+  $('imethod').value = request.method || 'GET';
+  $('iurl').value = request.url || '';
+  try {
+    const parsed = new URL($('iurl').value);
+    $('intruder-host').value = parsed.hostname;
+    $('intruder-port').value = parsed.port || (parsed.protocol === 'https:' ? '443' : '80');
+    $('intruder-https').checked = parsed.protocol === 'https:';
+  } catch {}
+  $('iheaders').value = JSON.stringify(request.headers || {}, null, 2);
+  $('ibody').value = request.body || '';
+  $('intruder-raw-request').value = formatRequest({method: request.method, url: request.url, request_headers: request.headers, request_body: request.body});
+  $('mode').value = saved.mode;
+  $('intruder-delay').value = Number(saved.delay_ms || 150);
+  $('intruder-concurrency').value = Number(saved.concurrency || 1);
+  transformations = (saved.transformations || []).map(transform => ({...transform}));
+  renderTransformations();
+  dictionaries.splice(0, dictionaries.length, ...(saved.payloads || []).map((values, index) => ({name:`Dictionary ${index + 1}`, values:[...values]})));
+  if (!dictionaries.length) addDictionary();
+  else renderDictionaries();
+}
+async function loadSavedAttacks() {
+  try {
+    const projectParam = activeProjectId ? `?project_id=${encodeURIComponent(activeProjectId)}` : '';
+    const data = await readJSON(await fetch(`/api/intruder/saved${projectParam}`));
+    savedAttacks.clear();
+    data.items.forEach(saved => savedAttacks.set(String(saved.id), saved));
+    renderSavedAttacks();
+  } catch (error) { $('attack-status').textContent = `Saved attacks error: ${error.message}`; }
+}
+loadSavedAttacks();
+$('clear-attack').addEventListener('click', () => {
+  attackPollGeneration += 1;
+  if (attackPollTimer) clearTimeout(attackPollTimer);
+  cancelActiveAttack();
+  activeAttackId = null;
+  localStorage.removeItem(activeAttackStorageKey);
+  attackPollTimer = null;
+  if (attackFilterDebounceTimer) {
+    clearTimeout(attackFilterDebounceTimer);
+    attackFilterDebounceTimer = null;
+  }
+  currentAttackResults = [];
+  attackResultCursor = 0;
+  renderedAttackKey = '';
+  attackStatusText = '';
+  attackVisibleIndices = [];
+  attackReportTotal = 0;
+  attackReportCompleted = 0;
+  attackReportFailed = 0;
+  attackReportStatus = '';
+  syncExportMenuAvailability('intruder', false);
+  closeExportMenus();
+  $('intruder-raw-request').value = '';
+  $('intruder-host').value = '';
+  $('intruder-port').value = '';
+  $('intruder-https').checked = false;
+  $('mode').value = 'sniper';
+  $('intruder-delay').value = '150';
+  $('imethod').value = 'GET';
+  $('iurl').value = '';
+  $('iheaders').value = '{}';
+  $('ibody').value = '';
+  transformations = [];
+  $('transform-operation').value = 'urlEncode';
+  $('transform-value').value = '';
+  updateTransformationValueVisibility();
+  renderTransformations();
+  dictionaries.splice(0, dictionaries.length, {name: 'Dictionary 1', values: []});
+  renderDictionaries();
+  $('saved-attacks').value = '';
+  $('attack-filter').value = '';
+  $('attack-sort').value = 'index';
+  $('attack-sort-direction').value = 'asc';
+  setAttackRunning(false);
+  $('attack-results').innerHTML = `<tr><td colspan="9">${escapeHTML(tr('state.attackResults'))}</td></tr>`;
+  $('attack-status').textContent = '';
+  $('attack-request-inspector').textContent = tr('header.attackResult');
+  $('attack-response-inspector').textContent = tr('header.attackResult');
+  queueWorkspacePersistence();
+});
+const recoveredAttackId = localStorage.getItem(activeAttackStorageKey);
+if (recoveredAttackId && /^\d+$/.test(recoveredAttackId)) {
+  activeAttackId = recoveredAttackId;
+  setAttackRunning(true);
+  pollAttack();
+}
+
+// A Nuclei run interrupted by a reload is re-attached here, beside the Intruder
+// recovery above. It is asked of the engine rather than assumed: a job that
+// finished while the tab was closed is not followed.
+restoreActiveScanJob().catch(() => {});
+
+// History stores complete request and response bodies, so serialising every
+// record is proportional to the whole evidence store: with a few hundred
+// megabytes of captured traffic the unbounded list took tens of seconds and the
+// tab stopped responding. The gateway accepts `limit` and `offset`, so the list
+// reads one window at a time and grows it on demand.
+//
+// This is a transport window, not a deletion and not a cap on what is stored:
+// every record is still persisted, still searchable through the filters (which
+// are applied server-side before the window), and still present in Export. The
+// `Load more` control under the table reports the real counts — how many rows
+// are still behind it and how many the store holds — so a short list is never
+// mistaken for the complete history and the operator is never told about it by a
+// popup, which is what the previous window notice amounted to.
+const HISTORY_PAGE = 500;
+
+// historyTotal is how many records the server holds for the active filter, and
+// historyMorePending guards the `Load more` button while a window is in flight.
+let historyTotal = 0;
+let historyMorePending = false;
+
+// A row shows host, method, URL, status and time, so a window is requested with
+// `detail=summary` and the captured payload is read for the record the operator
+// actually opens. Five hundred rows of one burst used to mean 68 MB of bodies to
+// draw a table; nothing is dropped, it is simply read on demand.
+function historyQuery(offset = 0, limit = HISTORY_PAGE) {
+  const projectParam = activeProjectId ? `&project_id=${encodeURIComponent(activeProjectId)}` : '';
+  const sort = $('history-sort')?.value;
+  const sortParam = sort ? `&sort=${encodeURIComponent(sort)}` : '';
+  return `/api/history?limit=${limit}&offset=${offset}&detail=summary${projectParam}${sortParam}`;
+}
+
+// Ids whose complete record is already cached. A summary row is not enough to
+// show a request or send it anywhere, so every consumer resolves the record
+// through `ensureHistoryRecord` first.
+let historyRecordsLoaded = new Set();
+
+async function ensureHistoryRecord(id, options = {}) {
+  const key = String(id);
+  const cached = historyItems.get(key);
+  if (cached && historyRecordsLoaded.has(key)) return cached;
+  const {loading} = options;
+  if (loading) showHistoryLoading(loading);
+  try {
+    const record = await readJSON(await fetch(`/api/history/${encodeURIComponent(key)}`));
+    historyItems.set(key, record);
+    historyRecordsLoaded.add(key);
+    return record;
+  } catch (error) {
+    showToast(tr('history.loadFailedTitle'), error.message, 'error');
+    return cached || null;
+  } finally {
+    if (loading) clearHistoryLoading(loading);
+  }
+}
+
+function showHistoryLoading(targets) {
+  targets.forEach(id => {
+    const node = $(id);
+    if (node) node.textContent = tr('history.loadingRecord');
+  });
+}
+
+function clearHistoryLoading(targets) {
+  targets.forEach(id => {
+    const node = $(id);
+    if (node && node.textContent === tr('history.loadingRecord')) {
+      node.textContent = tr('state.selectHistory');
+    }
+  });
+}
+
+// A Traffic row shows the same columns a History row does, so the snapshot is
+// requested with `detail=summary` and the captured payload is read for the event
+// the operator opens. An event that already carries its payload — one that just
+// arrived over the live stream — is used as it is, with no extra request.
+let trafficRecordsLoaded = new Set();
+
+// Traffic has two sources, kept apart on purpose.
+//
+// `trafficItems` is the live capture: the engine's in-memory Store plus the SSE
+// stream. It is bounded by the current session on purpose — it starts empty after
+// a restart and `Refresh traffic` empties it — so it cannot be the whole picture.
+//
+// `trafficArchive` is what is durable: the same exchanges as they were persisted
+// to PostgreSQL, read a window at a time by `Load more`. It lives in its own map
+// because the live snapshot is rebuilt from the Store on every activation and
+// would otherwise drop the archive the operator had already paged in.
+//
+// A stored row's primary key shares a number space with a live engine event id, so
+// a row is addressed by a namespaced key. Without the prefix one exchange would
+// silently replace the other in the table and disappear from the view.
+const TRAFFIC_ARCHIVE_PREFIX = 'db-';
+// trafficArchive, trafficArchiveTotal, trafficArchiveLoaded are declared in index.html to avoid TDZ
+let trafficMorePending = false;
+
+function trafficRowKey(item) {
+  if (item && item.db_id != null) return `${TRAFFIC_ARCHIVE_PREFIX}${item.db_id}`;
+  return String(item.id || `${item.session}-${item.timestamp}`);
+}
+
+// trafficRecordForKey resolves a row key to its record, wherever the record lives,
+// so every consumer reads a row the same way regardless of where it came from.
+function trafficRecordForKey(key) {
+  const id = String(key);
+  if (id.startsWith(TRAFFIC_ARCHIVE_PREFIX)) {
+    return trafficArchive.get(id.slice(TRAFFIC_ARCHIVE_PREFIX.length)) || null;
+  }
+  return trafficItems.get(id) || null;
+}
+
+// trafficAllRecords is the whole Traffic view: the live capture and the durable
+// archive, in one list, sorted by the operator's choice.
+function trafficAllRecords() {
+  return [...trafficItems.values(), ...trafficArchive.values()];
+}
+
+function eventHasPayload(item) {
+  if (!item) return false;
+  return Boolean(
+    item.response_body || item.request_body ||
+    item.response_headers || item.request_headers ||
+    item.response_body_base64 || item.request_body_base64
+  );
+}
+
+async function ensureTrafficEvent(key, options = {}) {
+  const rowKey = String(key);
+  if (rowKey.startsWith(TRAFFIC_ARCHIVE_PREFIX)) {
+    return ensureTrafficArchiveEvent(rowKey.slice(TRAFFIC_ARCHIVE_PREFIX.length), options);
+  }
+  const cached = trafficItems.get(rowKey);
+  if (cached && (trafficRecordsLoaded.has(rowKey) || eventHasPayload(cached))) return cached;
+  const id = cached && cached.id;
+  if (!id) return cached || null;
+  const {loading} = options;
+  if (loading) showTrafficLoading(loading);
+  try {
+    const event = await readJSON(await fetch(`/api/traffic/detail?id=${encodeURIComponent(id)}`));
+    trafficItems.set(rowKey, event);
+    trafficRecordsLoaded.add(rowKey);
+    return event;
+  } catch (error) {
+    showToast(tr('traffic.loadFailedTitle'), error.message, 'error');
+    return cached || null;
+  } finally {
+    if (loading) clearTrafficLoading(loading);
+  }
+}
+
+// ensureTrafficArchiveEvent reads the complete exchange for a durable row. The
+// archive listing carries the columns only, for the same reason the live one does:
+// a window of stored bodies is the cost the table never needed to pay.
+async function ensureTrafficArchiveEvent(dbId, options = {}) {
+  const key = String(dbId);
+  const cached = trafficArchive.get(key);
+  if (cached && (trafficRecordsLoaded.has(`${TRAFFIC_ARCHIVE_PREFIX}${key}`) || eventHasPayload(cached))) {
+    return cached;
+  }
+  const {loading} = options;
+  if (loading) showTrafficLoading(loading);
+  try {
+    const record = await readJSON(await fetch(`/api/traffic/record?id=${encodeURIComponent(key)}`));
+    trafficArchive.set(key, record);
+    trafficRecordsLoaded.add(`${TRAFFIC_ARCHIVE_PREFIX}${key}`);
+    return record;
+  } catch (error) {
+    showToast(tr('traffic.loadFailedTitle'), error.message, 'error');
+    return cached || null;
+  } finally {
+    if (loading) clearTrafficLoading(loading);
+  }
+}
+
+// updateTrafficMore states what is still behind the control, from the real counts
+// the server reported for the durable archive.
+function updateTrafficMore() {
+  const holder = $('traffic-more');
+  const button = $('traffic-more-btn');
+  if (!holder || !button) return;
+  const remaining = Math.max(0, trafficArchiveTotal - trafficArchiveLoaded);
+  holder.hidden = remaining <= 0;
+  button.disabled = trafficMorePending;
+  button.title = tr('traffic.loadMoreHint');
+  if (remaining <= 0) {
+    button.textContent = '';
+    return;
+  }
+  button.dataset.i18n = 'traffic.loadMore';
+  button.textContent = tr('traffic.loadMore', {count: remaining, total: trafficArchiveTotal});
+}
+
+// loadMoreTraffic reads the next window of durable passive exchanges from PostgreSQL
+// and keeps both the live capture and the windows already read. The live Store
+// only knows the current session, so this is the only way to see an exchange from
+// before a restart or from a capture that has since been cleared.
+async function loadMoreTraffic() {
+  if (trafficMorePending) return;
+  if (trafficArchiveTotal - trafficArchiveLoaded <= 0) return;
+  trafficMorePending = true;
+  updateTrafficMore();
+  try {
+    const projectParam = activeProjectId ? `&project_id=${encodeURIComponent(activeProjectId)}` : '';
+    const data = await readJSON(await fetch(
+      `/api/traffic/records?limit=${HISTORY_PAGE}&offset=${trafficArchiveLoaded}&detail=summary${projectParam}`
+    ));
+    trafficArchiveTotal = Number.isFinite(Number(data.total)) ? Number(data.total) : 0;
+    data.items.forEach(item => {
+      if (item.db_id == null) return;
+      const key = String(item.db_id);
+      trafficArchive.set(key, item);
+      if (!data.bodies_omitted) trafficRecordsLoaded.add(`${TRAFFIC_ARCHIVE_PREFIX}${key}`);
+    });
+    trafficArchiveLoaded += data.items.length;
+    renderTraffic();
+  } catch (error) {
+    showToast(tr('traffic.loadFailedTitle'), error.message, 'error');
+  } finally {
+    trafficMorePending = false;
+    updateTrafficMore();
+  }
+}
+
+// refreshTrafficArchiveCount asks how many durable records exist without reading
+// any of them, so the control can offer itself on an empty live capture instead of
+// hiding a real archive behind a tab that has nothing in it yet.
+async function refreshTrafficArchiveCount() {
+  try {
+    const projectParam = activeProjectId ? `&project_id=${encodeURIComponent(activeProjectId)}` : '';
+    const data = await readJSON(await fetch(`/api/traffic/records?limit=0&detail=summary${projectParam}`));
+    trafficArchiveTotal = Number.isFinite(Number(data.total)) ? Number(data.total) : 0;
+    updateTrafficMore();
+  } catch (error) {
+    // The live view is unaffected by a failed count; the control simply stays as
+    // it was rather than reporting an archive size nobody verified.
+    console.warn('Traffic archive count could not be read:', error);
+  }
+}
+
+function showTrafficLoading(targets) {
+  targets.forEach(id => {
+    const node = $(id);
+    if (node) node.textContent = tr('traffic.loadingRecord');
+  });
+}
+
+function clearTrafficLoading(targets) {
+  targets.forEach(id => {
+    const node = $(id);
+    if (node && node.textContent === tr('traffic.loadingRecord')) {
+      node.textContent = tr('traffic.selectRow');
+    }
+  });
+}
+
+// applyHistoryItems merges one window into the table state and reports how much
+// of the store is still behind the `Load more` control.
+//
+// `append` is what distinguishes a first window from a following one: a first
+// window replaces the listing, because the filter it answers may have changed,
+// while a following window keeps the rows already read. Nothing is dropped either
+// way — a record that is not in the window has not been lost, it has not been
+// asked for yet, and the control says exactly how many those are.
+function applyHistoryItems(data, append = false) {
+  if (!append) {
+    historyItems.clear();
+    historyRecordsLoaded = new Set();
+  }
+  data.items.forEach(item => {
+    const key = String(item.id);
+    historyItems.set(key, item);
+    // A summary row is not a record: it is the columns only, and the complete
+    // exchange is read for the row the operator opens.
+    if (!data.bodies_omitted) historyRecordsLoaded.add(key);
+  });
+  historyTotal = Number.isFinite(Number(data.total)) ? Number(data.total) : historyItems.size;
+  updateHistoryMore();
+  return data.items;
+}
+
+// updateHistoryMore states what is still behind the control, from the real
+// counters the server reported. It hides the control once every record the
+// filter matches is on screen, so the tab never carries a button that cannot do
+// anything.
+function updateHistoryMore() {
+  const holder = $('history-more');
+  const button = $('history-more-btn');
+  if (!holder || !button) return;
+  const remaining = Math.max(0, historyTotal - historyItems.size);
+  holder.hidden = remaining <= 0;
+  button.disabled = historyMorePending;
+  if (remaining <= 0) {
+    button.textContent = '';
+    return;
+  }
+  button.dataset.i18n = 'history.loadMore';
+  button.textContent = tr('history.loadMore', {count: remaining, total: historyTotal});
+}
+
+// loadMoreHistory reads the next window from PostgreSQL and keeps what is already on
+// screen. The button reports a real `N of M` and is disabled while the request is
+// in flight, so a slow read is visible instead of looking like a dead control.
+async function loadMoreHistory() {
+  if (historyMorePending) return;
+  if (historyTotal - historyItems.size <= 0) return;
+  historyMorePending = true;
+  updateHistoryMore();
+  try {
+    const data = await readJSON(await fetch(historyQuery(historyItems.size)));
+    applyHistoryItems(data, true);
+    renderHistory([...historyItems.values()], false);
+  } catch (error) {
+    showToast(tr('history.loadFailedTitle'), error.message, 'error');
+  } finally {
+    historyMorePending = false;
+    updateHistoryMore();
+  }
+}
+
+async function loadHistory() {
+  try {
+    const data = await readJSON(await fetch(historyQuery()));
+    renderHistory(applyHistoryItems(data), true);
+  } catch (error) { $('history-body').innerHTML = `<tr><td colspan="11">Error: ${escapeHTML(error.message)}</td></tr>`; }
+}
+function loadHistoryWithFilters() {
+  fetch(historyQuery()).then(readJSON).then(data => {
+    renderHistory(applyHistoryItems(data), false);
+  }).catch(error => { $('history-body').innerHTML = `<tr><td colspan="11">Error: ${escapeHTML(error.message)}</td></tr>`; });
+}
+// TRAFFIC_CACHE_BYTES bounds the persisted Traffic snapshot.
+//
+// It is a storage budget for the reload cache, not a limit on capture: nothing is
+// dropped from `trafficItems`, the live table and Export always see every event,
+// and `Refresh traffic` still clears the in-memory store. The cache exists so a
+// reload shows the recent exchange list, and that is what the newest rows give.
+//
+// Without the bound, a long capture wrote every stored body every two seconds:
+// 600 exchanges were already 2.5 MB and 24 ms of synchronous work, and a few
+// thousand were tens of megabytes on the same cadence. It also consumed the
+// origin's storage quota, which is the quota the workspace snapshot needs — and
+// when the write threw, the oversized serialisation was retried on the next
+// flush, forever, for a value that could never fit.
+const TRAFFIC_CACHE_BYTES = 4 * 1024 * 1024;
+// Newest exchanges the cache keeps when the bound bites. Every view already
+// draws a window, so this is what an operator sees first, not the whole capture.
+const TRAFFIC_CACHE_ROWS = 2000;
+
+function persistTrafficCacheNow() {
+  const all = [...trafficItems.values()]
+    .sort((left, right) => new Date(right.timestamp || 0) - new Date(left.timestamp || 0));
+  // Keep cache lightweight and bounded to summary fields only so JSON serialization
+  // and synchronous localStorage writes never block the main thread.
+  const cached = all.slice(0, 150).map(item => ({
+    id: item.id,
+    db_id: item.db_id,
+    session: item.session,
+    timestamp: item.timestamp,
+    source: item.source,
+    host: item.host,
+    source_ip: item.source_ip,
+    method: item.method,
+    url: item.url,
+    status: item.status,
+    response_size: item.response_size,
+    response_content_type: item.response_content_type,
+    scope_status: item.scope_status,
+    tags: item.tags
+  }));
+  try {
+    localStorage.setItem(trafficCacheKey, JSON.stringify(cached));
+    localStorage.setItem(trafficCacheStateKey, 'active');
+  } catch (error) {
+    // A stale oversized value must not break Traffic rendering or SSE updates.
+    console.warn('Traffic cache was not persisted:', error);
+    try {
+      localStorage.removeItem(trafficCacheKey);
+      localStorage.setItem(trafficCacheStateKey, 'active');
+    } catch (storageError) {
+      console.warn('Traffic cache could not be cleared:', storageError);
+    }
+  }
+}
+
+// Persisting the whole Traffic snapshot used to run synchronously on every SSE
+// event: a full array spread, an O(n log n) sort with two Date allocations per
+// comparison, JSON.stringify of every stored body, and a blocking
+// localStorage write. At a busy event rate that is seconds of main-thread work
+// per second, in every open tab, all writing the same key.
+//
+// Persistence is now coalesced: the first event schedules a flush, later events
+// within the window are absorbed, and the write happens at most once per
+// TRAFFIC_PERSIST_DEBOUNCE_MS. A background tab defers the flush until it
+// becomes visible again, and pagehide forces a final synchronous write.
+function saveTrafficCache() {
+  if (trafficPersistTimer !== null) return;
+  if (document.hidden) {
+    // A hidden tab still receives SSE frames but must not spend main-thread
+    // time on storage; the flush runs when the tab is shown again.
+    return;
+  }
+  trafficPersistTimer = window.setTimeout(() => {
+    trafficPersistTimer = null;
+    persistTrafficCacheNow();
+  }, TRAFFIC_PERSIST_DEBOUNCE_MS);
+}
+
+function flushTrafficCache() {
+  if (trafficPersistTimer !== null) {
+    clearTimeout(trafficPersistTimer);
+    trafficPersistTimer = null;
+  }
+  persistTrafficCacheNow();
+}
+function restoreTrafficCache() {
+  try {
+    if (localStorage.getItem(trafficCacheStateKey) === 'cleared') return;
+    const cached = JSON.parse(localStorage.getItem(trafficCacheKey) || '[]');
+    if (!Array.isArray(cached) || !cached.length) return;
+    cached.forEach(item => trafficItems.set(trafficRowKey(item), item));
+  } catch (error) {
+    localStorage.removeItem(trafficCacheKey);
+    localStorage.removeItem(trafficCacheStateKey);
+  }
+}
+function updateTableSortHeaders(tableSelector, currentSort) {
+  const table = document.querySelector(tableSelector);
+  if (!table) return;
+  const isDesc = String(currentSort).startsWith('-');
+  const activeField = isDesc ? currentSort.slice(1) : currentSort;
+  table.querySelectorAll('th.sortable-th').forEach(th => {
+    const field = th.dataset.sort;
+    th.classList.remove('sort-asc', 'sort-desc');
+    th.removeAttribute('aria-sort');
+    if (field && (field === activeField || (field === 'status' && activeField === 'status_code') || (field === 'length' && activeField === 'response_size') || (field === 'mime' && activeField === 'response_content_type'))) {
+      if (isDesc) {
+        th.classList.add('sort-desc');
+        th.setAttribute('aria-sort', 'descending');
+      } else {
+        th.classList.add('sort-asc');
+        th.setAttribute('aria-sort', 'ascending');
+      }
+    }
+  });
+}
+
+function exchangeSortValue(item, field) {
+  if (field === 'timestamp') {
+    if (item._cachedTimestamp !== undefined) return item._cachedTimestamp;
+    item._cachedTimestamp = item.timestamp ? new Date(item.timestamp).getTime() : 0;
+    return item._cachedTimestamp;
+  }
+  if (field === 'id') return Number(item.id || item.db_id || 0);
+  if (field === 'source') return String(item.source || 'proxy').toLowerCase();
+  if (field === 'host') return exchangeHost(item);
+  if (field === 'source_ip') return String(item.source_ip || '').toLowerCase();
+  if (field === 'method') return String(item.method || '').toUpperCase();
+  if (field === 'url') return String(item.url || '').toLowerCase();
+  if (field === 'status_code' || field === 'status') return Number(item.status ?? (item.status_code ?? 0));
+  if (field === 'response_size' || field === 'length') return Number(item.response_size ?? 0);
+  if (field === 'mime' || field === 'content_type' || field === 'response_content_type') return String(item.response_content_type || '').toLowerCase();
+  return 0;
+}
+function exchangeHost(item) {
+  if (!item) return '';
+  if (item._cachedHost !== undefined) return item._cachedHost;
+  if (item.host) {
+    item._cachedHost = String(item.host).toLowerCase();
+  } else {
+    try { item._cachedHost = new URL(item.url || '').host.toLowerCase(); } catch { item._cachedHost = ''; }
+  }
+  return item._cachedHost;
+}
+function exchangeMatchesHost(item, value) {
+  const query = String(value || '').trim().toLowerCase();
+  if (!query) return true;
+  const hostQuery = query.replace(/^https?:\/\//, '').split('/')[0];
+  return exchangeHost(item).includes(hostQuery)
+    || String(item?.url || '').toLowerCase().includes(query);
+}
+function sortExchangeItems(items, controlId) {
+  const selected = typeof controlId === 'string' ? ($(controlId)?.value || '-timestamp') : (controlId || '-timestamp');
+  const descending = selected.startsWith('-');
+  const field = descending ? selected.slice(1) : selected;
+  return [...items].sort((left, right) => {
+    const a = exchangeSortValue(left, field);
+    const b = exchangeSortValue(right, field);
+    if (a === b) return (Number(left.id || left.db_id || 0) - Number(right.id || right.db_id || 0)) * (descending ? -1 : 1);
+    if (typeof a === 'number' && typeof b === 'number') {
+      return (a - b) * (descending ? -1 : 1);
+    }
+    return String(a).localeCompare(String(b)) * (descending ? -1 : 1);
+  });
+}
+function formatResponseSize(value) {
+  return value === null || value === undefined ? '-' : `${value} B`;
+}
+function renderHistory(items, includeCopy) {
+  // The table stays compact while the inspector retains the complete exchange.
+  // The table stays scannable while the inspector preserves the full exchange.
+  updateTableSortHeaders('.history-table', $('history-sort')?.value || '-timestamp');
+  items = sortExchangeItems(
+    items.filter(item => exchangeMatchesHost(item, $('history-host-search')?.value)),
+    'history-sort'
+  );
+  $('history-body').innerHTML = items.map(item => {
+    const tags = (item.tags || []).join(', ');
+    const urlCell = `${formatUrlMarkup(item.url)}${tags ? ` <span class="exchange-tag-badge">${escapeHTML(tags)}</span>` : ''}`;
+    return `<tr data-history-row="${item.id}"><td><input type="checkbox" data-select-history="${item.id}"></td><td>${item.id}</td><td>${renderHistorySourceCell(item)}</td><td>${escapeHTML(item.host || '')}</td><td>${escapeHTML(item.source_ip || '-')}</td><td>${renderMethodBadge(item.method)}</td><td title="${escapeHTML(item.url)}">${urlCell}</td><td>${renderStatusBadge(item.status ?? (item.error ? 'ERROR' : 0))}</td><td>${formatResponseSize(item.response_size)}</td><td>${escapeHTML(item.response_content_type || '')}</td><td class="row-actions"><div class="quick-actions"><button type="button" class="icon-btn primary" data-view-history="${item.id}" title="${escapeHTML(tr('row.inspect'))}" aria-label="${escapeHTML(tr('row.inspect'))}">👁</button><button type="button" class="icon-btn" data-history-repeater="${item.id}" title="${escapeHTML(tr('row.sendRepeater'))}" aria-label="${escapeHTML(tr('row.sendRepeater'))}">↩</button><button type="button" class="ctx-trigger" data-ctx-history="${item.id}" aria-label="${escapeHTML(tr('row.moreActions'))}" title="${escapeHTML(tr('row.moreActions'))}">⋯</button></div></td></tr>`;
+  }).join('');
+  // The listing carries row columns only, so opening a record reads the
+  // complete exchange and shows a loading line meanwhile.
+  const showHistoryRecord = async id => {
+    const targets = ['history-request-inspector', 'history-response-inspector'];
+    const item = await ensureHistoryRecord(id, {loading: targets});
+    if (!item) return null;
+    $('history-request-inspector').innerHTML = highlightHTTPText(formatRequest(item));
+    $('history-response-inspector').innerHTML = highlightHTTPText(formatResponse(item));
+    return item;
+  };
+  document.querySelectorAll('[data-history-row]').forEach(row => row.addEventListener('click', event => {
+    if (event.target.closest('button,input')) return;
+    showHistoryRecord(row.dataset.historyRow);
+  }));
+  document.querySelectorAll('[data-view-history]').forEach(button => button.addEventListener('click', () => {
+    showHistoryRecord(button.dataset.viewHistory);
+  }));
+  document.querySelectorAll('[data-copy-history]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.copyHistory);
+    if (!item) return;
+    await navigator.clipboard.writeText(JSON.stringify(item, null, 2));
+  }));
+  document.querySelectorAll('[data-delete-history]').forEach(button => button.addEventListener('click', async () => {
+    await fetch(`/api/history/${button.dataset.deleteHistory}`, {method:'DELETE'});
+    loadHistoryWithFilters();
+  }));
+  document.querySelectorAll('[data-history-repeater]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.historyRepeater);
+    if (item) loadTrafficItem(item, 'repeater');
+  }));
+  document.querySelectorAll('[data-history-intruder]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.historyIntruder);
+    if (item) loadTrafficItem(item, 'intruder');
+  }));
+  document.querySelectorAll('[data-comparer-request]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.comparerRequest);
+    if (item) sendToComparer(formatRequest(item), 'left');
+  }));
+  document.querySelectorAll('[data-comparer-response]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.comparerResponse);
+    if (item) sendToComparer(formatResponse(item), 'right');
+  }));
+  document.querySelectorAll('[data-decoder-request]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.decoderRequest);
+    if (item) sendToDecoder(formatRequest(item));
+  }));
+  document.querySelectorAll('[data-decoder-response]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.decoderResponse);
+    if (item) sendToDecoder(formatResponse(item));
+  }));
+  document.querySelectorAll('[data-annotate-item]').forEach(button => button.addEventListener('click', async () => {
+    const item = await ensureHistoryRecord(button.dataset.annotateItem);
+    if (item) promptAnnotation(item, 'history');
+  }));
+}
+function formatRequest(item) {
+  if (!item) return 'No request selected.';
+  if (item.raw_request && typeof item.raw_request === 'string') {
+    return item.raw_request;
+  }
+  let target = item.url || '/';
+  try {
+    const parsed = new URL(target);
+    target = `${parsed.pathname || '/'}${parsed.search}`;
+  } catch { /* Keep non-URL request targets readable. */ }
+  target = target.replace(/%C2%A7/gi, '§');
+  let headers = '';
+  const rawHeaders = item.request_headers || item.headers || {};
+  if (typeof rawHeaders === 'string') {
+    headers = rawHeaders.trim();
+  } else if (rawHeaders && typeof rawHeaders === 'object') {
+    const headerValues = {...rawHeaders};
+    if (!Object.keys(headerValues).some(key => key.toLowerCase() === 'host')) {
+      try { headerValues.Host = new URL(item.url).host; } catch { /* Relative targets rely on their existing Host header. */ }
+    }
+    headers = Object.entries(headerValues).map(([key, value]) => `${key}: ${value}`).join('\n');
+  }
+  const body = item.request_body_encoding === 'base64'
+    ? `[binary ${item.request_content_type || 'application/octet-stream'}; base64]\n${item.request_body_base64 || ''}`
+    : (item.request_body ?? item.body ?? '');
+  return `${item.method || 'GET'} ${target} HTTP/1.1\n${headers}${headers ? '\n' : ''}\n${body}`;
+}
+function formatResponse(item) {
+  if (!item) return 'No response selected.';
+  const status = item.status == null
+    ? (item.error ? 'ERROR' : 'PENDING')
+    : (item.status_text || item.status);
+  const headers = Object.entries(item.response_headers || {}).map(([key, value]) => `${key}: ${value}`).join('\n');
+  const body = item.response_body_encoding === 'base64'
+    ? `[binary ${item.response_content_type || 'application/octet-stream'}; base64]\n${item.response_body_base64 || ''}`
+    : (item.response_body || '');
+  const error = item.error ? `[error] ${item.error}\n` : '';
+  const raw = item.raw_response ? `${item.raw_response}\n` : '';
+  return `${raw || `HTTP/1.1 ${status}\n${headers}${headers ? '\n' : ''}\n`}${error}${body}`;
+}

@@ -1,0 +1,1671 @@
+<!-- FAQ & Interactive User Manual Modal Dialog -->
+<dialog id="tab-faq-modal" class="tab-faq-modal" aria-labelledby="tab-faq-title" aria-modal="true" data-lang="uk">
+  <div class="tab-faq-header">
+    <div class="tab-faq-title-group">
+      <span class="tab-faq-icon" aria-hidden="true" style="font-size:20px">📖</span>
+      <div>
+        <h3 id="tab-faq-title" data-i18n="faq.modalTitle">Довідник та інструкція користувача</h3>
+        <span id="tab-faq-current-tab-badge" class="tab-badge">OSINT</span>
+      </div>
+    </div>
+    <div class="tab-faq-search-wrap">
+      <input type="search" id="tab-faq-search" class="tab-faq-search-input" placeholder="Пошук по функціях, налаштуваннях, полях затримок..." data-i18n-placeholder="faq.searchPlaceholder" autocomplete="off">
+      <button type="button" id="tab-faq-search-clear" class="tab-faq-search-clear" title="Clear">×</button>
+    </div>
+    <button type="button" class="tab-faq-close" id="tab-faq-close-btn" aria-label="Close" data-i18n-aria-label="common.close">×</button>
+  </div>
+
+  <div class="tab-faq-body">
+    <!-- Sidebar navigation between tools -->
+    <nav class="tab-faq-sidebar" role="tablist" aria-label="FAQ Tools Navigation">
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="osint" role="tab" aria-selected="true">
+        <span class="tab-faq-nav-icon">🔍</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">OSINT &amp; Граф</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">OSINT &amp; Graph</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="repeater" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">↩</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Repeater (Повторювач)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Repeater</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="intruder" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">⚡</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Intruder (Фаззер)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Intruder (Fuzzer)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="scanner" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🛡️</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Scanner (Вразливості)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Scanner (Vulns)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="target" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🎯</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Target (Карта &amp; JS)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Target (Map &amp; JS)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="traffic" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🌊</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Трафік &amp; Проксі</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Traffic &amp; Proxy</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="history" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">📜</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Історія (History)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">History Records</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="comparer" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">↔</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Comparer (Порівняння)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Comparer (Diff)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="decoder" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">{}</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Decoder (Конвертер)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Decoder (Encoding)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="proxy" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🧅</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Tor &amp; Маршрутизація</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Tor &amp; Outbound Proxy</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="ai" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🤖</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">AI SecOps (ШІ-аудит)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">AI SecOps Assistant</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="automation" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">🚀</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Automation (Воркфлоу)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Automation (Workflows)</span>
+      </button>
+      <button type="button" class="tab-faq-nav-item" data-faq-tab="projects" role="tab" aria-selected="false">
+        <span class="tab-faq-nav-icon">📁</span>
+        <span class="tab-faq-nav-label" data-faq-lang="uk">Projects (Проєкти)</span>
+        <span class="tab-faq-nav-label" data-faq-lang="en">Projects &amp; Scope</span>
+      </button>
+    </nav>
+
+    <!-- Main manual content view -->
+    <div class="tab-faq-content" id="tab-faq-content-scroll">
+
+      <!-- ======================================================== -->
+      <!-- OSINT PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-osint" class="tab-faq-pane active" data-tab-pane="osint">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🔍 OSINT та Граф сутностей</span><span data-faq-lang="en">🔍 OSINT &amp; Entity Graph</span><span class="faq-hero-badge" data-faq-lang="uk">Розвідка та зв'язки</span><span class="faq-hero-badge" data-faq-lang="en">Reconnaissance</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Пасивний збір відкритих даних (DNS, HTTP, TLS, WAF, технології, куки) та візуальний граф сутностей для дослідження взаємозв'язків між доменами, IP, поштами та обліковими записами.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Passive reconnaissance of open data (DNS, HTTP, TLS, WAF, technologies, cookies) and visual Entity Graph mapping relations between domains, IPs, emails, and credentials.</p>
+          </div>
+        </div>
+
+        <!-- SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань, полів та галочок OSINT</span>
+            <span data-faq-lang="en">⚙️ OSINT Settings, Inputs &amp; Toggles Detailed Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Налаштування / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Setting / Checkbox</th>
+                <th data-faq-lang="uk">Призначення та що буде при зміні</th>
+                <th data-faq-lang="en">Purpose &amp; Effect on Execution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Run benign WAF canary</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка на сторінці</small><small style="color:var(--muted)" data-faq-lang="en">Page checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Безпечна канарка WAF.</strong>
+                  <br>• <em>Увімкнено (рекомендовано):</em> надсилає один безпечний канарковий запит зі специфічним патерном. Дозволяє автоматично визначити вендора фаєрвола (Cloudflare, Akamai, CloudFront, ModSecurity) та показує бейдж WAF у картці безпеки.
+                  <br>• <em>Вимкнено:</em> перевірка не виконується; зменшує підозрілий слід, але тип WAF залишається невідомим.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Benign WAF Canary Probe.</strong>
+                  <br>• <em>Checked (recommended):</em> Sends an innocuous canary request to fingerprint active WAF vendors (Cloudflare, Akamai, CloudFront, ModSecurity).
+                  <br>• <em>Unchecked:</em> Omits probe to minimize footprint; WAF status remains unverified.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Delay ms</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле затримки в опціях</small><small style="color:var(--muted)" data-faq-lang="en">Delay input in options</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Затримка між перевірками (мілісекунди).</strong>
+                  <br>Час очікування між запитами під час запуску трансформацій (наприклад <code>150-250 ms</code>). Запобігає спрацюванню лімітів запитів (Rate Limiting) та блокуванню IP зовнішніми сервісами (GitHub API, Wayback Machine, HackerTarget). Значення <code>0</code> = надсилати без пауз на максимальній швидкості.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Inter-check Delay (milliseconds).</strong>
+                  <br>Pause between queries during transform runs (e.g. <code>150-250 ms</code>). Prevents IP rate-limiting and temporary blocks on public intelligence services. Value <code>0</code> disables delays.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Concurrency</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле кількості воркерів</small><small style="color:var(--muted)" data-faq-lang="en">Concurrency workers in options</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Кількість одночасних потоків.</strong>
+                  <br>Скільки запитів одночасно генерує воркер пул рушія (за замовчуванням 8). Для скритих досліджень рекомендується знижувати до <code>2-4</code>; для швидкої розвідки у відкритих мережах можна збільшувати.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Concurrency Worker Count.</strong>
+                  <br>Number of concurrent probe goroutines dispatched simultaneously (default: 8). Lower to <code>2-4</code> for stealth; raise for rapid assessment.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">DNS Wildcard Detection</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Checkbox in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Виявлення wildcard DNS перед брутфорсом.</strong>
+                  <br>• <em>Увімкнено:</em> перед скануванням субдоменів генерує запит на випадковий фейковий хост (наприклад <code>nonexistent-9x1z.target.com</code>). Якщо сервер повертає IP (увімкнено Wildcard DNS <code>*.domain</code>), система попередить вас, запобігаючи створенню тисяч хибних субдоменів у графі.
+                  <br>• <em>Вимкнено:</em> перевірка вимикається; субдомени збираються наосліп.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>DNS Wildcard Detection.</strong>
+                  <br>• <em>Checked:</em> Probes a random pseudo-domain before bruteforcing. If resolved (catch-all DNS enabled), warns the operator to prevent flooding the graph with phantom subdomains.
+                  <br>• <em>Unchecked:</em> Skips wildcard test; gathers names blindly.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Graph animations</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Checkbox in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Анімація та фізична симуляція графу.</strong>
+                  <br>• <em>Увімкнено:</em> полотно плавно анімує вузли, зв'язки розтягуються за моделлю пружин (COSE).
+                  <br>• <em>Вимкнено:</em> вимикає анімацію переходу; значно економить процесор та батарею ноутбука при роботі з графами понад 500 вузлів.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Graph Physics &amp; Animations.</strong>
+                  <br>• <em>Checked:</em> Smooth physics-based node positioning and spring dynamics (COSE).
+                  <br>• <em>Unchecked:</em> Disables continuous physics ticks, saving CPU/battery on graphs exceeding 500 nodes.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Max Rendered Nodes</span><br><small style="color:var(--muted)" data-faq-lang="uk">Ліміт вузлів у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Node limit in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Стеля відображення сутностей (250 / 500 / 1000 / 2500).</strong>
+                  <br>Захищає вкладку браузера від переповнення пам'яті (OOM Crash). При досягненні ліміту рендерер показує найбільш пріоритетні вузли з найвищим показником ризику (Risk Score).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Max Rendered Nodes Cap (250 / 500 / 1000 / 2500).</strong>
+                  <br>Prevents browser DOM/Canvas memory exhaustion. Displays top-priority entities sorted by risk score when exceeded.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- OSINT TRANSFORMS DEEP DIVE -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚡ Повний довідник трансформацій графу (OSINT Transforms)</span>
+            <span data-faq-lang="en">⚡ Full OSINT Graph Transforms Reference</span>
+          </h4>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px" data-faq-lang="uk">
+            Трансформація викликається <strong>правим кліком по вузлу графа → Transform</strong>. Кожен трансформ приймає значення вибраного вузла, робить спрямований пошук і створює нові пов'язані вузли.
+          </p>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px" data-faq-lang="en">
+            Launch a transform by <strong>right-clicking any node on the graph → Transform</strong>. Each transform takes the node's value, runs targeted intelligence checks, and outputs connected nodes.
+          </p>
+
+          <div class="faq-card-grid">
+
+            <!-- username_search -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">username_search</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: username</span><span class="faq-card-tag" data-faq-lang="en">accepts: username</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Шукає акаунт людини за нікнеймом на 8 валідованих платформах: <strong>GitHub, GitLab, Twitter/X, Keybase, SoundCloud, HackerNews, Steam, Telegram</strong>.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Finds user profiles across 8 verified platforms: <strong>GitHub, GitLab, Twitter/X, Keybase, SoundCloud, HackerNews, Steam, Telegram</strong>.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Під капотом:</strong> Перевірка без помилкових спрацьовувань за HTTP кодами (200 vs 404), маркерами в тілі або редиректами (t.me). Додає вузол <code>url</code> зі зв'язком <code>profile_of</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Under the hood:</strong> Zero false-positive detection using status codes (200 vs 404), body markers, or redirects (t.me). Emits <code>url</code> nodes with <code>profile_of</code> relation.</span>
+              </div>
+            </div>
+
+            <!-- github_recon -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">github_recon</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: username</span><span class="faq-card-tag" data-faq-lang="en">accepts: username</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Глибоке дослідження публічного GitHub: знаходить справжні email розробника, сайти, блоги та перелік публічних репозиторіїв.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Deep public GitHub reconnaissance: reveals developer emails, domains, blogs, and public repositories.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Під капотом:</strong> Сканує <code>events/public</code> та свіжі коміти. Суворо фільтрує чужі пошти та <code>noreply</code> ботів. Додає сутності <code>email</code>, <code>domain</code>, <code>repository</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Under the hood:</strong> Scans <code>events/public</code> and recent commits. Strictly filters third-party authors and <code>noreply</code> bot emails.</span>
+              </div>
+            </div>
+
+            <!-- git_secrets -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">git_secrets</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: username, url</span><span class="faq-card-tag" data-faq-lang="en">accepts: username, url</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Пошук злитих токенів та паролів у публічних комітах репозиторіїв (читає <code>.diff</code> рядків, що додавалися через <code>+</code>).
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Scans public commits (<code>.diff</code> additions starting with <code>+</code>) for leaked credentials and API tokens.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Під капотом:</strong> 9 правил детекції: AWS (AKIA/ASIA), GitHub token (ghp_), Slack, Stripe (sk_live), Google API (AIza), PEM private keys, JWT, Basic Auth URL. Зберігає лише безпечний fingerprint (префікс + SHA256[:12]).</span>
+                <span data-faq-lang="en">🎯 <strong>Under the hood:</strong> 9 detection patterns: AWS, GitHub, Slack, Stripe, Google AIza, PEM keys, JWT, Basic Auth. Stores sanitized SHA-256 fingerprints only.</span>
+              </div>
+            </div>
+
+            <!-- secret_scan -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">secret_scan</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain, url</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain, url</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Зондування живого цільового веб-сервера на наявність відкритих конфігураційних файлів та секретів.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Probes a live target host for exposed configuration files and leaked credentials.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Шляхи перевірки:</strong> <code>/.env</code>, <code>/.env.local</code>, <code>/.git/config</code>, <code>/config.js</code>, <code>/wp-config.php.bak</code> тощо. Фіксує відповіді 200 vs 403 vs 404 та зв'язок <code>exposes_secret</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Paths checked:</strong> <code>/.env</code>, <code>/.git/config</code>, <code>/config.js</code>, <code>/wp-config.php.bak</code>, etc. Evaluates 200 vs 403 vs 404 responses.</span>
+              </div>
+            </div>
+
+            <!-- subdomains -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">subdomains</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain, subdomain</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain, subdomain</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Виявлення піддоменів через відкриті журнали Certificate Transparency (CT-індекси crt.sh).
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Enumerates subdomains via Certificate Transparency (CT logs / crt.sh indices).
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Особливість:</strong> Запитує індекси за apex-зоною ітеративно від субдомена до головного домену. Створює сутності <code>subdomain</code> зі зв'язком <code>subdomain_of</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Feature:</strong> Iterates across apex zones to discover all issued SSL/TLS names. Creates <code>subdomain</code> nodes linked with <code>subdomain_of</code>.</span>
+              </div>
+            </div>
+
+            <!-- dns_records -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">dns_records</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain, subdomain</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain, subdomain</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Резолвінг повного комплекту DNS-записів: A, AAAA (IP), MX (пошта), NS (сервери імен), TXT (SPF, DKIM, DMARC), SOA.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Resolves full DNS records: A, AAAA (IPs), MX (mail), NS (nameservers), TXT (SPF, DKIM, verification tokens), SOA.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Результат:</strong> Знаходить поштові сервери (Google Workspace, Proton, MS 365) та прив'язку до фізичних IP.</span>
+                <span data-faq-lang="en">🎯 <strong>Outcome:</strong> Maps mail relays (Google, Proton, MS 365) and binds domain to physical IPs.</span>
+              </div>
+            </div>
+
+            <!-- reverse_dns -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">reverse_dns</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: ip, domain</span><span class="faq-card-tag" data-faq-lang="en">accepts: ip, domain</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Зворотний PTR-пошук для IP-адреси та виявлення сусідніх доменів на спільному хостингу (Shared Hosting Index).
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Reverse PTR resolution for IP addresses and shared hosting neighbor discovery.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Результат:</strong> Створює зв'язки <code>resolves_to</code> та <code>hosted_on</code>, показуючи які інші сайти ділять той самий сервер.</span>
+                <span data-faq-lang="en">🎯 <strong>Outcome:</strong> Adds <code>resolves_to</code> and <code>hosted_on</code> relations to visualize colocated neighboring domains.</span>
+              </div>
+            </div>
+
+            <!-- s3_buckets -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">s3_buckets</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Пошук відкритих хмарних сховищ (AWS S3, Google Cloud Storage, Azure Blobs) за словником типових префіксів/суфіксів компанії.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Searches for publicly exposed cloud storage buckets (AWS S3, GCS, Azure Blobs) using permutated target naming conventions.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Шаблони:</strong> Перевіряє суфікси <code>-backup</code>, <code>-assets</code>, <code>-dev</code>, <code>-prod</code>, <code>-data</code> на публічний лістинг (ListBucket).</span>
+                <span data-faq-lang="en">🎯 <strong>Patterns:</strong> Checks <code>-backup</code>, <code>-assets</code>, <code>-dev</code>, <code>-prod</code> suffixes for public ListBucket access.</span>
+              </div>
+            </div>
+
+            <!-- wayback_urls -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">wayback_urls</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain, subdomain</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain, subdomain</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Вилучення історичних URL з архівів (Internet Archive Wayback Machine, AlienVault OTX, Common Crawl).
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Extracts archived historical URLs and forgotten endpoints from Wayback Machine, AlienVault OTX, and Common Crawl.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Користь:</strong> Знаходить старі ендпоінти API, забуті параметри запитів, панелі адміністрування, бекапи.</span>
+                <span data-faq-lang="en">🎯 <strong>Value:</strong> Discovers legacy endpoints, forgotten API parameters, and decommissioned assets.</span>
+              </div>
+            </div>
+
+            <!-- asn_lookup -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">asn_lookup</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: ip</span><span class="faq-card-tag" data-faq-lang="en">accepts: ip</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Визначення автономної системи (ASN), хостинг-провайдера (Cloudflare, AWS, Hetzner тощо), CIDR підмережі та країни.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Resolves the Autonomous System Number (ASN), hosting ISP/cloud provider (Cloudflare, AWS, Hetzner), CIDR range, and country.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Зв'язок:</strong> Створює вузол <code>asn</code> зі зв'язком <code>routes_traffic</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Relation:</strong> Generates an <code>asn</code> node linked via <code>routes_traffic</code>.</span>
+              </div>
+            </div>
+
+            <!-- whois -->
+            <div class="faq-card">
+              <div class="faq-card-header">
+                <span class="faq-card-title">whois</span>
+                <span class="faq-card-tag" data-faq-lang="uk">приймає: domain, ip</span><span class="faq-card-tag" data-faq-lang="en">accepts: domain, ip</span>
+              </div>
+              <div class="faq-card-desc" data-faq-lang="uk">
+                Вилучення реєстраційних даних домену: реєстратор, дати створення/оновлення/закінчення, контактні дані.
+              </div>
+              <div class="faq-card-desc" data-faq-lang="en">
+                Queries registry metadata: registrar name, creation/expiration dates, nameservers, and organization info.
+              </div>
+              <div class="faq-card-meta">
+                <span data-faq-lang="uk">🎯 <strong>Зв'язок:</strong> Створює вузли <code>organization</code> та <code>nameserver</code>.</span>
+                <span data-faq-lang="en">🎯 <strong>Relation:</strong> Spawns <code>organization</code> and <code>nameserver</code> nodes.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Graph layout & controls -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">📊 Керування графом сутностей (Entity Graph Controls)</span>
+            <span data-faq-lang="en">📊 Entity Graph Layout &amp; Management</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:25%" data-faq-lang="uk">Елемент / Дія</th>
+                <th style="width:25%" data-faq-lang="en">Element / Action</th>
+                <th data-faq-lang="uk">Призначення та опис</th>
+                <th data-faq-lang="en">Description &amp; Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Сітка (Grid)</span><span class="faq-pill" data-faq-lang="en">Grid</span></td>
+                <td data-faq-lang="uk">Розподіляє всі сутності по рівномірній сітці (зручно для швидкого перегляду великої кількості знайдених вузлів).</td>
+                <td data-faq-lang="en">Arranges all entities across an even grid (ideal for rapid overview of high node counts).</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Радіальний (Force-directed)</span><span class="faq-pill" data-faq-lang="en">Force-directed (Radial)</span></td>
+                <td data-faq-lang="uk">Фізико-орієнтована розкладка: групує пов'язані сутності навколо центральних доменів та IP.</td>
+                <td data-faq-lang="en">Physics-based layout: clusters related entities around central apex domains and IPs.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Концентричний (Concentric)</span><span class="faq-pill" data-faq-lang="en">Concentric</span></td>
+                <td data-faq-lang="uk">Концентричні кола за рівнями ризику: критичні знахідки (витоки ключів) у центрі, домени зовні.</td>
+                <td data-faq-lang="en">Concentric rings by risk score: critical findings (secrets) at center, peripheral assets outer.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Деревовидний (Breadthfirst)</span><span class="faq-pill" data-faq-lang="en">Breadthfirst (Tree)</span></td>
+                <td data-faq-lang="uk">Ієрархічне дерево залежностей: Домен → Субдомени → IP → Сервіси.</td>
+                <td data-faq-lang="en">Hierarchical tree view: Apex Domain → Subdomains → IPs → Services.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Експорт графу в HTML</span><span class="faq-pill" data-faq-lang="en">Export graph HTML</span></td>
+                <td data-faq-lang="uk">Експортує інтерактивну візуалізацію Cytoscape у повністю автономний HTML-звіт без потреби в інтернеті.</td>
+                <td data-faq-lang="en">Exports interactive Cytoscape visualization into a fully standalone offline HTML report.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- REPEATER PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-repeater" class="tab-faq-pane" data-tab-pane="repeater">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">↩ Repeater (Повторювач запитів)</span><span data-faq-lang="en">↩ Repeater (Request Tampering)</span><span class="faq-hero-badge" data-faq-lang="uk">Ручне тестування</span><span class="faq-hero-badge" data-faq-lang="en">Manual Tampering</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Ручне конструювання, модифікація та відправка HTTP/HTTPS запитів. Дозволяє досліджувати поведінку сервера при зміні методів, заголовків, параметрів і тіла запиту.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Manual HTTP/HTTPS request crafting and tampering. Test server behavior under modified methods, headers, parameters, and payloads.</p>
+          </div>
+        </div>
+
+        <!-- REPEATER SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань, полів та галочок Repeater</span>
+            <span data-faq-lang="en">⚙️ Repeater Settings, Inputs &amp; Toggles Detailed Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Налаштування / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Setting / Checkbox</th>
+                <th data-faq-lang="uk">Призначення та що буде при зміні</th>
+                <th data-faq-lang="en">Purpose &amp; Effect on Execution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Request Timeout (sec)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Field in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Таймаут очікування відповіді (секунди, 1–120).</strong>
+                  <br>Максимальний час, протягом якого Repeater чекає відповіді сервера. За замовчуванням <code>15 сек</code>. Збільшуйте до <code>30-60 сек</code> при перевірці сліпих SQL-ін'єкцій на базі затримок (Time-based SQLi <code>WAITFOR DELAY</code> / <code>pg_sleep(10)</code>) або при завантаженні важких звітів, щоб запит не скидався передчасно.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Request Timeout (seconds, 1–120).</strong>
+                  <br>Max duration to wait for server response (default: 15s). Increase to <code>30-60s</code> when auditing time-based SQL injections (<code>pg_sleep</code> / <code>WAITFOR DELAY</code>) to prevent premature connection aborts.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Follow Redirects</span><br><small style="color:var(--muted)" data-faq-lang="uk">Випадаючий список у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Dropdown menu in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Поведінка при редиректах (301, 302, 307, 308).</strong>
+                  <br>• <code>Off</code>: НЕ переходити за редиректом. Критично для Bug Bounty — дозволяє побачити заголовки <code>Location</code>, витік токенів сесії та перевірити Open Redirect або SSRF.
+                  <br>• <code>Same Host Only</code>: слідувати лише за внутрішніми редиректами в межах того самого домену.
+                  <br>• <code>Always (Cross-domain)</code>: слідувати за редиректом на будь-які зовнішні домени (поведінка браузера).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Follow Redirects Policy (301, 302, 307, 308).</strong>
+                  <br>• <code>Off</code>: Stops immediately at 3xx. Essential for bug hunters to inspect <code>Location</code> headers, leaked session tokens, Open Redirect, and SSRF.
+                  <br>• <code>Same Host Only</code>: Follows internal redirects within origin host only.
+                  <br>• <code>Always</code>: Follows cross-domain hops unconditionally (browser-like).
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">HTTP Protocol Version</span><br><small style="color:var(--muted)" data-faq-lang="uk">Вибір протоколу в ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Protocol selector in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Версія протоколу HTTP для відправки.</strong>
+                  <br>• <code>Auto-negotiate</code>: узгоджує найвищу версію через ALPN.
+                  <br>• <code>Force HTTP/1.0</code>: надсилає без підтримки keep-alive та чанка (тестування застарілих систем).
+                  <br>• <code>Force HTTP/1.1</code>: стандартний текстовий протокол.
+                  <br>• <code>Force HTTP/2</code>: бінарний мультиплексований протокол; дозволяє тестувати специфічні HTTP/2 вразливості (H2.CL, H2.TE Desync, CRLF injection у псевдо-заголовках).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>HTTP Protocol Version.</strong>
+                  <br>• <code>Auto-negotiate</code>: ALPN negotiation.
+                  <br>• <code>Force HTTP/1.0</code>: Classic single-exchange mode.
+                  <br>• <code>Force HTTP/1.1</code>: Standard stream with Keep-Alive.
+                  <br>• <code>Force HTTP/2</code>: Binary multiplexed protocol; test HTTP/2 desync and pseudo-header CRLF injections.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Auto-update Content-Length</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Checkbox in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Авто-перерахунок довжини тіла.</strong>
+                  <br>• <em>Увімкнено (рекомендовано):</em> при ручному редагуванні тексту в тілі запиту заголовок <code>Content-Length</code> автоматично перераховується у точну кількість байт. Це рятує від зависання запиту на бекенді або помилок <code>400 Bad Request</code>.
+                  <br>• <em>Вимкнено:</em> заголовок не оновлюється. Вимикайте лише якщо ви навмисно тестуєте <strong>HTTP Request Smuggling (CL.TE / TE.CL)</strong> або розсинхронізацію зворотного проксі!
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Auto-update Content-Length Header.</strong>
+                  <br>• <em>Checked (recommended):</em> Automatically syncs <code>Content-Length</code> to payload byte size, preventing 400 Bad Request or server hang-ups.
+                  <br>• <em>Unchecked:</em> Preserves manual value. Toggle off specifically for <strong>HTTP Request Smuggling (CL.TE / TE.CL)</strong> experiments.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Baseline Auto-Diff</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Checkbox in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Автоматичне порівняння з базовою відповіддю.</strong>
+                  <br>• <em>Увімкнено:</em> Repeater запам'ятовує першу успішну відповідь на цей запит як еталон (Baseline) і автоматично показує різницю при наступних відправках (підсвічує зміни статусу, розміру тіла та часу відповіді).
+                  <br>• <em>Вимкнено:</em> відповіді відображаються незалежно без порівняння.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Baseline Auto-Diff against Response.</strong>
+                  <br>• <em>Checked:</em> Captures the initial response as a baseline; subsequent sends highlight divergences in status, length, and timing.
+                  <br>• <em>Unchecked:</em> Renders responses independently without diffing.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Workspace Tab Dots</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка в налаштуваннях ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Checkbox in settings ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Кольорові точки статусів на вкладках.</strong>
+                  <br>• <em>Увімкнено:</em> показує кольорову крапку на ярлику робочого простору: зелений (2xx), синій (3xx), жовтий (4xx), червоний (5xx). Дозволяє миттєво бачити результат виконання у фонових вкладках.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Status-code Colored Dots on Tabs.</strong>
+                  <br>• <em>Checked:</em> Displays colored indicator dots on workspace tab headers: Green (2xx), Blue (3xx), Amber (4xx), Red (5xx).
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">🛠 Можливості та функції панелі керування</span>
+            <span data-faq-lang="en">🛠 Toolbar Controls &amp; Capabilities</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:25%" data-faq-lang="uk">Кнопка / Поле</th>
+                <th style="width:25%" data-faq-lang="en">Control / Input</th>
+                <th data-faq-lang="uk">Що робить</th>
+                <th data-faq-lang="en">Function</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Send (Надіслати)</span><span class="faq-pill" data-faq-lang="en">Send</span></td>
+                <td data-faq-lang="uk">Відправляє відредагований сирий HTTP-запит на цільовий сервер через активний маршрут (Direct/Tor). Гаряча клавіша: <strong>Ctrl+Enter</strong>.</td>
+                <td data-faq-lang="en">Dispatches raw HTTP request to the target server via active route. Shortcut: <strong>Ctrl+Enter</strong>.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Інспектор запитів 🔍</span><span class="faq-pill" data-faq-lang="en">Request Inspector 🔍</span></td>
+                <td data-faq-lang="uk">Розгортає візуальну таблицю для швидкого редагування Query Params, Headers та Body Params без необхідності вручну екранувати URL.</td>
+                <td data-faq-lang="en">Expands visual inspector table to quickly edit Query Params, Headers, and Body without manual URL encoding.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Копіювати як cURL 📋</span><span class="faq-pill" data-faq-lang="en">Copy as cURL 📋</span></td>
+                <td data-faq-lang="uk">Генерує точну копію поточного запиту у вигляді команди <code>curl</code> для запуску в терміналі bash.</td>
+                <td data-faq-lang="en">Copies the exact HTTP request formatted as an executable bash <code>curl</code> command.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Порівняти відповідь ↔</span><span class="faq-pill" data-faq-lang="en">Compare response ↔</span></td>
+                <td data-faq-lang="uk">Передає поточну відповідь сервера у вкладку <strong>Comparer</strong> для диференційного побайтового аналізу.</td>
+                <td data-faq-lang="en">Sends the current response into the <strong>Comparer</strong> tab for side-by-side diffing.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Передати обмін у AI 🤖</span><span class="faq-pill" data-faq-lang="en">Send exchange to AI 🤖</span></td>
+                <td data-faq-lang="uk">Прикріплює пару «Запит + Відповідь» до AI-асистента для автоматичного пошуку вразливостей (OWASP, IDOR, Injection).</td>
+                <td data-faq-lang="en">Attaches the HTTP exchange to AI SecOps for automated vulnerability audit and triage.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- INTRUDER PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-intruder" class="tab-faq-pane" data-tab-pane="intruder">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">⚡ Intruder (Фаззер та атаки за словником)</span><span data-faq-lang="en">⚡ Intruder (Fuzzer &amp; Wordlist Attacks)</span><span class="faq-hero-badge" data-faq-lang="uk">Автоматизовані атаки</span><span class="faq-hero-badge" data-faq-lang="en">Automated Attacks</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Асинхронний високоефективний рушій для автоматизованого перебору параметрів, тестування ін'єкцій, брутфорсу та виявлення прихованих шляхів.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">High-concurrency async fuzzing engine for automated brute-forcing, parameter discovery, and injection testing.</p>
+          </div>
+        </div>
+
+        <!-- INTRUDER SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань, полів затримок та галочок Intruder</span>
+            <span data-faq-lang="en">⚙️ Intruder Settings, Delays &amp; Toggles Detailed Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Параметр / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Parameter / Checkbox</th>
+                <th data-faq-lang="uk">Призначення, захист від банів та як налаштовувати</th>
+                <th data-faq-lang="en">Purpose, Evasion Effect &amp; Recommended Setup</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Delay (ms)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле затримки в ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Delay input in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Базова затримка між атакуючими запитами (0–5000 мс).</strong>
+                  <br>• <code>0 мс</code>: атака йде на максимальній швидкості вашого каналу та воркерів. Використовуйте для CTF або локальних тестів.
+                  <br>• <code>100–300 мс</code> (рекомендовано для Bug Bounty): уповільнює перебір, запобігаючи перевантаженню процесора цільового сервера та блокуванню за частотою запитів (Rate Limiting 429).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Base Inter-request Delay (0–5000 ms).</strong>
+                  <br>• <code>0 ms</code>: Full throttle maximum throughput (CTF / local QA).
+                  <br>• <code>100–300 ms</code> (Bug Bounty standard): Paces attacks to bypass rate limiters (HTTP 429) and prevent server overload.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Jitter (ms)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле варіації часу в ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Jitter variance in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Випадковий розкид часу затримки (0–2000 мс).</strong>
+                  <br>Додає випадкову паузу від <code>0</code> до <code>Jitter</code> мс до кожного запиту. Наприклад, при <code>Delay = 200 ms</code> та <code>Jitter = 100 ms</code> інтервали між запитами будуть непередбачувано коливатися від <strong>200 до 300 мс</strong>. Це надійно збиває з пантелику поведінкові аналізатори WAF та системи захисту від ботів, які виявляють фіксовані часові інтервали.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Random Jitter Variance (0–2000 ms).</strong>
+                  <br>Injects random entropy up to specified jitter limit. Example: <code>Delay = 200ms</code> + <code>Jitter = 100ms</code> creates pseudo-random intervals between <strong>200ms and 300ms</strong>, defeating anti-automation anomaly heuristics.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Concurrency (Workers)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле воркерів у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Worker threads in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Кількість паралельних потоків виконання (1–50).</strong>
+                  <br>Визначає, скільки з'єднань одночасно тримає Go engine worker pool. Для атак за великими словниками встановлюйте <code>10-20</code>; для суворого stealth-тестування — <code>1-3</code>.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Worker Concurrency Pool (1–50).</strong>
+                  <br>Simultaneous worker connections managed by the Go runtime. Use <code>10-20</code> for large dictionary sweeps; throttle to <code>1-3</code> for stealth assessments.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Max Failure Streak</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поріг аварійної авто-паузи</small><small style="color:var(--muted)" data-faq-lang="en">Emergency auto-pause threshold</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Поріг послідовних помилок до авто-паузи (5–50).</strong>
+                  <br>Якщо N запитів поспіль повертають збій мережі, таймаут або коди 502/503/504, Intruder <strong>автоматично ставить атаку на паузу</strong>. Це запобігає падінню сервера замовника (DoS), зберігає вже зібрані результати та дозволяє оператору з'ясувати причину перед відновленням.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Max Consecutive Failure Streak (5–50).</strong>
+                  <br>Threshold of sequential connection dropouts, timeouts, or 502/503/504 errors before triggering an <strong>automatic attack pause</strong>. Prevents accidental target denial-of-service.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Auto-throttle on 429/503</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка адаптивної швидкості</small><small style="color:var(--muted)" data-faq-lang="en">Adaptive speed checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Адаптивне сповільнення швидкості.</strong>
+                  <br>• <em>Увімкнено (рекомендовано):</em> якщо сервер повертає <code>429 Too Many Requests</code> або <code>503 Service Unavailable</code>, Intruder тимчасово збільшує затримку вдвічі, чекає відновлення нормальних відповідей 200 OK і плавно повертається до робочої швидкості.
+                  <br>• <em>Вимкнено:</em> швидкість не змінюється; високий ризик потрапити у повний бан за IP на кілька годин.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Auto-throttle on 429 Too Many Requests or 503.</strong>
+                  <br>• <em>Checked:</em> Dynamically backs off request velocity when receiving HTTP 429/503 signals, resuming standard cadence once the server cools down.
+                  <br>• <em>Unchecked:</em> Ignores throttling signals, risking an extended IP block.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Only matches</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка фільтрації таблиці</small><small style="color:var(--muted)" data-faq-lang="en">Table filter checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Відображати лише рядки зі збігом.</strong>
+                  <br>• <em>Увімкнено:</em> приховує всі звичайні рядки з кодами 200/404, показуючи на екрані виключно ті запити, де спрацювало правило Grep Match (наприклад, знайдено слово <code>root:x:0:0</code>, <code>SQL syntax</code> або інший розмір тіла). Незамінно при переборі 100 000 значень.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Only Matches Filter Toggle.</strong>
+                  <br>• <em>Checked:</em> Suppresses noise rows, rendering exclusively results that matched your Grep Match string or regex patterns.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Auto-scroll results</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка авто-прокручування</small><small style="color:var(--muted)" data-faq-lang="en">Auto-scroll checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Стеження за новими результатами.</strong>
+                  <br>• <em>Увімкнено:</em> автоматично прокручує таблицю результатів до найновіших запитів. Вимкніть галочку, якщо ви хочете спокійно вивчати знайдений рядок під час активної атаки.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Auto-scroll Results Table.</strong>
+                  <br>• <em>Checked:</em> Continuously pins viewport to newest attack items. Uncheck when manually reviewing an interesting row during live sweeps.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">🎯 Режими атаки (Attack Modes)</span>
+            <span data-faq-lang="en">🎯 Attack Modes</span>
+          </h4>
+          <div class="faq-card-grid">
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">Sniper (Снайпер)</span><span class="faq-card-tag" data-faq-lang="uk">1 Словник</span><span class="faq-card-tag" data-faq-lang="en">1 Wordlist</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Підставляє слова зі словника по черзі у кожну помічену позицію <code>§marker§</code>. Усі інші позиції залишаються в оригінальному стані. Найкраще для пошуку ін'єкцій (SQLi, XSS, SSRF) по черзі у всіх параметрах.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Iterates dictionary values one by one into each marked position <code>§marker§</code> sequentially, leaving others intact. Ideal for scanning injections across multiple fields.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">Battering Ram (Таран)</span><span class="faq-card-tag" data-faq-lang="uk">1 Словник</span><span class="faq-card-tag" data-faq-lang="en">1 Wordlist</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Одне й те саме значення підставляється одночасно в <strong>усі</strong> помічені позиції за один запит. Використовується, коли параметр дублюється в URL і в Headers.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Substitutes the same payload simultaneously into ALL marked positions in a single request. Useful for repeated parameters.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">Pitchfork (Вила)</span><span class="faq-card-tag" data-faq-lang="uk">Кілька словників</span><span class="faq-card-tag" data-faq-lang="en">Multiple Wordlists</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Використовує кілька словників паралельно: Словник 1 іде в Позицію 1, Словник 2 — у Позицію 2. Зупиняється, коли закінчується найкоротший список. Ідеально для пар <code>login:password</code> або <code>id:token</code>.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Iterates multiple dictionaries in lock-step: Dict 1 to Position 1, Dict 2 to Position 2. Stops at shortest list. Perfect for matched <code>user:password</code> pairs.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">Cluster Bomb (Касетна бомба)</span><span class="faq-card-tag" data-faq-lang="uk">Декартовий добуток</span><span class="faq-card-tag" data-faq-lang="en">Cartesian Product</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Перебирає всі можливі комбінації між усіма словниками (10 логінів × 10 паролів = 100 запитів). Використовується для повного перебору авторизації.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Exhaustive Cartesian product across all payload sets (10 users × 10 passwords = 100 requests). Ideal for full credential brute-forcing.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- SCANNER PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-scanner" class="tab-faq-pane" data-tab-pane="scanner">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🛡️ Scanner (CMS розвідка та активний аудит)</span><span data-faq-lang="en">🛡️ Scanner (CMS Recon &amp; Active Scanner)</span><span class="faq-hero-badge" data-faq-lang="uk">Двигун вразливостей</span><span class="faq-hero-badge" data-faq-lang="en">Vulnerability Engine</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Дворівневий сканер безпеки: безпечна розвідка CMS (WordPress, Joomla, Drupal) та активний сканер вразливостей з 9 модулями детекції та доказами впливу.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Two-tier security scanner: Safe CMS reconnaissance and an Active Scanner featuring 9 detection modules with proof-of-impact verification.</p>
+          </div>
+        </div>
+
+        <!-- SCANNER SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань та параметрів сканування</span>
+            <span data-faq-lang="en">⚙️ Scanner Settings, Profiles &amp; Safety Parameters Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Параметр / Налаштування</th>
+                <th style="width:26%" data-faq-lang="en">Parameter / Option</th>
+                <th data-faq-lang="uk">Призначення та вплив на процес сканування</th>
+                <th data-faq-lang="en">Purpose &amp; Scan Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Default Profile</span><br><small style="color:var(--muted)" data-faq-lang="uk">Вибір у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Selection in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Профіль інтенсивності сканування.</strong>
+                  <br>• <code>Safe</code>: виключно пасивні перевірки (заголовки, CMS маркери, публічні директорії) без надсилання ін'єкцій чи агресивних проб.
+                  <br>• <code>Standard (за замовчуванням)</code>: повна перевірка 9 модулями з валідацією через докази впливу.
+                  <br>• <code>Aggressive</code>: збільшений пул векторів обходу, форсований перебір параметрів.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Scan Intensity Profile.</strong>
+                  <br>• <code>Safe</code>: Passive reconnaissance only (headers, CMS signatures, public asset probes) without active fuzzing.
+                  <br>• <code>Standard (default)</code>: Comprehensive 9-module scan with proof-of-impact validation.
+                  <br>• <code>Aggressive</code>: Expanded evasion payload arrays and deep parameter probing.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Probe Timeout (sec)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле таймауту у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Timeout field in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Таймаут окремого діагностичного запиту (3–30 сек).</strong>
+                  <br>Скільки часу модуль сканера очікує реакції на probe-запит (за замовчуванням 10 сек). При тестуванні повільних баз даних збільшуйте до 15-20 сек для точного детектування сліпих SQL-ін'єкцій.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Probe Timeout (3–30 sec).</strong>
+                  <br>Max duration to await diagnostic probe responses (default: 10s). Raise to 15-20s on high-latency backend databases.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Failure Streak Limit</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поріг аварійної зупинки</small><small style="color:var(--muted)" data-faq-lang="en">Emergency circuit breaker</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Ліміт послідовних збоїв (5–50).</strong>
+                  <br>Якщо сканер отримує 15 поспіль таймаутів або відмов у з'єднанні, він аварійно зупиняє сканування хоста, щоб не спровокувати відмову в обслуговуванні (DoS).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Failure Streak Limit (5–50).</strong>
+                  <br>Automatic abort circuit breaker if target encounters consecutive connection drops or gateway timeouts.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">🔬 9 Модулів активного виявлення вразливостей</span>
+            <span data-faq-lang="en">🔬 9 Active Vulnerability Detection Modules</span>
+          </h4>
+          <div class="faq-card-grid">
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">sqli</span><span class="faq-card-tag" data-faq-lang="uk">SQL-ін'єкції</span><span class="faq-card-tag" data-faq-lang="en">SQL Injection</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Три техніки детекції: Error-based (11 сигнатур СУБД × 12 проб), Boolean-differential (порівняння true/false відповідей), UNION baseline перевірка.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Three techniques: Error-based (11 DBMS signatures × 12 breakout probes), Boolean-differential, and numerical UNION checks.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">xss</span><span class="faq-card-tag" data-faq-lang="uk">Міжсайтовий скриптинг (XSS)</span><span class="faq-card-tag" data-faq-lang="en">Cross-Site Scripting</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Контекстний Reflected XSS: перевірка Content-Type, віддзеркалення унікальної канарки, ескалація в залежності від оточення (HTML body, attributes, script context).</div>
+              <div class="faq-card-desc" data-faq-lang="en">Contextual Reflected XSS: checks canary reflection, HTML Content-Type, and context escalation (body, attribute, script tag).</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">ssrf</span><span class="faq-card-tag" data-faq-lang="uk">Підробка запитів (SSRF)</span><span class="faq-card-tag" data-faq-lang="en">Server-Side Request Forgery</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Зондування внутрішніх адрес: <code>127.0.0.1</code>, <code>localhost</code>, AWS metadata <code>169.254.169.254</code> та GCP <code>metadata.google.internal</code> (Critical).</div>
+              <div class="faq-card-desc" data-faq-lang="en">Internal probe vectors: <code>127.0.0.1</code>, <code>localhost</code>, AWS cloud metadata (169.254.169.254), and GCP internal metadata.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">lfi</span><span class="faq-card-tag" data-faq-lang="uk">Включення файлів (LFI)</span><span class="faq-card-tag" data-faq-lang="en">Local File Inclusion</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">6 технік: абсолютні шляхи, traversal <code>../../</code>, обхід санітизації <code>....//</code>, доступ до <code>/etc/passwd</code>, <code>win.ini</code> та обгортки PHP <code>php://filter</code>.</div>
+              <div class="faq-card-desc" data-faq-lang="en">6 techniques: absolute paths, path traversal, mixed sequences, <code>/etc/passwd</code>, Windows <code>win.ini</code>, and PHP wrappers.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">cmdi</span><span class="faq-card-tag" data-faq-lang="uk">Впровадження команд ОС</span><span class="faq-card-tag" data-faq-lang="en">Command Injection</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Ехо-техніка з арифметичним виразом <code>echo $((19*23))</code> = 437 та сліпа техніка затримок <code>sleep N</code> з порівнянням інкремента часу.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Echo technique with arithmetic evaluation <code>$((19*23))</code> = 437, plus blind time-delay technique with <code>sleep N</code>.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">ssti</span><span class="faq-card-tag" data-faq-lang="uk">Ін'єкція шаблонів (SSTI)</span><span class="faq-card-tag" data-faq-lang="en">Server-Side Template Injection</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">6 сімейств шаблонних рушіїв (Jinja2, Twig, Smarty, Freemarker тощо). Перевіряє зникнення виразу та появу результату обчислення.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Tests 6 template engine families (Jinja2, Twig, Smarty, Freemarker). Validates mathematical evaluation inside templates.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">redirect</span><span class="faq-card-tag" data-faq-lang="uk">Відкриті редиректи</span><span class="faq-card-tag" data-faq-lang="en">Open Redirect</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">12 векторів: protocol-relative <code>//evil.test</code>, backslash, userinfo confusion, закодовані символи <code>%40</code> та перевірка заголовка <code>Location</code>.</div>
+              <div class="faq-card-desc" data-faq-lang="en">12 evasion vectors: protocol-relative URLs, backslashes, userinfo confusion, encoded tabs, and client-side navigation primitives.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">exposure</span><span class="faq-card-tag" data-faq-lang="uk">Витік чутливих даних</span><span class="faq-card-tag" data-faq-lang="en">Sensitive Data Leak</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">13 патернів секретів у відповідях: AWS AKIA, PEM Private Key, токени GitHub, Stripe, Slack, рядки з'єднання з БД, JWT токени.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Scans responses for 13 credential patterns: AWS AKIA, PEM private keys, GitHub, Stripe, Slack tokens, connection strings, JWTs.</div>
+            </div>
+            <div class="faq-card">
+              <div class="faq-card-header"><span class="faq-card-title">misconfig</span><span class="faq-card-tag" data-faq-lang="uk">Заголовки безпеки та CORS</span><span class="faq-card-tag" data-faq-lang="en">Security Headers &amp; CORS</span></div>
+              <div class="faq-card-desc" data-faq-lang="uk">Небезпечний CORS (віддзеркалення Origin з credentials), відсутність захисних заголовків CSP, HSTS, X-Frame-Options, відкритий лістинг директорій.</div>
+              <div class="faq-card-desc" data-faq-lang="en">Insecure CORS (Origin reflection with credentials), directory listing, and missing HSTS, CSP, X-Frame-Options headers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- TARGET PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-target" class="tab-faq-pane" data-tab-pane="target">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🎯 Target (Карта цілі, Павук та Аналіз JS)</span><span data-faq-lang="en">🎯 Target (Site Map, Spider &amp; JS Analysis)</span><span class="faq-hero-badge" data-faq-lang="uk">Карта сайту та JS</span><span class="faq-hero-badge" data-faq-lang="en">Site Mapper</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Автоматична побудова ієрархічної карти веб-ресурсу, збір посилань, параметрів та глибокий аналіз JavaScript-бандлів на приховані API та витоки ключів.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Hierarchical site map crawler, endpoint discovery, HTML form extraction, and deep JavaScript bundle secret analysis.</p>
+          </div>
+        </div>
+
+        <!-- TARGET SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань краулінгу та обходу</span>
+            <span data-faq-lang="en">⚙️ Crawl Settings, Depth &amp; Proxy Distribution Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Параметр / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Setting / Checkbox</th>
+                <th data-faq-lang="uk">Що робить та як впливає на обхід</th>
+                <th data-faq-lang="en">Function &amp; Crawl Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Max Crawl Depth</span><br><small style="color:var(--muted)" data-faq-lang="uk">Глибина переходу у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Crawl depth in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Максимальна глибина переходів за посиланнями (1–10).</strong>
+                  <br>• <code>1</code>: сканує лише стартову сторінку (без переходів).
+                  <br>• <code>2–3</code> (оптимально): переходить за всіма посиланнями зі стартової сторінки та посиланнями другого рівня. Запобігає блуканню по нескінченних сторінках.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Max Crawl Depth (1–10).</strong>
+                  <br>• <code>1</code>: Ingests the initial start URL only.
+                  <br>• <code>2–3</code> (recommended): Traverses links on the landing page and their child pages, stopping before runaway deep crawls.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Max Pages Limit</span><br><small style="color:var(--muted)" data-faq-lang="uk">Стеля кількості сторінок</small><small style="color:var(--muted)" data-faq-lang="en">Max pages threshold</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Абсолютний ліміт сторінок (10–1000).</strong>
+                  <br>Скільки сторінок максимум дозволено завантажити краулеру. Гарантує захист від потрапляння у нескінченні динамічні календарі, пагінації чи фільтри інтернет-магазинів.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Max Pages Limit (10–1000).</strong>
+                  <br>Hard ceiling on total crawled resources. Crucial protection against infinite dynamic crawler traps (e-commerce filters, calendars).
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Same Origin Only</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка обмеження домену</small><small style="color:var(--muted)" data-faq-lang="en">Scope boundary checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Суворе обмеження цільовим доменом.</strong>
+                  <br>• <em>Увімкнено (рекомендовано):</em> краулер ігнорує будь-які посилання, що ведуть на сторонні сайти (соцмережі, CDN, партнерські сервіси). Досліджується виключно ціль.
+                  <br>• <em>Вимкнено:</em> дозволяє дослідження піддоменів та споріднених хостів.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Same Origin Only Toggle.</strong>
+                  <br>• <em>Checked (recommended):</em> Restricts crawler strictly to the target apex origin; skips third-party CDNs and external links.
+                  <br>• <em>Unchecked:</em> Allows cross-subdomain traversal.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Extract JS Endpoints</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка аналізу JS</small><small style="color:var(--muted)" data-faq-lang="en">JS analysis checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Автоматичний парсинг JavaScript-файлів.</strong>
+                  <br>• <em>Увімкнено:</em> кожен завантажений скрипт аналізується AST-парсером на наявність прихованих шляхів <code>/api/...</code>, внутрішніх роутів та ключів доступу.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Extract JS Endpoints.</strong>
+                  <br>• <em>Checked:</em> AST parser scans all discovered script bundles for hidden API routes and backend endpoints.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Worker mode (Split vs Replicate)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Розподіл проксі</small><small style="color:var(--muted)" data-faq-lang="en">Proxy allocation</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Режим пулу проксі-серверів.</strong>
+                  <br>• <code>Split queue</code>: список знайдених посилань розбивається порівну між проксі. Забезпечує максимальну швидкість та маскування IP.
+                  <br>• <code>Replicate</code>: кожен проксі обходить повний список посилань для порівняння географічної видачі.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Proxy Pool Distribution Mode.</strong>
+                  <br>• <code>Split queue</code>: Partitions target URL queue across proxy workers for maximum throughput and evasion.
+                  <br>• <code>Replicate</code>: Every proxy fetches the entire queue to compare geographic variations.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- TRAFFIC PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-traffic" class="tab-faq-pane" data-tab-pane="traffic">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🌊 Трафік &amp; Локальний Проксі</span><span data-faq-lang="en">🌊 Traffic &amp; Local Proxy</span><span class="faq-hero-badge" data-faq-lang="uk">Пасивний проксі :8080</span><span class="faq-hero-badge" data-faq-lang="en">Passive Proxy :8080</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Центральний потік аудиту HTTP/HTTPS транзакцій. Працює як пасивний локальний проксі для вашого браузера (порт 8080) та журналює запити всіх утиліт без ручного утримання трафіку.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Central audit stream of HTTP/HTTPS transactions. Serves as a passive local proxy (port 8080) for external browsers and logs all internal tool exchanges transparently without holding traffic.</p>
+          </div>
+        </div>
+
+        <!-- TRAFFIC SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір буфера пам'яті та фільтрації Трафіку</span>
+            <span data-faq-lang="en">⚙️ Traffic Buffer &amp; Filtering Settings Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Налаштування / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Setting / Checkbox</th>
+                <th data-faq-lang="uk">Що робить та чому це важливо</th>
+                <th data-faq-lang="en">Function &amp; Memory Impact</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Retention Buffer Size</span><br><small style="color:var(--muted)" data-faq-lang="uk">Розмір буфера в пам'яті</small><small style="color:var(--muted)" data-faq-lang="en">In-memory buffer size</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Кількість записів у пам'яті (250 / 500 / 1000 / 5000).</strong>
+                  <br>Визначає ліміт останніх запитів, які утримуються в оперативній пам'яті для живого рендерингу. Стандартне значення <code>1000</code> забезпечує ідеальний баланс між глибиною історії та швидкістю інтерфейсу.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Memory Retention Buffer Size (250 / 500 / 1000 / 5000).</strong>
+                  <br>Maximum live exchange records kept in browser memory. Standard <code>1000</code> maintains optimal UI fluidity.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Ring Buffer Mode</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка кільцевого буфера</small><small style="color:var(--muted)" data-faq-lang="en">Ring buffer checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Кільцевий буфер (захист від витоку пам'яті).</strong>
+                  <br>• <em>Увімкнено:</em> при перевищенні ліміту буфера найстаріші записи автоматично видаляються з таблиці, даючи місце новим. Гарантує, що вкладка браузера ніколи не зависне навіть після 12 годин активного аудиту.
+                  <br>• <em>Вимкнено:</em> таблиця накопичує необмежену кількість рядків (може спричинити лаги на слабких комп'ютерах).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Ring Buffer Mode.</strong>
+                  <br>• <em>Checked:</em> Automatically evicts oldest items when the retention limit is reached. Prevents browser tab freeze during 24h continuous traffic ingestion.
+                  <br>• <em>Unchecked:</em> Appends indefinitely.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Hide 404 &amp; 304</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка приховування шуму</small><small style="color:var(--muted)" data-faq-lang="en">Noise filter checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Фільтрація неінформативних запитів.</strong>
+                  <br>• <em>Увімкнено:</em> автоматично приховує з основного списку відповіді <code>404 Not Found</code> (биті посилання, іконки) та <code>304 Not Modified</code> (кешовані картинки), фокусуючи увагу аналітика лише на змістовному трафіку.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Hide 404 Not Found &amp; 304 Not Modified.</strong>
+                  <br>• <em>Checked:</em> Filters out static cache pings and broken asset requests, highlighting actionable API and application traffic.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- HISTORY PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-history" class="tab-faq-pane" data-tab-pane="history">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">📜 History (Історія запитів)</span><span data-faq-lang="en">📜 History (Request Archive)</span><span class="faq-hero-badge" data-faq-lang="uk">База даних PostgreSQL</span><span class="faq-hero-badge" data-faq-lang="en">Persistent DB</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Довгостроковий журнал усіх перевірок та обмінів, збережених у базі даних PostgreSQL. Дозволяє фільтрувати, експортувати та повертатися до попередніх сесій тестування.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Durable audit trail of all HTTP transactions stored in PostgreSQL. Filter, bulk export, and review previous testing runs.</p>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Операції та керування історією</span>
+            <span data-faq-lang="en">⚙️ History Management Operations</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Кнопка / Дія</th><th style="width:26%" data-faq-lang="en">Button / Action</th>
+                <th data-faq-lang="uk">Призначення</th>
+                <th data-faq-lang="en">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Експорт вибраних JSON</span><span class="faq-pill" data-faq-lang="en">Export selected JSON</span></td>
+                <td data-faq-lang="uk">Експортує виділені чекбоксами транзакції у стандартизований JSON файл для звітів або передачі клієнту.</td>
+                <td data-faq-lang="en">Exports checked transactions into a structured JSON file for evidence reporting.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Видалити вибрані</span><span class="faq-pill" data-faq-lang="en">Delete selected</span></td>
+                <td data-faq-lang="uk">Безповоротно видаляє вибрані записи з бази даних PostgreSQL для очищення від непотрібного шуму.</td>
+                <td data-faq-lang="en">Permanently deletes checked records from the PostgreSQL database.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Очистити історію</span><span class="faq-pill" data-faq-lang="en">Clear history</span></td>
+                <td data-faq-lang="uk">Повне очищення таблиці історії для активного проєкту.</td>
+                <td data-faq-lang="en">Clears all historical records for the active project.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- COMPARER PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-comparer" class="tab-faq-pane" data-tab-pane="comparer">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">↔ Comparer (Порівняльник відповідей)</span><span data-faq-lang="en">↔ Comparer (Response Diffing)</span><span class="faq-hero-badge" data-faq-lang="uk">Диференційний аналіз</span><span class="faq-hero-badge" data-faq-lang="en">Visual Diff</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Візуальне порівняння двох запитів або відповідей пліч-о-пліч (Side-by-Side Diff) для виявлення тонких розбіжностей.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Side-by-side visual difference analyzer. Spot subtle character-level, word-level, or byte-level deviations.</p>
+          </div>
+        </div>
+
+        <!-- COMPARER SETTINGS & CONTROLS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір налаштувань порівняння</span>
+            <span data-faq-lang="en">⚙️ Diff Settings &amp; Comparison Granularity Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Параметр / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Parameter / Checkbox</th>
+                <th data-faq-lang="uk">Що робить та коли застосовувати</th>
+                <th data-faq-lang="en">Function &amp; Use Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Comparison Granularity</span><br><small style="color:var(--muted)" data-faq-lang="uk">Рівень деталізації у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Granularity level in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Рівень гранулярності diff-аналізу.</strong>
+                  <br>• <code>Word-by-word (за замовчуванням)</code>: порівнює слова та токени. Найкраще для пошуку IDOR, витоків даних та ін'єкцій.
+                  <br>• <code>Character-by-character</code>: посимвольне порівняння (підсвічує навіть різницю в один символ чи лапки).
+                  <br>• <code>Line-by-line</code>: порядкове порівняння для довгих файлів чи дампів бази.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Diff Granularity Mode.</strong>
+                  <br>• <code>Word-by-word (default)</code>: Compares semantic words and tokens. Ideal for authorization divergence and IDOR audits.
+                  <br>• <code>Character-by-character</code>: Highlights single-character modifications.
+                  <br>• <code>Line-by-line</code>: Structural diff for large scripts and databases.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Ignore case distinctions</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка ігнорування регістру</small><small style="color:var(--muted)" data-faq-lang="en">Ignore case checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Не враховувати регістр літер (A == a).</strong>
+                  <br>• <em>Увімкнено:</em> вважає <code>True</code> та <code>true</code> однаковими, що запобігає зайвому шуму при порівнянні відповідей різних мов програмування.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Ignore Case Distinctions.</strong>
+                  <br>• <em>Checked:</em> Case-insensitive comparison (treats <code>Admin</code> and <code>admin</code> as identical).
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Ignore whitespace</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка ігнорування пробілів</small><small style="color:var(--muted)" data-faq-lang="en">Ignore whitespace checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Ігнорування пробілів та кінців рядків.</strong>
+                  <br>• <em>Увімкнено (рекомендовано):</em> не підсвічує як зміну зайві пробіли, табуляції та різницю переносу рядків між серверами (Windows <code>CRLF</code> vs Linux <code>LF</code>).
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Ignore Whitespace &amp; Line Endings.</strong>
+                  <br>• <em>Checked (recommended):</em> Suppresses false diffs caused by tab spacing or Windows CRLF vs Linux LF differences.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- DECODER PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-decoder" class="tab-faq-pane" data-tab-pane="decoder">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">{} Decoder (Конвертер та кодер)</span><span data-faq-lang="en">{} Decoder (Encoding &amp; Transform)</span><span class="faq-hero-badge" data-faq-lang="uk">Трансформація даних</span><span class="faq-hero-badge" data-faq-lang="en">Data Transform</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Швидке кодування, декодування, форматування та хешування даних у різних представленнях.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Rapid encoding, decoding, hashing, and formatting utility supporting all common security formats.</p>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">🛠 Операції кодування та маніпуляцій</span>
+            <span data-faq-lang="en">🛠 Encoding &amp; Hashing Operations</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Операція</th><th style="width:26%" data-faq-lang="en">Operation</th>
+                <th data-faq-lang="uk">Опис алгоритму</th>
+                <th data-faq-lang="en">Algorithm Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">URL / Base64 / Hex</span></td>
+                <td data-faq-lang="uk">Пряме та зворотне перетворення найпопулярніших веб-кодувань для ін'єкцій та обходу фільтрів WAF.</td>
+                <td data-faq-lang="en">Bidirectional encoding for web payloads, binary tokens, and WAF evasion.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Base64 URL-safe</span></td>
+                <td data-faq-lang="uk">Варіант Base64 для токенів JWT та параметрів URL (символи <code>+</code> та <code>/</code> замінені на <code>-</code> та <code>_</code>).</td>
+                <td data-faq-lang="en">RFC 4648 Base64URL encoding replacing <code>+</code> and <code>/</code> with <code>-</code> and <code>_</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">JSON Pretty &amp; Minify</span></td>
+                <td data-faq-lang="uk">Форматування заплутаних JSON-відповідей з відступами або стиснення в один суцільний рядок.</td>
+                <td data-faq-lang="en">Beautifies nested minified JSON or compresses it into a single line.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">SHA-256</span></td>
+                <td data-faq-lang="uk">Обчислення криптографічного гешу SHA-256 для звірки паролів або контрольних сум.</td>
+                <td data-faq-lang="en">Cryptographic SHA-256 hash generation for signatures and checksums.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- PROXY PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-proxy" class="tab-faq-pane" data-tab-pane="proxy">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🧅 Tor &amp; Outbound Proxy</span><span data-faq-lang="en">🧅 Tor &amp; Outbound Proxy</span><span class="faq-hero-badge" data-faq-lang="uk">Анонімність та маршрут</span><span class="faq-hero-badge" data-faq-lang="en">Anonymity &amp; Routing</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Керування вихідним маршрутом для всіх інструментів (Repeater, Intruder, Scanner, Target, OSINT). Дозволяє маскувати IP-адресу та обходити блокування.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Outbound network route manager for all active tools. Mask origin IP and bypass geographic firewalls.</p>
+          </div>
+        </div>
+
+        <!-- PROXY SETTINGS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір параметрів вихідного маршруту та проксі</span>
+            <span data-faq-lang="en">⚙️ Outbound Route &amp; Proxy Settings Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Налаштування / Поле</th>
+                <th style="width:26%" data-faq-lang="en">Setting / Field</th>
+                <th data-faq-lang="uk">Що робить та як впливає на роботу</th>
+                <th data-faq-lang="en">Function &amp; Route Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">SOCKS5 Address (Tor / Upstream)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Адреса маршруту у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Route address in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Вихідний SOCKS5 проксі-маршрут (наприклад, Tor 127.0.0.1:9050).</strong>
+                  <br>• <em>Заповнено (наприклад, 127.0.0.1:9050):</em> усі вихідні запити інструментів (Repeater, Intruder, Target, OSINT, Scanner) скеровуються через локальний Tor/SOCKS5 демон.
+                  <br>• <em>Порожньо (Direct):</em> трафік надсилається напряму без проміжних проксі.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Outbound SOCKS5 Proxy Route (e.g., Tor 127.0.0.1:9050).</strong>
+                  <br>• <em>Specified:</em> All outbound tool requests (Repeater, Intruder, Target, OSINT, Scanner) are tunneled through the designated SOCKS5 route.
+                  <br>• <em>Empty (Direct):</em> Direct outbound network requests without proxy tunneling.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Route Check URL &amp; Timeout</span><br><small style="color:var(--muted)" data-faq-lang="uk">Перевірка зв'язку у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Verification check in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Тестовий запит для верифікації активного маршруту.</strong>
+                  <br>Надсилає діагностичний запит (за замовчуванням на <code>https://check.torproject.org/</code>), перевіряє затримку (latency), працездатність SOCKS5-ланцюжка та зовнішню IP-адресу.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Diagnostic Route Probe.</strong>
+                  <br>Dispatches a test request (defaults to <code>https://check.torproject.org/</code>) to verify SOCKS5 route health, measured latency, and outward exit node IP.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Passive Proxy :8080</span><br><small style="color:var(--muted)" data-faq-lang="uk">Локальний порт слухача</small><small style="color:var(--muted)" data-faq-lang="en">Local listener port</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Пасивне логування трафіку зовнішніх браузерів.</strong>
+                  <br>Слухає на <code>127.0.0.1:8080</code>. Усі запити проходять прозоро та автоматично зберігаються у Traffic і History. Ручне утримання (інтерсепт) не застосовується, забезпечуючи максимальну швидкодію.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Passive External Browser Logging.</strong>
+                  <br>Listens on <code>127.0.0.1:8080</code>. Transparently logs captured HTTP/HTTPS traffic to Traffic and History tabs without blocking or holding requests in an intercept queue.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">TLS / JA3 / JA4 Profile</span><br><small style="color:var(--muted)" data-faq-lang="uk">Вибір відбитка в ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Fingerprint preset in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Маскування TLS-відбитка клієнта.</strong>
+                  <br>Імітує набір шифрів (Cipher Suites), розширення TLS та поведінку браузера (Chrome, Firefox, Safari). Дозволяє успішно проходити перевірки Cloudflare Bot Management та Akamai Botman, які блокують стандартні бібліотеки Go/Python за їхнім відбитком JA3.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>TLS / JA3 / JA4 Fingerprint Profile.</strong>
+                  <br>Emulates authentic browser TLS handshakes (Chrome, Firefox, Safari), evading automated bot mitigation and WAF JA3 fingerprint blocks.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- AI SECOPS PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-ai" class="tab-faq-pane" data-tab-pane="ai">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🤖 AI SecOps (ШІ-асистент)</span><span data-faq-lang="en">🤖 AI SecOps (Assistant)</span><span class="faq-hero-badge" data-faq-lang="uk">ШІ-асистент SecOps</span><span class="faq-hero-badge" data-faq-lang="en">AI Assistant</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Інтелектуальний помічник аудитора безпеки з підтримкою локальних (Ollama) та провідних хмарних моделей (Gemini, Claude, GPT-4o).</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Intelligent security auditor assistant supporting local models (Ollama) and top cloud providers (Gemini, Claude, GPT-4o).</p>
+          </div>
+        </div>
+
+        <!-- AI SETTINGS BREAKDOWN -->
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір параметрів ШІ та ReAct агента</span>
+            <span data-faq-lang="en">⚙️ AI Model Parameters &amp; ReAct Agent Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Параметр / Галочка</th>
+                <th style="width:26%" data-faq-lang="en">Parameter / Checkbox</th>
+                <th data-faq-lang="uk">Що робить та як налаштовувати</th>
+                <th data-faq-lang="en">Function &amp; Guidance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill">Autonomous Agent (ReAct)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка на сторінці</small><small style="color:var(--muted)" data-faq-lang="en">Page checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Автономний агент із викликом інструментів (ReAct Loop).</strong>
+                  <br>• <em>Увімкнено:</em> модель може сама викликати системні інструменти (шукати транзакції в збереженому трафіку, надсилати тестові запити через Repeater, реєструвати знахідки в базі знань проєкту).
+                  <br>• <em>Вимкнено:</em> модель працює у звичайному режимі чату-консультанта без доступу до виклику функцій.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Autonomous ReAct Agent Toggle.</strong>
+                  <br>• <em>Checked:</em> Grants the agent tool invocation capabilities (search traffic records, replay requests, register findings).
+                  <br>• <em>Unchecked:</em> Standard conversational advice mode without tool execution.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Project context</span><br><small style="color:var(--muted)" data-faq-lang="uk">Галочка на сторінці</small><small style="color:var(--muted)" data-faq-lang="en">Page checkbox</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Контекст активного проєкту.</strong>
+                  <br>• <em>Увімкнено:</em> автоматично додає в системний промпт список дозволених доменів (In-Scope), виявлені технології та нотатки з Knowledge Hub. Це робить відповіді точними та релевантними до вашої цілі.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Project Context Opt-In.</strong>
+                  <br>• <em>Checked:</em> Feeds current in-scope targets, tech stack, and Knowledge Hub notes into system prompts for grounded audits.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Temperature</span><br><small style="color:var(--muted)" data-faq-lang="uk">Поле температури у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Temperature field in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Температура генерації моделі (0.0 – 1.0).</strong>
+                  <br>• <code>0.1–0.2</code> (рекомендовано для безпеки): максимальна строгість, точність і детермінованість. Виключає галюцинації при аналізі коду та логів.
+                  <br>• <code>0.7–0.9</code>: творчий режим; використовуйте для генерації нестандартних обходів WAF чи фішингових сценаріїв.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Generation Temperature (0.0 – 1.0).</strong>
+                  <br>• <code>0.1–0.2</code> (recommended for audit): Deterministic, analytical precision without hallucinations.
+                  <br>• <code>0.7–0.9</code>: Creative mode for generating exotic WAF bypass mutations.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill">Context Limit (Tokens)</span><br><small style="color:var(--muted)" data-faq-lang="uk">Ліміт токенів у ⚙️</small><small style="color:var(--muted)" data-faq-lang="en">Token limit in ⚙️</small></td>
+                <td data-faq-lang="uk">
+                  <strong>Розмір вікна контексту (1024 – 32768).</strong>
+                  <br>Визначає, скільки тексту (запитів, відповідей, вихідного коду) модель пам'ятає в рамках поточної бесіди.
+                </td>
+                <td data-faq-lang="en">
+                  <strong>Context Token Window (1024 – 32768).</strong>
+                  <br>Determines max exchange history and response body length fed into model context.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- AUTOMATION PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-automation" class="tab-faq-pane" data-tab-pane="automation">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">🚀 Automation (Воркфлоу)</span><span data-faq-lang="en">🚀 Automation (Workflows)</span><span class="faq-hero-badge" data-faq-lang="uk">Двигун автоматизації</span><span class="faq-hero-badge" data-faq-lang="en">Pipeline Engine</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Візуальний конструктор сценаріїв для побудови автоматизованих ланцюжків дій пентесту на базі графів (Node-based Graph).</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Visual node-based workflow builder orchestrating automated pentesting pipelines and reactive triggers.</p>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір компонентів та виконання Воркфлоу</span>
+            <span data-faq-lang="en">⚙️ Workflow Nodes &amp; Execution Settings Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Кнопка / Вузол</th><th style="width:26%" data-faq-lang="en">Button / Node</th>
+                <th data-faq-lang="uk">Призначення та дія</th>
+                <th data-faq-lang="en">Function &amp; Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Активація (Activate)</span><span class="faq-pill" data-faq-lang="en">Activate</span></td>
+                <td data-faq-lang="uk">Переводить сценарій в активний режим фонового моніторингу: система починає слухати всі нові запити в реальному часі та автоматично запускає ланцюжок при спрацюванні тригера.</td>
+                <td data-faq-lang="en">Activates pipeline for live background execution on incoming traffic triggers.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Вузол тригера (Trigger)</span><span class="faq-pill" data-faq-lang="en">Trigger Node</span></td>
+                <td data-faq-lang="uk">Умова запуску: поява нового хоста, статус-код 200 на прихованому шляху, виявлення піддомену або регулярний запуск за таймером.</td>
+                <td data-faq-lang="en">Entry condition: new host discovery, status code match, or scheduled interval.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Вузол фільтра (Filter)</span><span class="faq-pill" data-faq-lang="en">Filter Node</span></td>
+                <td data-faq-lang="uk">Фільтрація за регулярними виразами, заголовками чи параметрами для відсікання зайвого шуму перед виконанням дії.</td>
+                <td data-faq-lang="en">Regex, header, or MIME filter pruning noise before dispatching payloads.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Вузол дії (Action)</span><span class="faq-pill" data-faq-lang="en">Action Node</span></td>
+                <td data-faq-lang="uk">Автоматичне виконання дії: запуск активного сканування, надсилання запиту в Repeater, генерація звіту чи передача в AI.</td>
+                <td data-faq-lang="en">Action payload: launches vulnerability scan, alerts analyst, or pipes to AI.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- PROJECTS PANE -->
+      <!-- ======================================================== -->
+      <div id="faq-pane-projects" class="tab-faq-pane" data-tab-pane="projects">
+        <div class="faq-hero">
+          <div class="faq-hero-main">
+            <h2><span data-faq-lang="uk">📁 Projects &amp; Workspaces</span><span data-faq-lang="en">📁 Projects &amp; Workspaces</span><span class="faq-hero-badge" data-faq-lang="uk">Організація проєктів</span><span class="faq-hero-badge" data-faq-lang="en">Management</span></h2>
+            <p class="faq-hero-desc" data-faq-lang="uk">Організація та ізоляція даних клієнтських аудитів, керування межами дозволених цілей (Scope), збереження нотаток та експорт звітів.</p>
+            <p class="faq-hero-desc" data-faq-lang="en">Project isolation, testing scope enforcement, knowledge repository, and comprehensive report exports.</p>
+          </div>
+        </div>
+        <div class="faq-section">
+          <h4 class="faq-section-title">
+            <span data-faq-lang="uk">⚙️ Детальний розбір Scope та керування проєктами</span>
+            <span data-faq-lang="en">⚙️ Scope Settings &amp; Project Management Breakdown</span>
+          </h4>
+          <table class="faq-table">
+            <thead>
+              <tr>
+                <th style="width:26%" data-faq-lang="uk">Опція / Поле</th><th style="width:26%" data-faq-lang="en">Option / Field</th>
+                <th data-faq-lang="uk">Призначення та правила використання</th>
+                <th data-faq-lang="en">Purpose &amp; Best Practices</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Цільовий Scope (In-Scope Target)</span><span class="faq-pill" data-faq-lang="en">In-Scope Target</span></td>
+                <td data-faq-lang="uk">Цільовий домен або регулярний вираз (наприклад <code>*.example.com</code>). Усі активні інструменти (Scanner, Target, Intruder) обмежуються лише цими адресами для уникнення атак на сторонні сайти.</td>
+                <td data-faq-lang="en">Target domain regex pattern (e.g. <code>*.example.com</code>). Restricts active tools to prevent unauthorized out-of-scope probes.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">База знань (Knowledge Hub)</span><span class="faq-pill" data-faq-lang="en">Knowledge Hub</span></td>
+                <td data-faq-lang="uk">Централізована база знань: сюди записуються знайдені облікові дані, приховані адмінки, архітектурні нотатки та підтверджені вразливості проєкту.</td>
+                <td data-faq-lang="en">Project intelligence repository: stores credentials, sensitive endpoints, and verified vulnerabilities.</td>
+              </tr>
+              <tr>
+                <td><span class="faq-pill" data-faq-lang="uk">Експорт / Імпорт (.json)</span><span class="faq-pill" data-faq-lang="en">Export / Import (.json)</span></td>
+                <td data-faq-lang="uk">Повний бандл проєкту: дозволяє зберегти історію, графіки OSINT та конфігурації у єдиний файл для відновлення на іншому пристрої.</td>
+                <td data-faq-lang="en">Comprehensive state bundle: exports all graphs, history, and configs into a portable JSON package.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</dialog>
+
+<script nonce="{{ csp_nonce }}">
+(function() {
+  const faqModal = document.getElementById('tab-faq-modal');
+  const faqCloseBtn = document.getElementById('tab-faq-close-btn');
+  const faqSearchInput = document.getElementById('tab-faq-search');
+  const faqSearchClear = document.getElementById('tab-faq-search-clear');
+  const faqBadge = document.getElementById('tab-faq-current-tab-badge');
+  const faqNavItems = document.querySelectorAll('.tab-faq-nav-item');
+  const faqPanes = document.querySelectorAll('.tab-faq-pane');
+  const scrollContainer = document.getElementById('tab-faq-content-scroll');
+
+  const TAB_TITLES_UK = {
+    osint: 'OSINT та Граф',
+    repeater: 'Repeater',
+    intruder: 'Intruder',
+    scanner: 'Scanner',
+    target: 'Target & JS',
+    traffic: 'Трафік & Проксі',
+    history: 'Історія',
+    comparer: 'Comparer',
+    decoder: 'Decoder',
+    proxy: 'Tor / Проксі',
+    ai: 'AI SecOps',
+    automation: 'Automation',
+    projects: 'Projects'
+  };
+
+  const TAB_TITLES_EN = {
+    osint: 'OSINT & Graph',
+    repeater: 'Repeater',
+    intruder: 'Intruder',
+    scanner: 'Scanner',
+    target: 'Target & JS',
+    traffic: 'Traffic & Proxy',
+    history: 'History',
+    comparer: 'Comparer',
+    decoder: 'Decoder',
+    proxy: 'Tor / Proxy',
+    ai: 'AI SecOps',
+    automation: 'Automation',
+    projects: 'Projects'
+  };
+
+  function updateFaqLanguage() {
+    const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+    if (faqModal) {
+      faqModal.setAttribute('data-lang', curLang);
+    }
+    const activePane = document.querySelector('.tab-faq-pane.active');
+    if (activePane) {
+      const activeTab = activePane.getAttribute('data-tab-pane') || activePane.id.replace('faq-pane-', '');
+      const titles = curLang === 'en' ? TAB_TITLES_EN : TAB_TITLES_UK;
+      if (faqBadge) {
+        faqBadge.textContent = titles[activeTab] || activeTab.toUpperCase();
+      }
+    }
+    if (faqSearchInput && window.translations && window.translations[curLang]) {
+      const ph = window.translations[curLang]['faq.searchPlaceholder'];
+      if (ph) faqSearchInput.placeholder = ph;
+    }
+  }
+
+  function selectFaqTab(tabName) {
+    if (!tabName) tabName = 'osint';
+    const targetPaneId = `faq-pane-${tabName}`;
+    const targetPane = document.getElementById(targetPaneId);
+
+    faqNavItems.forEach(item => {
+      const isTarget = item.getAttribute('data-faq-tab') === tabName;
+      item.classList.toggle('active', isTarget);
+      item.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+    });
+
+    faqPanes.forEach(pane => {
+      pane.classList.toggle('active', pane.id === targetPaneId);
+    });
+
+    const curLang = (typeof language !== 'undefined' && language) ? language : (localStorage.getItem('requestrider-language') || 'uk');
+    const titles = curLang === 'en' ? TAB_TITLES_EN : TAB_TITLES_UK;
+    if (faqBadge) {
+      faqBadge.textContent = titles[tabName] || tabName.toUpperCase();
+    }
+
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+    }
+  }
+
+  function openTabFAQ(tabName) {
+    if (!faqModal) return;
+    updateFaqLanguage();
+
+    if (!tabName) {
+      const activeNavTab = document.querySelector('nav .nav-tab.active')?.getAttribute('data-tab');
+      tabName = activeNavTab || 'osint';
+    }
+
+    selectFaqTab(tabName);
+    if (!faqModal.open) {
+      faqModal.showModal();
+    }
+    if (faqSearchInput) {
+      faqSearchInput.value = '';
+      filterFaqContent('');
+      faqSearchClear.style.display = 'none';
+    }
+  }
+
+  function filterFaqContent(query) {
+    query = query.toLowerCase().trim();
+    if (!query) {
+      // Restore all
+      document.querySelectorAll('.tab-faq-pane .faq-card, .tab-faq-pane .faq-section, .tab-faq-pane tr').forEach(el => {
+        el.style.display = '';
+      });
+      return;
+    }
+
+    // Filter within the currently active pane
+    const activePane = document.querySelector('.tab-faq-pane.active');
+    if (!activePane) return;
+
+    const cards = activePane.querySelectorAll('.faq-card');
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? '' : 'none';
+    });
+
+    const rows = activePane.querySelectorAll('.faq-table tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(query) ? '' : 'none';
+    });
+  }
+
+  // Bind sidebar nav clicks
+  faqNavItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const tab = item.getAttribute('data-faq-tab');
+      selectFaqTab(tab);
+      if (faqSearchInput && faqSearchInput.value) {
+        filterFaqContent(faqSearchInput.value);
+      }
+    });
+  });
+
+  // Search input events
+  faqSearchInput?.addEventListener('input', (e) => {
+    const val = e.target.value;
+    filterFaqContent(val);
+    if (faqSearchClear) {
+      faqSearchClear.style.display = val ? 'block' : 'none';
+    }
+  });
+
+  faqSearchClear?.addEventListener('click', () => {
+    if (faqSearchInput) {
+      faqSearchInput.value = '';
+      filterFaqContent('');
+      faqSearchClear.style.display = 'none';
+      faqSearchInput.focus();
+    }
+  });
+
+  // Close modal
+  faqCloseBtn?.addEventListener('click', () => {
+    faqModal.close();
+  });
+
+  faqModal?.addEventListener('click', (e) => {
+    if (e.target === faqModal) {
+      faqModal.close();
+    }
+  });
+
+  // Global delegate for clicking FAQ triggers
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.tab-faq-trigger, #header-faq-btn, .header-faq-btn');
+    if (trigger) {
+      e.preventDefault();
+      e.stopPropagation();
+      const currentActiveTab = document.querySelector('nav .nav-tab.active')?.getAttribute('data-tab');
+      const tabName = trigger.getAttribute('data-tab') || currentActiveTab || 'osint';
+      openTabFAQ(tabName);
+    }
+  });
+
+  // Keyboard shortcut F1 to open FAQ for current tab
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'F1') {
+      e.preventDefault();
+      const currentActiveTab = document.querySelector('nav .nav-tab.active')?.getAttribute('data-tab');
+      openTabFAQ(currentActiveTab || 'osint');
+    }
+  });
+
+  // Keep FAQ language synced with main language toggle
+  document.getElementById('language-toggle')?.addEventListener('click', () => {
+    setTimeout(updateFaqLanguage, 10);
+  });
+
+  // Expose function globally
+  window.openTabFAQ = openTabFAQ;
+})();
+</script>

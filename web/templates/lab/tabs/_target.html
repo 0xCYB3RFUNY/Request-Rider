@@ -1,0 +1,141 @@
+  <section id="target" class="tab">
+    <div id="workspace-tabs-target" class="workspace-tabs" aria-label="Target workspaces" data-i18n-aria-label="a11y.workspacesTarget"></div>
+    <div class="workspace">
+      <section class="target-control-panel">
+        <div class="workspace-title"><span data-i18n="target.title">Target site map</span><span class="muted" data-i18n="target.scope">Same origin by default</span><button type="button" class="tab-faq-trigger icon-btn" data-tab="target" title="Довідка / FAQ" aria-label="FAQ & Manual" style="margin-left:auto;">❓ <span data-i18n="faq.button">FAQ</span></button><button type="button" class="tab-settings-trigger icon-btn" data-tab="target" title="Налаштування Target" aria-label="Налаштування Target">⚙️</button></div>
+        <label for="target-url" data-i18n="target.url">Start URL</label>
+        <input id="target-url" type="url" placeholder="https://example.test/" aria-label="Target start URL" data-i18n-aria-label="a11y.targetStartUrl" style="width:100%;margin:6px 0 10px">
+        <label for="target-engine" data-i18n="target.engine">Engine</label>
+        <select id="target-engine" style="width:100%;margin:6px 0 10px">
+          <option value="static" data-i18n="target.staticEngine">Static HTTP crawler</option>
+          <option value="browser" data-i18n="target.browserEngine">Browser-driven</option>
+        </select>
+        <div id="target-browser-panel">
+          <label for="target-browser" data-i18n="target.browser">Browser</label>
+          <select id="target-browser" style="width:100%;margin:6px 0 6px">
+           <option value="firefox">Firefox</option>
+           <option value="chromium">Chromium</option>
+           <option value="chrome">Google Chrome</option>
+           <option value="edge">Microsoft Edge</option>
+          </select>
+          <!-- The runtime availability measured by the browser worker, in words. A
+               `disabled` option explains itself only on hover and only on a
+               desktop, so the reason is also written where it cannot be missed.
+               Left empty and invisible when every runtime starts, which is the
+               normal case and must not cost a line of panel height. -->
+          <div id="target-browser-hint" class="hint" role="status" aria-live="polite" style="margin:0 0 10px"></div>
+        </div>
+        <div id="target-capture-panel">
+          <label for="target-capture-context" data-i18n="target.captureContext">Passive capture context</label>
+          <select id="target-capture-context" style="width:100%;margin:6px 0 10px">
+            <option value="" data-i18n="target.noCaptureContext">No capture context (unscoped)</option>
+          </select>
+          <div class="toolbar">
+            <input id="target-capture-name" data-i18n-placeholder="target.captureName" placeholder="Capture context name" aria-label="Capture context name" data-i18n-aria-label="target.captureName" style="flex:1;min-width:160px">
+            <select id="target-capture-project" style="min-width:180px"><option value="" data-i18n="target.captureNoProject">No Project (unscoped)</option></select>
+            <button type="button" id="target-capture-create" data-i18n="target.captureCreate">Create capture context</button>
+          </div>
+          <div id="target-capture-hint" class="hint" aria-live="polite"></div>
+        </div>
+        <div class="toolbar" id="target-settings">
+          <div class="toolbar-group">
+            <strong data-i18n="target.groupLimits">Limits</strong>
+            <label><span data-i18n="target.maxPages">Max pages</span> <input id="target-max-pages" type="number" min="0" value="0" aria-label="Maximum pages to crawl" data-i18n-aria-label="target.maxPages" style="width:100px"></label>
+            <label><span data-i18n="target.maxDepth">Max depth</span> <input id="target-max-depth" type="number" min="-1" value="-1" aria-label="Maximum crawl depth" data-i18n-aria-label="target.maxDepth" style="width:82px"></label>
+            <label><span data-i18n="target.delay">Delay ms</span> <input id="target-delay" type="number" min="0" value="0" aria-label="Delay between requests in milliseconds" data-i18n-aria-label="target.delay" style="width:82px"></label>
+            <label class="inline"><input id="target-same-origin" type="checkbox" checked aria-label="Crawl same origin only" data-i18n-aria-label="target.sameOrigin"> <span data-i18n="target.sameOrigin">Same origin only</span></label>
+          </div>
+          <div class="toolbar-group" id="target-anti-toolbar">
+            <strong data-i18n="target.groupBrowser">Browser crawler</strong>
+            <label><span data-i18n="target.navigationTimeout">Navigation timeout ms</span> <input id="target-navigation-timeout" type="number" min="0" value="0" style="width:96px" data-i18n-title="target.navigationTimeoutHint"></label>
+            <label id="target-auto-wait-label"><span data-i18n="target.autoWaitTimeout">Auto-fill wait ms</span> <input id="target-auto-wait" type="number" min="0" value="15000" style="width:96px" data-i18n-title="target.autoWaitTimeoutHint"></label>
+            <label class="inline"><input id="target-anti-detect" type="checkbox" checked data-i18n-title="target.antiDetectHint"> <span data-i18n="target.antiDetect">Anti-detect</span></label>
+            <!-- Both fields are empty by default, and empty means "the crawl
+                 behaves exactly as it did before they existed": no proxy, no
+                 profile. They are extra ways out of the browser, not a mode. -->
+            <label><span data-i18n="target.proxyServers">Proxy endpoints</span> <input id="target-proxy-servers" type="text" style="width:210px" data-i18n-placeholder="target.proxyServersPlaceholder" data-i18n-title="target.proxyServersHint"> <button type="button" id="target-proxy-pool-btn" class="icon-btn" style="min-width:26px;height:24px;padding:0 6px;font-size:11px" data-i18n-title="target.proxyPoolManage" title="Manage proxy pool">📋</button> <span id="target-proxy-count" class="muted" style="font-size:11px"></span></label>
+            <label><span data-i18n="target.browserProfile">Browser profile</span> <input id="target-browser-profile" type="text" style="width:190px" data-i18n-placeholder="target.browserProfilePlaceholder" data-i18n-title="target.browserProfileHint"></label>
+          </div>
+          <div class="toolbar-group" id="target-static-toolbar">
+            <strong data-i18n="target.groupStatic">Static crawler</strong>
+            <label><span data-i18n="target.acceptLanguage">Accept-Language</span> <input id="target-accept-language" type="text" placeholder="uk-UA,uk;q=0.9" style="width:150px"></label>
+            <label><span data-i18n="target.retryAttempts">Retry attempts</span> <input id="target-retry-attempts" type="number" min="0" value="0" style="width:74px"></label>
+            <!-- Both numbers below are the analyst's, and both decide when a crawl
+                 stops: how long one request may wait, and how many unanswered
+                 requests in a row pause the crawl. A crawl that cannot fail cannot
+                 be paused, which is what made a hung site look like a patient one. -->
+            <label><span data-i18n="target.requestTimeout">Request timeout (ms)</span> <input id="target-timeout" type="number" min="0" value="0" placeholder="15000" style="width:92px"></label>
+            <label><span data-i18n="target.failurePause">Pause after failures</span> <input id="target-failure-pause" type="number" min="-1" value="0" placeholder="20" style="width:74px"></label>
+            <!-- The 403 ladder is off until it is asked for, and asking costs a
+                 request per form per refused page. The count beside it is read
+                 from the engine rather than written here, because a count kept in
+                 this file is a number that goes stale and lies quietly. -->
+            <label class="inline"><input id="target-bypass" type="checkbox" data-i18n-title="target.bypassHint"> <span data-i18n="target.bypassLadder">403 bypass ladder</span></label>
+            <span class="muted" id="target-bypass-hint" aria-live="polite" data-i18n="target.bypassIdle">off</span>
+          </div>
+          <div class="toolbar-group" id="target-auto-scope-group">
+            <strong data-i18n="target.autoScopeLabel">Automatic pass</strong>
+            <div class="scanner-chips" id="target-auto-scope" role="group" aria-label="Automatic pass scope" data-i18n-aria-label="target.autoScopeLabel">
+              <button type="button" class="scanner-chip" id="target-auto-forms" data-target-auto="forms" aria-pressed="false" data-i18n="target.autoScopeForms">Forms only</button>
+              <button type="button" class="scanner-chip" id="target-auto-clicks" data-target-auto="clicks" aria-pressed="false" data-i18n="target.autoScopeClicks">Controls only</button>
+              <button type="button" class="scanner-chip" id="target-auto-both" data-target-auto="both" aria-pressed="true" data-i18n="target.autoScopeBoth">Forms and controls</button>
+            </div>
+          </div>
+        </div>
+        <div id="target-auto-hint" class="hint" aria-live="polite" style="margin:0 0 6px"></div>
+        <div class="toolbar target-run-toolbar">
+          <button class="primary" id="target-start" data-i18n="target.start">Build map</button>
+          <button id="target-pause" disabled data-i18n="target.pause">Pause</button>
+          <button id="target-resume" disabled data-i18n="target.resume">Resume</button>
+          <button id="target-cancel" disabled data-i18n="target.cancel">Cancel</button>
+          <button id="target-resend" disabled data-i18n="target.resend">Resend not delivered pages</button>
+        </div>
+        <div class="toolbar target-transfer-bar">
+          <div class="export-menu" data-export-menu="target">
+            <button type="button" id="target-export" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export Target map" data-i18n-aria-label="target.exportAria" disabled>
+              <span data-i18n="scanner.exportLabel">Export</span>
+              <svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="export-menu-list" role="menu" hidden>
+              <button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full sitemap JSON</span></button>
+              <button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button>
+              <button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="target.exportCsvHint">Endpoints &amp; evidence CSV</span></button>
+            </div>
+          </div>
+          <div class="target-transfer-actions">
+            <button type="button" id="target-send-ai" class="target-btn-transfer" data-i18n="button.sendMapAI"><span>🤖</span> <span data-i18n="button.sendMapAI">Send map to AI</span></button>
+            <button type="button" id="target-send-automation" class="target-btn-transfer" data-i18n="button.sendAutomation"><span>🚀</span> <span data-i18n="button.sendAutomation">Send to Automation</span></button>
+          </div>
+        </div>
+        <div id="target-status" class="status"></div>
+        <p id="target-checkpoint" class="scanner-progress-checkpoint" role="status" aria-live="polite" hidden></p>
+      </section>
+      <section class="target-preview-column">
+        <div class="workspace-title"><span data-i18n="target.preview">Map preview</span><span><button type="button" id="target-collapse-all" data-i18n="target.collapseAll">Collapse all</button><button type="button" id="target-expand-all" data-i18n="target.expandAll">Expand all</button><span id="target-meta" class="muted"></span></span></div>
+        <div class="target-preview"><div id="target-tree" class="target-tree" data-i18n="target.empty">Enter a URL and build a map.</div></div>
+      </section>
+    </div>
+    <div class="toolbar" style="margin:10px 0 6px">
+      <input id="target-filter" data-i18n-placeholder="target.filter" placeholder="Filter URL, status or type" style="flex:1;min-width:220px">
+      <select id="target-sort" data-i18n-title="target.sortTitle" title="Sort target results">
+        <option value="-index" data-i18n="target.sortNewest">Newest first</option>
+        <option value="index" data-i18n="target.sortOldest">Oldest first</option>
+        <option value="-status">Status (errors first)</option>
+        <option value="status" data-i18n="target.sortStatus">Status (2xx first)</option>
+        <option value="-depth">Depth (deepest first)</option>
+        <option value="depth" data-i18n="target.sortDepth">Depth (shallow first)</option>
+        <option value="url" data-i18n="target.sortUrl">URL (A-Z)</option>
+        <option value="-url">URL (Z-A)</option>
+        <option value="content_type" data-i18n="target.sortType">Content type (A-Z)</option>
+        <option value="-content_type">Content type (Z-A)</option>
+        <option value="-time">Time (slowest first)</option>
+        <option value="time">Time (fastest first)</option>
+      </select>
+      <button type="button" id="target-clear-filter" data-i18n="target.clearFilter">Clear</button>
+      <select id="target-network-filter" data-i18n-title="target.networkFilterTitle" title="Filter browser network evidence"><option value="all" data-i18n="target.networkAll">All network</option><option value="xhr" data-i18n="target.networkXhr">API/XHR/fetch</option><option value="document" data-i18n="target.networkDocuments">Documents</option><option value="script" data-i18n="target.networkScripts">Scripts</option><option value="other" data-i18n="target.networkOther">Other</option></select>
+      <button type="button" id="target-compare-maps" data-i18n="target.compareMaps">Compare static/browser</button>
+    </div>
+    <div class="exchange-list">
+      <table class="target-table"><colgroup><col class="target-col-index"><col class="target-col-depth"><col class="target-col-status"><col class="target-col-url"><col class="target-col-type"><col class="target-col-time"><col class="target-col-actions"></colgroup><thead><tr><th class="sortable-th" data-sort="index" data-i18n="target.index">#</th><th class="sortable-th" data-sort="depth" data-i18n="target.maxDepth">Depth</th><th class="sortable-th" data-sort="status" data-i18n="table.status">Status</th><th class="sortable-th" data-sort="url" data-i18n="target.url">URL</th><th class="sortable-th" data-sort="content_type" data-i18n="target.contentType">Content type</th><th class="sortable-th" data-sort="time" data-i18n="target.time">Time</th><th data-i18n="target.actions">Actions</th></tr></thead><tbody id="target-results"><tr><td colspan="7" data-i18n="target.noPages">No pages discovered.</td></tr></tbody></table>
+    </div>
+  </section>
