@@ -1,0 +1,1222 @@
+<!-- Tab Settings Modal Dialog & Command Palette (N2 Roadmap) -->
+<dialog id="tab-settings-modal" class="tab-settings-modal" aria-labelledby="tab-settings-title" aria-modal="true">
+  <div class="tab-settings-header">
+    <div class="tab-settings-title-group">
+      <span class="tab-settings-icon" aria-hidden="true">⚙️</span>
+      <div>
+        <h3 id="tab-settings-title" data-i18n="settings.modalTitle">Налаштування вкладки</h3>
+        <span id="tab-settings-current-tab-badge" class="tab-badge">Repeater</span>
+      </div>
+    </div>
+    <button type="button" class="tab-settings-close" id="tab-settings-close-btn" aria-label="Close" data-i18n-aria-label="common.close">×</button>
+  </div>
+
+  <div class="tab-settings-body">
+    <!-- Sub-navigation tabs inside settings modal -->
+    <div class="tab-settings-nav" role="tablist">
+      <button type="button" class="tab-settings-nav-btn active" data-settings-section="sec-dns" role="tab" aria-selected="true" data-i18n="settings.navDns">🌐 Мережа та DNS</button>
+      <button type="button" class="tab-settings-nav-btn" data-settings-section="sec-appearance" role="tab" aria-selected="false" data-i18n="settings.navAppearance">🎨 Зовнішній вигляд</button>
+      <button type="button" class="tab-settings-nav-btn" data-settings-section="sec-tool" role="tab" aria-selected="false" data-i18n="settings.navTool">🛠 Параметри інструмента</button>
+      <button type="button" class="tab-settings-nav-btn" data-settings-section="sec-shortcuts" role="tab" aria-selected="false" data-i18n="settings.navShortcuts">⌨️ Шорткати та пресети</button>
+    </div>
+
+    <div class="tab-settings-content">
+      <!-- SECTION 1: DNS & Network -->
+      <div id="sec-dns" class="tab-settings-pane active" role="tabpanel">
+        <div class="settings-form-group">
+          <label class="settings-label" data-i18n="settings.dnsMode">Режим DNS-резолвера</label>
+          <select id="setting-dns-mode" class="settings-select">
+            <option value="system" data-i18n="settings.dnsSystem">Системний DNS за замовчуванням (Default)</option>
+            <option value="custom" data-i18n="settings.dnsCustom">Кастомний UDP/TCP DNS сервер (IP:порт)</option>
+            <option value="doh" data-i18n="settings.dnsDoh">DNS-over-HTTPS (DoH)</option>
+            <option value="static" data-i18n="settings.dnsStatic">Статичні оверрайди хостів (/etc/hosts)</option>
+            <option value="split" data-i18n="settings.dnsSplit">Split-Horizon DNS маршрутизація</option>
+          </select>
+        </div>
+
+        <div id="setting-dns-custom-wrap" class="settings-form-group" style="display:none">
+          <label class="settings-label" data-i18n="settings.customDnsServer">Адреса DNS-сервера (IP:порт)</label>
+          <input type="text" id="setting-dns-custom" class="settings-input" placeholder="1.1.1.1:53" value="1.1.1.1:53">
+        </div>
+
+        <div id="setting-dns-doh-wrap" class="settings-form-group" style="display:none">
+          <label class="settings-label" data-i18n="settings.dohEndpoint">URL DoH-резолвера</label>
+          <input type="text" id="setting-dns-doh" class="settings-input" placeholder="https://cloudflare-dns.com/dns-query" value="https://cloudflare-dns.com/dns-query">
+        </div>
+
+        <div id="setting-dns-static-wrap" class="settings-form-group" style="display:none">
+          <label class="settings-label" data-i18n="settings.staticHosts">Статичні оверрайди (IP Domain на рядок)</label>
+          <textarea id="setting-dns-static" class="settings-textarea" placeholder="127.0.0.1 target.corp.local&#10;10.10.10.5 api.internal">127.0.0.1 target.corp.local</textarea>
+        </div>
+
+        <div id="setting-dns-split-wrap" class="settings-form-group" style="display:none">
+          <label class="settings-label" data-i18n="settings.splitRules">Split-Horizon правила (Шаблон=DNS)</label>
+          <textarea id="setting-dns-split" class="settings-textarea" placeholder="*.corp.internal=10.0.0.2:53&#10;*.test.local=127.0.0.1:5353">*.corp.internal=10.0.0.2:53</textarea>
+        </div>
+
+        <div class="settings-form-group">
+          <label class="settings-label" data-i18n="settings.tlsFingerprint">TLS / JA3 / JA4 профіль клієнта</label>
+          <select id="setting-tls-fingerprint" class="settings-select">
+            <option value="chrome">Google Chrome (Modern JA3/JA4)</option>
+            <option value="firefox">Mozilla Firefox ESR</option>
+            <option value="safari">Apple Safari (iOS/macOS)</option>
+            <option value="golang">Golang Standard</option>
+          </select>
+        </div>
+
+        <div class="settings-checkbox-group">
+          <label class="settings-checkbox-label">
+            <input type="checkbox" id="setting-dns-ttl0">
+            <span data-i18n="settings.forceTtl0">Примусовий повторний резолв перед кожним запитом (Force TTL=0)</span>
+          </label>
+        </div>
+
+        <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+          <button type="button" id="btn-flush-dns-cache" class="settings-action-btn" data-i18n="settings.flushDns">🔄 Скинути DNS-кеш</button>
+          <span id="flush-dns-status" class="muted" style="font-size:11px;"></span>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Appearance & Colors -->
+      <div id="sec-appearance" class="tab-settings-pane" role="tabpanel">
+        <div class="settings-form-group">
+          <label class="settings-label" data-i18n="settings.themePreset">Тема оформлення (Theme Preset)</label>
+          <select id="setting-theme-preset" class="settings-select">
+            <option value="default" data-i18n="settings.themeDefault">RequestRider Dark (Стандартна)</option>
+            <option value="burp" data-i18n="settings.themeBurp">Burp Classic</option>
+            <option value="cyberpunk" data-i18n="settings.themeCyberpunk">Cyberpunk Neon</option>
+            <option value="monokai" data-i18n="settings.themeMonokai">Monokai Pro</option>
+            <option value="highContrast" data-i18n="settings.themeHighContrast">Висококонтрастна (A11y)</option>
+          </select>
+        </div>
+
+        <h4 style="margin:16px 0 8px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em;" data-i18n="settings.statusPalette">Кольорове диференціювання HTTP статус-кодів</h4>
+        <div class="color-picker-grid">
+          <div class="color-item">
+            <label data-i18n="settings.status2xx">2xx Успіх</label>
+            <input type="color" id="setting-color-2xx" value="#22c55e">
+          </div>
+          <div class="color-item">
+            <label data-i18n="settings.status3xx">3xx Редирект</label>
+            <input type="color" id="setting-color-3xx" value="#3b82f6">
+          </div>
+          <div class="color-item">
+            <label data-i18n="settings.status4xx">4xx Помилка</label>
+            <input type="color" id="setting-color-4xx" value="#f59e0b">
+          </div>
+          <div class="color-item">
+            <label data-i18n="settings.status5xx">5xx Сервер</label>
+            <input type="color" id="setting-color-5xx" value="#ef4444">
+          </div>
+        </div>
+
+        <h4 style="margin:16px 0 8px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em;" data-i18n="settings.methodPalette">Кольори типів запитів (HTTP Methods)</h4>
+        <div class="color-picker-grid">
+          <div class="color-item">
+            <label>GET</label>
+            <input type="color" id="setting-color-method-get" value="#34d399">
+          </div>
+          <div class="color-item">
+            <label>POST</label>
+            <input type="color" id="setting-color-method-post" value="#fbbf24">
+          </div>
+          <div class="color-item">
+            <label>PUT</label>
+            <input type="color" id="setting-color-method-put" value="#60a5fa">
+          </div>
+          <div class="color-item">
+            <label>DELETE</label>
+            <input type="color" id="setting-color-method-delete" value="#fb7185">
+          </div>
+          <div class="color-item">
+            <label>PATCH</label>
+            <input type="color" id="setting-color-method-patch" value="#c084fc">
+          </div>
+          <div class="color-item">
+            <label>OPTIONS</label>
+            <input type="color" id="setting-color-method-options" value="#a1a1aa">
+          </div>
+        </div>
+
+        <h4 style="margin:16px 0 8px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em;" data-i18n="settings.urlSyntax">Підсвічування коду та URL</h4>
+        <div class="color-picker-grid">
+          <div class="color-item">
+            <label data-i18n="settings.urlPath">URL Path</label>
+            <input type="color" id="setting-color-url-path" value="#22d3ee">
+          </div>
+          <div class="color-item">
+            <label data-i18n="settings.urlParams">Query Params</label>
+            <input type="color" id="setting-color-url-params" value="#fbbf24">
+          </div>
+        </div>
+
+        <h4 style="margin:16px 0 8px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em;">Шрифт та редактор RAW</h4>
+        <div class="settings-form-row">
+          <div class="settings-form-group" style="flex:1;">
+            <label class="settings-label" data-i18n="settings.syntaxFontSize">Розмір шрифту</label>
+            <select id="setting-font-size" class="settings-select">
+              <option value="11px">11px</option>
+              <option value="12px">12px</option>
+              <option value="13px" selected>13px (Default)</option>
+              <option value="14px">14px</option>
+              <option value="16px">16px</option>
+              <option value="18px">18px</option>
+            </select>
+          </div>
+          <div class="settings-checkbox-group" style="flex:1; align-self:flex-end; padding-bottom:6px;">
+            <label class="settings-checkbox-label">
+              <input type="checkbox" id="setting-word-wrap" checked>
+              <span data-i18n="settings.syntaxWrap">Word Wrap (Перенесення рядків)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Tool-specific Parameters -->
+      <div id="sec-tool" class="tab-settings-pane" role="tabpanel">
+        <div class="tool-settings-subnav" role="tablist" aria-label="Tool Settings Tabs">
+          <button type="button" class="tool-subnav-btn active" data-tool-tab="repeater" role="tab" aria-selected="true"><span class="tool-icon">↩</span> Repeater</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="target" role="tab" aria-selected="false"><span class="tool-icon">🎯</span> Target</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="intruder" role="tab" aria-selected="false"><span class="tool-icon">⚡</span> Intruder</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="scanner" role="tab" aria-selected="false"><span class="tool-icon">🛡️</span> Scanner</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="osint" role="tab" aria-selected="false"><span class="tool-icon">🔍</span> OSINT</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="traffic" role="tab" aria-selected="false"><span class="tool-icon">🌊</span> Traffic</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="proxy" role="tab" aria-selected="false"><span class="tool-icon">🧅</span> Proxy</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="ai" role="tab" aria-selected="false"><span class="tool-icon">🤖</span> AI</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="comparer" role="tab" aria-selected="false"><span class="tool-icon">↔</span> Comparer</button>
+          <button type="button" class="tool-subnav-btn" data-tool-tab="decoder" role="tab" aria-selected="false"><span class="tool-icon">{}</span> Decoder</button>
+        </div>
+
+        <div id="tool-settings-panes-wrap">
+          <!-- Pane: Repeater -->
+          <div id="tool-pane-repeater" class="tool-settings-pane active">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Request Timeout (sec)</label>
+                <input type="number" id="setting-repeater-timeout" class="settings-input" min="1" max="120" value="15">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Follow Redirects</label>
+                <select id="setting-repeater-redirects" class="settings-select">
+                  <option value="off">Off</option>
+                  <option value="same-host" selected>Same Host Only</option>
+                  <option value="always">Always (Cross-domain)</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">HTTP Protocol Version</label>
+              <select id="setting-repeater-httpver" class="settings-select">
+                <option value="auto" selected>Auto-negotiate</option>
+                <option value="http10">Force HTTP/1.0</option>
+                <option value="http11">Force HTTP/1.1</option>
+                <option value="http2">Force HTTP/2</option>
+              </select>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-repeater-tabdot" checked>
+                <span>Show status-code colored dots on workspace tabs</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Target -->
+          <div id="tool-pane-target" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="target.maxPages">Max pages</label>
+                <input type="number" id="setting-target-pages" class="settings-input" min="0" value="0">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="target.maxDepth">Max depth</label>
+                <input type="number" id="setting-target-depth" class="settings-input" min="-1" value="-1">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="target.delay">Delay ms</label>
+                <input type="number" id="setting-target-delay" class="settings-input" min="0" value="0">
+              </div>
+            </div>
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="target.engine">Default Engine</label>
+                <select id="setting-target-engine" class="settings-select">
+                  <option value="static" data-i18n="target.staticEngine">Static HTTP crawler</option>
+                  <option value="browser" data-i18n="target.browserEngine">Browser-driven</option>
+                </select>
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="target.browser">Browser</label>
+                <select id="setting-target-browser" class="settings-select">
+                  <option value="firefox">Firefox</option>
+                  <option value="chromium">Chromium</option>
+                  <option value="chrome">Google Chrome</option>
+                  <option value="edge">Microsoft Edge</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-target-same-origin" checked>
+                <span data-i18n="target.sameOrigin">Same origin only</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-target-anti-detect" checked>
+                <span data-i18n="target.antiDetect">Anti-detect</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Intruder -->
+          <div id="tool-pane-intruder" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="intruder.attackMode">Attack mode</label>
+                <select id="setting-intruder-mode" class="settings-select">
+                  <option value="sniper">Sniper</option>
+                  <option value="batteringRam">Battering Ram</option>
+                  <option value="pitchfork">Pitchfork</option>
+                  <option value="clusterBomb">Cluster Bomb</option>
+                </select>
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="label.concurrency">Concurrency</label>
+                <input type="number" id="setting-intruder-concurrency" class="settings-input" min="1" step="1" value="1">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="intruder.delay">Delay between requests (ms)</label>
+                <input type="number" id="setting-intruder-delay" class="settings-input" min="0" step="1" value="150">
+              </div>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-intruder-detect-enabled" checked>
+                <span data-i18n="intruder.detectEnabled">Detect a successful login</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-intruder-autoscroll" checked>
+                <span data-i18n="settings.autoScrollResults">Auto-scroll results table</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Scanner -->
+          <div id="tool-pane-scanner" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Default Profile</label>
+                <select id="setting-scanner-profile" class="settings-select">
+                  <option value="Safe">Safe (Passive / non-intrusive)</option>
+                  <option value="Standard" selected>Standard</option>
+                  <option value="Aggressive">Aggressive</option>
+                </select>
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Probe Timeout (sec)</label>
+                <input type="number" id="setting-scanner-timeout" class="settings-input" min="3" max="30" value="10">
+              </div>
+            </div>
+          </div>
+
+          <!-- Pane: OSINT -->
+          <div id="tool-pane-osint" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Graph Layout Engine</label>
+                <select id="setting-osint-layout" class="settings-select">
+                  <option value="cose" selected>COSE (Physics simulation)</option>
+                  <option value="concentric">Concentric circles</option>
+                  <option value="circle">Circle</option>
+                  <option value="breadthfirst">Breadthfirst (Hierarchical)</option>
+                  <option value="grid">Grid</option>
+                </select>
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Max Rendered Nodes</label>
+                <select id="setting-osint-maxnodes" class="settings-select">
+                  <option value="250">250 nodes (Fast)</option>
+                  <option value="500">500 nodes</option>
+                  <option value="1000" selected>1000 nodes (Default)</option>
+                  <option value="2500">2500 nodes (Heavy)</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-osint-wildcard" checked>
+                <span>DNS Wildcard Detection before bruteforce</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-osint-animation" checked>
+                <span>Graph animations and physics simulation</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Traffic -->
+          <div id="tool-pane-traffic" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-group">
+              <label class="settings-label">Retention Buffer Size (items in memory)</label>
+              <select id="setting-traffic-buffer" class="settings-select">
+                <option value="250">250 records</option>
+                <option value="500">500 records</option>
+                <option value="1000" selected>1000 records (Default)</option>
+                <option value="5000">5000 records</option>
+              </select>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-traffic-ring" checked>
+                <span>Ring Buffer Mode (evict oldest items to prevent tab lag)</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-traffic-hide404">
+                <span>Hide 404 Not Found &amp; 304 Not Modified by default</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-traffic-autoscroll" checked>
+                <span>Auto-scroll live traffic stream to newest records</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Proxy -->
+          <div id="tool-pane-proxy" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-group">
+              <label class="settings-label" data-i18n="proxy.address">SOCKS5 address (empty = direct)</label>
+              <input type="text" id="setting-proxy-route-address" class="settings-input" placeholder="host:port (empty = direct, e.g. 127.0.0.1:9050 for Tor)" data-i18n-placeholder="route.address">
+              <small class="muted" data-i18n="proxy.hint">Repeater, Intruder, Target, OSINT, Scanner and the passive proxy share this route.</small>
+            </div>
+            <div class="settings-form-row" style="margin-top:10px;">
+              <div class="settings-form-group" style="flex:2">
+                <label class="settings-label" data-i18n="proxy.checkUrlLabel">Route Check URL</label>
+                <input type="url" id="setting-proxy-check-url" class="settings-input" value="https://check.torproject.org/" placeholder="https://check.torproject.org/">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label" data-i18n="proxy.timeout">Timeout ms</label>
+                <input type="number" id="setting-proxy-check-timeout" class="settings-input" min="1000" step="500" value="15000">
+              </div>
+            </div>
+            <div class="settings-note-card" style="margin-top:14px; padding:10px 12px; border:1px solid var(--line); border-radius:4px; background:rgba(255,255,255,0.02);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:14px;">ℹ️</span>
+                <strong style="font-size:12px;" data-i18n="proxy.passiveProxyTitle">Пасивний локальний проксі (Passive Proxy)</strong>
+              </div>
+              <p class="muted" style="margin:6px 0 0; font-size:11px; line-height:1.4;" data-i18n="proxy.passiveProxyDesc">
+                Слухає на <code>127.0.0.1:8080</code>. Виконує виключно прозоре логування трафіку в Traffic та History без перехоплення чи утримання запитів.
+              </p>
+            </div>
+          </div>
+
+          <!-- Pane: AI Assistant -->
+          <div id="tool-pane-ai" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:2">
+                <label class="settings-label">LLM API Endpoint</label>
+                <input type="text" id="setting-ai-endpoint" class="settings-input" value="http://127.0.0.1:11434">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Model Name</label>
+                <input type="text" id="setting-ai-model" class="settings-input" value="qwen2.5-coder">
+              </div>
+            </div>
+            <div class="settings-form-row">
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Context Limit (Tokens)</label>
+                <input type="number" id="setting-ai-context" class="settings-input" min="1024" max="32768" value="4096">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">Temperature</label>
+                <input type="number" id="setting-ai-temp" class="settings-input" min="0" max="1" step="0.1" value="0.2">
+              </div>
+              <div class="settings-form-group" style="flex:1">
+                <label class="settings-label">System Persona</label>
+                <select id="setting-ai-preset" class="settings-select">
+                  <option value="analyst" selected>Security Analyst</option>
+                  <option value="redteam">Red Team Offensive</option>
+                  <option value="auditor">Compliance Auditor</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pane: Comparer -->
+          <div id="tool-pane-comparer" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-group">
+              <label class="settings-label">Comparison Granularity</label>
+              <select id="setting-comparer-granularity" class="settings-select">
+                <option value="word" selected>Word-by-word diff</option>
+                <option value="char">Character-by-character diff</option>
+                <option value="line">Line-by-line diff</option>
+              </select>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-comparer-ignorecase">
+                <span>Ignore case distinctions (Case-insensitive)</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-comparer-ignorews" checked>
+                <span>Ignore whitespace and line endings</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-comparer-ignoreheaders" checked>
+                <span>Ignore dynamic headers (Date, Set-Cookie, Nonce)</span>
+              </label>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-comparer-syncscroll" checked>
+                <span>Synchronized dual-pane scrolling</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Pane: Decoder -->
+          <div id="tool-pane-decoder" class="tool-settings-pane" style="display:none">
+            <div class="settings-form-group">
+              <label class="settings-label">Default Output Representation</label>
+              <select id="setting-decoder-output" class="settings-select">
+                <option value="text" selected>Plain Text</option>
+                <option value="hex">Hex Dump</option>
+                <option value="base64">Base64</option>
+                <option value="url">URL Encoded</option>
+              </select>
+            </div>
+            <div class="settings-checkbox-group">
+              <label class="settings-checkbox-label">
+                <input type="checkbox" id="setting-decoder-autodetect" checked>
+                <span>Auto-detect input encoding format</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: Shortcuts, Command Palette & Presets -->
+      <div id="sec-shortcuts" class="tab-settings-pane" role="tabpanel">
+        <div class="shortcuts-card">
+          <h4 style="margin:0 0 10px; font-size:13px; color:var(--accent);" data-i18n="settings.cmdPaletteHint">Командна палітра (Ctrl+K або Cmd+K)</h4>
+          <p class="muted" style="margin:0 0 14px; font-size:12px;">Швидкий пошук та перемикання між усіма 12 вкладками інструментів, керування проектами та запуск шестерні без миші.</p>
+          <div class="shortcut-list">
+            <div class="shortcut-row"><span>Командна палітра</span> <kbd>Ctrl+K</kbd> / <kbd>Cmd+K</kbd></div>
+            <div class="shortcut-row"><span>Надіслати запит (Repeater)</span> <kbd>Ctrl+Enter</kbd></div>
+            <div class="shortcut-row"><span>Пошук у History / Traffic</span> <kbd>Ctrl+F</kbd></div>
+            <div class="shortcut-row"><span>Перейменувати вкладку інлайн</span> <kbd>F2</kbd> або двоклік</div>
+          </div>
+        </div>
+
+        <h4 style="margin:20px 0 10px; font-size:12px; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em;">Експорт та імпорт профілів налаштувань (.json)</h4>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button type="button" id="btn-export-settings-profile" class="settings-action-btn" data-i18n="settings.exportProfile">📤 Експорт пресету (.json)</button>
+          <button type="button" id="btn-import-settings-profile" class="settings-action-btn" data-i18n="settings.importProfile">📥 Імпорт пресету (.json)</button>
+          <input type="file" id="input-import-settings-file" accept=".json" style="display:none">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-settings-footer">
+    <button type="button" id="btn-reset-tab-settings" class="settings-btn-secondary" data-i18n="settings.resetDefaults">Скинути до дефолту</button>
+    <div style="margin-left:auto; display:flex; gap:8px;">
+      <button type="button" id="btn-cancel-tab-settings" class="settings-btn-secondary" data-i18n="common.cancel">Скасувати</button>
+      <button type="button" id="btn-save-tab-settings" class="settings-btn-primary" data-i18n="settings.saveApply">Зберегти та застосувати</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Command Palette Modal (Ctrl+K / Cmd+K) -->
+<dialog id="cmd-palette-dialog" class="cmd-palette-dialog" aria-labelledby="cmd-palette-input" aria-modal="true">
+  <div class="cmd-palette-input-wrap">
+    <span style="margin-right:8px; color:var(--muted)">🔍</span>
+    <input type="text" id="cmd-palette-input" class="cmd-palette-input" placeholder="Type a command or tab name (e.g. Repeater, Settings, Proxy)..." autofocus>
+    <kbd style="font-size:11px; color:var(--muted); background:var(--button); padding:2px 5px; border-radius:3px;">Esc</kbd>
+  </div>
+  <ul id="cmd-palette-list" class="cmd-palette-list" role="listbox">
+  </ul>
+</dialog>
+
+<script nonce="{{ csp_nonce }}">
+let currentSettingsTab = 'repeater';
+
+function switchToolSubTab(toolKey) {
+  if (!toolKey) toolKey = 'repeater';
+  toolKey = toolKey.toLowerCase();
+  currentSettingsTab = toolKey;
+
+  document.querySelectorAll('.tool-subnav-btn').forEach(btn => {
+    const isTarget = btn.getAttribute('data-tool-tab') === toolKey;
+    btn.classList.toggle('active', isTarget);
+    btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('.tool-settings-pane').forEach(pane => {
+    pane.classList.remove('active');
+    pane.style.display = 'none';
+  });
+
+  const activePane = document.getElementById(`tool-pane-${toolKey}`);
+  if (activePane) {
+    activePane.classList.add('active');
+    activePane.style.display = 'block';
+  }
+
+  const badge = document.getElementById('tab-settings-current-tab-badge');
+  if (badge) {
+    badge.textContent = toolKey.toUpperCase();
+  }
+}
+
+function updateDnsVisibility(mode) {
+  const customWrap = document.getElementById('setting-dns-custom-wrap');
+  const dohWrap = document.getElementById('setting-dns-doh-wrap');
+  const staticWrap = document.getElementById('setting-dns-static-wrap');
+  const splitWrap = document.getElementById('setting-dns-split-wrap');
+  if (customWrap) customWrap.style.display = (mode === 'custom') ? 'block' : 'none';
+  if (dohWrap) dohWrap.style.display = (mode === 'doh') ? 'block' : 'none';
+  if (staticWrap) staticWrap.style.display = (mode === 'static') ? 'block' : 'none';
+  if (splitWrap) splitWrap.style.display = (mode === 'split') ? 'block' : 'none';
+}
+
+function populateSettingsForm(prefs) {
+  if (!prefs) prefs = loadUIPreferences();
+
+  // DNS
+  const dnsMode = document.getElementById('setting-dns-mode');
+  if (dnsMode) {
+    dnsMode.value = prefs.dns?.mode || 'system';
+    updateDnsVisibility(dnsMode.value);
+  }
+  const customServer = document.getElementById('setting-dns-custom');
+  if (customServer) customServer.value = prefs.dns?.customServer || '1.1.1.1:53';
+  const dohUrl = document.getElementById('setting-dns-doh');
+  if (dohUrl) dohUrl.value = prefs.dns?.dohUrl || 'https://cloudflare-dns.com/dns-query';
+  const staticHosts = document.getElementById('setting-dns-static');
+  if (staticHosts) staticHosts.value = prefs.dns?.staticHosts || '127.0.0.1 localhost';
+  const splitRules = document.getElementById('setting-dns-split');
+  if (splitRules) splitRules.value = prefs.dns?.splitRules || '*.corp.internal=10.0.0.2:53';
+  const tlsFp = document.getElementById('setting-tls-fingerprint');
+  if (tlsFp) tlsFp.value = prefs.dns?.tlsFingerprint || 'chrome';
+  const forceTtl0 = document.getElementById('setting-dns-ttl0');
+  if (forceTtl0) forceTtl0.checked = !!prefs.dns?.forceTTL0;
+
+  // Appearance
+  const themePreset = document.getElementById('setting-theme-preset');
+  if (themePreset) themePreset.value = prefs.appearance?.theme || 'default';
+
+  const col2xx = document.getElementById('setting-color-2xx');
+  if (col2xx) col2xx.value = prefs.appearance?.customColors?.status2xx || '#22c55e';
+  const col3xx = document.getElementById('setting-color-3xx');
+  if (col3xx) col3xx.value = prefs.appearance?.customColors?.status3xx || '#3b82f6';
+  const col4xx = document.getElementById('setting-color-4xx');
+  if (col4xx) col4xx.value = prefs.appearance?.customColors?.status4xx || '#f59e0b';
+  const col5xx = document.getElementById('setting-color-5xx');
+  if (col5xx) col5xx.value = prefs.appearance?.customColors?.status5xx || '#ef4444';
+
+  const colPath = document.getElementById('setting-color-url-path');
+  if (colPath) colPath.value = prefs.appearance?.customColors?.urlPath || '#22d3ee';
+  const colParams = document.getElementById('setting-color-url-params');
+  if (colParams) colParams.value = prefs.appearance?.customColors?.urlParamKey || '#fbbf24';
+
+  const colGet = document.getElementById('setting-color-method-get');
+  if (colGet) colGet.value = prefs.appearance?.customColors?.methodGet || '#34d399';
+  const colPost = document.getElementById('setting-color-method-post');
+  if (colPost) colPost.value = prefs.appearance?.customColors?.methodPost || '#fbbf24';
+  const colPut = document.getElementById('setting-color-method-put');
+  if (colPut) colPut.value = prefs.appearance?.customColors?.methodPut || '#60a5fa';
+  const colDel = document.getElementById('setting-color-method-delete');
+  if (colDel) colDel.value = prefs.appearance?.customColors?.methodDelete || '#fb7185';
+  const colPatch = document.getElementById('setting-color-method-patch');
+  if (colPatch) colPatch.value = prefs.appearance?.customColors?.methodPatch || '#c084fc';
+  const colOpt = document.getElementById('setting-color-method-options');
+  if (colOpt) colOpt.value = prefs.appearance?.customColors?.methodOptions || '#a1a1aa';
+
+  const fontSize = document.getElementById('setting-font-size');
+  if (fontSize) fontSize.value = prefs.appearance?.syntaxHighlighting?.fontSize || '13px';
+  const wordWrap = document.getElementById('setting-word-wrap');
+  if (wordWrap) wordWrap.checked = prefs.appearance?.syntaxHighlighting?.wrap !== false;
+
+  const tabs = prefs.tabs || {};
+
+  // Repeater
+  const rep = tabs.repeater || {};
+  const repTimeout = document.getElementById('setting-repeater-timeout');
+  if (repTimeout) repTimeout.value = rep.timeout || 15;
+  const repRedirects = document.getElementById('setting-repeater-redirects');
+  if (repRedirects) repRedirects.value = rep.followRedirects || 'same-host';
+  const repHttpver = document.getElementById('setting-repeater-httpver');
+  if (repHttpver) repHttpver.value = rep.httpVersion || 'auto';
+  const repTabdot = document.getElementById('setting-repeater-tabdot');
+  if (repTabdot) repTabdot.checked = rep.tabColorDot !== false;
+
+  // Target
+  const tgt = tabs.target || {};
+  const liveTgtPages = document.getElementById('target-max-pages')?.value;
+  const tgtPages = document.getElementById('setting-target-pages');
+  if (tgtPages) tgtPages.value = liveTgtPages !== undefined ? liveTgtPages : (tgt.maxPages ?? 0);
+  const liveTgtDepth = document.getElementById('target-max-depth')?.value;
+  const tgtDepth = document.getElementById('setting-target-depth');
+  if (tgtDepth) tgtDepth.value = liveTgtDepth !== undefined ? liveTgtDepth : (tgt.maxDepth ?? -1);
+  const liveTgtDelay = document.getElementById('target-delay')?.value;
+  const tgtDelay = document.getElementById('setting-target-delay');
+  if (tgtDelay) tgtDelay.value = liveTgtDelay !== undefined ? liveTgtDelay : (tgt.delayMs ?? 0);
+  const liveTgtEngine = document.getElementById('target-engine')?.value;
+  const tgtEngine = document.getElementById('setting-target-engine');
+  if (tgtEngine) tgtEngine.value = liveTgtEngine || tgt.engine || 'static';
+  const liveTgtBrowser = document.getElementById('target-browser')?.value;
+  const tgtBrowser = document.getElementById('setting-target-browser');
+  if (tgtBrowser) tgtBrowser.value = liveTgtBrowser || tgt.browser || 'firefox';
+  const liveTgtOrigin = document.getElementById('target-same-origin')?.checked;
+  const tgtOrigin = document.getElementById('setting-target-same-origin');
+  if (tgtOrigin) tgtOrigin.checked = liveTgtOrigin !== undefined ? liveTgtOrigin : (tgt.sameOrigin !== false);
+  const liveTgtAnti = document.getElementById('target-anti-detect')?.checked;
+  const tgtAnti = document.getElementById('setting-target-anti-detect');
+  if (tgtAnti) tgtAnti.checked = liveTgtAnti !== undefined ? liveTgtAnti : (tgt.antiDetect !== false);
+
+  // Intruder
+  const intru = tabs.intruder || {};
+  const liveIntruMode = document.getElementById('mode')?.value;
+  const intruMode = document.getElementById('setting-intruder-mode');
+  if (intruMode) intruMode.value = liveIntruMode || intru.mode || 'sniper';
+  const liveIntruConc = document.getElementById('intruder-concurrency')?.value;
+  const intruConc = document.getElementById('setting-intruder-concurrency');
+  if (intruConc) intruConc.value = liveIntruConc !== undefined ? liveIntruConc : (intru.concurrency || 1);
+  const liveIntruDelay = document.getElementById('intruder-delay')?.value;
+  const intruDelay = document.getElementById('setting-intruder-delay');
+  if (intruDelay) intruDelay.value = liveIntruDelay !== undefined ? liveIntruDelay : (intru.delayMs ?? 150);
+  const liveIntruDetect = document.getElementById('detect-enabled')?.checked;
+  const intruDetect = document.getElementById('setting-intruder-detect-enabled');
+  if (intruDetect) intruDetect.checked = liveIntruDetect !== undefined ? liveIntruDetect : (intru.detectEnabled !== false);
+  const intruAutoscroll = document.getElementById('setting-intruder-autoscroll');
+  if (intruAutoscroll) intruAutoscroll.checked = intru.autoScroll !== false;
+
+  // Scanner
+  const scn = tabs.scanner || {};
+  const scnProfile = document.getElementById('setting-scanner-profile');
+  if (scnProfile) scnProfile.value = scn.defaultProfile || 'Standard';
+  const scnTimeout = document.getElementById('setting-scanner-timeout');
+  if (scnTimeout) scnTimeout.value = scn.probeTimeout || 10;
+
+  // OSINT
+  const os = tabs.osint || {};
+  const osLayout = document.getElementById('setting-osint-layout');
+  if (osLayout) osLayout.value = os.layout || 'cose';
+  const osMaxnodes = document.getElementById('setting-osint-maxnodes');
+  if (osMaxnodes) osMaxnodes.value = os.maxNodes || 1000;
+  const osWildcard = document.getElementById('setting-osint-wildcard');
+  if (osWildcard) osWildcard.checked = os.wildcardDetection !== false;
+  const osAnim = document.getElementById('setting-osint-animation');
+  if (osAnim) osAnim.checked = os.animation !== false;
+
+  // Traffic
+  const traf = tabs.traffic || {};
+  const trafBuffer = document.getElementById('setting-traffic-buffer');
+  if (trafBuffer) trafBuffer.value = traf.bufferSize || 1000;
+  const trafRing = document.getElementById('setting-traffic-ring');
+  if (trafRing) trafRing.checked = traf.ringBuffer !== false;
+  const trafHide404 = document.getElementById('setting-traffic-hide404');
+  if (trafHide404) trafHide404.checked = !!traf.hide404;
+  const trafAutoscroll = document.getElementById('setting-traffic-autoscroll');
+  if (trafAutoscroll) trafAutoscroll.checked = traf.autoScroll !== false;
+
+  // Proxy
+  const prx = tabs.proxy || {};
+  const liveRouteAddr = document.getElementById('route-address')?.value;
+  const prxRouteAddr = document.getElementById('setting-proxy-route-address');
+  if (prxRouteAddr) prxRouteAddr.value = liveRouteAddr !== undefined && liveRouteAddr !== '' ? liveRouteAddr : (prx.routeAddress || '');
+  const liveCheckUrl = document.getElementById('route-check-url')?.value;
+  const prxCheckUrl = document.getElementById('setting-proxy-check-url');
+  if (prxCheckUrl) prxCheckUrl.value = liveCheckUrl || prx.checkUrl || 'https://check.torproject.org/';
+  const liveCheckTimeout = document.getElementById('route-check-timeout')?.value;
+  const prxCheckTimeout = document.getElementById('setting-proxy-check-timeout');
+  if (prxCheckTimeout) prxCheckTimeout.value = liveCheckTimeout || prx.checkTimeout || 15000;
+
+  // AI
+  const aiConf = tabs.ai || {};
+  const aiEndpoint = document.getElementById('setting-ai-endpoint');
+  if (aiEndpoint) aiEndpoint.value = aiConf.endpoint || 'http://127.0.0.1:11434';
+  const aiModel = document.getElementById('setting-ai-model');
+  if (aiModel) aiModel.value = aiConf.model || 'qwen2.5-coder';
+  const aiContext = document.getElementById('setting-ai-context');
+  if (aiContext) aiContext.value = aiConf.contextLimit || 4096;
+  const aiTemp = document.getElementById('setting-ai-temp');
+  if (aiTemp) aiTemp.value = aiConf.temperature ?? 0.2;
+  const aiPreset = document.getElementById('setting-ai-preset');
+  if (aiPreset) aiPreset.value = aiConf.systemPreset || 'analyst';
+
+  // Comparer
+  const cmp = tabs.comparer || {};
+  const cmpGran = document.getElementById('setting-comparer-granularity');
+  if (cmpGran) cmpGran.value = cmp.granularity || 'word';
+  const cmpCase = document.getElementById('setting-comparer-ignorecase');
+  if (cmpCase) cmpCase.checked = !!cmp.ignoreCase;
+  const cmpWs = document.getElementById('setting-comparer-ignorews');
+  if (cmpWs) cmpWs.checked = cmp.ignoreWhitespace !== false;
+  const cmpHdrs = document.getElementById('setting-comparer-ignoreheaders');
+  if (cmpHdrs) cmpHdrs.checked = cmp.ignoreDynamicHeaders !== false;
+  const cmpScroll = document.getElementById('setting-comparer-syncscroll');
+  if (cmpScroll) cmpScroll.checked = cmp.syncScroll !== false;
+
+  // Decoder
+  const dec = tabs.decoder || {};
+  const decDetect = document.getElementById('setting-decoder-autodetect');
+  if (decDetect) decDetect.checked = dec.autoDetect !== false;
+  const decOutput = document.getElementById('setting-decoder-output');
+  if (decOutput) decOutput.value = dec.outputFormat || 'text';
+}
+
+function openTabSettings(tabName) {
+  if (!tabName) {
+    const activeNav = document.querySelector('.nav-tab.active');
+    tabName = activeNav ? activeNav.getAttribute('data-tab') : 'repeater';
+  }
+  tabName = (tabName || 'repeater').toLowerCase();
+
+  // If opening from a tab or gear, activate the "sec-tool" section
+  const navBtnTool = document.querySelector('.tab-settings-nav-btn[data-settings-section="sec-tool"]');
+  if (navBtnTool) {
+    document.querySelectorAll('.tab-settings-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-settings-pane').forEach(p => p.classList.remove('active'));
+    navBtnTool.classList.add('active');
+    const toolSec = document.getElementById('sec-tool');
+    if (toolSec) toolSec.classList.add('active');
+  }
+
+  // Switch to the target tool pane
+  switchToolSubTab(tabName);
+
+  // Populate all preferences
+  const prefs = loadUIPreferences();
+  populateSettingsForm(prefs);
+
+  const modal = document.getElementById('tab-settings-modal');
+  if (!modal) return;
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    modal.setAttribute('open', '');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Navigation tabs inside settings modal (DNS, Appearance, Tool, Shortcuts)
+  document.querySelectorAll('.tab-settings-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-settings-nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-settings-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-settings-section');
+      const pane = document.getElementById(targetId);
+      if (pane) pane.classList.add('active');
+    });
+  });
+
+  // Tool subnav tabs inside Tool Settings section
+  document.querySelectorAll('.tool-subnav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const toolKey = btn.getAttribute('data-tool-tab');
+      switchToolSubTab(toolKey);
+    });
+  });
+
+  // DNS mode dropdown change
+  const dnsModeSel = document.getElementById('setting-dns-mode');
+  if (dnsModeSel) {
+    dnsModeSel.addEventListener('change', () => {
+      updateDnsVisibility(dnsModeSel.value);
+    });
+  }
+
+  // Theme preset change
+  const themePresetSel = document.getElementById('setting-theme-preset');
+  if (themePresetSel) {
+    themePresetSel.addEventListener('change', () => {
+      const theme = themePresetSel.value;
+      const current = loadUIPreferences();
+      current.appearance.theme = theme;
+      applyUIThemeAndColors(current);
+    });
+  }
+
+  // Live color pickers change
+  const colorBindings = [
+    { id: 'setting-color-2xx', prop: '--status-2xx' },
+    { id: 'setting-color-3xx', prop: '--status-3xx' },
+    { id: 'setting-color-4xx', prop: '--status-4xx' },
+    { id: 'setting-color-5xx', prop: '--status-5xx' },
+    { id: 'setting-color-method-get', prop: '--method-get' },
+    { id: 'setting-color-method-post', prop: '--method-post' },
+    { id: 'setting-color-method-put', prop: '--method-put' },
+    { id: 'setting-color-method-delete', prop: '--method-delete' },
+    { id: 'setting-color-method-patch', prop: '--method-patch' },
+    { id: 'setting-color-method-options', prop: '--method-options' },
+    { id: 'setting-color-url-path', prop: '--syn-path' },
+    { id: 'setting-color-url-params', prop: '--syn-status' }
+  ];
+  colorBindings.forEach(b => {
+    const el = document.getElementById(b.id);
+    if (el) {
+      el.addEventListener('input', () => {
+        document.documentElement.style.setProperty(b.prop, el.value);
+      });
+    }
+  });
+
+  // Flush DNS cache button
+  const flushBtn = document.getElementById('btn-flush-dns-cache');
+  if (flushBtn) {
+    flushBtn.addEventListener('click', () => {
+      const statusEl = document.getElementById('flush-dns-status');
+      if (statusEl) {
+        statusEl.textContent = tr('settings.dnsFlushed') || 'DNS cache flushed';
+        statusEl.style.color = 'var(--accent)';
+        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+      }
+    });
+  }
+
+  // Close modal
+  const closeBtn = document.getElementById('tab-settings-close-btn');
+  const cancelBtn = document.getElementById('btn-cancel-tab-settings');
+  const modal = document.getElementById('tab-settings-modal');
+  const closeModal = () => {
+    if (modal) {
+      if (typeof modal.close === 'function') modal.close();
+      else modal.removeAttribute('open');
+    }
+  };
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+
+  // Save Settings
+  const saveBtn = document.getElementById('btn-save-tab-settings');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const prefs = loadUIPreferences();
+
+      // Gather DNS
+      prefs.dns.mode = document.getElementById('setting-dns-mode')?.value || 'system';
+      prefs.dns.customServer = document.getElementById('setting-dns-custom')?.value || '1.1.1.1:53';
+      prefs.dns.dohUrl = document.getElementById('setting-dns-doh')?.value || '';
+      prefs.dns.staticHosts = document.getElementById('setting-dns-static')?.value || '';
+      prefs.dns.splitRules = document.getElementById('setting-dns-split')?.value || '';
+      prefs.dns.tlsFingerprint = document.getElementById('setting-tls-fingerprint')?.value || 'chrome';
+      prefs.dns.forceTTL0 = !!document.getElementById('setting-dns-ttl0')?.checked;
+
+      // Gather Appearance
+      prefs.appearance.theme = document.getElementById('setting-theme-preset')?.value || 'default';
+      prefs.appearance.customColors = {
+        ...prefs.appearance.customColors,
+        status2xx: document.getElementById('setting-color-2xx')?.value,
+        status3xx: document.getElementById('setting-color-3xx')?.value,
+        status4xx: document.getElementById('setting-color-4xx')?.value,
+        status5xx: document.getElementById('setting-color-5xx')?.value,
+        methodGet: document.getElementById('setting-color-method-get')?.value,
+        methodPost: document.getElementById('setting-color-method-post')?.value,
+        methodPut: document.getElementById('setting-color-method-put')?.value,
+        methodDelete: document.getElementById('setting-color-method-delete')?.value,
+        methodPatch: document.getElementById('setting-color-method-patch')?.value,
+        methodOptions: document.getElementById('setting-color-method-options')?.value,
+        urlPath: document.getElementById('setting-color-url-path')?.value,
+        urlParamKey: document.getElementById('setting-color-url-params')?.value,
+      };
+      prefs.appearance.syntaxHighlighting = {
+        ...prefs.appearance.syntaxHighlighting,
+        fontSize: document.getElementById('setting-font-size')?.value || '13px',
+        wrap: !!document.getElementById('setting-word-wrap')?.checked
+      };
+
+      // Gather Tab Specifics across all tool panes
+      if (!prefs.tabs) prefs.tabs = {};
+
+      // Repeater
+      if (!prefs.tabs.repeater) prefs.tabs.repeater = {};
+      prefs.tabs.repeater.timeout = parseInt(document.getElementById('setting-repeater-timeout')?.value || '15', 10);
+      prefs.tabs.repeater.followRedirects = document.getElementById('setting-repeater-redirects')?.value || 'same-host';
+      prefs.tabs.repeater.httpVersion = document.getElementById('setting-repeater-httpver')?.value || 'auto';
+      prefs.tabs.repeater.tabColorDot = !!document.getElementById('setting-repeater-tabdot')?.checked;
+
+      // Target
+      if (!prefs.tabs.target) prefs.tabs.target = {};
+      prefs.tabs.target.maxPages = parseInt(document.getElementById('setting-target-pages')?.value || '0', 10);
+      prefs.tabs.target.maxDepth = parseInt(document.getElementById('setting-target-depth')?.value || '-1', 10);
+      prefs.tabs.target.delayMs = parseInt(document.getElementById('setting-target-delay')?.value || '0', 10);
+      prefs.tabs.target.engine = document.getElementById('setting-target-engine')?.value || 'static';
+      prefs.tabs.target.browser = document.getElementById('setting-target-browser')?.value || 'firefox';
+      prefs.tabs.target.sameOrigin = !!document.getElementById('setting-target-same-origin')?.checked;
+      prefs.tabs.target.antiDetect = !!document.getElementById('setting-target-anti-detect')?.checked;
+
+      // Sync to live Target DOM
+      const tgtPagesEl = document.getElementById('target-max-pages');
+      if (tgtPagesEl) tgtPagesEl.value = prefs.tabs.target.maxPages;
+      const tgtDepthEl = document.getElementById('target-max-depth');
+      if (tgtDepthEl) tgtDepthEl.value = prefs.tabs.target.maxDepth;
+      const tgtDelayEl = document.getElementById('target-delay');
+      if (tgtDelayEl) tgtDelayEl.value = prefs.tabs.target.delayMs;
+      const tgtEngineEl = document.getElementById('target-engine');
+      if (tgtEngineEl && tgtEngineEl.value !== prefs.tabs.target.engine) {
+        tgtEngineEl.value = prefs.tabs.target.engine;
+        tgtEngineEl.dispatchEvent(new Event('change'));
+      }
+      const tgtBrowserEl = document.getElementById('target-browser');
+      if (tgtBrowserEl) tgtBrowserEl.value = prefs.tabs.target.browser;
+      const tgtOriginEl = document.getElementById('target-same-origin');
+      if (tgtOriginEl) tgtOriginEl.checked = prefs.tabs.target.sameOrigin;
+      const tgtAntiEl = document.getElementById('target-anti-detect');
+      if (tgtAntiEl) tgtAntiEl.checked = prefs.tabs.target.antiDetect;
+
+      // Intruder
+      if (!prefs.tabs.intruder) prefs.tabs.intruder = {};
+      prefs.tabs.intruder.mode = document.getElementById('setting-intruder-mode')?.value || 'sniper';
+      prefs.tabs.intruder.concurrency = parseInt(document.getElementById('setting-intruder-concurrency')?.value || '1', 10);
+      prefs.tabs.intruder.delayMs = parseInt(document.getElementById('setting-intruder-delay')?.value || '150', 10);
+      prefs.tabs.intruder.detectEnabled = !!document.getElementById('setting-intruder-detect-enabled')?.checked;
+      prefs.tabs.intruder.autoScroll = !!document.getElementById('setting-intruder-autoscroll')?.checked;
+
+      // Sync to live Intruder DOM
+      const intruModeEl = document.getElementById('mode');
+      if (intruModeEl) intruModeEl.value = prefs.tabs.intruder.mode;
+      const intruConcEl = document.getElementById('intruder-concurrency');
+      if (intruConcEl) intruConcEl.value = prefs.tabs.intruder.concurrency;
+      const intruDelayEl = document.getElementById('intruder-delay');
+      if (intruDelayEl) intruDelayEl.value = prefs.tabs.intruder.delayMs;
+      const intruDetectEl = document.getElementById('detect-enabled');
+      if (intruDetectEl) intruDetectEl.checked = prefs.tabs.intruder.detectEnabled;
+
+      // Scanner
+      if (!prefs.tabs.scanner) prefs.tabs.scanner = {};
+      prefs.tabs.scanner.defaultProfile = document.getElementById('setting-scanner-profile')?.value || 'Standard';
+      prefs.tabs.scanner.probeTimeout = parseInt(document.getElementById('setting-scanner-timeout')?.value || '10', 10);
+
+      // OSINT
+      if (!prefs.tabs.osint) prefs.tabs.osint = {};
+      prefs.tabs.osint.layout = document.getElementById('setting-osint-layout')?.value || 'cose';
+      prefs.tabs.osint.maxNodes = parseInt(document.getElementById('setting-osint-maxnodes')?.value || '1000', 10);
+      prefs.tabs.osint.wildcardDetection = !!document.getElementById('setting-osint-wildcard')?.checked;
+      prefs.tabs.osint.animation = !!document.getElementById('setting-osint-animation')?.checked;
+
+      // Traffic
+      if (!prefs.tabs.traffic) prefs.tabs.traffic = {};
+      prefs.tabs.traffic.bufferSize = parseInt(document.getElementById('setting-traffic-buffer')?.value || '1000', 10);
+      prefs.tabs.traffic.ringBuffer = !!document.getElementById('setting-traffic-ring')?.checked;
+      prefs.tabs.traffic.hide404 = !!document.getElementById('setting-traffic-hide404')?.checked;
+      prefs.tabs.traffic.autoScroll = !!document.getElementById('setting-traffic-autoscroll')?.checked;
+
+      // Proxy
+      if (!prefs.tabs.proxy) prefs.tabs.proxy = {};
+      prefs.tabs.proxy.routeAddress = document.getElementById('setting-proxy-route-address')?.value?.trim() || '';
+      prefs.tabs.proxy.checkUrl = document.getElementById('setting-proxy-check-url')?.value?.trim() || 'https://check.torproject.org/';
+      prefs.tabs.proxy.checkTimeout = parseInt(document.getElementById('setting-proxy-check-timeout')?.value || '15000', 10);
+
+      // Sync to live Proxy DOM
+      const routeAddrEl = document.getElementById('route-address');
+      if (routeAddrEl && prefs.tabs.proxy.routeAddress !== undefined) {
+        routeAddrEl.value = prefs.tabs.proxy.routeAddress;
+      }
+      const routeCheckUrlEl = document.getElementById('route-check-url');
+      if (routeCheckUrlEl && prefs.tabs.proxy.checkUrl) {
+        routeCheckUrlEl.value = prefs.tabs.proxy.checkUrl;
+      }
+      const routeCheckTimeoutEl = document.getElementById('route-check-timeout');
+      if (routeCheckTimeoutEl && prefs.tabs.proxy.checkTimeout) {
+        routeCheckTimeoutEl.value = prefs.tabs.proxy.checkTimeout;
+      }
+
+      // AI
+      if (!prefs.tabs.ai) prefs.tabs.ai = {};
+      prefs.tabs.ai.endpoint = document.getElementById('setting-ai-endpoint')?.value || 'http://127.0.0.1:11434';
+      prefs.tabs.ai.model = document.getElementById('setting-ai-model')?.value || 'qwen2.5-coder';
+      prefs.tabs.ai.contextLimit = parseInt(document.getElementById('setting-ai-context')?.value || '4096', 10);
+      prefs.tabs.ai.temperature = parseFloat(document.getElementById('setting-ai-temp')?.value || '0.2');
+      prefs.tabs.ai.systemPreset = document.getElementById('setting-ai-preset')?.value || 'analyst';
+
+      // Comparer
+      if (!prefs.tabs.comparer) prefs.tabs.comparer = {};
+      prefs.tabs.comparer.granularity = document.getElementById('setting-comparer-granularity')?.value || 'word';
+      prefs.tabs.comparer.ignoreCase = !!document.getElementById('setting-comparer-ignorecase')?.checked;
+      prefs.tabs.comparer.ignoreWhitespace = !!document.getElementById('setting-comparer-ignorews')?.checked;
+      prefs.tabs.comparer.ignoreDynamicHeaders = !!document.getElementById('setting-comparer-ignoreheaders')?.checked;
+      prefs.tabs.comparer.syncScroll = !!document.getElementById('setting-comparer-syncscroll')?.checked;
+
+      // Decoder
+      if (!prefs.tabs.decoder) prefs.tabs.decoder = {};
+      prefs.tabs.decoder.autoDetect = !!document.getElementById('setting-decoder-autodetect')?.checked;
+      prefs.tabs.decoder.outputFormat = document.getElementById('setting-decoder-output')?.value || 'text';
+
+      saveUIPreferences(prefs);
+      applyUIThemeAndColors(prefs);
+      closeModal();
+
+      if (typeof showToast === 'function') {
+        showToast(tr('settings.tabSettings') || 'Settings', tr('settings.settingsSaved') || 'Settings saved successfully', 'success');
+      }
+    });
+  }
+
+  // Reset to Defaults
+  const resetBtn = document.getElementById('btn-reset-tab-settings');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      const def = defaultUIPreferences();
+      saveUIPreferences(def);
+      openTabSettings(currentSettingsTab);
+    });
+  }
+
+  // Export Profile
+  document.getElementById('btn-export-settings-profile')?.addEventListener('click', () => {
+    const prefs = loadUIPreferences();
+    const blob = new Blob([JSON.stringify(prefs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `requestrider-settings-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Import Profile
+  const fileInput = document.getElementById('input-import-settings-file');
+  document.getElementById('btn-import-settings-profile')?.addEventListener('click', () => {
+    fileInput?.click();
+  });
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        saveUIPreferences(imported);
+        openTabSettings(currentSettingsTab);
+      } catch (err) {
+        alert('Invalid settings JSON format');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Delegate all gear clicks
+  document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.tab-settings-trigger, #header-settings-btn, .header-settings-btn');
+    if (trigger) {
+      e.preventDefault();
+      e.stopPropagation();
+      const currentActiveTab = document.querySelector('.nav-tab.active')?.getAttribute('data-tab');
+      const tabName = trigger.getAttribute('data-tab') || currentActiveTab || 'repeater';
+      openTabSettings(tabName);
+    }
+  });
+
+  // Command Palette Controller (Ctrl+K / Cmd+K)
+  const cmdDialog = document.getElementById('cmd-palette-dialog');
+  const cmdInput = document.getElementById('cmd-palette-input');
+  const cmdList = document.getElementById('cmd-palette-list');
+
+  const COMMAND_ITEMS = [
+    { title: 'Repeater (Повторювач)', tab: 'repeater', icon: '↩', shortcut: 'Alt+1' },
+    { title: 'Intruder (Атаки та фаззинг)', tab: 'intruder', icon: '⚡', shortcut: 'Alt+2' },
+    { title: 'Target (Карта цілі та краулер)', tab: 'target', icon: '🎯', shortcut: 'Alt+3' },
+    { title: 'OSINT (Розвідка та граф)', tab: 'osint', icon: '🔍', shortcut: 'Alt+4' },
+    { title: 'Scanner (Вразливості)', tab: 'scanner', icon: '🛡️', shortcut: 'Alt+5' },
+    { title: 'Traffic (Живий потік)', tab: 'traffic', icon: '🌊', shortcut: 'Alt+6' },
+    { title: 'History (Історія запитів)', tab: 'history', icon: '📜', shortcut: '' },
+    { title: 'Proxy (Tor та маршрутизація)', tab: 'proxy', icon: '🧅', shortcut: 'Alt+7' },
+    { title: 'Comparer (Порівняння обмінів)', tab: 'comparer', icon: '↔', shortcut: '' },
+    { title: 'Decoder (Конвертер)', tab: 'decoder', icon: '{}', shortcut: '' },
+    { title: 'AI Assistant (Локальні моделі)', tab: 'ai', icon: '🤖', shortcut: '' },
+    { title: 'Automation (Воркфлоу)', tab: 'automation', icon: '🚀', shortcut: '' },
+    { title: 'Projects (Проекти)', tab: 'projects', icon: '📁', shortcut: '' },
+    { title: '❓ Довідник та інструкція (FAQ & Manual)', action: 'faq', icon: '❓', shortcut: 'F1' },
+    { title: '⚙️ Налаштування активної вкладки (Gear Settings)', action: 'settings', icon: '⚙️', shortcut: 'Alt+S' }
+  ];
+
+  function renderCommandPalette(filter = '') {
+    if (!cmdList) return;
+    cmdList.innerHTML = '';
+    const filtered = COMMAND_ITEMS.filter(it => it.title.toLowerCase().includes(filter.toLowerCase()) || (it.tab && it.tab.includes(filter.toLowerCase())));
+    if (filtered.length === 0) {
+      cmdList.innerHTML = '<li class="cmd-palette-item muted" style="justify-content:center;">Нічого не знайдено</li>';
+      return;
+    }
+    filtered.forEach((it, idx) => {
+      const li = document.createElement('li');
+      li.className = `cmd-palette-item${idx === 0 ? ' active' : ''}`;
+      li.innerHTML = `<span><span style="margin-right:8px">${it.icon}</span>${escapeHTML(it.title)}</span>${it.shortcut ? `<kbd>${it.shortcut}</kbd>` : ''}`;
+      li.addEventListener('click', () => {
+        if (cmdDialog) cmdDialog.close();
+        if (it.action === 'settings') {
+          openTabSettings();
+        } else if (it.action === 'faq') {
+          if (typeof openTabFAQ === 'function') openTabFAQ();
+        } else if (it.tab) {
+          document.querySelector(`.nav-tab[data-tab="${it.tab}"]`)?.click();
+        }
+      });
+      cmdList.appendChild(li);
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (!cmdDialog) return;
+      if (cmdDialog.open) {
+        cmdDialog.close();
+      } else {
+        renderCommandPalette('');
+        cmdDialog.showModal();
+        if (cmdInput) {
+          cmdInput.value = '';
+          cmdInput.focus();
+        }
+      }
+    }
+  });
+
+  cmdInput?.addEventListener('input', () => {
+    renderCommandPalette(cmdInput.value.trim());
+  });
+
+  cmdInput?.addEventListener('keydown', (e) => {
+    const items = [...cmdList.querySelectorAll('.cmd-palette-item:not(.muted)')];
+    const currentIndex = items.findIndex(el => el.classList.contains('active'));
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (items.length > 0) {
+        items.forEach(el => el.classList.remove('active'));
+        const next = (currentIndex + 1) % items.length;
+        items[next].classList.add('active');
+        items[next].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (items.length > 0) {
+        items.forEach(el => el.classList.remove('active'));
+        const prev = (currentIndex - 1 + items.length) % items.length;
+        items[prev].classList.add('active');
+        items[prev].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentIndex >= 0 && items[currentIndex]) {
+        items[currentIndex].click();
+      }
+    }
+  });
+});
+</script>

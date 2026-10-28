@@ -1,0 +1,2199 @@
+:root { color-scheme:dark; --bg:#080c12; --panel:#101722; --panel-2:#0d141e; --line:#263548; --text:#dbe7f5; --muted:#8294aa; --accent:#43d9a3; --accent-strong:#62e8b5; --purple:#a970ff; --purple-strong:#c79aff; --orange:#f06b38; --button:#182333; --button-hover:#22344b; --radius:7px; --gap:8px; --green:#34d399; --danger:#f87171; --warning:#f59e0b; --info:#60a5fa; --accent-tint:#43d9a314;
+      /* Payload colour palette. It covers the first line and the body only: the
+         header block between them is plain text, because painting it turned the
+         middle of every exchange into the loudest thing on screen and left the
+         first line and the payload with no weight of their own. The set lives
+         here, once, so the whole block is re-themed from one line by hand. */
+      /* Page gutter — the only horizontal offset between the window edge and
+         the content column, and the reason the column has no max-width. It used
+         to be three different numbers: `main` was `width:min(1660px,100% - 36px)`
+         centred with auto margins, so above 1660px the gap grew with the window,
+         an `@media (min-width:1800px)` block removed the cap and snapped the
+         column to full-bleed, and the 900px/560px blocks tightened it to 10px
+         and 6px. Browser zoom crosses all three marks, so the same window
+         showed 147px gaps on one zoom step and 12px on the next, and the header
+         (padded from `100vw`, which counts the scrollbar) drifted out of line
+         with the content by the same jump. One token, used by `main` and
+         `header`, never re-declared in a media query: the offset is now the same
+         small value on both sides at every window width and every zoom level. */
+      --gutter:14px;
+      /* One screen of workspace, used as the height of each half of History and
+         Traffic. 92px is what the masthead costs the first screen: the 56px header
+         and the navigation row under it. History and Traffic are two of these — the
+         raw above, the table below — so the page is the scroll between them, and
+         this number is the whole reason it works out to "the page is twice as long".
+         It is a token because the two halves must stay equal: a raw block one window
+         tall and a table taller would make the split look accidental. */
+      --rr-view-block:calc(100vh - 92px);
+      --syn-method:#4ade80; --syn-path:#22d3ee; --syn-status:#fbbf24;
+      --syn-key:#c084fc; --syn-string:#fb923c; --syn-number:#a5b4fc; --syn-literal:#f0abfc; --syn-tag:#2dd4bf; --syn-attr:#e879f9;
+      --syn-punct:#8294aa; --syn-marker:#f06b38; --syn-comment:#6b7f95; --syn-sensitive:#f87171; --syn-sensitive-fg:#fda4af; --syn-sensitive-bg:rgba(248,113,113,.16);
+      /* Cookies are the one place in the header block that is read character by
+         character rather than scanned for a name: a reviewer is looking for a
+         specific cookie in a specific request, so `Cookie` and `Set-Cookie` are
+         the header lines that do get painted. Three tones, all in the purple
+         family the brand already uses, so a long cookie header reads as one
+         thing instead of a row of unrelated hues: the name, the value, and a
+         quieter one for the attributes that follow a Set-Cookie. */
+      --syn-cookie:#c084fc; --syn-cookie-value:#a970ff; --syn-cookie-flag:#7c5ca8;
+      --shadow-sm:0 1px 4px rgba(0,0,0,0.25); --shadow-md:0 4px 14px rgba(0,0,0,0.35); --shadow-lg:0 8px 28px rgba(0,0,0,0.55);
+    }
+    .url-dim { color:var(--muted) }
+    .url-host { font-weight:600; color:var(--text) }
+    .url-path { color:#22d3ee }
+    .url-query { color:#fbbf24 }
+    .url-fallback { color:var(--text) }
+    * { box-sizing:border-box } html { min-height:100%; scrollbar-gutter:stable; background:#080c12 } html::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(180deg,#244b68 0,#162d43 38%,#080c12 78%); will-change:transform } body { zoom:.9; margin:0; min-height:100vh; overflow-x:hidden; overflow-y:auto; background:transparent; color:var(--text); font:13px/1.4 system-ui,sans-serif }
+    header { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; min-height:56px; padding:10px var(--gutter); border-bottom:1px solid var(--line); background:#0b111aee; position:relative; z-index:2 }
+    .header-left { grid-column:1; display:flex; align-items:center; gap:12px; min-width:0; flex-wrap:wrap }
+    .project-indicator { display:inline-flex; align-items:center; gap:6px; min-width:0; color:var(--muted); font-size:12px }
+    .project-indicator strong { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--accent) }
+    .project-management-bar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 18px; border:1px solid var(--line); border-radius:10px; background:linear-gradient(135deg,rgba(16,27,41,0.95),rgba(12,19,29,0.95)); backdrop-filter:blur(8px); box-shadow:0 4px 20px rgba(0,0,0,0.25); flex-wrap:wrap }
+    .project-bar-main { display:flex; align-items:center; gap:14px; flex-wrap:wrap; min-width:0 }
+    .project-bar-group { display:flex; align-items:center; gap:8px }
+    .project-bar-label { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap }
+    .project-select-wrap select { min-width:180px; max-width:260px; height:34px; background:#09101a; border:1px solid var(--line); border-radius:6px; color:var(--text); font-size:12px; font-weight:600; padding:0 10px }
+    .project-bar-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .project-bar-actions button { height:34px; padding:0 12px; font-size:12px; font-weight:600; border-radius:6px; display:inline-flex; align-items:center; gap:6px }
+    .project-btn-new { background:linear-gradient(135deg,#10b981,#059669) !important; color:#fff !important; border:none !important; box-shadow:0 2px 8px rgba(16,185,129,0.3) }
+    .project-btn-new:hover { filter:brightness(1.1); box-shadow:0 3px 12px rgba(16,185,129,0.45) }
+    .danger-btn:not(:disabled) { color:#f87171 !important; border-color:rgba(239,68,68,0.4) !important }
+    .danger-btn:not(:disabled):hover { background:rgba(239,68,68,0.15) !important; border-color:#f87171 !important }
+    .project-bar-transfer { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .project-btn-transfer { height:34px; padding:0 12px; font-size:12px; font-weight:600; border-radius:6px; display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--text) }
+    .project-btn-transfer:hover:not(:disabled) { background:rgba(255,255,255,0.08); border-color:var(--accent) }
+    .project-status-strip { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px; padding:8px 14px; background:rgba(14,23,36,0.6); border:1px solid rgba(255,255,255,0.05); border-radius:8px; font-size:12px; flex-wrap:wrap }
+    .project-active-badge { display:inline-block; padding:1px 6px; background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); color:#10b981; border-radius:4px; font-size:10px; font-weight:700; letter-spacing:.06em; margin-right:6px }
+    .project-active-name { color:#38bdf8; font-weight:700 }
+    .project-active-target { color:#a7f3d0; font-family:monospace }
+    .project-active-env { color:var(--muted); font-size:11px }
+    .project-status-right { display:flex; align-items:center; gap:12px }
+    .project-available-panel { margin-top:12px }
+    .project-list { display:grid; gap:6px; max-height:52vh; overflow:auto }
+    .project-card { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel-2); cursor:pointer; transition:border-color .15s ease, background .15s ease }
+    .project-card:hover { border-color:rgba(16,185,129,0.3); background:rgba(20,32,48,0.7) }
+    .project-card.active { border-color:var(--accent); box-shadow:0 0 12px #43d9a322 }
+    .project-card button { min-height:30px; padding:5px 9px }
+    .project-card-main { min-width:0; flex:1; cursor:pointer }
+    .project-card-main strong, .project-card-main span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .project-card-main span { color:var(--muted); font-size:11px }
+    .project-tools { display:flex; align-items:center; flex-wrap:wrap; gap:10px; min-width:0 }
+    .project-tools select { min-width:150px; max-width:220px }
+    .project-active-summary { color:var(--muted); font-size:12px; line-height:1.45 }
+    .project-hub { margin-top:14px; border:1px solid var(--line); border-radius:10px; background:linear-gradient(135deg,#101b29,#0c131d); overflow:hidden }
+    .project-hub-header { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding:18px 20px; border-bottom:1px solid var(--line) }
+    .project-hub-kicker { margin:0 0 4px; color:var(--accent); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase }
+    .project-hub-title { margin:0; color:var(--text); font-size:20px; letter-spacing:.01em }
+    .project-hub-description { margin:5px 0 0; color:var(--muted); font-size:12px }
+    .project-hub-layout { display:grid; grid-template-columns:190px minmax(0,1fr); min-height:390px }
+    .project-hub-nav { display:flex; flex-direction:column; gap:4px; padding:12px; border-right:1px solid var(--line); background:#0c141f }
+    .project-hub-tab { width:100%; min-height:34px; padding:7px 10px; border:1px solid transparent; background:transparent; color:var(--muted); text-align:left; font-size:12px }
+    .project-hub-tab:hover:not(:disabled) { color:var(--text); background:var(--button); border-color:var(--line) }
+    .project-hub-tab.primary { color:var(--text); background:#14634e; border-color:var(--accent) }
+    .project-hub-content { min-width:0; padding:16px 18px 20px }
+    .project-hub-panel { min-height:320px }
+    .project-hub-metrics { display:grid; grid-template-columns:repeat(4,minmax(100px,1fr)); gap:8px; margin-bottom:16px }
+    .project-hub-metric { padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2) }
+    .project-hub-metric strong { display:block; color:var(--accent); font-size:22px; line-height:1.1 }
+    .project-hub-metric span { display:block; margin-top:4px; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.08em }
+    .project-hub-section-title { margin:0 0 8px; font-size:13px; color:var(--text) }
+    .project-hub-list { display:grid; gap:7px; max-height:320px; overflow:auto }
+    .project-hub-list .project-card { align-items:flex-start; flex-direction:column; gap:3px }
+    .project-hub-list .project-card span { color:var(--muted); font-size:11px; overflow-wrap:anywhere }
+    /* The secret itself: shown whole, so it wraps and scrolls rather than being
+       ellipsised. A truncated JWT is an operator who has to re-capture it. */
+    .project-hub-list .secret-value { display:block; width:100%; max-height:140px; overflow:auto; padding:5px 7px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:5px; background:var(--panel); color:var(--text); font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; user-select:text }
+    .project-hub-empty { display:grid; place-items:center; min-height:180px; border:1px dashed var(--line); border-radius:8px; color:var(--muted); text-align:center }
+    /* Live Security Operations Dashboard */
+    .hub-live-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981; animation:pulse-dot 2s infinite }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
+    .hub-dashboard-wrap { display:flex; flex-direction:column; gap:16px }
+    .hub-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px }
+    .hub-kpi-card { position:relative; padding:14px 16px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(18,28,42,0.7); backdrop-filter:blur(8px); box-shadow:0 4px 14px rgba(0,0,0,0.25); transition:transform .15s, border-color .15s }
+    .hub-kpi-card:hover { transform:translateY(-2px); border-color:rgba(16,185,129,0.3) }
+    .hub-kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px }
+    .hub-kpi-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+    .hub-kpi-icon { font-size:16px; opacity:.8 }
+    .hub-kpi-val { font-size:26px; font-weight:700; color:var(--text); line-height:1.1 }
+    .hub-kpi-sub { font-size:11px; color:var(--muted); margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap }
+    .hub-hud-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:10px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(12,20,31,0.85); font-size:12px }
+    .hub-hud-items { display:flex; align-items:center; gap:16px; flex-wrap:wrap }
+    .hub-hud-item { display:flex; align-items:center; gap:6px }
+    .hub-hud-k { color:var(--muted); font-size:11px }
+    .hub-hud-v { font-weight:600; color:var(--text) }
+    .hub-quick-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .hub-quick-bar button { padding:6px 12px; font-size:12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px }
+    .hub-2col-layout { display:grid; grid-template-columns:1.05fr 0.95fr; gap:14px; min-height:360px }
+    .hub-panel-box { display:flex; flex-direction:column; border:1px solid var(--line); border-radius:10px; background:#0e1724; overflow:hidden }
+    .hub-panel-head { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); background:#111c2c }
+    .hub-panel-head h3 { margin:0; font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px }
+    .hub-panel-body { padding:12px; overflow-y:auto; max-height:420px; display:flex; flex-direction:column; gap:8px }
+    .hub-task-card { padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(20,32,48,0.5); display:flex; flex-direction:column; gap:6px; transition:border-color .15s }
+    .hub-task-card:hover { border-color:var(--accent) }
+    .hub-task-top { display:flex; align-items:center; justify-content:space-between; gap:8px }
+    .hub-task-title { font-weight:600; font-size:12px; color:var(--text) }
+    .hub-task-url { font-family:monospace; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .hub-progress-track { width:100%; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden }
+    .hub-progress-bar { height:100%; border-radius:3px; background:linear-gradient(90deg,#0ea5e9,#10b981); transition:width .3s ease }
+    .hub-progress-bar.active-pulse { width:100% !important; background:linear-gradient(90deg,#0ea5e9,#10b981,#6366f1,#0ea5e9); background-size:200% 100%; animation:hubProgressPulse 1.8s linear infinite }
+    .hub-progress-bar.stopping { width:100% !important; background:linear-gradient(90deg,#f59e0b,#ef4444); opacity:0.7 }
+    @keyframes hubProgressPulse { 0% { background-position:200% 0 } 100% { background-position:-200% 0 } }
+    .hub-task-dismiss-btn { padding:2px 8px; font-size:11px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:var(--muted); border-radius:4px; cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease }
+    .hub-task-dismiss-btn:hover { background:rgba(239,68,68,0.2); border-color:#ef4444; color:#f87171 }
+    .hub-task-open-btn { padding:2px 8px; font-size:11px; border-radius:4px; cursor:pointer }
+    .hub-finding-card { padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:rgba(18,28,42,0.6); cursor:pointer; display:flex; flex-direction:column; gap:4px; transition:transform .15s ease, border-color .15s ease, background .15s ease }
+    .hub-finding-card:hover { transform:translateX(3px); border-color:var(--accent); background:rgba(25,38,58,0.8) }
+    .hub-finding-top { display:flex; align-items:center; justify-content:space-between; gap:8px }
+    .hub-chip { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em }
+    .hub-chip-crit { background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); box-shadow:0 0 6px rgba(239,68,68,0.2) }
+    .hub-chip-high { background:rgba(249,115,22,0.2); color:#fb923c; border:1px solid rgba(249,115,22,0.4) }
+    .hub-chip-med { background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4) }
+    .hub-chip-low { background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4) }
+    .hub-chip-info { background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3) }
+    .hub-sev-tabs { display:flex; gap:4px; flex-wrap:wrap }
+    .hub-sev-btn { padding:3px 8px; font-size:11px; border-radius:4px; border:1px solid transparent; background:transparent; color:var(--muted); cursor:pointer }
+    .hub-sev-btn.active { background:var(--button); color:var(--text); border-color:var(--line) }
+    .hub-drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px }
+    .hub-drawer-overlay.open { display:flex !important }
+    .hub-drawer-overlay[hidden] { display:none !important }
+    .hub-drawer-modal { width:100%; max-width:760px; max-height:85vh; background:#0f172a; border:1px solid var(--line); border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.6); display:flex; flex-direction:column; overflow:hidden }
+    .hub-drawer-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); background:#1e293b }
+    .hub-drawer-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; font-size:13px }
+    .hub-drawer-field { display:flex; flex-direction:column; gap:6px }
+    .hub-drawer-label { font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); letter-spacing:.05em }
+    .hub-drawer-val { color:var(--text); line-height:1.5 }
+    @media (max-width:1024px) { .hub-kpi-grid { grid-template-columns:repeat(2,1fr) } .hub-2col-layout { grid-template-columns:1fr } }
+    @media (max-width:600px) { .hub-kpi-grid { grid-template-columns:1fr } }
+    @media (max-width:900px) { .project-hub-metrics { grid-template-columns:repeat(3,minmax(100px,1fr)) } }
+    @media (max-width:620px) { .project-hub-header { flex-direction:column } .project-hub-layout { grid-template-columns:1fr } .project-hub-nav { flex-direction:row; overflow:auto; border-right:0; border-bottom:1px solid var(--line) } .project-hub-tab { min-width:max-content; width:auto; text-align:center } .project-hub-metrics { grid-template-columns:repeat(2,minmax(100px,1fr)) } }
+    @media (max-width:760px) { .project-management { grid-template-columns:1fr } }
+    .header-tools { grid-column:3; display:flex; align-items:center; justify-content:flex-end; gap:10px; min-width:0 }
+    .header-tools > button { width:auto; min-width:112px; padding-inline:8px; white-space:normal }
+    #language-toggle { min-height:34px; padding:7px 10px; font-size:12px }
+    /* Narrow windows: the header stops being three columns.
+       Measured, not assumed. At 1152 and above the three columns are clean
+       (0 overlapping sibling pairs). At 1024 `h1` and `Save session` already
+       share 15×25px, at 900 it is 68×25px, and by 768 the status block lands on
+       both. The cause is arithmetic, not paint: `h1` is the `auto` column and
+       `white-space:nowrap`, so it keeps its 151px while the two `minmax(0,1fr)`
+       columns shrink toward zero — and a column at zero still holds its content,
+       so `.header-left` (overflow 6px at 820, 35px at 768, 284px at 320) spills
+       onto its neighbours instead of disappearing. `1024` is the first width
+       that fails, so it is the breakpoint; a wider one would restyle windows
+       that are currently correct, and a narrower one would leave 1024 broken.
+       Above it nothing here applies: the single-row 56px header is unchanged,
+       which is what 1356×652 and 1920×1080 rely on.
+       Only layout moves. The logo, the icons, the colours and the order are the
+       same elements in the same order. */
+    @media (max-width:1024px) {
+      header { grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"brand brand" "left tools"; row-gap:8px; align-items:start }
+      .header-left { grid-column:1; grid-area:left; align-items:flex-start }
+      h1 { grid-column:1 / -1; grid-area:brand; justify-self:center; padding-top:2px }
+      .header-tools { grid-column:2; grid-area:tools; flex-wrap:wrap; justify-content:flex-end; row-gap:8px }
+      .header-status { flex-wrap:wrap }
+    }
+    h1 { grid-column:2; display:flex; align-items:center; justify-content:center; gap:8px; margin:0; padding:0; font-size:18px; color:var(--accent); letter-spacing:.04em; white-space:nowrap } h1 .logo-mark { display:block; width:28px; height:28px; flex:none; margin:0; align-self:center }
+    /* The content column. No width and no max-width: `margin-inline` is the whole
+       layout, so the offset from the window edge is `--gutter` on both sides at
+       every window width and every browser zoom, and the header above (same
+       token, same box basis) lines up with it exactly. A capped, auto-centred
+       column cannot do that — the cap is what made the gap grow with the window. */
+    main { margin:0 var(--gutter) }
+    nav { display:flex; gap:4px; margin:2px 0 12px; padding:6px 0; flex-wrap:wrap; border-bottom:1px solid transparent; background:transparent; position:sticky; top:0; z-index:3 }
+    .nav-tab { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:104px; padding:8px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--button); color:var(--text); text-decoration:none; font-weight:600; letter-spacing:.01em; transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease, color .15s ease }
+    .nav-tab:hover, .nav-tab:focus-visible { background:var(--button-hover); border-color:var(--purple); box-shadow:0 0 14px #a970ff55; text-decoration:none }
+    .nav-tab.active { background:#14634e; border-color:var(--accent); color:#f2fffa; box-shadow:0 0 18px #43d9a322 }
+    .nav-tab span:not(.nav-icon) { min-width:0; overflow:hidden; text-overflow:ellipsis }
+    .nav-icon { width:20px; height:20px; flex:none; color:#b879ff }
+    nav .nav-tab .nav-icon, nav .nav-tab.active .nav-icon, nav .nav-tab:hover .nav-icon, nav .nav-tab:focus-visible .nav-icon { color:#b879ff; filter:none }
+    nav .nav-tab[data-tab="proxy"] .nav-icon { width:22px; height:22px; color:#b879ff; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='22' fill='%237516ad'/%3E%3Cpath d='M25 8a16 16 0 0 1 0 32M25 14a10 10 0 0 1 0 20M25 20a4 4 0 0 1 0 8' fill='none' stroke='%23f3e9ff' stroke-width='3.2'/%3E%3Cpath d='M8 7h17v34H8z' fill='%238b18c9'/%3E%3Cpath d='M25 8v32' stroke='%23600d91' stroke-width='1.5'/%3E%3C/svg%3E") center/contain no-repeat }
+    nav .nav-tab[data-tab="proxy"] .nav-icon path { display:none }
+    nav .nav-tab[data-tab="ai"] .nav-icon { width:36px; height:36px; color:#b879ff }
+    button, select, input { background:var(--button); color:var(--text); border:1px solid var(--line); border-radius:var(--radius); padding:8px 11px; min-height:36px; font:inherit; transition:background .12s ease, border-color .12s ease, color .12s ease }
+    button { cursor:pointer; user-select:none; font-weight:600; letter-spacing:.01em }
+    button:hover:not(:disabled) { background:var(--button-hover); border-color:var(--purple); box-shadow:0 0 14px #a970ff55 }
+    select:hover:not(:disabled) { border-color:var(--purple); box-shadow:0 0 14px #a970ff55 }
+    button:active:not(:disabled) { transform:translateY(1px); box-shadow:0 1px 5px #0006 }
+    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    button:disabled { cursor:not-allowed; opacity:.6 }
+    input[type=checkbox] { appearance:none; width:16px; height:16px; min-height:16px; margin:0 6px 0 0; padding:0; border-radius:4px; vertical-align:-3px; cursor:pointer; box-shadow:none }
+    input[type=checkbox]:hover:not(:disabled) { border-color:var(--purple); box-shadow:none }
+    input[type=checkbox]:checked { background:var(--accent); border-color:var(--accent); box-shadow:none }
+    input[type=checkbox]:checked::after { content:""; display:block; width:4px; height:8px; margin:2px 0 0 5px; border:solid #08120f; border-width:0 2px 2px 0; transform:rotate(45deg) }
+    button.active, button.primary { background:#14634e; border-color:var(--accent); color:#f2fffa }
+    button.primary { box-shadow:0 0 18px #43d9a322 }
+    button.active:hover:not(:disabled), button.primary:hover:not(:disabled) { background:#1a7b60; border-color:var(--accent-strong); box-shadow:0 0 14px #43d9a355 }
+    input:hover:not(:disabled), textarea:hover:not(:disabled) { border-color:var(--purple); box-shadow:0 0 14px #a970ff55 }
+    button.active:focus-visible, button.primary:focus-visible { outline-color:var(--accent-strong) }
+    nav .nav-tab { min-width:104px; padding-inline:16px }
+    .tab { display:none; content-visibility:hidden; contain-intrinsic-size:1000px }
+    .tab.active { display:block; content-visibility:visible; padding-top:8px }
+       and the table takes the whole window after it. The page is the scroll.
+
+       The column used to be pinned to the viewport — `height:calc(100vh - 92px)` —
+       and the raw and the table had to share it. Whatever the operator did, one of
+       the two was squeezed: a long exchange filled two thirds of the section and the
+       table was reduced to the 140px strip below the handle, a short exchange gave
+       the raw six lines and the divider cut across the last of them. Both readings
+       are wrong for a reader of raw HTTP, and the arithmetic moved every time the
+       tab, the zoom or the window changed it, so nothing about it was stable.
+
+       Neither box competes any more. Each one is a window tall — `--rr-view-block`,
+       the same `100vh - 92px` the section itself used to be — and the page scrolls
+       between them: raw on the first screen without a scroll, table on the next one
+       after a scroll. A window becomes the unit instead of a share of one, so the
+       raw shows what a full screen of raw text is, and the table shows a full screen
+       of rows. Nothing has to be bought by pulling a handle, which is why the handle
+       is left describing the only thing it still describes: rows bought from the
+       page, and a return to exactly the height it had. */
+    #history.active, #traffic.active { height:auto; min-height:var(--rr-view-block); display:flex; flex-direction:column; overflow:visible }
+    #history > .toolbar, #traffic > .toolbar { flex:none }
+    /* The raw block owns its height instead of taking a share of a leftover, so it
+       is laid out at exactly one window and never compressed: `flex:0 0 auto` stops
+       it shrinking against its own `height`, and `min-height:0` on the shared rule
+       below stops the `pre`'s own 150px floor from growing the block past the window
+       it was given. The two panels stay side by side and each scrolls its own text,
+       which is what `pre { overflow:auto }` has always done — a long exchange scrolls
+       inside its panel instead of making the page ten thousand pixels tall. */
+    #history > .inspector, #traffic > .inspector { flex:0 0 auto; height:var(--rr-view-block); min-height:0; overflow:hidden }
+    #history > .inspector > .inspector-panel, #traffic > .inspector > .inspector-panel { display:flex; flex-direction:column; overflow:hidden }
+    #history > .inspector .inspector-panel pre, #traffic > .inspector .inspector-panel pre { flex:1 1 auto; min-height:0; max-height:none }
+    .exchange-list { min-height:140px; flex:1; overflow:auto; border:1px solid var(--line); border-radius:8px }
+    .exchange-list th { position:sticky; top:0; z-index:1 }
+    .exchange-list tbody tr { height:38px }
+    #intruder.active { min-height:calc(100vh - 92px); display:block; overflow:visible }
+    /* The floor is declared once, on the shared rule, because a per-section
+       minimum is what made the same handle behave differently in Intruder than
+       it did in History: the drag could not take the table below a section's own
+       minimum, so the handle appeared to stop early. The resizer now owns the
+       bounds for every table and no section may set its own. */
+    #intruder.active > .exchange-list { height:48vh; max-height:none; overflow:auto }
+    #target.active { height:calc(100vh - 92px); min-height:0; display:flex; flex-direction:column; overflow:hidden }
+    /* Target is deliberately not a fill column like History and Traffic, and this
+       `flex:0 0 auto` is load-bearing: the workspace holds the whole crawl form —
+       731px of controls. A shrinkable workspace (`flex:0 1 auto`) let it collapse
+       to `min(430px,52vh)`, the workspace then clipped it with `overflow:hidden`,
+       and everything under the browser select — capture context, limits, actions,
+       `Build map`, the status line — disappeared with no scrollbar and no way to
+       reach it; only a 50% page zoom showed the whole tool. At its content height
+       the form is laid out whole and the page scrolls to it, which is how Target
+       behaved before the resizer work and how its owner expects it to look. */
+    #target > .workspace { flex:0 0 auto; height:auto; min-height:min(430px,52vh); overflow:hidden }
+    #target > .workspace > section { min-height:0; overflow:auto }
+    #target > .workspace > .target-control-panel { overflow:visible; }
+    #target .target-control-panel > .toolbar { flex:none; }
+    #target .target-control-panel input,
+    #target .target-control-panel select,
+    #target .target-control-panel button { position:relative; z-index:1; }
+    #target .target-control-panel { pointer-events:none; }
+    #target .target-control-panel > * { pointer-events:auto; }
+    .target-auto-badge { font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; cursor:help; }
+    .target-auto-badge.is-ok { border-color:var(--accent); color:var(--accent); }
+    .target-auto-badge.is-failed { border-color:var(--orange); color:var(--orange); }
+    /* Challenge and fingerprint badges reuse the two existing tone classes: a
+       third accent colour is forbidden by the style rules, and a badge that
+       carries its state in text does not need one. */
+    .target-row-badge { font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; cursor:help; }
+    .target-row-badge.is-ok { border-color:var(--accent); color:var(--accent); }
+    .target-row-badge.is-failed { border-color:var(--orange); color:var(--orange); }
+    .target-row-badge.is-muted { color:var(--muted); }
+    .target-row-badge:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    /* Бейдж не має права заходити на текст сусідньої колонки.
+       Виміряно на живій карті ria.ru: 25 із 25 бейджів виходили за межі своєї
+       клітинки — до 1057 px праворуч і до 1152 px у сусідню колонку, при тому
+       що клітинка мала 86 px, а підпис бейджа 210 px. `min-width:0` дозволяє
+       flex-елементу стискатися нижче власного вмісту, а `text-overflow` просить
+       показати трикрапку замість тиші; повний текст лишається у вікні підказки,
+       тож обрізання нічого не губить. */
+    .quick-actions > .status-badge { min-width:0; max-width:100%; overflow:hidden }
+    .quick-actions .rr-badge-text { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    /* rr-tip — the small window a badge opens. Fixed positioning, the project's
+       tokens, monospace like the badge itself, and a hard ceiling on height: the
+       badge's text is 30 lines on a real site, and a tooltip taller than the
+       window is a tooltip the operator cannot read to the end. `pointer-events:none`
+       keeps the hover that opened it alive. */
+    .rr-tip { position:fixed; z-index:4800; max-width:min(520px,92vw); max-height:min(52vh,420px); overflow:auto; padding:8px 10px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; background:var(--panel); box-shadow:0 10px 28px #00000059; color:var(--text); font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; overflow-wrap:anywhere; pointer-events:none }
+    .rr-tip[hidden] { display:none }
+    .target-network-table { margin-top:8px; }
+    .target-network-table td, .target-network-table th { font-size:11px; }
+    /* The exchange table ends its column: a zero basis means the table is handed
+       every pixel the boxes above it leave, so it reaches the bottom of the
+       section — and the section is pinned to the viewport — instead of holding a
+       height chosen when the page was first laid out. The floor keeps a usable
+       strip on a very short window, and the resizer still owns every height an
+       operator asks for explicitly. */
+    /* Target's table keeps its own 48vh + 300px floor instead of the shared fill
+       rule: the section is pinned to the viewport while the form above it is laid
+       out at its full height, so a percentage-only table would collapse to
+       nothing on a short window and the operator would scroll past the results. */
+    #target > .exchange-list { flex:0 0 48vh; height:48vh; min-height:300px; overflow:auto }
+    /* The table is the second screen, and it is a whole one: the same window the raw
+       took above it, with its own scroll. It ends the section, so the control under
+       it — `Load more from database` — ends it too, and the page below them is the
+       page's own bottom.
+
+       This also answers the handle honestly. The raw above it has a height of its own
+       and no longer gives any of it up, so the drag has no room to spend and grows
+       the page instead, exactly as it already does in Intruder and Target: the
+       ceiling is the window, and the floor is the height below — one window of table,
+       which is where a downward drag returns. `flex:0 0 auto` is what makes the
+       written height stick instead of being distributed by the column. */
+    #history > .exchange-list, #traffic > .exchange-list { flex:0 0 auto; height:var(--rr-view-block); min-height:0; overflow:auto }
+    #history.active, #traffic.active, #target.active { overflow:visible }
+    .table-resizer { flex:0 0 10px; height:10px; margin:0 4px; border:1px solid transparent; border-radius:5px; cursor:ns-resize; touch-action:none; position:relative; z-index:2 }
+    .table-resizer::after { content:""; position:absolute; left:35%; right:35%; top:4px; height:2px; border-radius:2px; background:var(--muted); opacity:.7; transition:left .15s ease,right .15s ease,background .15s ease }
+    .table-resizer:hover, .table-resizer.dragging { border-color:var(--accent); background:#43d9a30f }
+    .table-resizer:hover::after, .table-resizer.dragging::after { left:25%; right:25%; background:var(--accent) }
+    .table-resizer.expanded { position:fixed; top:var(--rr-overlay-top); bottom:var(--rr-overlay-bottom); left:var(--rr-overlay-left); right:var(--rr-overlay-right); margin:0; background:var(--panel); z-index:11; }
+    .exchange-list.table-expanded { position:fixed; z-index:10; background:var(--panel); box-sizing:border-box; height:auto !important; max-height:none; top:var(--rr-overlay-top); bottom:var(--rr-overlay-bottom); left:var(--rr-overlay-left); right:var(--rr-overlay-right); }
+    #target .target-table th { position:sticky; top:0; z-index:1 }
+    .grid { display:grid; grid-template-columns:120px minmax(0, 880px); gap:8px 12px; max-width:1040px; align-items:start } label { color:var(--muted); padding-top:9px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.04em }
+    textarea { width:100%; min-height:100px; resize:vertical; background:#0d1520; color:#d7e4f2; border:1px solid var(--line); border-radius:5px; padding:10px; font:13px ui-monospace,monospace }
+    /* Блок налаштувань Target: чотири повноширинні рядки з дубльованими
+       заголовками займали стільки вертикалі, що сама карта починалася нижче
+       першого екрана. Ті самі поля зібрані в .toolbar-group — це наявний
+       патерн сторінки, а не новий компонент. Правило звужене до
+       #target-settings, щоб не зачепити інші .toolbar-group у Scanner. */
+    #target-settings { gap:8px }
+    #target-settings .toolbar-group { gap:5px 10px; padding:6px 9px }
+    #target-settings .toolbar-group > strong { align-self:center; white-space:nowrap }
+    #target-settings .toolbar-group label { display:flex; align-items:center; gap:5px; margin:0; padding:0; font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--muted) }
+    #target-settings .toolbar-group label.inline { color:var(--text) }
+    #target-settings .toolbar-group input[type=checkbox] { margin:0 }
+    .toolbar { display:flex; gap:6px; margin:8px 0; flex-wrap:wrap; align-items:center } .toolbar-group { display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding:5px 7px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel) } .toolbar-group > strong { color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:.06em } .toolbar-group select { min-width:150px } pre { white-space:pre-wrap; overflow:auto; overflow-wrap:anywhere; background:#0d1520; border:1px solid var(--line); padding:10px; min-height:180px }
+    .traffic-table-toolbar { position:sticky; top:0; z-index:3; display:flex; align-items:center; justify-content:flex-start; gap:6px; min-height:42px; padding:5px 8px; border:1px solid var(--line); border-bottom:0; border-radius:8px 8px 0 0; background:var(--panel) }
+    .exchange-host-search { flex:1 1 240px; min-width:180px; max-width:420px }
+    .traffic-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; width:100% }
+    .traffic-left-actions, .traffic-right-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .traffic-mode-group { display:inline-flex; align-items:center; background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius); padding:2px; gap:2px }
+    .traffic-mode-btn { padding:5px 11px; font-size:11px; font-weight:600; border:1px solid transparent; border-radius:5px; background:transparent; color:var(--muted); cursor:pointer; transition:background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease }
+    .traffic-mode-btn:hover { color:var(--text); border-color:var(--purple); box-shadow:0 0 14px #a970ff55 }
+    .traffic-mode-btn:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    .traffic-mode-btn.on { background:var(--button-hover); border-color:var(--accent); color:var(--accent); box-shadow:0 0 18px #43d9a322 }
+    .traffic-table th.sortable-th { cursor:pointer; user-select:none }
+    .traffic-table th.sortable-th:hover { color:var(--text); border-bottom-color:var(--accent) }
+    .traffic-right-actions { margin-left:auto }
+    .traffic-player-group { display:flex; align-items:center; gap:8px; padding:2px 0; margin-right:2px; flex-shrink:0 }
+    .traffic-player-button { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; min-width:36px; min-height:36px; padding:0; border-radius:8px; background:rgba(16, 23, 34, 0.96); border:1px solid rgba(118, 138, 160, 0.9); box-shadow:0 0 0 1px rgba(67, 217, 163, 0.18), 0 0 12px rgba(169, 112, 255, 0.24); color:var(--text); transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease }
+    .traffic-player-button:hover:not(:disabled) { transform:translateY(-1px); background:rgba(24, 35, 51, 0.98); border-color:var(--purple); box-shadow:0 0 0 1px rgba(169,112,255,0.35), 0 0 18px rgba(169,112,255,0.28) }
+    .traffic-player-button:disabled { opacity:.48; cursor:not-allowed; box-shadow:none }
+    .traffic-player-button.resume { background:rgba(11, 30, 24, 0.96); border-color:rgba(67, 217, 163, 0.72); box-shadow:0 0 0 1px rgba(67, 217, 163, 0.2), 0 0 12px rgba(67, 217, 163, 0.18) }
+    .traffic-player-button.pause { background:rgba(30, 16, 28, 0.96); border-color:rgba(169, 112, 255, 0.72); box-shadow:0 0 0 1px rgba(169, 112, 255, 0.18), 0 0 12px rgba(169, 112, 255, 0.18) }
+    .traffic-player-button .traffic-player-icon { display:inline-flex; align-items:center; justify-content:center; width:14px; font-size:15px; line-height:1; font-weight:700; transform:translateY(-1px) }
+    .traffic-player-button.resume .traffic-player-icon { margin-left:2px }
+    .traffic-capture-status { display:inline-flex; align-items:center; justify-content:center; gap:8px; width:max-content; min-width:132px; max-width:100%; padding:7px 10px; min-height:36px; border-radius:8px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; background:rgba(15, 20, 28, 0.8); border:1px solid rgba(118, 138, 160, 0.8); color:var(--muted); white-space:normal; transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease }
+    .traffic-capture-status.recording { border-color:rgba(67, 217, 163, 0.8); color:var(--green); box-shadow:0 0 12px rgba(67, 217, 163, 0.18) }
+    .traffic-capture-status.paused { border-color:rgba(255, 180, 88, 0.8); color:#ffb45a; box-shadow:0 0 12px rgba(255, 180, 88, 0.14) }
+    .traffic-status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 8px currentColor; flex-shrink:0 }
+    .traffic-status-text { display:inline-block; min-width:0; text-align:center; overflow-wrap:anywhere }
+    .traffic-table-toolbar .traffic-sort-select { min-width:170px }
+    #traffic > .exchange-list { width:100%; align-self:stretch }
+    #traffic .traffic-table-toolbar, #traffic .traffic-table { width:100%; min-width:0 }
+    #traffic .traffic-table { table-layout:fixed }
+    #traffic .traffic-table th, #traffic .traffic-table td { vertical-align:middle }
+    #traffic .traffic-table .traffic-actions { width:100%; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px }
+    .history-table-toolbar { position:sticky; top:0; z-index:3; display:flex; align-items:center; justify-content:flex-start; gap:6px; min-height:42px; padding:5px 8px; border:1px solid var(--line); border-bottom:0; border-radius:8px 8px 0 0; background:var(--panel) }
+    .history-table-toolbar .history-sort-select { min-width:170px }
+    #history > .exchange-list { width:100%; align-self:stretch }
+    #history .history-table-toolbar, #history .history-table { width:100%; min-width:0 }
+    #history .history-table { table-layout:fixed }
+    #history .history-table th, #history .history-table td { vertical-align:middle }
+    #history .history-table th, #traffic .traffic-table th { position:static; z-index:auto }
+    #history .history-table .history-actions { width:100%; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px }
+    #history .history-table td:nth-child(4), #traffic .traffic-table td:nth-child(4),
+    #history .history-table td:nth-child(5), #traffic .traffic-table td:nth-child(5),
+    #history .history-table td:nth-child(7), #traffic .traffic-table td:nth-child(7),
+    #history .history-table td:nth-child(10), #traffic .traffic-table td:nth-child(10),
+    #intruder .attack-table td:nth-child(3), #intruder .attack-table td:nth-child(4) {
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:0;
+    }
+    .exchange-tag-badge { display:inline-block; margin-left:6px; padding:1px 5px; border-radius:4px; background:rgba(169,112,255,.15); border:1px solid rgba(169,112,255,.3); color:var(--purple); font-size:10px; vertical-align:middle }
+    #intruder .attack-table { width:100%; min-width:0; table-layout:fixed }
+    #intruder .attack-table th, #intruder .attack-table td { vertical-align:middle }
+    /* Column widths for the Intruder results table. The Match column is the
+       sixth: right after Status, because it is the answer to the same question
+       the Status column answers, and the verdict that qualifies it is one the
+       operator has to be able to read without opening the row. The space it
+       takes comes out of URL and Payload, which are the two columns that wrap
+       rather than truncate. */
+    #intruder .attack-table th:nth-child(1), #intruder .attack-table td:nth-child(1) { width:5% }
+    #intruder .attack-table th:nth-child(2), #intruder .attack-table td:nth-child(2) { width:9% }
+    #intruder .attack-table th:nth-child(3), #intruder .attack-table td:nth-child(3) { width:20% }
+    #intruder .attack-table th:nth-child(4), #intruder .attack-table td:nth-child(4) { width:16% }
+    #intruder .attack-table th:nth-child(5), #intruder .attack-table td:nth-child(5) { width:9% }
+    #intruder .attack-table th:nth-child(6), #intruder .attack-table td:nth-child(6) { width:15% }
+    #intruder .attack-table .attack-actions { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px }
+    .field-tools { display:flex; gap:6px; margin-top:5px; flex-wrap:wrap }
+    .field-tools button, .dictionary-tools button { padding:7px 9px; min-height:34px; font-size:12px }
+    .hint { color:var(--muted); font-size:12px; margin:5px 0 9px }
+    .proxy-check-sites { display:grid; gap:7px; max-width:1040px; margin:12px 0 2px; padding:12px 14px; border:1px solid #4b3470; border-radius:10px; background:linear-gradient(135deg,#17152a 0%,#111a27 58%,#10221f 100%); box-shadow:inset 0 1px #ffffff0a,0 8px 24px #0003 }
+    .proxy-check-sites strong { display:flex; align-items:center; gap:8px; color:var(--text); font-size:12px; letter-spacing:.06em; text-transform:uppercase }
+    .proxy-check-sites strong::before { content:"✓"; display:inline-grid; place-items:center; width:22px; height:22px; border:1px solid #8d5ed0; border-radius:50%; color:#e8d8ff; background:#6d3da033; font-size:13px }
+    .proxy-check-sites > span:not(.proxy-check-links) { max-width:820px; color:#9cabc0; line-height:1.5 }
+    .proxy-check-links { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:2px }
+    .proxy-check-links a { display:inline-flex; align-items:center; min-height:29px; padding:5px 9px; border:1px solid #4d3c70; border-radius:999px; color:#d8c5ff; background:#241b38aa; font-size:11px; font-weight:700; text-decoration:none; transition:background .15s ease,border-color .15s ease,color .15s ease,transform .08s ease }
+    .proxy-check-links a::before { content:"↗"; margin-right:5px; color:var(--purple-strong) }
+    .proxy-check-links a:hover { border-color:var(--purple-strong); color:#fff; background:#3a2857; transform:translateY(-1px); box-shadow:0 4px 14px #a970ff2e }
+    .dictionaries { max-width:1040px; margin-top:10px; border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px 2px; background:linear-gradient(135deg, #121a26, #101823) }
+    .dictionaries > strong { display:block; margin-bottom:2px; color:var(--text) }
+    .dictionary { display:grid; grid-template-columns:140px minmax(0, 1fr) auto; gap:6px; align-items:start; margin:6px 0; padding-top:6px; border-top:1px solid #1e2b3c }
+    .dictionary textarea { min-height:70px }
+    .dictionary input[type=file] { max-width:160px; font-size:11px }
+    .workspace-tabs { display:flex; align-items:center; gap:5px; min-height:40px; margin:0 0 10px; overflow-x:auto; padding:2px 0 }
+    .workspace-tab { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; min-height:36px; white-space:nowrap; padding:7px 11px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--muted); cursor:pointer; font-size:13px; line-height:20px }
+    .workspace-tab.active { border-color:var(--accent); color:var(--text); background:var(--panel-2) }
+    .workspace-tab .workspace-close { border:0; padding:0 2px; min-height:0; background:transparent; color:var(--muted); cursor:pointer }
+    .workspace-tab .workspace-close:hover { color:var(--danger,#ff7185); box-shadow:none }
+    .workspace-tab-add { min-width:32px; padding-inline:10px }
+    .comparer-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+    /* The Comparer panes hold raw HTTP, so they get the same monospace metrics as
+       the Repeater and Intruder editors. Besides reading better, an explicit
+       font and line-height is what makes the highlight layer's wrapping match the
+       control's: with the inherited proportional font and line-height:normal the
+       two elements broke the same line differently, and the colours drifted a line
+       away from the letters. The box styling is left alone on purpose. */
+    .comparer-grid textarea { min-height:300px; font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; tab-size:2 }
+    /* The Comparer panes are the only raw editors that do not sit inside a
+       .workspace > section, and that section is the only thing that puts a panel
+       behind the control: the textarea has to be transparent for the highlight
+       layer, so with nothing behind it the brand gradient of <html> became the
+       field. The background belongs on the stack — the box the control actually
+       fills — and not on the section, so the title row keeps the page backdrop
+       and the panes read as the same panel the Repeater and Intruder editors sit
+       in. The radius matches the plain textarea border-radius; the field keeps its
+       own 1px border, so only the interior changed. */
+    .comparer-grid .raw-editor-stack { background:var(--panel); border-radius:5px }
+    .diff-output { min-height:180px; max-height:420px; margin-top:8px; line-height:1.5 }
+    .diff-added { background:#164d3b; color:#b9ffe5 }
+    .diff-removed { background:#552638; color:#ffd0d9; text-decoration:line-through }
+    @media (max-width:900px) { .comparer-grid { grid-template-columns:1fr } }
+    .transform-row { display:flex; gap:6px; align-items:center; margin:5px 0; padding:6px; border:1px solid var(--line); border-radius:5px; background:#0d1520 }
+    .transform-row code { flex:1; color:var(--accent) }
+    .transform-row input { min-height:32px; padding:6px 8px }
+    /* A status line reports state, not a document. Engine and worker errors arrive
+       as one multi-line string, and an unbreakable run of them grew the page to
+       27000px — the operator saw a wall of raw text instead of a message. The
+       line wraps, scrolls past a ceiling, and keeps its own scrollbar, so a large
+       diagnostic is still readable without taking the view with it. */
+    .status { min-height:20px; color:var(--muted); margin-top:8px; font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; overflow-wrap:anywhere; word-break:break-word; max-height:min(30vh,260px); overflow:auto }
+    .status:not(:empty)::before { content:"[sys] "; color:var(--purple); }
+    .file-chip { display:inline-flex; align-items:center; gap:6px; margin:2px 4px 2px 0; padding:3px 4px 3px 9px; border:1px solid var(--line); border-radius:999px; background:#101b29; color:var(--text); font-size:11px; white-space:nowrap } .file-chip button { border:0; background:transparent; color:var(--muted); cursor:pointer; padding:1px 5px; min-height:0; font-size:12px } .file-chip button:hover { color:var(--text) }
+    table { width:100%; table-layout:fixed; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden } th,td { text-align:left; vertical-align:top; border-bottom:1px solid var(--line); padding:7px 8px; word-break:break-word; overflow-wrap:anywhere } th { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; background:#141e2b } tbody tr:not(.history-details) { cursor:pointer } tbody tr:not(.history-details):hover { background:#172536 } tbody tr.selected { background:#1a3b45; box-shadow:inset 3px 0 var(--accent) } td:last-child { white-space:normal } td:last-child button:not(.icon-btn):not(.ctx-trigger) { margin:2px; padding:7px 9px; min-height:34px; font-size:12px; white-space:nowrap } .exchange-list th,.exchange-list td { padding:3px 5px; line-height:1.2; font-size:12px } .exchange-list th { line-height:1.1 } .exchange-list td .muted { font-size:11px; line-height:1.1 } .exchange-list th:first-child,.exchange-list td:first-child { width:42px } .exchange-list th:nth-last-child(1),.exchange-list td:nth-last-child(1) { width:112px } .exchange-list th:nth-last-child(2),.exchange-list td:nth-last-child(2) { width:128px } .exchange-list th:nth-child(2),.exchange-list td:nth-child(2) { width:82px }     .traffic-actions, .history-actions, .attack-actions, .target-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px; align-items:stretch } .target-actions:has([data-target-repeater]) { grid-template-columns:repeat(2,minmax(0,1fr)) } .traffic-actions button, .history-actions button, .attack-actions button, .target-actions button { width:100%; height:28px; margin:0 !important; padding:3px 4px !important; min-height:28px !important; font-size:10px; line-height:1; white-space:nowrap } .quick-actions { display:flex; align-items:center; justify-content:flex-end; gap:4px; flex-wrap:nowrap } .icon-btn { display:inline-flex; align-items:center; justify-content:center; min-width:28px; min-height:28px; padding:5px 7px; border:1px solid var(--line); border-radius:6px; background:var(--panel-2); color:var(--muted); font-size:11px; line-height:1; cursor:pointer; transition:background .12s ease, border-color .12s ease, color .12s ease, box-shadow .12s ease } .icon-btn:hover, .icon-btn:focus-visible { border-color:var(--purple); background:#121e2d; color:var(--text); box-shadow:0 0 0 1px rgba(169,112,255,.16) } .icon-btn.primary { background:#122c2b; border-color:var(--accent); color:var(--text) } .muted { color:var(--muted) }
+    .history-details td { padding:12px; background:#0d1520 }
+    .history-exchange { display:grid; grid-template-columns:1fr 1fr; gap:12px }
+    .history-exchange h4 { margin:0 0 6px; color:var(--accent) }
+    .history-exchange pre { min-height:120px; margin:0; font-size:12px; max-height:none; overflow:visible }
+    input[type=file] { min-height:40px; cursor:pointer }
+    label:has(> button) { display:inline-flex; align-items:center; padding-top:0; cursor:pointer }
+    /* Shared two-column workbench used by Repeater and the raw exchange viewers (Request and Response equal 50/50). */
+    .workspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1px; border:1px solid var(--line); background:var(--line); border-radius:8px; overflow:hidden }
+    .workspace > section { min-width:0; background:var(--panel); padding:10px; display:flex; flex-direction:column }
+    .workspace-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em }
+    .agent-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:14px 0 }
+    .agent-card,.agent-step,.agent-event { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px }
+    .agent-card .agent-value { display:block; font-size:20px; font-weight:700; margin-top:4px }
+    .agent-step-list,.agent-event-list { display:grid; gap:8px; max-height:420px; overflow:auto }
+    .agent-step { display:grid; grid-template-columns:34px 1fr auto; gap:10px; align-items:center }
+    .agent-step-number { color:var(--purple); font-weight:700 }
+    .agent-step-title { font-weight:700 }
+    .agent-step-meta,.agent-event-meta { color:var(--muted); font-size:12px }
+    .agent-status-ok { color:var(--accent) } .agent-status-bad { color:var(--danger) }
+    .agent-event { display:flex; justify-content:space-between; gap:12px; font-size:13px }
+    .agent-technical { margin-top:12px; color:var(--muted) } .agent-technical summary { cursor:pointer; padding:8px 0 }
+    /* ====== Modern AI Tab Interface Styles ====== */
+    /* The AI view owns the whole window under the masthead, so its height is the
+       space that is actually left over — measured, not guessed.
+
+       Measured in Firefox at `body{zoom:.9}` (pageZoom .90625), window 1356x652:
+       the masthead is header 57.5px + nav 65.3px + 12px nav margin, and
+       `#ai`'s own `getBoundingClientRect().top` is 136.86px. The old
+       `calc(100vh - 65px)` was neither that number nor `--rr-view-block`
+       (which is `100vh - 92px` and belongs to History/Traffic, not to this tab),
+       so it was wrong at both ends of the range: the composer overran the bottom
+       edge by 4px at 1356x652 — the input box and the attached-evidence strip
+       were cut off — and 1920x1080 left 36px of dead space under it.
+
+       `--rr-ai-block` is written by `applyOverlayEdges()` from the measured
+       masthead height (`#ai.getBoundingClientRect().top` through `cssPx()`)
+       subtracted from `window.innerHeight`, both in true CSS px, so `#ai.bottom`
+       lands exactly on the viewport bottom at every zoom and size. `calc(100vh
+       …)` is deliberately not used: under `body{zoom:.9}` the CSS `100vh` is
+       compressed relative to the real CSS viewport, which left a gap or a clip
+       at both ends of the size range. The fallback is the measured 137px rather
+       than the old wrong 65px, so the first paint before the script runs is
+       honest. */
+    #ai.active {
+      height: var(--rr-ai-block, calc(100vh - 137px));
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 0;
+      background: #080c13;
+    }
+    #ai > .workspace-tabs {
+      flex: none;
+      padding: 4px 12px;
+      background: #0d131d;
+      border-bottom: 1px solid var(--line);
+      margin: 0;
+    }
+    .ai-main-container {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      overflow: hidden;
+      background: #080c13;
+    }
+
+    /* AI Sidebar */
+    .ai-sidebar {
+      display: flex;
+      flex-direction: column;
+      background: #0c121c;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+      padding: 6px 6px 0 6px;
+      gap: 6px;
+    }
+    .ai-sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .ai-sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #b879ff;
+      letter-spacing: 0.02em;
+    }
+    .ai-icon-sm {
+      width: 14px;
+      height: 14px;
+      color: #b879ff;
+    }
+    .ai-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 5px;
+      transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+    .ai-icon-btn:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .ai-sidebar-section-title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .ai-presets-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ai-preset-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 4px 6px;
+      background: #101824;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      color: var(--text);
+    }
+    .ai-preset-card:hover {
+      background: #172436;
+      border-color: #7b42ff;
+    }
+    .ai-preset-icon {
+      font-size: 12px;
+      line-height: 1;
+      padding-top: 1px;
+    }
+    .ai-preset-info strong {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 1px;
+    }
+    .ai-preset-info small {
+      display: block;
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+    .ai-sidebar-attached-section {
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* AI Main Chat Pane */
+    .ai-chat-pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+      background: #090e17;
+      position: relative;
+    }
+
+    /* Top Control Header — one row at every width.
+       `flex-wrap: wrap` let the row break wherever it ran out of room: measured at
+       1356x652 the two halves needed 1289.57px inside a 1142.13px pane, so the
+       header rendered 77.13px tall instead of 39.07px and pushed the log and the
+       composer down with it. The row is `nowrap` now, and the only part allowed to
+       give is the two context-toggle captions: they carry their full text in
+       `title`/`data-i18n-title` and shrink to an ellipsis, so nothing is lost and
+       the buttons, the provider select and the model badge keep their size. */
+    .ai-chat-header {
+      flex: none;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 3px 10px;
+      background: #0e1522;
+      border-bottom: 1px solid var(--line);
+      min-height: 33px;
+      box-sizing: border-box;
+    }
+    .ai-model-selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+    .ai-status-indicator,
+    .ai-provider-pill,
+    .ai-model-badge {
+      flex: none;
+    }
+    .ai-status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.25);
+      font-size: 10px;
+      font-weight: 600;
+      color: #2ecc71;
+    }
+    .ai-status-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #2ecc71;
+      box-shadow: 0 0 5px #2ecc71;
+    }
+    .ai-provider-pill select {
+      height: 24px;
+      background: #141d2c;
+      color: #f1f5f9;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+    }
+    .ai-provider-pill select:focus {
+      border-color: #9d4edd;
+    }
+    .ai-model-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #162233;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 10px;
+      color: #93c5fd;
+    }
+    .ai-header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: nowrap;
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+    .ai-header-actions .export-menu-list {
+      left: auto;
+      right: 0;
+    }
+    .ai-project-ctx-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 10.5px;
+      color: var(--text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      /* The caption is the only elastic part of the row: `min-width: 0` lets it
+         shrink below its content, and the ellipsis below reports that it did
+         instead of silently overflowing onto the buttons. The checkbox itself
+         never shrinks, or the target would move under the pointer. */
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+    .ai-project-ctx-toggle input {
+      margin: 0;
+      cursor: pointer;
+      flex: none;
+    }
+    .ai-project-ctx-toggle .ai-ctx-label {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ai-ctx-hint {
+      font-size: 10px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .ai-header-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 24px;
+      padding: 0 7px;
+      background: #141d2c;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 10.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      flex: none;
+    }
+    .ai-header-btn:hover {
+      background: #1b263b;
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* Chat Messages Log Area.
+
+       The log is the one region of this view whose job is to hold as much of the
+       conversation as it can: every number below is the previous one scaled to
+       11.5/12.5 (0.92) for type and 0.8 for the spacing around it, so the same
+       pane carries roughly a quarter more lines at the same legibility. Measured
+       after the change at 1356x652 and 1920x1080: the log grew from 293.08px to
+       320.34px and from 719.03px to 784.27px of viewport height respectively,
+       with no row clipped and no horizontal scroll.
+
+       This is a scale of the log only. The composer, the header and the sidebar
+       keep their own sizes — they are controls, not transcript. */
+    .ai-chat-pane .agent-chat-log {
+      flex: 1;
+      min-height: 0;
+      max-height: none;
+      overflow-y: auto;
+      padding: 5px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #090e17;
+      border: none;
+      border-radius: 0;
+      scroll-behavior: smooth;
+      /* Long ReAct transcripts are the common case here, and the rows are already
+         short: skipping layout for the ones outside the viewport is what keeps the
+         scroll smooth once a run accumulates hundreds of steps. The size hint is
+         the real bubble height so the scrollbar does not jump as rows arrive. */
+      content-visibility: auto;
+      contain-intrinsic-size: 0 46px;
+    }
+    .ai-chat-message-row {
+      display: flex;
+      gap: 5px;
+      width: 100%;
+      animation: aiFadeIn 0.2s ease-out;
+    }
+    .ai-chat-message-row.user {
+      flex-direction: row-reverse;
+    }
+    .ai-avatar {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8.5px;
+      font-weight: 700;
+      user-select: none;
+    }
+    .ai-avatar.assistant {
+      background: linear-gradient(135deg, #7b2cbf 0%, #3a0ca3 100%);
+      color: #fff;
+      box-shadow: 0 1px 6px rgba(123, 44, 191, 0.3);
+    }
+    .ai-avatar.user {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0369a1 100%);
+      color: #fff;
+    }
+    .ai-avatar.tool {
+      background: #1e293b;
+      color: #94a3b8;
+    }
+
+    .ai-message-bubble-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: min(96%, 1180px);
+    }
+    .ai-chat-message-row.user .ai-message-bubble-wrap {
+      align-items: flex-end;
+    }
+    .ai-message-meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      color: var(--muted);
+      margin-bottom: 1px;
+      padding: 0 2px;
+    }
+    .ai-chat-message-row.user .ai-message-meta {
+      flex-direction: row-reverse;
+    }
+
+    .agent-chat-message {
+      width: fit-content;
+      max-width: 100%;
+      padding: 4px 9px;
+      border-radius: 7px;
+      word-break: break-word;
+      line-height: 1.34;
+      font-size: 11.5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    .agent-chat-message.user {
+      background: #133a5e;
+      color: #f0f7ff;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-top-right-radius: 2px;
+    }
+    .agent-chat-message.assistant {
+      background: #111a28;
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top-left-radius: 2px;
+    }
+    .agent-chat-message.tool {
+      background: #0d141e;
+      border: 1px dashed rgba(255,255,255,0.15);
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 5px;
+    }
+    .agent-chat-thinking {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #a78bfa;
+      font-style: italic;
+      font-size: 11px;
+    }
+    .agent-chat-thinking::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border: 1.5px solid #a78bfa;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: aiSpin 0.8s linear infinite;
+    }
+
+    /* Agent ReAct Step Badges & Collapsible Trace */
+    .ai-agent-steps-accordion {
+      margin-bottom: 3px;
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      border-radius: 5px;
+      background: rgba(147, 51, 234, 0.05);
+      overflow: hidden;
+    }
+    .ai-agent-steps-summary {
+      padding: 3px 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 600;
+      color: #c084fc;
+      user-select: none;
+    }
+    .ai-agent-steps-list {
+      padding: 3px 7px 5px;
+      border-top: 1px solid rgba(168, 85, 247, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .ai-agent-step-item {
+      padding: 2px 5px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+      font-size: 10px;
+      border-left: 2px solid #a855f7;
+    }
+    .ai-step-badge {
+      display: inline-block;
+      padding: 1px 4px;
+      background: rgba(168, 85, 247, 0.2);
+      color: #e9d5ff;
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 9px;
+      margin-right: 4px;
+    }
+    .ai-step-observation {
+      margin-top: 2px;
+      padding: 2px 5px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 3px;
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 9.5px;
+      max-height: 76px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Message Code Blocks */
+    .ai-code-block-container {
+      margin: 4px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 5px;
+      background: #080c14;
+      overflow: hidden;
+    }
+    .ai-code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 8px;
+      background: #0e1522;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 9.5px;
+      color: #94a3b8;
+    }
+    .ai-copy-code-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      color: #cbd5e1;
+      padding: 1px 5px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .ai-copy-code-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .ai-code-block-container pre {
+      margin: 0;
+      padding: 5px 9px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 10.5px;
+      line-height: 1.34;
+      color: #e2e8f0;
+    }
+    .agent-chat-message p {
+      margin: 0 0 3px 0;
+    }
+    .agent-chat-message p:last-child {
+      margin-bottom: 0;
+    }
+    .ai-msg-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .ai-msg-actions:hover {
+      opacity: 1;
+    }
+    .ai-msg-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .ai-msg-action-btn:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+    }
+
+    /* Claude/ChatGPT Style Input Bar (Compact) */
+    .ai-chat-input-container {
+      flex: none;
+      padding: 4px 14px 0;
+      background: linear-gradient(180deg, rgba(9,14,23,0) 0%, #090e17 25%);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ai-quick-chips {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      padding-bottom: 1px;
+      scrollbar-width: none;
+      flex: none;
+    }
+    .ai-quick-chips::-webkit-scrollbar {
+      display: none;
+    }
+    .ai-chip {
+      flex: none;
+      background: #111927;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #cbd5e1;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+    }
+    .ai-chip:hover {
+      background: #1b263b;
+      border-color: #7b42ff;
+      color: #fff;
+    }
+
+    .ai-input-box-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      background: #111a28;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 7px;
+      /* No bottom padding: the textarea grows to fill and the footer sits
+         flush at the wrapper's bottom edge, which is the page bottom edge. */
+      padding: 4px 8px 0 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.2);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .ai-input-box-wrapper:focus-within {
+      border-color: #8b5cf6;
+      box-shadow: 0 1px 10px rgba(139, 92, 246, 0.2);
+    }
+    #agent-chat-input {
+      width: 100%;
+      min-height: 0;
+      max-height: 140px;
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.35;
+      resize: none;
+      outline: none;
+      padding: 1px 0;
+      box-sizing: border-box;
+      /* flex: 1 makes the textarea grow to fill every free pixel of the wrapper,
+         so the input bar has no empty strip and the footer below it sits flush
+         at the page bottom edge. flex-shrink: 1 lets it shrink on small screens
+         without pushing the footer off the bottom. */
+      flex: 1 1 28px;
+      min-height: 0;
+    }
+    #agent-chat-input::placeholder {
+      color: #64748b;
+    }
+    .ai-input-box-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* margin-top/padding-top removed: footer follows textarea directly with no
+         gap, sitting flush at the bottom edge of the wrapper/page. */
+      border-top: 1px solid rgba(255,255,255,0.05);
+      flex: none;
+    }
+    .ai-input-left-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-attach-file-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px;
+      color: #94a3b8;
+      font-size: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .ai-attach-file-btn:hover {
+      background: #18263a;
+      border-color: #8b5cf6;
+      color: #e2e8f0;
+    }
+    .ai-attached-files-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding-bottom: 3px;
+      margin-bottom: 3px;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+    }
+    .ai-file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 6px;
+      background: #132438;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      border-radius: 4px;
+      color: #93c5fd;
+      font-size: 10px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .ai-file-chip-remove {
+      background: transparent;
+      border: none;
+      color: #60a5fa;
+      cursor: pointer;
+      padding: 0 2px;
+      font-size: 11px;
+      line-height: 1;
+    }
+    .ai-file-chip-remove:hover {
+      color: #f87171;
+    }
+    .ai-input-box-wrapper.ai-drag-over {
+      border-color: #a855f7 !important;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.4) !important;
+    }
+    .ai-input-hints {
+      font-size: 9px;
+      color: #64748b;
+    }
+    .ai-kbd-hint {
+      display: inline-block;
+      padding: 0 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 8.5px;
+      color: #94a3b8;
+    }
+    .ai-send-button {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      min-height: 26px;
+      max-width: 26px;
+      max-height: 26px;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      flex: 0 0 26px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      box-shadow: 0 1px 6px rgba(124, 58, 237, 0.4);
+    }
+    .ai-send-button svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      display: block;
+      margin: auto;
+      transform: translate(-0.5px, 0.5px);
+    }
+    .ai-send-button:hover:not(:disabled) {
+      transform: scale(1.06);
+      box-shadow: 0 3px 8px rgba(124, 58, 237, 0.6);
+    }
+    .ai-send-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* AI Settings Modal */
+    .ai-settings-dialog {
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      padding: 0;
+      max-width: 520px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .ai-settings-dialog::backdrop {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(3px);
+    }
+    .ai-settings-modal {
+      background: #0f1724;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .ai-settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: #141e2e;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .ai-settings-header h2 {
+      margin: 0;
+      font-size: 16px;
+      color: #f1f5f9;
+    }
+    .ai-settings-header .muted {
+      font-size: 12px;
+    }
+    .ai-settings-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .ai-settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ai-settings-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .ai-settings-group input {
+      width: 100%;
+      height: 38px;
+      background: #090e17;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 0 12px;
+      color: #f8fafc;
+      font-size: 13px;
+      box-sizing: border-box;
+    }
+    .ai-settings-group input:focus {
+      border-color: #8b5cf6;
+      outline: none;
+    }
+    .ai-settings-group small {
+      font-size: 11px;
+    }
+    .ai-settings-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 20px;
+      background: #141e2e;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @keyframes aiFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes aiSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 1100px) {
+      .ai-chat-pane .agent-chat-log, .ai-chat-input-container {
+        padding-left: 6%;
+        padding-right: 6%;
+      }
+    }
+    @media (max-width: 850px) {
+      .ai-main-container {
+        grid-template-columns: 1fr;
+      }
+      .ai-sidebar {
+        display: none;
+      }
+      .ai-chat-pane .agent-chat-log, .ai-chat-input-container {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+    }
+    .code-editor { width:100%; min-height:360px; resize:vertical; border:0; border-radius:4px; background:#091019; color:#d9e8f7; padding:12px; font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; tab-size:2; box-sizing:border-box }
+    .raw-editor { min-height:360px; box-sizing:border-box }
+    #repeater .workspace > section { display:flex; flex-direction:column }
+    #repeater .raw-editor-stack { flex:1; display:flex; flex-direction:column }
+    #repeater #repeater-raw-request, #repeater #response { flex:1; min-height:360px; margin:0; box-sizing:border-box }
+    /* A textarea paints its value as plain text and cannot hold <span> markup, so
+       the raw request editor gets the standard overlay instead: a highlighted
+       <pre> behind the control, with the textarea's own glyphs made transparent
+       and only the caret left solid. The text stays fully editable, and the
+       colours come from the same tokenizer the read-only inspectors use.
+       Both layers must agree on every metric that moves a glyph, so the highlight
+       layer copies .code-editor's font, padding and border. The wrap settings are
+       not a guess: a textarea computes overflow-wrap:break-word, so a long token
+       (a JWT, a long URL, base64) breaks inside the control. Leaving the layer at
+       `normal` would keep that token on one line there and on two in the editor,
+       and every line after it would sit one row out of step. */
+    .raw-editor-stack { position:relative }
+    .raw-editor-highlight { position:absolute; top:0; left:0; margin:0; padding:12px; border:0; border-radius:4px; background:transparent; overflow:hidden; pointer-events:none; color:var(--text); font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; word-break:normal; overflow-wrap:break-word; text-align:left }
+    /* Bound to the element type, not to a class on the control. The Repeater and
+       Intruder editors carry .raw-editor, but the Comparer panes are plain
+       textareas with no class at all, and a class-scoped rule left their own
+       glyphs visible on top of the highlight layer — the same request drawn
+       twice, once plain and once coloured. */
+    .raw-editor-stack textarea { position:relative; display:block; background:transparent; color:transparent; caret-color:var(--text) }
+    .raw-editor-stack textarea::placeholder { color:var(--muted); opacity:1 }
+    .raw-editor-stack textarea::selection { background:rgba(96,165,250,.32) }
+    /* History and Traffic keep the selected exchange visible below the table. */
+    .inspector { margin-bottom:8px; display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:8px; overflow:visible; box-shadow:0 8px 20px #0005 }
+    .inspector-panel { min-width:0; min-height:0; background:#091019; padding:8px }
+    .inspector-panel h3 { margin:0 0 8px; color:var(--accent); font-size:12px; text-transform:uppercase; letter-spacing:.06em }
+    .inspector-panel h3::before { content:"> "; color:var(--purple) }
+    /* RAW inspector panes show a request and a response as evidence, and an
+       operator reading a 24 KB HTML challenge needs most of it on screen
+       without scrolling twice. Two things decide how much of it is visible: the
+       type size and the box. Both are fixed here, on the shared rule, because
+       the three RAW views (History, Traffic, Intruder) are one feature seen on
+       three pages, and a pane that is comfortable in one of them must not be
+       cramped in another.
+
+       10px is the deliberate number, not a leftover. A raw header line runs
+       100-200 characters and the pane wraps (`pre-wrap`), so a column that is
+       too narrow costs a wrapped line for every header. At 1440px, 12px held
+       104 columns and 27 lines; 10px holds 124 columns and 36 lines in the same
+       box — about 87% more of the exchange read without moving a single pixel of
+       layout. `body { zoom: .9 }` is already part of the reading experience, so
+       10px lands at 9 device px, which is the size this workspace is read at
+       rather than a size reached by zooming the whole browser out to 67%.
+
+       The cap is a share of the window with a pixel ceiling, so a pane grows on
+       a tall screen and stays sane on a very tall one. It is deliberately not a
+       shrink cap: nothing here may reduce what the pane can show. History and
+       Traffic override it below, because there the flex column decides the
+       height and the pane takes whatever it is handed. */
+    .inspector-panel pre { min-height:150px; max-height:min(58vh, 640px); margin:0; border:0; background:transparent; padding:4px; font-size:10px; line-height:1.45; overflow:auto; overflow-wrap:anywhere; white-space:pre-wrap }
+    /* Intruder earned the height back. Its Export row moved down beside the
+       filter controls, which freed a toolbar from the stack above the inspector,
+       and a request or response is evidence: it is shown whole and scrolled, not
+       trimmed to fit a row. The floor is a share of the window so it also grows on
+       a tall screen instead of staying at a fixed number, and it now matches what
+       History and Traffic hand the same pane: before this, Intruder showed 23
+       lines on a 1440x900 window where Traffic showed 27, while its own table
+       still kept 48vh. The ceiling lives on the shared rule above. */
+    #intruder > .inspector .inspector-panel pre { min-height:clamp(240px, 32vh, 420px) }
+    .response-tabs { display:flex; gap:4px; margin-bottom:8px }
+    .response-tabs button { min-height:30px; padding:5px 9px; font-size:11px }
+    .subtle-panel { margin:12px 0; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2) }
+    .binary-note { color:#f5bd68; font-size:12px; margin:6px 0 }
+    .operation-review { margin:8px 0 10px; padding:8px 10px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; background:rgba(67,217,163,.06); font-size:12px; line-height:1.55; color:var(--muted) }
+    .operation-review strong { color:var(--text); }
+    .operation-review .review-pill { display:inline-block; margin:2px 4px 2px 0; padding:2px 6px; border-radius:999px; background:#0d1825; border:1px solid var(--line); color:var(--text) }
+    #intruder .workspace > section:nth-child(2) { display:flex; flex-direction:column; gap:6px }
+    #intruder .workspace > section:nth-child(2) > .toolbar { margin:0 }
+    #intruder .workspace > section:nth-child(2) > label { padding-top:0 }
+    #intruder .workspace > section:nth-child(2) > select { width:100% }
+    #intruder .intruder-transformations { padding-top:6px; border-top:1px solid var(--line) }
+    #intruder .intruder-transformations > label { display:block; padding-top:0; margin-bottom:4px }
+    #intruder .intruder-transformations .toolbar { margin:5px 0 0 }
+    #intruder .intruder-transformations .toolbar select { flex:1 1 150px; min-width:0 }
+    #intruder .intruder-transformations .toolbar button { flex:0 1 auto }
+    /* Login-success detection. It sits under the transformations block and uses
+       the same toolbar, chip and muted-row vocabulary as the rest of the view:
+       a new feature here is a composition of existing patterns, not a new
+       control vocabulary. */
+    #intruder .intruder-detection { padding-top:6px; margin-top:6px; border-top:1px solid var(--line) }
+    #intruder .intruder-detection > label { display:block; padding-top:0; margin-bottom:4px; text-transform:none }
+    #intruder .intruder-detection > .hint { margin:2px 0 6px }
+    #intruder .intruder-detection .detect-signals { display:flex; flex-wrap:wrap; gap:4px; margin:0 0 4px }
+    #intruder .intruder-detection .detect-signals .scanner-chip { cursor:pointer }
+    #intruder .intruder-detection .toolbar { margin:5px 0 0; align-items:center }
+    #intruder .intruder-detection .toolbar input[type=number] { width:72px; flex:0 0 auto }
+    #intruder .intruder-detection .toolbar select { flex:1 1 140px; min-width:0 }
+    #intruder .intruder-detection .toolbar input[type=text] { flex:1 1 120px; min-width:0 }
+    #intruder .intruder-detection .toolbar button { flex:0 1 auto }
+    #intruder .intruder-detection .detect-rule-row { display:flex; align-items:center; gap:6px; padding:3px 0; font-size:11px; min-height:28px }
+    #intruder .intruder-detection .detect-rule-row .rule-text { flex:1 1 auto; min-width:0; color:var(--muted); overflow-wrap:anywhere }
+    #intruder .intruder-detection .detect-rule-row .icon-btn { flex:0 0 auto }
+    /* A matched row is marked twice on purpose: a tinted row you can find by
+       scrolling and a badge that names the reason in the column itself. The
+       selection marker stays reserved for the selected row, so the two never
+       read as the same thing. */
+    #intruder .attack-table tr.intruder-match td { background:var(--accent-tint) }
+    #intruder .attack-table tr.intruder-match td:first-child { box-shadow:inset 3px 0 var(--accent) }
+    #intruder .attack-table .match-badge { display:inline-flex; align-items:center; gap:3px; padding:1px 7px; border:1px solid var(--accent); border-radius:999px; font-size:10px; font-weight:700; letter-spacing:.04em; color:var(--accent); white-space:nowrap }
+    #intruder .attack-table .match-reason { display:block; margin-top:2px; color:var(--muted); font-size:10px; line-height:1.3; overflow-wrap:anywhere }
+    #intruder .attack-table .match-empty { color:var(--muted) }
+    /* History/Traffic column widths come from the table colgroup; no fixed
+       pixel widths here so the actions column is never pushed out of view. */
+    #history .exchange-list th, #history .exchange-list td,
+    #traffic .exchange-list th, #traffic .exchange-list td { width:auto }
+    /* Scanner template report: one row per uploaded YAML file. The generic
+       .exchange-list column widths above belong to Traffic, so they are reset
+       here and the per-file columns are declared by <colgroup> instead. */
+    #scanner-tpl-results th, #scanner-tpl-results td { width:auto; line-height:1.35 }
+    #scanner-tpl-results td { white-space:normal; cursor:default }
+    #scanner-tpl-results tr:hover { background:transparent }
+    /* A corpus row answers with a status code, and a status code is not a severity:
+       /admin/ answering 401 and /actuator/health answering 200 are both findings,
+       and colouring the first red would tell the operator a risk the run never
+       measured. So the badge separates "the server answered" from "the server
+       answered with something else", and the number itself carries the rest. */
+    .scanner-status-badge.is-answer { border-color:#2f7d63; background:#10241f; color:#5fd6ab }
+    .scanner-status-badge.is-moved { border-color:#4a3a6b; background:#1a1428; color:#b79ce8 }
+    .scanner-status-badge.is-answered { border-color:var(--line); background:#131c29; color:var(--muted) }
+    #scanner-corpus-skipped { color:var(--warning); white-space:normal }
+    #scanner-corpus-skipped:empty { display:none }
+    #scanner-corpus-rows td { vertical-align:top }
+    #scanner-corpus-rows .corpus-path, #scanner-corpus-rows .corpus-evidence {
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; overflow-wrap:anywhere }
+    /* An openable row states that it is openable: the caret is the affordance, and a
+       row that only reveals itself on hover is not discoverable by keyboard. */
+    #scanner-corpus-rows tr.corpus-row { cursor:pointer }
+    #scanner-corpus-rows tr.corpus-row:hover { background:var(--panel-2) }
+    #scanner-corpus-rows tr.corpus-row:focus-visible { outline:2px solid var(--purple-strong); outline-offset:-2px }
+    #scanner-corpus-rows tr.corpus-row[aria-expanded="true"] { background:var(--panel-2); box-shadow:inset 3px 0 var(--accent) }
+    #scanner-corpus-rows tr.corpus-detail-row td { background:var(--panel-2); padding:10px 12px }
+    .corpus-detail-label {
+       font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:6px }
+    /* The whole point of opening a row is the part a table cell cannot show: the
+       matched bytes with their own line breaks. `pre-wrap` keeps a long line inside
+       the panel, and a bounded height keeps one finding from pushing the rest of the
+       report off the section. */
+    .corpus-detail-body {
+       margin:0; white-space:pre-wrap; overflow-wrap:anywhere;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+       font-size:10px; line-height:1.45; color:var(--text);
+       max-height:min(46vh,420px); overflow:auto }
+    .scanner-status-badge { display:inline-block; padding:1px 7px; border:1px solid var(--line); border-radius:999px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap }
+    .scanner-status-badge.is-matched { border-color:#2f7d63; background:#10241f; color:#5fd6ab }
+    .scanner-status-badge.is-not_matched { border-color:var(--line); background:#131c29; color:var(--muted) }
+    .scanner-status-badge.is-flow { border-color:#4a3a6b; background:#1a1428; color:#b79ce8; font-style:italic }
+    /* `uncompiled` is not a finding and not a broken file: `-validate` accepts the
+       document and the binary still compiles no template out of it. It is styled
+       apart from `invalid` (red) and from `skipped` (amber), because neither of
+       those two claims is true here — nothing ran, and nothing is wrong with the
+       file as far as the validator is concerned. */
+    .scanner-status-badge.is-uncompiled { border-color:#3f4a5c; background:#141821; color:#8fa2bb; font-style:italic; border-style:dashed }
+    .scanner-status-badge.is-no_request { border-color:#3a4a63; background:#141b26; color:#9fb0c6; font-style:italic }
+    /* A file Nuclei never executed is called out, not blended in with a clean run. */
+    .scanner-status-badge.is-skipped { border-color:var(--warning); background:var(--panel-2); color:var(--warning) }
+    .scanner-sev-badge { display:inline-flex; align-items:center; justify-content:center; padding:2px 8px; border-radius:999px; border:1px solid transparent; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap }
+    .scanner-sev-badge.is-critical { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); color:#f87171 }
+    .scanner-sev-badge.is-high { background:rgba(249,115,22,0.15); border-color:rgba(249,115,22,0.4); color:#fb923c }
+    .scanner-sev-badge.is-medium { background:rgba(245,158,11,0.15); border-color:rgba(245,158,11,0.4); color:#fbbf24 }
+    .scanner-sev-badge.is-low { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.4); color:#60a5fa }
+    .scanner-sev-badge.is-info { background:rgba(148,163,184,0.15); border-color:rgba(148,163,184,0.3); color:#94a3b8 }
+    .scanner-category-badge { display:inline-block; padding:1px 6px; border:1px solid rgba(169,112,255,.3); border-radius:4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; color:var(--purple); background:rgba(169,112,255,.1); white-space:nowrap }
+    .scanner-raw-details summary { font-size:11px; color:var(--muted); padding:4px 0 }
+    .scanner-raw-details summary:hover { color:var(--text) }
+    .scanner-diagnostics { margin:8px 0 0; border:1px solid var(--line); border-radius:8px; background:#0b1220 }    .scanner-diagnostics[hidden] { display:none }
+    .scanner-diagnostics > summary { padding:7px 10px; cursor:pointer; color:var(--muted); font-size:11px; user-select:none }
+    .scanner-diagnostics > summary:hover { color:var(--text) }
+    .scanner-diagnostics pre { margin:0; padding:10px; border-top:1px solid var(--line); max-height:280px; overflow:auto; white-space:pre-wrap; word-break:break-word; color:var(--muted); font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }
+    /* A folder scan reports thousands of files. Off-screen rows cost no layout
+       or paint, and the header stays put so the columns remain readable. */
+    #scanner-tpl-results thead th { position:sticky; top:0; z-index:1; background:var(--panel) }
+    #scanner-tpl-results tbody tr { content-visibility:auto; contain-intrinsic-size:auto 42px }
+    /* The grow control must stay laid out so it is always clickable. */
+    .scanner-more { display:flex; justify-content:center; padding:8px 0 }
+    .scanner-more[hidden] { display:none }
+    .scanner-more-btn { min-height:34px; padding:0 16px; border:1px solid var(--line); border-radius:999px; background:var(--button); color:var(--text); font-size:11px; font-weight:600; cursor:pointer }
+    .scanner-more-btn:hover { border-color:var(--purple); color:var(--accent); box-shadow:0 0 14px #a970ff55 }
+    .scanner-more-btn:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    .scanner-more-btn[disabled] { opacity:.6; cursor:default; box-shadow:none }
+    /* The History and Traffic `Load more` control is the same affordance as the
+       Scanner one, in the same place relative to its table: outside the scroll
+       container, so a lazily laid out last row can never swallow the click. It
+       names real counters, so "how much is still behind it" is never a guess. */
+    .exchange-more { display:flex; justify-content:center; align-items:center; flex:none; padding:6px 0 0 }
+    .exchange-more[hidden] { display:none }
+    .exchange-more-btn { min-height:34px; padding:0 16px; border:1px solid var(--line); border-radius:999px; background:var(--button); color:var(--text); font-size:11px; font-weight:600; cursor:pointer; transition:background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease }
+    .exchange-more-btn:hover:not(:disabled) { border-color:var(--purple); color:var(--accent); box-shadow:0 0 14px #a970ff55 }
+    .exchange-more-btn:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    .exchange-more-btn:active:not(:disabled) { transform:translateY(1px) }
+    .exchange-more-btn[disabled] { opacity:.6; cursor:default; box-shadow:none }
+    .scanner-status-badge.is-invalid { border-color:#8a3a3a; background:#2a1518; color:#f0908f }
+    .scanner-status-badge.is-duplicate { border-color:#4a4436; background:#1d1a14; color:#c8b48a }
+.scanner-status-badge.is-workflow { border-color:#3d4a66; background:#161a24; color:#a9bcd8; font-style:italic }
+    /* The run plan sits directly above the command line it explains: the number
+       of nuclei invocations is the first thing an operator needs when a large
+       folder takes longer than expected. */
+    .scanner-plan { margin:6px 0 0; color:var(--muted); font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }
+    .scanner-plan b { color:var(--accent); font-weight:600 }
+    .scanner-invalid-reason { color:#f0b3a6; font-size:11px }
+    .scanner-match { margin-bottom:5px }
+    .scanner-match:last-child { margin-bottom:0 }
+    .scanner-match > div { color:var(--muted); font-size:11px }
+    .scanner-match pre { margin:1px 0 0; padding:4px 6px; border:1px solid var(--line); border-radius:5px; background:#0d1620; color:var(--text); font-size:11px; line-height:1.3; white-space:pre-wrap; overflow-wrap:anywhere }
+    /* A folder scan is one selection, not thousands of independent ones, so the
+       report opens grouped by folder: a folder row carries the folder path, the
+       file count and the per-status counters, and opens the files on demand. The
+       chip repeats the shape the upload bar already uses for a folder, so the
+       same selection reads the same way before and after the run. */
+    #scanner-tpl-results tbody tr.scanner-folder-row { background:var(--panel-2); cursor:pointer }
+    #scanner-tpl-results tbody tr.scanner-folder-row:hover { background:#131d2a }
+    #scanner-tpl-results tbody tr.scanner-folder-row:focus-within { background:#131d2a }
+    .scanner-folder-toggle { display:inline-flex; align-items:center; gap:7px; max-width:100%; min-height:28px; padding:3px 9px 3px 5px; border:1px solid var(--line); border-radius:999px; background:#101b29; color:var(--text); font-size:11px; font-weight:600 }
+    .scanner-folder-toggle:hover { border-color:var(--purple); color:var(--text); box-shadow:0 0 14px #a970ff55 }
+    .scanner-folder-toggle:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px }
+    .scanner-folder-caret { width:13px; height:13px; flex:none; color:var(--muted) }
+    tr[aria-expanded="true"] .scanner-folder-caret { color:var(--accent) }
+    tr[aria-expanded="true"] .scanner-folder-caret path { transform:rotate(90deg); transform-origin:50% 50% }
+    .scanner-folder-icon { width:15px; height:15px; flex:none; color:var(--accent) }
+    .scanner-folder-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px }
+    .scanner-folder-count { flex:none; min-width:26px; padding:1px 7px; border-radius:999px; background:#16233a; color:var(--accent); font-size:10px; font-weight:700; text-align:center }
+    .scanner-folder-total { color:var(--accent); font-size:11px; font-weight:700 }
+    .scanner-group-counts { display:flex; flex-wrap:wrap; gap:4px }
+    /* A file inside an open folder is indented under it, so the tree is readable
+       without another column. */
+    #scanner-tpl-results tbody tr.scanner-child-row td:first-child { padding-left:24px }
+    /* What a folder found. The names are template titles, so they read as
+       monospace like the other identifiers in the table, and a long list wraps
+       inside the cell instead of stretching the row. */
+    #scanner-tpl-results tbody tr.scanner-folder-row td.scanner-folder-findings { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; color:var(--text); word-break:break-word }
+    .scanner-folder-head { display:inline-block; margin-bottom:1px; color:var(--text); font-size:12px; font-weight:600 }
+    /* One unified upload window: files and whole folders land in the same zone. */
+    .scanner-upload-zone { display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap; margin:2px 4px 2px 0; padding:6px 10px; border:1px dashed var(--line); border-radius:8px; background:#0f1826; cursor:pointer; transition:border-color .12s ease, background .12s ease }
+    .scanner-upload-zone:hover { border-color:var(--purple); background:#121e2d }
+    .scanner-upload-zone:focus-visible { border-color:var(--purple); background:#121e2d; outline:2px solid var(--purple); outline-offset:1px }
+    .scanner-upload-zone.is-dragging { border-color:var(--accent); background:#12222c }
+    .scanner-upload-zone strong { font-size:12px; font-weight:600 }
+    .scanner-upload-actions { display:inline-flex; gap:6px }
+    .scanner-upload-actions button { min-height:28px; padding:3px 9px; font-size:11px }
+    .scanner-type-control { display:inline-flex; align-items:center; gap:6px; min-width:0 }
+    .scanner-type-control select { min-height:30px; min-width:150px; max-width:240px; font-size:12px }
+    .scanner-type-status { max-width:230px; color:var(--muted); font-size:11px; overflow-wrap:anywhere }
+    .scanner-type-status:empty { display:none }
+    /* Bounded on purpose: this line carries transfer progress, and a whole
+       folder of templates can stream a great deal of text through it. */
+    .scanner-upload-progress { margin:4px 0; padding:4px 8px; border:1px solid var(--line); border-radius:6px; background:#0f1826; color:var(--muted); font-size:11px; max-height:90px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere }
+    /* Scan progress: a long folder run must be visibly alive, with real
+       counters from the binary rather than a decorative spinner. */
+    .scanner-progress { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-radius:9px; background:var(--panel); box-shadow:0 0 0 1px rgba(169,112,255,.06) }
+    .scanner-progress[hidden] { display:none }
+    .scanner-progress-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+    .scanner-progress-spinner { width:13px; height:13px; border:2px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:scanner-spin .8s linear infinite }
+    @keyframes scanner-spin { to { transform:rotate(360deg) } }
+    @media (prefers-reduced-motion:reduce) { .scanner-progress-spinner { animation-duration:2.4s } }
+    .scanner-progress-phase { font-size:12px; font-weight:600; letter-spacing:.02em }
+    .scanner-progress-pct { font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--accent) }
+    .scanner-progress-elapsed { font:11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--muted) }
+    .scanner-progress-cancel { margin-left:auto; min-height:26px; padding:2px 10px; border:1px solid var(--line); border-radius:6px; background:var(--button); color:var(--muted); font-size:11px; cursor:pointer }
+    .scanner-progress-cancel:hover { border-color:#8a3a3a; color:#f0908f }
+    .scanner-progress-pause { min-height:26px; padding:2px 12px; border:1px solid var(--line); border-radius:6px; background:var(--button); color:var(--text); font-size:11px; font-weight:600; cursor:pointer }
+    .scanner-progress-pause:hover { border-color:var(--accent); color:var(--accent) }
+    .scanner-progress-pause[hidden] { display:none }
+    .scanner-progress-track { position:relative; height:6px; margin:9px 0 7px; border-radius:999px; background:#0d1620; overflow:hidden }
+    .scanner-progress-fill { position:absolute; inset:0 auto 0 0; width:0; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent-strong)); transition:width .3s ease }
+    .scanner-progress-indeterminate { position:absolute; inset:0; display:none; background:linear-gradient(90deg,transparent,var(--accent),transparent); animation:scanner-sweep 1.4s ease-in-out infinite }
+    .scanner-progress.is-indeterminate .scanner-progress-indeterminate { display:block }
+    .scanner-progress.is-indeterminate .scanner-progress-fill { opacity:.25 }
+    @keyframes scanner-sweep { from { transform:translateX(-100%) } to { transform:translateX(100%) } }
+    .scanner-progress-stats { display:flex; flex-wrap:wrap; gap:4px 14px; color:var(--muted); font:11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }
+    .scanner-progress-stats b { color:var(--text); font-weight:600 }
+    .scanner-progress-checkpoint { margin:6px 0 0; font-size:11px; color:var(--orange); line-height:1.45 }
+    .scanner-progress-checkpoint[hidden] { display:none }
+    .scanner-active-recovery { margin:6px 0 0; gap:8px; flex-wrap:wrap }
+    .scanner-active-recovery[hidden] { display:none }
+    .scanner-progress-note { margin:5px 0 0; color:var(--muted); font-size:11px; line-height:1.4 }
+    .scanner-progress.is-done .scanner-progress-spinner { border-top-color:var(--accent); animation:none }
+    .scanner-progress.is-failed .scanner-progress-spinner { border-top-color:#f0908f; animation:none }
+    /* A cancelled run is a state the operator chose, so it reads as a settled
+       outcome rather than an error: the spinner stops and the phase is muted. */
+    .scanner-progress.is-cancelling .scanner-progress-spinner { border-top-color:var(--warning); animation:scanner-spin 1.6s linear infinite }
+    .scanner-progress.is-cancelled .scanner-progress-spinner { border-top-color:var(--muted); border-left-color:var(--muted); animation:none }
+    .scanner-progress.is-cancelled .scanner-progress-phase { color:var(--muted) }
+    /* A paused scan is alive but stopped: the bar dims instead of moving. */
+    .scanner-progress.is-paused { border-color:var(--warning) }
+    .scanner-progress.is-paused .scanner-progress-spinner { animation-play-state:paused; border-top-color:var(--warning); border-left-color:var(--warning) }
+    .scanner-progress.is-paused .scanner-progress-phase { color:var(--warning) }
+    .scanner-progress.is-paused .scanner-progress-fill { background:var(--warning); opacity:.5 }
+    .scanner-progress.is-paused .scanner-progress-indeterminate { animation-play-state:paused; opacity:.35 }
+    .scanner-files-hint { width:100%; margin-top:4px; color:var(--muted); font-size:11px }
+    .scanner-options-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:8px; margin:8px 0 }
+    /* Scanner has two inner views (CMS recon / Nuclei templates) so the two
+       kinds of controls never share one screen. */
+    .scanner-view-switch { display:inline-flex; gap:4px; margin:0 0 8px; padding:3px; border:1px solid var(--line); border-radius:8px; background:#0f1826 }
+    .scanner-view-switch button { min-height:30px; margin:0; padding:4px 14px; border:1px solid transparent; border-radius:6px; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; transition:background .12s ease, color .12s ease, border-color .12s ease }
+    .scanner-view-switch button:hover { color:var(--text) }
+    .scanner-view-switch button[aria-selected="true"] { border-color:var(--purple); background:#16233a; color:var(--text); box-shadow:inset 0 0 0 1px rgba(169,112,255,.18) }
+    .scanner-panel { display:flex; flex-direction:column; gap:6px }
+    .scanner-panel[hidden] { display:none }
+    /* Export is a real menu: a trigger plus a format list, so the available
+       formats are visible instead of hidden inside a native select. The trigger
+       class is shared by every view that exports (Scanner, Intruder, Project):
+       one control, one keyboard contract, one confirmation treatment. */
+    .export-menu { position:relative; display:inline-block; flex:none }
+    .export-export-trigger { display:inline-flex; align-items:center; gap:6px; min-height:30px; margin:0; padding:4px 10px; border:1px solid var(--line); border-radius:6px; background:var(--button); color:var(--text); font-size:12px; cursor:pointer; transition:border-color .12s ease, background .12s ease }
+    .export-export-trigger:hover:not(:disabled) { border-color:var(--purple); background:var(--button-hover) }
+    .export-export-trigger:focus-visible { border-color:var(--purple); background:var(--button-hover); outline:2px solid var(--purple); outline-offset:1px }
+    .export-export-trigger:disabled { opacity:.45; cursor:not-allowed }
+    .export-export-trigger[aria-expanded="true"] { border-color:var(--purple); background:var(--button-hover) }
+    .export-caret { width:9px; height:6px; color:var(--muted) }
+    .export-export-trigger.is-exported { border-color:var(--accent); box-shadow:0 0 0 1px rgba(67,217,163,.28) }
+    .export-export-trigger.is-exported::after { content:"✓ " attr(data-export-flash); color:var(--accent); font-size:11px }
+    .export-export-trigger[aria-expanded="true"] .export-caret { transform:rotate(180deg) }
+    .export-menu-list { position:absolute; z-index:40; top:calc(100% + 4px); left:0; min-width:196px; padding:4px; border:1px solid var(--line); border-radius:7px; background:#101b29; box-shadow:0 10px 28px #0009 }
+    .export-menu-list[hidden] { display:none }
+    /* Opened upwards when the trigger sits near the bottom of the window. */
+    .export-menu-list.opens-up { top:auto; bottom:calc(100% + 4px) }
+    .export-menu-list button { display:flex; flex-direction:column; gap:1px; width:100%; margin:0; padding:6px 9px; border:0; border-radius:5px; background:transparent; color:var(--text); text-align:left; cursor:pointer }
+    .export-menu-list button:hover { background:#1d3047 }
+    .export-menu-list button:focus-visible { background:#1d3047; outline:2px solid var(--purple); outline-offset:1px }
+    .export-menu-list button b { font-size:12px; font-weight:600 }
+    .export-menu-list button span { color:var(--muted); font-size:11px }
+    /* Severity filters are toggle chips: several levels can be picked at once
+       without a tall multi-select list. */
+    .scanner-options-primary { display:flex; flex-wrap:wrap; gap:12px 18px; align-items:flex-end; margin:8px 0 }
+    /* The two wordlists take a full row each. They are the only fields in this
+       panel that hold more than one value, and squeezing them into the numeric
+       row would wrap a pasted list into a column a couple of characters wide. */
+    .scanner-option-wide { flex:1 1 320px; display:flex; flex-direction:column; gap:4px; align-items:stretch }
+    .scanner-option-wide textarea { font:12px/1.45 var(--mono, ui-monospace, monospace); min-height:64px; resize:vertical }
+    .scanner-chipset { display:flex; flex-direction:column; gap:4px }
+    .scanner-chipset-label { font-size:11px; color:var(--muted) }
+    .scanner-chips { display:flex; flex-wrap:wrap; gap:4px }
+    .scanner-chip { padding:3px 9px; border:1px solid var(--line); border-radius:999px; background:#101b29; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.04em; cursor:pointer; transition:background .12s ease, color .12s ease, border-color .12s ease }
+    .scanner-chip:hover { color:var(--text) }
+    .scanner-chip[aria-pressed="true"] { border-color:var(--purple); background:#16233a; color:var(--text) }
+    #scanner-options-advanced { margin:6px 0 }
+    #scanner-options-advanced > summary { color:var(--muted) }
+    .scanner-option { display:flex; flex-direction:column; gap:3px; padding:0; font-size:11px; color:var(--muted) }
+    .scanner-option input[type="text"], .scanner-option input[type="number"], .scanner-option select { width:100%; min-height:28px; font-size:12px }
+    .scanner-option-check { flex-direction:row; align-items:center; gap:7px; padding-top:2px }
+    .scanner-option-check input { width:auto; min-height:0 }
+    /* Safety net: if zoom rounding ever pushes the table wider than its
+       scroll container, the actions cell pins to the visible edge instead of
+       being clipped. Transparent on purpose — no background or shadow, so it
+       is pixel-identical while everything fits. */
+    #history td.row-actions, #traffic td.row-actions { position:sticky; right:0; z-index:2 }
+    .target-table .target-col-index { width:44px } .target-table .target-col-depth { width:62px } .target-table .target-col-status { width:72px } .target-table .target-col-url { width:38% } .target-table .target-col-type { width:23% } .target-table .target-col-time { width:82px }
+    /* The map preview is as tall as the form beside it. The workspace row is as
+       tall as the tallest column, and the preview box is the last flex child of
+       its own column, so it takes whatever is left under the title. It used to
+       be pinned to a fixed 300px, which left a dead strip under the map on every
+       window tall enough to show the whole form — the exact height the owner
+       asked for. `min-height` keeps a usable map when the row is short. */
+    .target-preview-column { display:flex; flex-direction:column; min-height:0; contain:size }
+    .target-preview-column .workspace-title { flex:none }
+    .target-preview { flex:1 1 0%; height:auto; min-height:300px; max-height:none; background:#091019; border:1px solid var(--line); border-radius:8px; overflow:auto; padding:10px }
+    .target-tree { min-height:100%; margin:0; background:transparent; border:0; font-size:12px }
+    /* The tree scrolls inside the box and never decides the column's height: a
+       200-page map used to turn the whole Target view into a 2000px column and
+       push the results table off the screen. `contain:size` on the column is what
+       takes its content out of the grid row's height calculation, so the row is
+       set by the control panel beside it and the box simply fills what is left.
+       The narrow-window rule below restores a real height, because a size-contained
+       box has none of its own. */
+    #target > .workspace > .target-preview-column > .target-preview { min-height:0; overflow:auto }
+    #target > .workspace > .target-preview-column > .target-preview > .target-tree { min-height:0; height:auto }
+    .target-tree details { margin:2px 0 2px 12px }
+    .target-tree summary { cursor:pointer; color:var(--text); list-style:none; padding:3px 5px; border-radius:4px }
+    .target-tree summary::-webkit-details-marker { display:none }
+    .target-tree summary::before { content:"▸"; display:inline-block; width:16px; color:var(--purple); transition:transform .12s ease }
+    .target-tree details[open] > summary::before { transform:rotate(90deg) }
+    .target-tree .folder-label::before { content:"📁"; margin-right:6px }
+    .target-tree .file-label::before { content:"📄"; margin-right:6px }
+    .target-tree summary:hover, .target-tree .tree-file:hover { background:#172536 }
+    .target-tree .tree-file { display:block; margin:2px 0 2px 28px; padding:3px 5px; border-radius:4px; color:var(--muted); cursor:default }
+    .target-tree .tree-status { color:var(--accent); margin-left:8px }
+    #target .target-table th:last-child, #target .target-table td:last-child { width:174px }
+    /* Wide windows used to be a separate case: `@media (min-width:1800px)` lifted
+       the 1660px cap off `main` and these inner max-widths, so the layout had two
+       different shapes and the shape changed with browser zoom. `main` is now
+       uncapped everywhere, so "wide window" is the only shape and these caps have
+       to go with it — otherwise a form that is capped below 1800px and uncapped
+       above it would jump at exactly the zoom step that also moved the gutters. */
+    .grid, .dictionaries { max-width:none }
+    .workspace, .comparer-grid, .history-exchange, .agent-chat { width:100% }
+    .osint-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:10px }
+    .osint-card { min-width:0; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2) }
+    .osint-card h3 { margin:0 0 8px; color:var(--accent); font-size:12px; text-transform:uppercase; letter-spacing:.06em }
+    .osint-card pre { min-height:90px; max-height:280px; margin:0; font-size:12px }
+    /* The panel is one column: the details drawer used to occupy a 280px track
+       even while hidden, so the canvas lost a quarter of the width for a panel
+       nobody was looking at. The drawer is now an overlay pinned to the canvas
+       (see .osint-graph-drawer), so the graph gets the full workspace width and
+       the details still arrive from the side, on top of the graph. */
+    .osint-graph-panel { position:relative; display:grid; grid-template-columns:minmax(0,1fr); gap:10px; margin-top:10px; min-height:420px }
+    /* The overlay anchor. It is the stage's own box, so the drawer lines up with
+       the canvas without a measured offset, and it stays correct at every width
+       because it is not positioned against the panel or the page. */
+    .osint-graph-stage-wrap { position:relative; min-width:0 }
+    /* user-select:none on the canvas, because a drag is a drag. With the default
+       `auto`, dragging across the relation labels started a text selection and
+       the browser painted its own bars over the graph — they were read as relation
+       indicators, but they were the selection highlight, and they stayed after the
+       drag ended. The details drawer keeps selection: its payload is meant to be
+       read and copied. */
+    .osint-graph-stage { min-width:0; min-height:520px; border:1px solid var(--line); border-radius:8px; background:#080d14; overflow:hidden; position:relative; cursor:grab; user-select:none; -webkit-user-select:none }
+    .osint-graph-stage.is-panning { cursor:grabbing }
+    /* The Cytoscape container. It keeps the same box the old canvas had — full
+       width, 520px tall, the same radial backdrop — so nothing above or below it
+       moves. Cytoscape builds its layers inside; `touch-action:none` is what lets
+       a touch drag pan the graph instead of scrolling the page. */
+    #osint-graph-canvas { display:block; width:100%; height:520px; background:radial-gradient(circle at 50% 40%,#142338 0,#080d14 62%); touch-action:none }
+    #osint-graph-canvas:focus-visible { outline:2px solid var(--purple-strong); outline-offset:-2px }
+    /* A node is a control, so its focus ring is visible. Cytoscape puts the
+       element in the DOM, which is what makes this possible at all. */
+    #osint-graph-canvas .osint-graph-focusable:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px; border-radius:50% }
+    /* The keyboard layer. It is visually hidden, not `display:none`, because a
+       hidden control cannot take focus — that is the whole point of it. It becomes
+       visible when it does have focus, so a keyboard operator can see where they
+       are instead of trusting an invisible widget. */
+    .osint-graph-a11y { position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap }
+    .osint-graph-a11y:focus, .osint-graph-a11y:focus-visible { position:static; width:auto; height:auto; margin:0; overflow:visible; clip:auto; clip-path:none; display:inline-flex; align-items:center; gap:6px; padding:4px 8px; margin:6px 0 0; border:1px solid var(--line); border-radius:6px; background:var(--panel-2); color:var(--text); font-size:11px; outline:2px solid var(--purple-strong); outline-offset:2px }
+    .osint-graph-edge { stroke:#607995; stroke-width:1.5; opacity:.72; pointer-events:none }
+    .osint-graph-edge.selected { stroke:#a970ff; stroke-width:3; opacity:1 }
+    .osint-graph-edge-hit { fill:transparent; pointer-events:all; cursor:pointer; outline:none }
+    .osint-graph-edge-hit:hover, .osint-graph-edge-hit:focus { fill:rgba(169,112,255,.18) }
+    .osint-graph-edge-label { fill:#8fa5bd; font:10px ui-monospace,SFMono-Regular,Consolas,monospace; pointer-events:none }
+    .osint-graph-edge-label.selected { fill:#c9a6ff; font-weight:700 }
+    .osint-graph-node { cursor:pointer; outline:none }
+    .osint-graph-hit { pointer-events:all }
+    .osint-graph-node circle { stroke:#dbe7f5; stroke-width:1.5; transition:stroke-width .12s,filter .12s }
+    .osint-graph-node:hover circle,.osint-graph-node:focus circle { stroke-width:3; filter:drop-shadow(0 0 5px #43d9a3) }
+    .osint-graph-node.selected circle { stroke:#a970ff; stroke-width:3 }
+    .osint-graph-node text { fill:#e7f1fb; font:11px ui-monospace,SFMono-Regular,Consolas,monospace; pointer-events:none }
+    .osint-graph-node .osint-node-label-bg { fill:#0d1724; stroke:#31445d; stroke-width:1 }
+    .osint-graph-node .osint-node-type { fill:#8fa5bd; font-size:9px; text-transform:uppercase }
+    .osint-node-label-bg { pointer-events:none }
+    /* The drawer keeps its 280px width — the fields inside must not change size —
+       but it no longer takes a column: it floats over the canvas, anchored to the
+       stage wrapper, with a shadow so the graph underneath reads as covered rather
+       than as two panes side by side. `max-height:100%` keeps it inside the canvas
+       on a short stage, and `overflow:auto` scrolls the long payload itself. */
+    .osint-graph-drawer { position:absolute; top:0; right:0; z-index:3; width:280px; max-width:100%; max-height:100%; min-width:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:10px; overflow:auto; box-shadow:0 12px 32px #0000008c }
+    .osint-graph-drawer[hidden] { display:none }
+    .osint-graph-drawer h3 { margin:0 0 8px; color:var(--accent); font-size:13px }
+    .osint-graph-drawer pre { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font-size:11px; max-height:360px; overflow:auto }
+    .osint-graph-menu { position:fixed; z-index:1000; min-width:210px; padding:5px; border:1px solid var(--line); border-radius:7px; background:#101b29; box-shadow:0 10px 28px #0009 }
+    .osint-graph-menu[hidden] { display:none }
+    .osint-graph-menu button { display:block; width:100%; padding:7px 9px; border:0; border-radius:5px; background:transparent; color:var(--text); text-align:left; cursor:pointer }
+    .osint-graph-menu button:hover { background:#1d3047 }
+    .osint-graph-menu button:focus-visible { background:#1d3047; outline:2px solid var(--purple); outline-offset:1px }
+    .osint-graph-stats { color:var(--muted); font-size:11px }
+    .osint-transform-status { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0 0; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-2); font-size:11px; color:var(--muted) }
+    .osint-transform-status[hidden] { display:none }
+    .osint-transform-status .osint-transform-state { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; border:1px solid var(--line); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted) }
+    .osint-transform-status .osint-transform-detail { min-width:0; flex:1; overflow-wrap:anywhere; white-space:pre-wrap }
+    .osint-transform-status .osint-transform-meta { display:flex; flex-wrap:wrap; gap:6px }
+    .osint-transform-status .osint-transform-meta span { padding:2px 7px; border:1px solid var(--line); border-radius:5px }
+    .osint-transform-status[data-state="running"] { border-color:rgba(59,130,246,.45) }
+    .osint-transform-status[data-state="running"] .osint-transform-state { background:rgba(59,130,246,.14); border-color:rgba(59,130,246,.45); color:#60a5fa }
+    .osint-transform-status[data-state="completed"] { border-color:rgba(16,185,129,.45) }
+    .osint-transform-status[data-state="completed"] .osint-transform-state { background:rgba(16,185,129,.14); border-color:rgba(16,185,129,.45); color:#34d399 }
+    .osint-transform-status[data-state="empty"] { border-color:rgba(245,158,11,.45) }
+    .osint-transform-status[data-state="empty"] .osint-transform-state { background:rgba(245,158,11,.14); border-color:rgba(245,158,11,.45); color:#fbbf24 }
+    .osint-transform-status .osint-transform-controls { display:flex; gap:6px }
+    .osint-transform-status .osint-transform-controls[hidden] { display:none }
+    .osint-transform-status .osint-transform-file { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex-basis:100% }
+    .osint-transform-status .osint-transform-file[hidden] { display:none }
+    .osint-transform-status .osint-transform-file a { color:var(--info); text-decoration:underline }
+    .osint-transform-status .osint-transform-file a:hover,.osint-transform-status .osint-transform-file a:focus { color:var(--purple-strong) }
+    .osint-transform-status .osint-transform-file a:focus-visible { outline:2px solid var(--purple-strong); outline-offset:2px; border-radius:5px }
+    .osint-transform-status[data-state="paused"] { border-color:rgba(245,158,11,.45) }
+    .osint-transform-status[data-state="paused"] .osint-transform-state { background:rgba(245,158,11,.14); border-color:rgba(245,158,11,.45); color:var(--warning) }
+    .osint-transform-status[data-state="cancelled"] { border-color:rgba(148,163,184,.5) }
+    .osint-transform-status[data-state="cancelled"] .osint-transform-state { background:rgba(148,163,184,.14); border-color:rgba(148,163,184,.5); color:var(--muted) }
+    .osint-transform-status[data-state="failed"] { border-color:rgba(244,63,94,.5) }
+    .osint-transform-status[data-state="failed"] .osint-transform-state { background:rgba(244,63,94,.14); border-color:rgba(244,63,94,.5); color:#fb7185 }
+    .osint-transform-status[data-state="failed"] .osint-transform-detail { color:#fb7185 }
+    .osint-transform-warnings { margin:6px 0 0; padding:6px 0 0; border-top:1px dashed var(--line); width:100%; color:#fbbf24 }
+    .osint-transform-warnings[hidden] { display:none }
+    .osint-transform-warnings ul { margin:3px 0 0; padding-left:18px }
+    .status-badge, .method-badge { display:inline-flex; align-items:center; justify-content:center; padding:3px 7px; border-radius:999px; border:1px solid transparent; font-size:11px; font-weight:700; letter-spacing:.03em; white-space:nowrap }
+    .status-badge.status-1xx { background:rgba(59,130,246,.1); color:#60a5fa; border-color:rgba(59,130,246,.3) }
+    .status-badge.status-2xx { background:rgba(16,185,129,.1); color:#34d399; border-color:rgba(16,185,129,.3) }
+    .status-badge.status-3xx { background:rgba(6,182,212,.1); color:#22d3ee; border-color:rgba(6,182,212,.3) }
+    .status-badge.status-4xx { background:rgba(245,158,11,.1); color:#fbbf24; border-color:rgba(245,158,11,.3) }
+    .status-badge.status-5xx { background:rgba(244,63,94,.1); color:#fb7185; border-color:rgba(244,63,94,.3) }
+    .method-badge.method-get { color:#34d399; background:rgba(6,78,59,.4) }
+    .method-badge.method-post { color:#fbbf24; background:rgba(120,53,15,.4) }
+    .method-badge.method-put { color:#60a5fa; background:rgba(30,58,138,.4) }
+    .method-badge.method-delete { color:#fb7185; background:rgba(136,19,55,.4) }
+    .method-badge.method-patch { color:#c084fc; background:rgba(88,28,135,.4) }
+    .method-badge.method-options, .method-badge.method-head { color:#a1a1aa; background:#18181b }
+    /* Payload token classes. Every one of them reads a --syn-* custom property,
+       so the palette above stays the only place a colour is chosen.
+       The set is deliberately split by where a token can appear: the first line,
+       a body, and nothing in between — the header block is plain text and has no
+       class here at all. */
+    .http-method-token { color:var(--syn-method); font-weight:700 }
+    .http-version-token, .http-reason-token, .http-punct-token { color:var(--syn-punct) }
+    .http-path-token { color:var(--syn-path) }
+    .http-status-token { color:var(--syn-status); font-weight:700 }
+    /* A field name inside a body. The one place headers can still produce a
+       named token is a multipart Content-Disposition, which describes a field. */
+    .http-header-token, .http-form-key-token, .http-body-key-token { color:var(--syn-key) }
+    .http-form-value-token, .http-body-string-token { color:var(--syn-string) }
+    .http-number-token { color:var(--syn-number) }
+    .http-body-literal-token, .http-body-null-token { color:var(--syn-literal) }
+    .http-tag-token { color:var(--syn-tag) }
+    .http-attr-token { color:var(--syn-attr) }
+    .http-comment-token { color:var(--syn-comment); font-style:italic }
+    .http-marker-token { color:var(--syn-marker); font-weight:700 }
+    /* A cookie is one object seen three ways: its name, its value, and the
+       attributes that follow it in a Set-Cookie. They share a hue so that a
+       twenty-cookie header reads as one block of information. */
+    .http-cookie-name-token { color:var(--syn-cookie); font-weight:700 }
+    .http-cookie-value-token { color:var(--syn-cookie-value) }
+    .http-cookie-flag-token { color:var(--syn-cookie-flag) }
+    /* A secret is marked twice: the name says what the field is, and the value
+       carries the background so the credential itself is what the eye lands on. */
+    .http-sensitive-token { color:var(--syn-sensitive); font-weight:700 }
+    .http-sensitive-value-token { color:var(--syn-sensitive-fg); background:var(--syn-sensitive-bg); border-radius:3px; padding:0 2px }
+    .status-badge[data-status=""], .status-badge[data-status="0"], .status-badge[data-status="error"] { background:#1d1f23; color:#d4d4d8; border-color:#3f3f46 }
+    #toast-stack { position:fixed; right:18px; bottom:18px; z-index:5000; display:flex; flex-direction:column; gap:8px; pointer-events:none }
+    /* A toast announces, it does not print. A raw engine or worker error pasted
+       into one grew the toast to 20000px and dragged the page with it, so the
+       text is capped and scrolls inside the card the operator is meant to read. */
+    .toast { position:relative; min-width:220px; max-width:360px; max-height:min(40vh,320px); overflow:auto; overflow-wrap:anywhere; padding:10px 30px 10px 12px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:8px; background:#0d1724; box-shadow:0 14px 32px #0008; pointer-events:auto; transition:opacity .2s ease, transform .2s ease }
+    .toast strong { display:block; font-size:12px; color:var(--text) }
+    .toast span { display:block; margin-top:4px; color:var(--muted); font-size:11px; line-height:1.4 }
+    .toast .toast-close { position:absolute; top:6px; right:8px; background:transparent; border:none; color:var(--muted); font-size:14px; cursor:pointer; line-height:1; padding:2px 4px; border-radius:4px }
+    .toast .toast-close:hover { color:var(--text); background:rgba(255,255,255,0.1) }
+    .toast.toast-info { border-left-color:#38bdf8 }
+    .toast.toast-warning { border-left-color:#f59e0b }
+    .toast.toast-error { border-left-color:#f87171 }
+    .toast.toast-success { border-left-color:#34d399 }
+    /* Semantic JWT tokens for HTTP request/response highlighting */
+    .http-jwt-header-token { color:#f43f5e; font-weight:600 }
+    .http-jwt-payload-token { color:#c084fc; font-weight:600 }
+    .http-jwt-signature-token { color:#2dd4bf; font-weight:600 }
+    .http-jwt-dot { color:#94a3b8; font-weight:bold }
+    .osint-graph-help { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:7px 0 0; color:var(--muted); font-size:11px }
+    .osint-graph-panel .toolbar,.osint-graph-help { position:relative; z-index:2 }
+    .osint-graph-help strong { color:var(--text) }
+    .osint-graph-legend { display:flex; flex-wrap:wrap; gap:7px; margin-left:auto }
+    .osint-graph-legend span { display:inline-flex; align-items:center; gap:4px }
+    .osint-graph-legend i { width:9px; height:9px; border-radius:50%; display:inline-block }
+    .osint-graph-zoom { display:flex; gap:4px; align-items:center; margin-left:auto }
+    .osint-graph-zoom output { min-width:44px; text-align:center; color:var(--muted); font-size:11px }
+    /* On a narrow window a 280px overlay would leave almost no canvas visible, so
+       the same overlay becomes a sheet across the top of the canvas instead. The
+       rule keeps its own max-height: it must never grow taller than the stage it
+       covers, whatever the window does. */
+    @media (max-width:900px) { .osint-grid { grid-template-columns:1fr } .osint-graph-panel { grid-template-columns:1fr } .osint-graph-drawer { left:0; right:0; width:auto; max-height:min(300px,100%) } }
+    @media (max-width:900px) { .workspace,.inspector { grid-template-columns:1fr } .dictionary { grid-template-columns:1fr } .grid { grid-template-columns:1fr } .history-exchange { grid-template-columns:1fr } label { padding-top:4px } .header-tools > .muted { display:none }
+      /* Below 900px the two RAW panes stop sitting side by side and stack, so the
+         shared 58vh cap would make the pair taller than the window it lives in and
+         force a scroll to read a request against its response. The cap comes back
+         to the value the side-by-side layout used to have: the pair is then worth
+         about one window, which is the most that fits, and the smaller type still
+         buys the extra lines. */
+      #intruder > .inspector .inspector-panel pre { max-height:52vh; min-height:150px }
+    }
+    @media (max-width:900px) {
+      #target.active { height:auto; min-height:calc(100vh - 92px); overflow:visible; }
+      #target > .workspace { flex:0 0 auto; height:auto; overflow:visible; grid-template-columns:1fr; }
+      #target > .workspace > .target-control-panel { overflow:visible; }
+      /* Stacked, the preview has no row to match and a size-contained column has
+         no height of its own, so it is given one: a long tree must scroll inside
+         the map, not push the results table off the page. */
+      #target > .workspace > .target-preview-column { height:300px; max-height:300px; overflow:auto; }
+    }
+    @media (max-width:560px) { main { padding-top:8px } nav { margin-top:2px } nav .nav-tab { flex:1 1 calc(50% - 4px); min-width:0 } .toolbar > input,.toolbar > select,.toolbar > button { flex:1 1 140px } .workspace > section { padding:8px } .code-editor,.raw-editor { min-height:260px } .exchange-list { overflow-x:auto } .exchange-list table { min-width:760px } }
+    /* Keep the complete tool navigation on one stable row at browser zoom 100%. */
+    nav { flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; scrollbar-color:#52647b transparent }
+    nav::-webkit-scrollbar { height:5px }
+    nav::-webkit-scrollbar-track { background:transparent }
+    nav::-webkit-scrollbar-thumb { border-radius:5px; background:#52647b }
+    nav .nav-tab { flex:1 0 84px; min-width:84px; padding:7px 4px; gap:3px; overflow:hidden; font-size:10.5px; letter-spacing:0; white-space:nowrap }
+    nav .nav-tab > span:not(.nav-icon) { min-width:0; overflow:hidden; text-overflow:ellipsis }
+    nav .nav-tab .nav-icon, nav .nav-tab[data-tab="proxy"] .nav-icon { width:17px !important; height:17px !important; flex:0 0 17px }
+    nav .nav-tab[data-tab="ai"] .nav-icon { width:36px !important; height:36px !important; flex:0 0 36px }
+    @media (max-width:560px) { nav .nav-tab { flex:0 0 86px; min-width:86px } }
+    /* Keep the previous editor proportions; only compact the node palette. */
+    #automation.active { height:auto; min-height:calc(100vh - 150px); display:block; overflow:visible }
+    #automation.active .automation-shell { height:calc(100vh - 190px); min-height:700px; }
+    #automation.active .automation-sidebar { padding:7px; }
+    #automation.active .automation-palette { grid-template-columns:1fr; gap:2px; }
+    #automation.active .automation-palette-group { margin:3px 0 0; font-size:9px; }
+    #automation.active .automation-palette-item { min-width:0; min-height:22px; padding:2px 5px; gap:4px; font-size:9px; }
+    #automation.active .automation-palette-item > span:last-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    #automation.active .automation-palette-icon { width:17px; height:17px; flex:0 0 17px; font-size:9px; }
+    .automation-shell { flex:1; min-height:0; display:grid; grid-template-columns:220px minmax(0,1fr); border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel) }
+    .automation-sidebar { min-width:0; overflow:auto; padding:10px; border-right:1px solid var(--line); background:#0b141e }
+    .automation-sidebar-head { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:8px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase }
+    .automation-sidebar-head button { min-height:28px; padding:3px 8px }
+    .automation-search { width:100%; margin:0 0 8px }
+    .automation-list { display:grid; gap:5px; max-height:180px; overflow:auto; margin-bottom:12px }
+    .automation-list-item { display:flex; align-items:center; gap:5px; min-width:0; padding:6px 7px; border:1px solid transparent; border-radius:6px; background:#111c28; color:var(--muted); cursor:pointer; text-align:left }
+    .automation-list-item:hover,.automation-list-item.active { border-color:var(--accent); color:var(--text); background:#142b32 }
+    .automation-list-item strong { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px }
+    .automation-list-item small { display:block; color:var(--muted); font-size:10px }
+    .automation-list-item button { flex:none; min-height:24px; padding:2px 5px; color:var(--muted) }
+    .automation-palette { display:grid; gap:5px }
+    .automation-palette-group { margin:7px 0 2px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase }
+    .automation-palette-item { display:flex; align-items:center; gap:7px; width:100%; padding:7px; border:1px solid var(--line); border-radius:6px; background:#111c28; color:var(--text); cursor:grab; text-align:left; font-size:12px }
+    .automation-palette-item:hover { border-color:var(--accent); background:#152a33 }
+    .automation-palette-item:active { cursor:grabbing }
+    .automation-palette-icon { display:grid; place-items:center; width:24px; height:24px; flex:none; border-radius:6px; background:#25364b; color:var(--accent); font-weight:700 }
+    .automation-editor { min-width:0; min-height:0; display:flex; flex-direction:column; overflow:hidden }
+    .automation-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:6px; padding:8px; border-bottom:1px solid var(--line); background:#101a26 }
+    .automation-toolbar #workflow-name { flex:1; min-width:170px; font-weight:700 }
+    .automation-toolbar .workflow-project { color:var(--muted); font-size:11px; white-space:nowrap }
+    .automation-canvas-wrap { position:relative; flex:1; min-height:360px; overflow:hidden; background-color:#101923; background-image:radial-gradient(#53657b55 1px,transparent 1px); background-size:18px 18px; cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none }
+    .automation-canvas-wrap.is-panning, .automation-canvas-wrap.is-panning * { cursor:grabbing !important }
+    .workflow-canvas-controls { position:absolute; z-index:4; top:8px; right:10px; display:flex; align-items:center; gap:3px; padding:3px; border:1px solid #52647b; border-radius:6px; background:#0b141ee8; box-shadow:0 4px 12px #0006 }
+    .workflow-canvas-controls button { min-height:26px; padding:2px 7px; font-size:11px }
+    .workflow-canvas-controls span { min-width:42px; color:var(--muted); text-align:center; font:10px ui-monospace,monospace; cursor:pointer }
+    .workflow-canvas-controls span:hover { color:var(--text) }
+    #workflow-minimap { position:absolute; z-index:3; right:10px; bottom:10px; width:150px; height:92px; overflow:hidden; border:1px solid #52647b; border-radius:6px; background:#0b141edb; box-shadow:0 4px 12px #0006 }
+    #workflow-minimap-content { position:absolute; inset:5px; transform-origin:top left; opacity:.8 }
+    .workflow-minimap-node { position:absolute; width:12px; height:7px; border-radius:2px; background:#8b9bb4 }
+    .workflow-minimap-node.running { background:#60a5fa }.workflow-minimap-node.error { background:#fb7185 }
+    #workflow-canvas { position:relative; width:1800px; height:1100px; min-width:100%; min-height:100% }
+    #workflow-content { position:relative; width:1800px; height:1100px; transform-origin:top left }
+    #workflow-edges { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none }
+    #workflow-edges path { fill:none; stroke:#73839b; stroke-width:2.2; marker-end:url(#workflow-arrow) }
+    #workflow-edges path.active { stroke:var(--accent); stroke-width:3 }
+    .workflow-node { position:absolute; width:190px; min-height:94px; border:1px solid #64748b; border-radius:9px; background:#f8fafc; color:#172033; box-shadow:0 7px 18px #0005; cursor:grab; user-select:none }
+    .workflow-node:active { cursor:grabbing }
+    .workflow-node.selected { border:2px solid #2563eb; box-shadow:0 0 0 3px #2563eb33,0 8px 20px #0006 }
+    .workflow-node.running { border-color:#3b82f6; box-shadow:0 0 0 3px #3b82f633,0 8px 20px #0006; animation:workflow-pulse 1.2s ease-in-out infinite }
+    .workflow-node.success { border-color:#16a34a; box-shadow:0 0 0 2px #16a34a44,0 8px 20px #0006 }
+    .workflow-node.error { border-color:#e11d48; box-shadow:0 0 0 2px #e11d4844,0 8px 20px #0006 }
+    @keyframes workflow-pulse { 50% { filter:brightness(1.18) } }
+    .workflow-node.disabled { opacity:.5 }
+    .workflow-node-head { display:flex; align-items:center; gap:7px; padding:8px 9px; border-bottom:1px solid #d9e0ea; border-radius:8px 8px 0 0; background:#eef3f9; font-weight:700; font-size:12px }
+    .workflow-node-head .workflow-node-kind { margin-left:auto; color:#64748b; font-size:10px; font-weight:600 }
+    .workflow-node-body { padding:8px 9px; color:#475569; font:11px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .workflow-node-handle { position:absolute; top:42px; width:11px; height:11px; border:2px solid #fff; border-radius:50%; background:#2563eb; box-shadow:0 0 0 1px #2563eb; cursor:crosshair }
+    .workflow-node-handle.input { left:-6px }
+    .workflow-node-handle.output { right:-6px }
+    .workflow-node-handle.output.false { top:65px; background:#e11d48; box-shadow:0 0 0 1px #e11d48 }
+    .workflow-node-handle.output.true { top:42px; background:#16a34a; box-shadow:0 0 0 1px #16a34a }
+    .workflow-node-handle:hover { transform:scale(1.35) }
+    .workflow-node-delete { position:absolute; top:5px; right:5px; display:none; min-height:20px; padding:1px 5px; border:0; background:#e11d48; color:#fff; font-size:11px }
+    .workflow-node:hover .workflow-node-delete,.workflow-node.selected .workflow-node-delete { display:block }
+    .automation-canvas-hint { position:absolute; left:10px; bottom:9px; z-index:2; padding:5px 8px; border:1px solid #52647b; border-radius:5px; background:#0b141ed9; color:#cbd5e1; font-size:11px; pointer-events:none }
+    .automation-bottom { display:grid; grid-template-columns:minmax(230px,.85fr) minmax(0,1.15fr); min-height:190px; max-height:290px; border-top:1px solid var(--line); background:#0d1722 }
+    .workflow-inspector,.workflow-runs-panel { min-width:0; overflow:auto; padding:9px }
+    .workflow-inspector { border-right:1px solid var(--line) }
+    .workflow-inspector h3,.workflow-runs-panel h3 { margin:0 0 7px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em }
+    .workflow-inspector label { display:grid; grid-template-columns:92px minmax(0,1fr); align-items:center; gap:6px; margin:0 0 5px; padding:0; font-size:11px }
+    .workflow-inspector input,.workflow-inspector textarea,.workflow-inspector select { width:100%; min-width:0; margin:0; font-size:12px }
+    .workflow-inspector textarea { min-height:70px; resize:vertical; font-family:ui-monospace,SFMono-Regular,Consolas,monospace }
+    .workflow-inspector .workflow-param-object { min-height:54px }
+    .workflow-inspector-actions { display:flex; gap:5px; margin-top:7px }
+    .workflow-runs-head { display:flex; align-items:center; justify-content:space-between; gap:6px }
+    .workflow-runs-head h3 { margin-bottom:7px }
+    .workflow-run-actions { display:flex; gap:3px }
+    .workflow-run-actions button { min-height:24px; padding:2px 5px; font-size:10px }
+    .workflow-runs-table { width:100%; border:0; background:transparent; table-layout:fixed }
+    .workflow-runs-table th,.workflow-runs-table td { padding:5px 4px; border-bottom:1px solid var(--line); font-size:11px }
+    .workflow-runs-table th { background:transparent }
+    .workflow-runs-table tr { cursor:pointer }
+    .workflow-runs-table tr:hover { background:#172536 }
+    .workflow-run-status { font-weight:700 }
+    .workflow-run-status.completed { color:var(--green) }.workflow-run-status.failed,.workflow-run-status.cancelled,.workflow-run-status.interrupted { color:var(--danger,#ff7185) }.workflow-run-status.running,.workflow-run-status.queued,.workflow-run-status.waiting { color:var(--accent) }.workflow-run-status.paused { color:#ffb45a }
+    .workflow-log { max-height:100px; margin:6px 0 0; overflow:auto; color:var(--muted); font:10px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace; white-space:pre-wrap }
+    @media (max-width:900px) { .automation-shell { grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr) }.automation-sidebar { max-height:220px; border-right:0; border-bottom:1px solid var(--line) }.automation-bottom { grid-template-columns:1fr; max-height:360px }.workflow-inspector { border-right:0; border-bottom:1px solid var(--line) } }
+    @media (max-width:560px) { .automation-toolbar #workflow-name { flex-basis:100% }.automation-toolbar button { flex:1 1 120px } }
+    /* The per-file JavaScript dialog. Colours come from the same tokens the rest of
+   the app uses, so the window reads as part of the tool rather than as something
+   pasted on top of it; the only size that is set here is the window's, and it is
+   set in viewport units so it never grows past the screen it is opened on. */
+.target-js-dialog { width:min(980px,calc(100vw - 24px)); max-width:none; max-height:min(86vh,900px); padding:0; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); color:var(--text); box-shadow:0 18px 60px #0009 }
+.target-js-dialog::backdrop { background:#02060acc }
+.target-js-shell { display:flex; flex-direction:column; max-height:min(86vh,900px); min-height:0 }
+.target-js-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line) }
+.target-js-header h2 { margin:0; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+.target-js-header span { display:block; margin-top:4px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:10px; word-break:break-all }
+.target-js-header button { min-width:34px; height:34px; font-size:16px; line-height:1 }
+.target-js-body { overflow:auto; padding:12px 14px }
+.target-js-section { margin:0 0 14px }
+.target-js-section h3 { margin:0 0 6px; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted) }
+.target-js-list { list-style:none; margin:0; padding:0 }
+.target-js-list li { padding:4px 0; border-bottom:1px solid var(--panel-2); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:10px; line-height:1.45; word-break:break-word }
+.target-js-list li:last-child { border-bottom:0 }
+.target-js-note { color:var(--muted); font-size:10px }
+.template-store-dialog { width:min(1240px,calc(100vw - 24px)); height:min(820px,calc(100vh - 24px)); max-width:none; max-height:none; padding:0; border:1px solid #52647b; border-radius:12px; background:#0b141e; color:var(--text); box-shadow:0 24px 80px #000b }
+    .template-store-dialog::backdrop { background:#02060acc; backdrop-filter:blur(3px) }
+    .template-store-shell { display:flex; flex-direction:column; height:100%; min-height:0 }
+    .template-store-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line); background:#101a26 }
+    .template-store-header h2 { display:inline; margin:0 8px 0 0; font-size:18px }
+    .template-store-header-actions { display:flex; align-items:center; gap:6px }
+    .template-store-header-actions input { width:min(360px,42vw); min-height:34px }
+    .template-store-header-actions button,.template-store-preview-head button { min-width:32px; min-height:32px; padding:3px 8px; font-size:18px }
+    .template-store-layout { display:grid; grid-template-columns:210px minmax(0,1fr) 310px; flex:1; min-height:0 }
+    .template-store-sidebar { min-width:0; overflow:auto; padding:12px; border-right:1px solid var(--line); background:#0d1722 }
+    .template-store-sidebar label { display:block; margin:10px 0 4px; color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase }
+    .template-store-sidebar select { width:100% }
+    .template-store-scope { margin-top:16px; padding:9px; border:1px solid #52647b; border-radius:7px; background:#111f2d; color:var(--muted); font-size:11px }
+    .template-store-scope strong { display:block; margin-bottom:5px; color:var(--accent) }
+    .template-store-scope p { margin:0 0 7px; line-height:1.35 }
+    .template-store-scope label { display:flex; align-items:flex-start; gap:5px; margin:0; color:var(--text); font-size:10px; line-height:1.3; text-transform:none; letter-spacing:0 }
+    .template-store-scope input { flex:none; margin-top:1px }
+    .template-store-results { min-width:0; overflow:auto; padding:12px; background:#0b141e }
+    .template-store-featured { margin-bottom:14px }
+    .template-store-featured h3,.template-store-list h3 { margin:0 0 8px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em }
+    .template-store-featured-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:8px }
+    .template-store-list { margin-top:14px }
+    .template-store-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:8px }
+    .template-store-card { display:flex; flex-direction:column; min-height:170px; padding:10px; border:1px solid var(--line); border-radius:8px; background:#111c28; cursor:pointer }
+    .template-store-card:hover,.template-store-card.selected { border-color:var(--accent); background:#142b33 }
+    .template-store-card h4 { margin:0 0 5px; font-size:13px }
+    .template-store-card p { flex:1; margin:0 0 8px; color:var(--muted); font-size:11px; line-height:1.35 }
+    .template-store-badges { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:7px }
+    .template-store-badge { padding:2px 5px; border:1px solid #52647b; border-radius:4px; color:#cbd5e1; font-size:9px; text-transform:uppercase }
+    .template-store-badge.high,.template-store-badge.critical { border-color:#fb7185; color:#fda4af }
+    .template-store-badge.active { border-color:#fbbf24; color:#fde68a }
+    .template-store-card-meta { display:flex; justify-content:space-between; gap:5px; color:var(--muted); font-size:10px }
+    .template-store-card-actions { display:flex; gap:5px; margin-top:8px }
+    .template-store-card-actions button { flex:1; min-height:27px; padding:2px 5px; font-size:10px }
+    .template-store-preview { min-width:0; overflow:auto; padding:12px; border-left:1px solid var(--line); background:#0d1722 }
+    .template-store-preview-head { display:flex; align-items:flex-start; justify-content:space-between; gap:6px }
+    .template-store-preview-head h3 { margin:0; font-size:14px }
+    .template-preview-graph { display:flex; flex-wrap:wrap; align-items:center; gap:5px; min-height:100px; margin:10px 0; padding:10px; border:1px dashed #52647b; border-radius:7px; background:#09121c }
+    .template-preview-node { padding:5px 6px; border:1px solid #64748b; border-radius:5px; color:#e2e8f0; background:#1b2939; font-size:10px }
+    .template-preview-arrow { color:var(--accent); font-size:14px }
+    .template-store-preview dl { display:grid; grid-template-columns:90px minmax(0,1fr); gap:4px 7px; margin:0 0 10px; font-size:11px }
+    .template-store-preview dt { color:var(--muted) }.template-store-preview dd { margin:0; overflow-wrap:anywhere }
+    .template-store-preview .primary { width:100%; margin-top:12px }
+    .template-store-variable { display:grid; gap:3px; margin-top:8px }
+    .template-store-variable label { color:var(--muted); font-size:10px }
+    .template-store-preview .hint { margin-top:8px; color:#fbbf24 }
+    @media (max-width:1000px) { .template-store-layout { grid-template-columns:180px minmax(0,1fr) }.template-store-preview { position:absolute; inset:58px 0 0 auto; width:min(360px,90vw); border-left:1px solid var(--line); box-shadow:-12px 0 30px #0008 } }
+    @media (max-width:650px) { .template-store-dialog { width:calc(100vw - 8px); height:calc(100vh - 8px) }.template-store-header { align-items:flex-start; flex-direction:column }.template-store-header-actions { width:100% }.template-store-header-actions input { flex:1; width:auto }.template-store-layout { grid-template-columns:1fr }.template-store-sidebar { border-right:0; border-bottom:1px solid var(--line); max-height:190px }.template-store-results { padding:8px } }
+
+    /* ── Header Status Indicators ────────────────────────────────────────── */
+    .header-status { display:inline-flex; align-items:center; gap:0; padding:2px 4px; border:1px solid #1e2d40; border-radius:6px; background:#060a10cc; font-size:11px }
+    .ss-item { display:inline-flex; align-items:center; gap:5px; padding:2px 7px; border-right:1px solid #1e2d40; color:var(--muted); white-space:nowrap; cursor:default; transition:background .12s ease }
+    .ss-item:last-child { border-right:0 }
+    .ss-item:hover { background:#0f1a28 }
+    .ss-dot { display:inline-block; width:7px; height:7px; border-radius:50%; flex:none; transition:background .3s ease, box-shadow .3s ease }
+    .ss-dot.ok { background:#43d9a3; box-shadow:0 0 6px #43d9a388 }
+    .ss-dot.err { background:#ff5f7a; box-shadow:0 0 6px #ff5f7a88; animation:ss-pulse .9s ease-in-out infinite }
+    .ss-dot.pending { background:#ffb347; box-shadow:0 0 6px #ffb34788 }
+    .ss-dot.off { background:#3a4a5c }
+    @keyframes ss-pulse { 50% { opacity:.4 } }
+    .ss-label { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.05em }
+    .ss-value { color:var(--text); font-size:11px; max-width:180px; overflow:hidden; text-overflow:ellipsis }
+    .ss-retry { border:0; background:transparent; padding:0 3px; min-height:16px; font-size:11px; color:var(--purple); cursor:pointer; text-decoration:none; margin-left:1px; line-height:1 }
+    .ss-retry:hover { color:var(--accent) }
+
+    /* ── P0: Context Menu ───────────────────────────────────────────────── */
+    #ctx-menu { position:fixed; z-index:9999; min-width:210px; padding:4px 0; border:1px solid #2d4058; border-radius:8px; background:#0d1824ee; backdrop-filter:blur(8px); box-shadow:0 8px 28px #000b, 0 0 0 1px #43d9a322; color:var(--text); font-size:12px; display:none; animation:ctx-in .1s ease }
+    @keyframes ctx-in { from { opacity:0; transform:scale(.96) translateY(-4px) } to { opacity:1; transform:none } }
+    #ctx-menu button { display:flex; align-items:center; gap:8px; width:100%; padding:7px 14px; min-height:0; border:0; border-radius:0; background:transparent; color:var(--text); font-size:12px; font-weight:500; text-align:left; cursor:pointer; transition:background .1s ease }
+    #ctx-menu button:hover { background:#172536 }
+    #ctx-menu button.danger { color:#ff7185 }
+    #ctx-menu button.danger:hover { background:#2a1620 }
+    #ctx-menu .ctx-icon { width:15px; text-align:center; opacity:.7 }
+    #ctx-menu .ctx-menu-head { padding:7px 14px 5px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px }    #command-palette { position:fixed; inset:15vh auto auto 50%; z-index:6000; width:min(520px,calc(100vw - 28px)); transform:translateX(-50%); padding:8px; border:1px solid var(--line); border-radius:10px; background:#0d1724; box-shadow:0 24px 70px #000b; }
+    #command-palette[hidden] { display:none }
+    #command-palette input { width:100%; margin-bottom:6px }
+    #command-palette-list { display:grid; gap:3px; max-height:45vh; overflow:auto }
+    #command-palette-list button { display:flex; justify-content:space-between; width:100%; padding:8px 10px; border:0; border-radius:4px; background:transparent; color:var(--text); text-align:left; font-size:12px }
+    #command-palette-list button:hover { background:#182635 }
+    #command-palette-list button:focus-visible { background:#182635; outline:2px solid var(--purple); outline-offset:-2px }
+    #ctx-menu hr { margin:3px 8px; border:0; border-top:1px solid #1e2d40 }
+    .ctx-trigger { border:0 !important; background:transparent !important; color:var(--muted) !important; padding:2px 5px !important; min-height:22px !important; font-size:13px !important; cursor:pointer; border-radius:4px; transition:color .12s ease, background .12s ease }
+    .ctx-trigger:hover { color:var(--text) !important; background:#1c2d3e !important }
+
+    /* ── P0: Request Inspector (Repeater) ───────────────────────────────── */
+    #req-inspector-wrap { margin:6px 0 2px; border:1px solid var(--line); border-radius:7px; background:#0b1320; overflow:hidden }
+    #req-inspector-toggle { display:flex; align-items:center; justify-content:space-between; padding:6px 10px; cursor:pointer; user-select:none; color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; background:#0d1622; border-bottom:0; transition:background .12s ease }
+    #req-inspector-toggle:hover { background:#121e2e }
+    #req-inspector-toggle .ri-arrow { display:inline-block; transition:transform .15s ease; margin-left:4px }
+    #req-inspector-wrap.open #req-inspector-toggle { border-bottom:1px solid var(--line) }
+    #req-inspector-wrap.open #req-inspector-toggle .ri-arrow { transform:rotate(180deg) }
+    #req-inspector-body { display:none; padding:8px 10px; gap:10px }
+    #req-inspector-wrap.open #req-inspector-body { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    .ri-section h4 { margin:0 0 5px; color:var(--accent); font-size:10px; text-transform:uppercase; letter-spacing:.06em }
+    .ri-table { width:100%; border-collapse:collapse; font-size:11px }
+    .ri-table th { color:var(--muted); font-size:10px; text-align:left; padding:2px 5px; font-weight:700 }
+    .ri-table td { padding:2px 5px; font:12px ui-monospace,monospace; border-top:1px solid #1a2636; word-break:break-all }
+    .ri-table td:first-child { color:var(--accent); min-width:80px; max-width:140px }
+    .ri-table tr:hover td { background:#111e2d }
+    .ri-edit-btn { border:0; background:transparent; padding:1px 4px; min-height:16px; font-size:10px; color:var(--purple); cursor:pointer }
+    .ri-empty { color:var(--muted); font-size:11px; font-style:italic }
+    .ri-tabs { display:flex; gap:3px; margin-bottom:6px }
+    .ri-tabs button { min-height:24px; padding:3px 7px; font-size:10px; border-radius:5px }
+    .ri-tabs button.active { background:#14634e; border-color:var(--accent); color:#f2fffa }
+    #ri-raw-section { grid-column:1 / -1 }
+    #ri-raw-preview { margin:0; max-height:220px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; line-height:1.45 }
+    @media (max-width:900px) { #req-inspector-wrap.open #req-inspector-body { grid-template-columns:1fr } }

@@ -1,0 +1,3215 @@
+<script nonce="{{ csp_nonce }}">
+const translations = {
+  uk: {
+    'projects.title': 'Проєкти',
+    'projects.subtitle': 'Організація робочих просторів, History, Traffic та Workflows',
+    'projects.active': 'Активний проєкт',
+    'projects.scope': 'Project групує дані й workflow; URL-політику не застосовує',
+    'projects.purpose': 'Project — це папка для History, Traffic, Workflows та OSINT graphs. Він не є allowlist і не блокує інші URL.',
+    'projects.noActiveSummary': 'Активний Project не вибрано. Інструменти можна використовувати без нього.',
+    'projects.new': 'Новий проєкт',
+    'projects.manage': 'Керувати проєктом',
+    'projects.delete': 'Видалити проєкт',
+    'projects.deleteHint': 'Видалення проєкту назавжди видаляє всі пов’язані записи.',
+    'projects.available': 'Доступні проєкти',
+    'projects.empty': 'Проєктів ще немає. Створіть проєкт, щоб упорядкувати робочий простір.',
+    'projects.countOne': 'проєкт',
+    'projects.countMany': 'проєктів',
+    'projects.select': 'Вибрати проєкт',
+    'projects.manageShort': 'Керувати',
+    'projects.dialogTitle': 'Керування проєктом',
+    'common.name': 'Назва',
+    'common.target': 'Ціль',
+    'common.url': 'URL',
+    'common.environment': 'Середовище',
+    'common.routeProfile': 'Профіль маршруту',
+    'common.cancel': 'Скасувати',
+    'common.save': 'Зберегти',
+    'common.confirm': 'Підтвердити',
+    'common.close': 'Закрити',
+    'projects.noTarget': 'Без цілі',
+    'projects.noEnvironment': 'Без середовища',
+    'projects.none': 'Немає проєкту',
+    'projects.label': 'Проєкт',
+    'projects.exportLabel': 'Експорт',
+    'projects.exportAria': 'Експорт проєкту',
+    'projects.exportJsonHint': 'Бандл для повторного імпорту',
+    'projects.exportHtmlHint': 'Інтерактивний звіт',
+    'projects.exportCsvHint': 'По рядку на запис',
+    'projects.import': 'Імпортувати проєкт',
+    'projects.exportWorking': 'Читання проєкту…',
+    'projects.exportFailed': 'Не вдалося експортувати проєкт',
+    'projects.importWorking': 'Імпорт проєкту…',
+    'projects.importConfirm': 'Імпортувати «{name}» як новий проєкт? Поточний проєкт залишиться без змін, а імпортований з’явиться поруч.',
+    'projects.importDone': 'Проєкт «{name}» імпортовано',
+    'projects.importFailed': 'Не вдалося імпортувати проєкт',
+    'projects.importEmpty': 'Бандл не містив жодного запису',
+    'projects.reportOverview': 'Проєкт',
+    'projects.reportNotes': 'Нотатки',
+    'projects.reportTech': 'Спостереження щодо технологій',
+    'projects.reportEndpoints': 'Ендпоінти',
+    'projects.reportScans': 'Сканування',
+    'projects.reportTargets': 'Обходи Target',
+    'projects.reportWorkflows': 'Автоматизації',
+    'projects.reportEntities': 'Сутності OSINT',
+    'projects.reportRelations': 'Зв’язки OSINT',
+    'projects.reportSecrets': 'Посилання на секрети',
+    'projects.reportEndpointsTitle': 'Спостережені ендпоинти',
+    'projects.reportScansTitle': 'Запуски сканера',
+    'projects.reportGraphsTitle': 'Графи OSINT',
+    'projects.reportWorkflowsTitle': 'Пов’язані автоматизації',
+    'projects.reportSecretsTitle': 'Посилання на секрети',
+    'projects.reportTrafficTitle': 'Зафіксований трафік',
+    'projects.reportEngine': 'Рушій',
+    'projects.reportHighest': 'Найвища severity',
+    'projects.reportFindings': 'Знахідки',
+    'projects.reportStatuses': 'Статуси',
+    'projects.reportParameters': 'Параметри',
+    'projects.reportStatus': 'Статус',
+    'projects.reportNodes': 'Вузли',
+    'projects.reportSchedule': 'Розклад',
+    'projects.reportSize': 'Розмір',
+    'projects.reportSource': 'Джерело',
+    'projects.exportFusion': 'Зведений Fusion звіт',
+    'projects.exportFusionHint': '4-рівневий мультирушійний HTML звіт',
+    'projects.exportSarif': 'SARIF 2.1.0',
+    'projects.exportSarifHint': 'Стандарт OASIS безпеки для CI/CD',
+    'projects.reportSchemaVersion': 'Версія схеми',
+    'projects.reportExportedAt': 'Дата експорту',
+    'projects.reportVulnerabilities': 'Знайдені вразливості',
+    'projects.reportPostureScore': 'Рейтинг безпеки',
+    'projects.reportSeverityBreakdown': 'Розподіл за критичністю',
+    'projects.reportVulnerabilitiesTitle': 'Реєстр виявлених вразливостей',
+    'projects.reportNoVulnerabilities': 'Вразливостей не виявлено',
+    'projects.reportRemediation': 'Рекомендації щодо усунення',
+    'projects.reportSeverity': 'Критичність',
+    'projects.reportProofOfConcept': 'Доказ експлуатації (PoC)',
+    'projects.reportPrint': 'Друк / Зберегти як PDF',
+    'projects.reportFilterAll': 'Усі',
+    'projects.reportFilterCrit': 'Критичні',
+    'projects.reportFilterHigh': 'Високі',
+    'projects.reportFilterMed': 'Середні',
+    'projects.reportFilterLow': 'Низькі',
+    'projects.reportFilterInfo': 'Інфо',
+    'projects.reportKey': 'Ключ',
+    'projects.reportRef': 'Посилання на значення',
+    'projects.reportGraph': 'Граф',
+    'projects.reportFilter': 'Пошук у розділі',
+    'projects.reportEmpty': 'У цьому розділі поки немає записів.',
+    'projects.reportLargeSection': 'У цьому розділі {rows} записів. Таблиця містить усі записи, а пошук вище читає їх повністю.',
+    'projects.reportEvidenceNote': 'Повні тіла запитів і відповідей кожного обміну лежать у JSON-бандлі цього проєкту: його можна імпортувати назад і відкрити кожен обмін у Repeater. Цей звіт показує огляд робочого простору, а не дублює тіла.',
+    'projects.reportCount.endpoints': 'ендпоинтів',
+    'projects.reportCount.secret_references': 'посилань на секрети',
+    'projects.reportCount.scanner_runs': 'запусків сканера',
+    'projects.reportCount.target_jobs': 'обходів Target',
+    'projects.reportCount.workflows': 'автоматизацій',
+    'projects.reportCount.workflow_runs': 'виконань',
+    'projects.reportCount.osint_graphs': 'графів OSINT',
+    'projects.reportCount.osint_entities': 'сутностей',
+    'projects.reportCount.osint_relations': 'зв’язків',
+    'projects.reportCount.traffic': 'обмінів',
+    'projects.reportCount.intruder_attacks': 'атак',
+    'projects.reportCount.capture_contexts': 'контекстів захоплення',
+    'intruder.exportLabel': 'Експорт',
+    'intruder.exportAria': 'Експорт результатів Intruder',
+    'intruder.exportJsonHint': 'Кожен обмін як є',
+    'intruder.exportHtmlHint': 'Інтерактивний звіт',
+    'intruder.exportCsvHint': 'По рядку на результат',
+    'intruder.detectEnabled': 'Визначити успішний вхід',
+    'intruder.detectHint': 'Перед запуском запит повторюється з неможливим паролем, щоб зрозуміти, як відповідає невдалий вхід. Кожен результат порівнюється з цією відповіддю, а відмінність за розміром, статусом, редиректом, cookie або тілом позначається як збіг у таблиці результатів.',
+    'intruder.detectSignalsAria': 'Сигнали, що порівнюються з невдалим входом',
+    'intruder.detectSignalStatus': 'Статус',
+    'intruder.detectSignalRedirect': 'Редирект',
+    'intruder.detectSignalCookie': 'Cookie',
+    'intruder.detectSignalLength': 'Розмір відповіді',
+    'intruder.detectSignalBody': 'Тіло',
+    'intruder.detectTolerance': 'Допуск розміру (байти)',
+    'intruder.detectToleranceTitle': 'Відповіді, що відрізняються від невдалого входу менше ніж на стільки байтів, вважаються тим самим розміром',
+    'intruder.detectCalibration': 'Зразків невдалого входу',
+    'intruder.detectCalibrationTitle': 'Скільки відповідей невдалого входу знімається до початку атаки',
+    'intruder.detectRuleTypeAria': 'Тип правила збігу',
+    'intruder.detectRuleBodyContains': 'Тіло містить',
+    'intruder.detectRuleBodyNotContains': 'Тіло не містить',
+    'intruder.detectRuleHeaderContains': 'Заголовок містить',
+    'intruder.detectRuleStatusEquals': 'Статус дорівнює',
+    'intruder.detectRuleHeaderName': 'Назва заголовка',
+    'intruder.detectRuleValue': 'Значення',
+    'intruder.detectRuleRegex': 'Регулярний вираз',
+    'intruder.detectRuleAdd': 'Додати правило',
+    'intruder.detectRuleClear': 'Очистити правила',
+    'intruder.detectRuleRemove': 'Прибрати правило',
+    'intruder.detectNoRules': 'Правил немає: вирішують сигнали вище.',
+    'intruder.detectOff': 'Визначення входу вимкнено.',
+    'intruder.detectCalibrating': 'Знімається відповідь невдалого входу…',
+    'intruder.detectUnavailable': 'Не вдалося зняти жодного зразка невдалого входу — працюють лише правила.',
+    'intruder.detectBaseline': 'Невдалий вхід: статус {status}, розмір {size} B, зразків {samples}, допуск {tolerance} B. Вирішують: {decided}.',
+    'intruder.detectDecidedRules': 'правила',
+    'intruder.detectDecidedSignals': 'сигнали',
+    'intruder.detectColumn': 'Збіг',
+    'intruder.detectBadge': 'ЗБІГ',
+    'intruder.detectMatches': 'збігів',
+    'intruder.detectOnlyMatches': 'Лише збіги',
+    'intruder.detectBaselineShort': 'Невдалий вхід',
+    'intruder.detectReason_status': 'статус',
+    'intruder.detectReason_redirect': 'редирект',
+    'intruder.detectReason_cookie': 'новий cookie',
+    'intruder.detectReason_length': 'інший розмір',
+    'intruder.detectReason_body': 'інше тіло',
+    'intruder.detectReason_status_equals': 'статус',
+    'intruder.detectReason_body_contains': 'тіло містить',
+    'intruder.detectReason_body_not_contains': 'тіло не містить',
+    'intruder.detectReason_header_contains': 'заголовок містить',
+    'intruder.reportResults': 'Результатів',
+    'intruder.reportResultsTitle': 'Результати атаки',
+    'intruder.reportError': 'Помилка',
+    'intruder.reportPayloads': 'Пейлоадів',
+    'intruder.reportElapsed': 'Час відповідей',
+    'intruder.reportBytes': 'Байт відповідей',
+    'intruder.reportMode': 'Режим',
+    'intruder.reportTarget': 'Ціль',
+    'intruder.reportProject': 'Проєкт',
+    'intruder.reportAttackId': 'ID атаки',
+    'intruder.reportStatus': 'Стан',
+    'intruder.reportJobs': 'Виконано запитів',
+    'intruder.reportFailed': 'помилок',
+    'intruder.reportDictionaries': 'Словники',
+    'intruder.reportRunTitle': 'Про атаку',
+    'intruder.reportEvidence': 'Запит і відповідь',
+    'intruder.reportEvidenceShow': 'Показати',
+    'intruder.reportEvidenceFor': 'Показати запит і відповідь для результату {index}',
+    'intruder.reportLarge': 'У звіті {rows} результатів на {bytes} байт відповідей. Таблиця містить усі результати; повний запит і відповідь завантажуються лише коли їх відкривають, тому фільтри й пошук працюють так само швидко.',
+    'intruder.reportRequest': 'Запит',
+    'intruder.reportResponse': 'Відповідь',
+    'intruder.reportIndex': '#',
+    'intruder.reportFilter': 'Пошук за статусом, URL або пейлоадом',
+    'intruder.reportAll': 'Усі',
+    'intruder.reportNoMatch': 'Нічого не знайдено за цим фільтром.',
+    'intruder.reportEmpty': 'Ця атака не повернула жодного результату.',
+    'intruder.reportPath': 'Шлях',
+    'intruder.reportObserved': 'Спостережено',
+    'export.unsupported': 'Цей формат експорту недоступний',
+    'export.failed': 'Експорт не вдався',
+    'scanner.reportRefused': 'Сервер відхилив звіт сканера',
+    'projects.namePrompt': 'Назва проєкту',
+    'nav.projects': 'Проєкти',
+    'nav.repeater': 'Повторювач',
+    'nav.intruder': 'Інтрудер',
+    'nav.target': 'Ціль',
+    'nav.osint': 'Розвідка',
+    'nav.decoder': 'Декодер',
+    'nav.scanner': 'Сканер',
+    'nav.proxy': 'Tor/Проксі',
+    'nav.history': 'Історія',
+    'nav.traffic': 'Трафік',
+    'nav.ai': 'Агент',
+    'target.engine': 'Рушій',
+    'target.staticEngine': 'Статичний HTTP-обхід',
+    'target.browserEngine': 'Обхід через браузер',
+    'target.navigationMode': 'Режим навігації',
+    'target.formMode': 'Режим форми (авто)',
+    'target.mode': 'Режим цілі',
+    'target.formHint': 'Режим форми: краулер сам знаходить усі поля й кнопки в DOM і працює з ними без селекторів.',
+    'target.navigationHint': 'Режим навігації: браузерний обхід лише для читання.',
+    'target.autoScopeLabel': 'Автопрохід',
+    'target.autoScopeForms': 'Тільки форми',
+    'target.autoScopeClicks': 'Тільки кнопки',
+    'target.autoScopeBoth': 'Форми і кнопки',
+    'target.autoHintForms': 'Заповнить усі поля й надішле кожну форму. Кнопки не натискає.',
+    'target.autoHintClicks': 'Натисне кнопки й перемикачі. Форми не заповнить і не надішле.',
+    'target.autoHintBoth': 'Форми і кнопки разом. Посилання не натискаються — краулер відкриває їх сам.',
+    'target.autoActions': 'Авто-дії',
+    'target.autoForms': 'форм',
+    'target.autoControls': 'кліків',
+    'target.autoFailed': 'не вдалося',
+    'target.autoTitle': 'Автоматичні дії на цій сторінці',
+    'target.browser': 'Браузер',
+    'target.captureContext': 'Контекст passive capture',
+    'target.noCaptureContext': 'Без capture context (не прив’язано до Project)',
+    'target.captureName': 'Назва capture context',
+    'target.captureNoProject': 'Без Project (capture context без прив’язки)',
+    'target.captureCreate': 'Створити capture context',
+    'target.captureReady': 'Захоплення: {name} · {scope}',
+    'target.captureUnscoped': 'Без прив’язки до Project',
+    'target.captureBrowserOnly': 'Capture context використовується browser-driven Mode',
+    'target.captureRouteHint': 'Класифікація passive capture потребує local proxy route',
+    'agent.startConversation': 'Почніть QA-розмову.',
+    'comparer.empty': 'Результати порівняння з’являться тут.',
+    'repeater.rawEditor': 'Редактор raw HTTP-запиту',
+    'repeater.shortcut': 'Ctrl/Cmd + Enter для надсилання',
+    'button.send': 'Надіслати',
+    'button.copyResponse': 'Копіювати відповідь',
+    'button.clear': 'Очистити',
+    'label.request': 'Запит',
+    'label.response': 'Відповідь',
+    'response.empty': "Відповідь з'явиться тут.",
+    host: 'Хост',
+    path: 'Шлях / запит',
+    'button.mark': 'Додати маркери §',
+    'button.apply': 'Застосувати трансформацію',
+    'button.clearTransformations': 'Очистити трансформації',
+    'button.addDictionary': 'Додати словник',
+    'button.runAttack': 'Запустити атаку',
+    'button.saveAttack': 'Зберегти атаку',
+    'button.pauseAttack': 'Призупинити атаку',
+    'button.resumeAttack': 'Відновити атаку',
+    'button.cancelAttack': 'Скасувати атаку',
+    'button.clearResults': 'Очистити результати',
+    'button.loadSelected': 'Завантажити вибране',
+    'button.runSelected': 'Запустити вибране',
+    'button.clearFilter': 'Очистити фільтр',
+    'button.exportHistory': 'Експортувати вибране JSON',
+    'button.deleteSelected': 'Видалити вибране',
+    'button.clearHistory': 'Очистити історію',
+    'button.refreshTraffic': 'Оновити трафік',
+    'button.pauseTraffic': 'Пауза',
+    'button.resumeTraffic': 'Старт',
+    'button.exportTraffic': 'Експортувати все',
+    'traffic.recording': 'Запис активний',
+    'traffic.paused': 'Запис призупинено',
+    'traffic.pause': 'Пауза запису трафіку',
+    'traffic.resume': 'Відновити запис трафіку',
+    'traffic.sort': 'Сортувати трафік',
+    'traffic.rowActions': 'Дії рядка',
+    'traffic.scopeLinked': 'прив’язано до проєкту',
+    'traffic.scopeIn': 'старе прив’язування до проєкту',
+    'traffic.scopeOut': 'стара метадата scope',
+    'traffic.scopeInvalid': 'некоректний контекст',
+    'traffic.scopeUnscoped': 'без прив’язки',
+    'header.target': 'Ціль',
+    'header.optionalOverride': 'Необов’язкова заміна з’єднання',
+    'header.selectMark': 'Виділіть текст і додайте маркери',
+    'header.transformations': 'Трансформації',
+    'header.dictionaries': 'Словники payload',
+    'header.selectedRequest': 'Вибраний запит',
+    'header.selectedResponse': 'Вибрана відповідь',
+    'header.attackResult': 'Виберіть результат Інтрудера',
+    'hint.payloadDictionary': 'Значення словника підставляються у позначений запит. Один словник використовуйте для Sniper/Battering Ram, кілька — для Pitchfork/Cluster Bomb. Генератор лише швидко створює повторювані тестові значення, а не запускає атаку автоматично.',
+    'hint.optionalHTTPS': 'HTTPS',
+    'hint.https': 'HTTPS',
+    'port': 'Порт',
+    'hint.savedAttacks': 'Збережені атаки',
+    'hint.filter': 'Фільтрувати за статусом або payload',
+    'hint.originalOrder': 'Початковий порядок',
+    'hint.ascending': 'За зростанням',
+    'hint.descending': 'За спаданням',
+    'hint.onePayload': 'один payload на рядок',
+    'hint.valuePrependAppend': 'Значення для prepend/append',
+    'intruder.dictionaryName': 'Назва словника',
+    'intruder.dictionaryDefault': 'Словник {index}',
+    'intruder.chooseDictionaryFile': 'Вибрати файл словника',
+    'intruder.payloadsLoaded': 'Завантажено payload: {count}',
+    'intruder.dictionaryError': 'Помилка словника: {error}',
+    'intruder.transformationsCleared': 'Трансформації очищено.',
+    'state.requestEmpty': 'Запит порожній.',
+    'state.responseEmpty': "Відповідь з'явиться тут.",
+    'state.responsePending': 'Очікування відповіді...',
+    'state.noResults': 'Результатів немає.',
+    'state.selectHistory': 'Виберіть запис історії.',
+    'history.loadMore': 'Завантажити ще · {count} з {total}',
+    'history.loadMoreDone': 'Усі {total} записів History завантажено',
+    'history.loadingRecord': 'Читання повного запису…',
+    'history.loadFailedTitle': 'History',
+    'traffic.loadMore': 'Завантажити ще з бази · {count} з {total}',
+    'traffic.loadMoreHint': 'Довічні записи пасивного proxy',
+    'traffic.loadingRecord': 'Читання повного обміну…',
+    // The wording the cell returns to once the load finishes or fails: a loading
+    // message left in place is a cell that still says it is reading a record the
+    // table already has.
+    'traffic.selectRow': 'Виберіть запис у рядку.',
+    'traffic.loadFailedTitle': 'Traffic',
+    'state.selectTraffic': 'Виберіть запис трафіку.',
+    'table.source': 'Джерело',
+    'table.close': 'Закрити діалог',
+    // A History row names the tool that sent it and the run it belongs to, so a
+    // scan's seventeen proxied requests are not read as ambient browsing.
+    'history.source.repeater': 'Repeater',
+    'history.source.intruder': 'Intruder',
+    'history.source.lastByte': 'Last-Byte',
+    'history.source.proxy': 'Проксі',
+    'history.source.tool': 'Інструмент',
+    'history.source.unknown': 'Інше',
+    'table.sourceIP': 'IP джерела',
+    'table.host': 'Хост',
+    'table.method': 'Метод',
+    'table.url': 'URL',
+    'table.status': 'Статус',
+    'table.length': 'Розмір',
+    'table.mime': 'MIME',
+    'table.payload': 'Пейлоад',
+    'table.time': 'Час',
+    'table.actions': 'Дії',
+    'table.resizeHandleAria': 'Змінити висоту таблиці. Стрілки — висота, Enter — на весь екран, Escape — вихід',
+    'button.view': 'Переглянути',
+    'button.saveRow': 'Зберегти рядок',
+    'button.sendAI': 'Надіслати до AI',
+    'button.sendExchangeAI': 'Надіслати обмін до AI',
+    'button.sendResultsAI': 'Надіслати результати до AI',
+    'button.sendMapAI': 'Надіслати карту до AI',
+    'button.sendOSINTAI': 'Надіслати OSINT до AI',
+    'button.sendScannerAI': 'Надіслати сканування до AI',
+    'button.sendChat': 'Надіслати',
+     'button.sendAutomation': 'Надіслати в Automation',
+    'agent.attachedDetails': 'Деталі',
+    'agent.clearAll': 'Очистити все',
+    'agent.remove': 'Видалити',
+    'ai.chatPlaceholder': 'Попросіть агента перевірити докази або виконати дозволений QA-крок',
+    'button.remove': 'Видалити',
+    'button.compare': 'Порівняти',
+    'button.copy': 'Копіювати',
+    'status.pending': 'очікування',
+    'label.concurrency': 'Паралельність',
+    'label.start': 'Початок',
+    'label.end': 'Кінець',
+    'label.step': 'Крок',
+    'button.compareRequest': 'Порівняти запит',
+    'button.compareResponse': 'Порівняти відповідь',
+    'button.decodeRequest': 'Декодувати запит',
+    'button.decodeResponse': 'Декодувати відповідь',
+    'button.tagNote': 'Тег / нотатка',
+    'state.attackResults': 'Результати з’являться тут.',
+    'state.loaded': 'завантажено',
+    'state.payloads': 'payload'
+    ,'exchange.hostSearch': 'Пошук за доменом або хостом'
+    ,'intruder.attackMode': 'Режим атаки'
+    ,'intruder.delay': 'Затримка між запитами (мс)'
+    ,'intruder.review': 'Перевірка'
+    ,'intruder.target': 'Ціль'
+    ,'intruder.targetUnset': 'Ціль не задана'
+    ,'intruder.route': 'Маршрут'
+    ,'intruder.routeDirect': 'Пряме з’єднання'
+    ,'intruder.mode': 'Режим'
+    ,'intruder.mode.sniper': 'Sniper'
+    ,'intruder.mode.batteringRam': 'Battering Ram'
+    ,'intruder.mode.pitchfork': 'Pitchfork'
+    ,'intruder.mode.clusterBomb': 'Cluster Bomb'
+    ,'intruder.delayShort': 'Затримка'
+    ,'intruder.concurrency': 'Паралельність'
+    ,'intruder.estimatedJobs': 'Орієнтовна кількість завдань'
+    ,'target.empty': 'Введіть URL і побудуйте карту.'
+    ,'osint.empty': 'Введіть URL і запустіть перевірки.'
+    ,'osint.noData': 'Немає даних.'
+    ,'scanner.empty': 'Введіть дозволений URL і запустіть безпечну CMS-розвідку.'
+    ,'scanner.emptyNuclei': 'Введіть дозволений URL, завантажте файли шаблонів і запустіть сканування.'
+    ,'scanner.emptyActive': 'Введіть дозволений URL і запустіть активне сканування.'
+    ,'scanner.urlRequired': 'Спочатку введіть URL.'
+    ,'scanner.running': 'Виконується безпечна розвідка...'
+    ,'proxy.targetRequired': 'Потрібна URL-адреса цілі.'
+    ,'proxy.checking': 'Перевірка маршруту...'
+    ,'state.sending': 'Надсилання...'
+    ,'state.noAttackResults': 'Результатів немає.'
+    ,'attack.status': 'Атака'
+    ,'attack.loadingResults': 'завантаження результатів'
+    ,'attack.completed': 'завершено'
+    ,'attack.failed': 'помилок'
+    ,'attack.showing': 'показано'
+    ,'repeater.compareResponse': 'Порівняти відповідь'
+    ,'decoder.operation': 'Операція декодера'
+    ,'decoder.inputPlaceholder': 'Вставте значення, фрагмент запиту або тіло відповіді'
+    ,'decoder.outputPlaceholder': 'Декодоване значення з’явиться тут'
+    ,'scanner.urlPlaceholder': 'https://example.test/'
+    ,'decoder.error': 'Помилка: {message}'
+    ,'repeater.error': 'Помилка: {message}'
+    ,'repeater.requestError': 'помилка запиту'
+    ,'scanner.completed': 'Завершено {result}. {posture}'
+    ,'scanner.successfully': 'успішно'
+    ,'scanner.withWarnings': 'з попередженнями'
+    ,'scanner.postureReview': 'Стан безпеки потребує перевірки.'
+    ,'scanner.postureStable': 'Стан безпеки стабільний за результатами пасивних перевірок.'
+    ,'scanner.target': 'Ціль'
+    ,'scanner.highestSeverity': 'Найвища критичність'
+    ,'scanner.findingCount': 'Кількість знахідок'
+    ,'scanner.httpStatus': 'Статус HTTP'
+    ,'scanner.technologies': 'Технології'
+    ,'scanner.pathChecks': 'Перевірки публічних шляхів лише для читання'
+    ,'scanner.noFindings': 'Безпечна розвідка не повернула знахідок.'
+    ,'scanner.evidence': 'Докази'
+    ,'scanner.recommendation': 'Рекомендація'
+    ,'scanner.cmsFindingsTitle': 'Знахідки безпечної розвідки CMS'
+    ,'scanner.cmsFilterHint': 'Фільтр за назвою, категорією, доказом або рекомендацією'
+    ,'scanner.cmsAllCategories': 'Усі категорії'
+    ,'scanner.cmsColumnSeverity': 'Рівень'
+    ,'scanner.cmsColumnCategory': 'Категорія'
+    ,'scanner.cmsColumnFinding': 'Знахідка / Поверхня'
+    ,'scanner.cmsColumnEvidence': 'Докази'
+    ,'scanner.cmsColumnRecommendation': 'Рекомендація'
+    ,'scanner.cmsRawSummary': 'Діагностичний текстовий журнал'
+    ,'scanner.cmsNoMatches': 'Немає знахідок, що відповідають вибраному фільтру.'
+    ,'ai.attachedToNext': '{label} буде додано до наступного повідомлення AI.'
+    ,'ai.attachedChat': 'Додано до чату'
+    ,'ai.nothingAttached': 'Нічого не додано'
+    ,'ai.details': 'Деталі'
+    ,'ai.compact': 'Згорнути'
+    ,'ai.clearAll': 'Очистити все'
+    ,'ai.remove': 'Видалити'
+    ,'target.map': 'Карта'
+    ,'target.pages': 'сторінок'
+    ,'target.unknown': 'невідомо'
+    ,'comparer.title': 'Порівняння'
+    ,'comparer.subtitle': 'Порівняйте два запити або відповіді'
+    ,'comparer.left': 'Ліва частина'
+    ,'comparer.right': 'Права частина'
+    ,'comparer.firstPlaceholder': 'Вставте перший запит або відповідь'
+    ,'comparer.secondPlaceholder': 'Вставте другий запит або відповідь'
+    ,'comparer.words': 'Порівняти слова'
+    ,'comparer.bytes': 'Порівняти байти'
+    ,'comparer.decodeLeft': 'Декодувати ліву'
+    ,'comparer.decodeRight': 'Декодувати праву'
+    ,'comparer.swap': 'Поміняти місцями'
+    ,'comparer.empty': 'Результати порівняння з’являться тут.'
+    ,'workspace.close': 'Закрити робочий простір'
+    ,'workspace.rename': 'Подвійне клацання для перейменування'
+    ,'workspace.new': 'Новий робочий простір'
+    ,'workspace.name': 'Назва робочого простору'
+    ,'comparer.compareResponse': 'Порівняти відповідь'
+    ,'target.title': 'Карта сайту',
+    'target.scope': 'Лише той самий origin за замовчуванням',
+    'target.url': 'Початковий URL',
+    'target.maxPages': 'Макс. сторінок'
+    ,'target.groupLimits': 'Ліміти'
+    ,'target.groupBrowser': 'Браузерний краулер'
+    ,'target.groupStatic': 'Статичний краулер',
+    'target.maxDepth': 'Макс. глибина',
+    'target.delay': 'Затримка мс',
+    'target.navigationTimeout': 'Таймаут навігації мс',
+    'target.autoWaitTimeout': 'Очікування автозаповнення мс',
+    'target.proxyServers': 'Проксі-ендпоинти',
+    'target.proxyServersPlaceholder': 'http://проксі1:8080, http://проксі2:8080',
+    'target.proxyServersHint': 'Список ендпоинтів через кому або з нового рядка. Порожнє поле — без проксі. Один ендпоинт дорівнює звичайному полю проксі; два й більше розподіляють паралельні воркери обходу між собою, тож обхід виходить з різних адрес.',
+    'target.proxyPoolManage': 'Керування пулом проксі',
+    'target.proxyPoolTitle': 'Пул проксі-ендпоінтів',
+    'target.proxyPoolSubtitle': 'Один ендпоінт на рядок (HTTP/SOCKS5). Дублікати відсікаються автоматично.',
+    'target.proxyPoolPlaceholder': 'http://10.0.0.1:8080\nhttp://user:pass@10.0.0.2:8080\nsocks5://10.0.0.3:1080',
+    'target.proxyPoolStats': '{count} ендпоінтів',
+    'target.proxyDistribution': 'Режим воркерів:',
+    'target.proxyDistSplit': 'Розподіл черги (кожен воркер свою частину)',
+    'target.proxyDistReplicate': 'Повний список на кожен проксі (дублювання)',
+    'target.browserProfile': 'Профіль браузера',
+    'target.browserProfilePlaceholder': '/шлях/до/профілю',
+    'target.browserProfileHint': 'Каталог профілю Firefox або Chromium. Обхід піднімається з нього, тож зберігаються розширення, налаштування та ідентичність. Порожнє поле — запуск без профілю.',
+    'target.autoWaitTimeoutHint': 'Скільки form-режим чекає, доки сторінка не відмалює форму або елемент. Очікування завершується на першому знайденому елементі, тож сторінка без полів повертається миттєво.',
+    'target.navigationTimeoutHint': '0 означає без дедлайну навігації: повільна сторінка не обривається. Зупинити job, який не завершується, можна кнопкою Cancel.',
+    'target.antiDetect': 'Антидетект',
+    // The sentence about User-Agent was the opposite of what the code does, and
+    // it had been since 2026-09-29: the layer draws a whole synthetic profile
+    // and writes the User-Agent with it. A hint that understates the change is
+    // worse than no hint, because it is read as a guarantee.
+    'target.antiDetectHint': 'Прибирає сліди автоматизації — navigator.webdriver, порожній список плагінів, програмний рендерер, нульовий розмір вікна — і переписує увесь відбиток цілком, включно з User-Agent: профіль вибирається один на контекст, тому UA, navigator.platform, клієнтські підказки та WebGL-рендерер не суперечать один одному. Вимкніть, щоб побачити відбиток без змін.',
+    'target.antiDetectNativeTitle': 'Антидетект надає сам браузер',
+    'target.antiDetectNativeRuntime': 'Власний шар відбитка браузера',
+    'target.browserUnavailable': 'Недоступні рантайми',
+    'target.browserNotMeasured': 'браузер-воркер не виміряв цей рантайм (перезапустіть browser-worker)',
+    'target.browserCheckFailed': 'Не вдалося перевірити доступність браузерів',
+    'target.browserChecking': 'Перевіряємо доступність браузерів…',
+    'target.acceptLanguage': 'Accept-Language',
+    'target.retryAttempts': 'Спроб повтору',
+    'target.bypassLadder': 'Драбина обходу 403',
+    'target.bypassHint': 'Якщо край відповідає 403, краулер спробує іншу форму того самого запиту. Це додає до одного запиту на форму на кожну відхилену сторінку, тому за замовчуванням вимкнено.',
+    'target.bypassIdle': 'вимкнено',
+    'target.bypassLoading': 'завантаження форм…',
+    'target.bypassReady': 'увімкнено — {count} форм',
+    'target.bypassEmpty': 'движок не повідомив жодної форми',
+    'target.bypassUnavailable': 'список форм недоступний ({error})',
+    'target.retryNote': 'Повтори',
+    'target.retryWaited': 'очікування',
+    'target.antiDetectTitle': 'Відбиток, який бачив сайт',
+    'target.antiDetectApplied': 'Застосовано',
+    'target.antiDetectReal': 'Справжній рендерер',
+    'target.jsLabel': 'JS',
+    'target.jsEndpoints': 'ендпоінтів',
+    'target.jsSources': 'джерел',
+    'target.jsSecrets': 'секретів',
+    'target.jsTitle': 'Що назвав цей JavaScript',
+    'target.jsMethod': 'Метод',
+    'target.jsParams': 'Параметри',
+    'target.jsProbeWords': 'Словник для фаззингу',
+    'target.jsFindingsTitle': 'Знахідки JavaScript',
+    'target.jsNoEndpoints': 'Жоден ендпоїнт не названо.',
+    'target.jsNoSecrets': 'Жодного секрету не знайдено.',
+    'target.jsNoFindings': 'Інших знахідок немає.',
+    'target.jsLibraries': 'Вразливі бібліотеки',
+    // Лічильник на бейджі та підпис рядка тултіпа. Оператор читав звіт, у
+    // якому шість знахідок для тієї самої бібліотеки відрізнялися лише
+    // версією виправлення, і не знав, яка це вразливість.
+    'target.jsVulnerableLibs': 'вразливих бібліотек',
+    'target.jsVulnerableLib': 'Вразлива бібліотека',
+    'target.jsNoLibraries': 'Вразливих бібліотек не знайдено.',
+    'target.jsNoProbeWords': 'Немає слів для фаззингу.',
+    'target.jsProbeWordsDropped': 'Відкинуто межею',
+    'target.jsSecretRule': 'Правило',
+    'target.jsFingerprint': 'Відбиток',
+    'target.jsLine': 'Рядок',
+    'target.jsParsed': 'розібрано',
+    'target.jsDeferred': 'посилань із виразом замість значення не пішло в чергу обходу',
+    'target.enrichLabel': 'аналіз',
+    'target.enrichTitle': 'аналіз сторінки',
+    'target.enrichFiles': 'файлів у рейтингу',
+    'target.enrichPatterns': 'патернів збіглося',
+    'target.enrichInfo': 'знахідок у тексті',
+    'target.enrichInsecureForms': 'форм без захисту',
+    'target.enrichHosts': 'зовнішніх хостів',
+    'target.enrichNotableFiles': 'файли за розширенням',
+    'target.enrichCsrf': 'форми',
+    'target.enrichReusedTokens': 'токен повторно використано',
+    'target.enrichExternalHosts': 'зовнішні хости',
+    'target.enrichSecrets': 'секретів',
+    'target.enrichRejected': 'збігів відхилено фільтрами',
+    'target.enrichSubdomains': 'субдоменів',
+    // Заголовки й порожні стани вікна аналізу сторінки. Вікно існує тому, що
+    // тултип — це місце, де неможливо прочитати список із 34 хостів; без
+    // порожніх станів секція без знахідок виглядала б як помилка рендера.
+    'target.enrichFindingsTitle': 'аналіз сторінки',
+    'target.enrichNoNotableFiles': 'жодного файлу не відзначено як вартий уваги',
+    'target.enrichNoPatterns': 'жоден патерн не збігся',
+    'target.enrichNoInfo': 'у тексті немає адрес і контактів',
+    'target.enrichNoCsrf': 'форм без захисту не знайдено',
+    'target.enrichNoSecrets': 'секретів не знайдено',
+    'target.enrichNoSubdomains': 'субдоменів не знайдено',
+    'target.enrichNoHosts': 'зовнішніх хостів не знайдено',
+    'target.enrichNoAnalysis': 'жодна сторінка не була проаналізована.',
+    'target.enrichNothingOnRow': 'на цьому рядку аналіз нічого не знайшов',
+    // `jsvar.sh`-порт: імена, які програма зв'язує. Рахується окремо від findings
+    // навіть поруч із ними — на реальному бандлі їх п'ятизначні числа, і в одній
+    // таблиці з інцидентами вони просто сховали б інциденти.
+    'target.jsVariables': 'імен змінних у бандлі',
+    'target.jsLibraries': 'бібліотек із відомими вразливостями',
+    'target.jsFixedIn': 'виправлено в',
+    'target.jsVersionUnknown': 'версія не прочитана',
+    'target.jsFailed': 'Розбір не вдався',
+    'target.jsSinks': 'записів у DOM',
+    'target.jsFinding': 'знахідка',
+    'target.exportEvidence': 'Експорт доказу рядка',
+    'target.antiDetectOff': 'Антидект вимкнено: сторінка бачила відбиток без змін.',
+    'target.sameOrigin': 'Лише той самий origin',
+    'target.start': 'Побудувати карту',
+    'target.cancel': 'Скасувати',
+    'target.cancelling': 'Зупинення...',
+    'target.jobGone': 'Обхід уже не існує: browser-worker перезапущено, а job живе в його пам’яті. Побудуйте карту ще раз.',
+    'target.preview': 'Перегляд карти'
+    ,'target.collapseAll': 'Згорнути все'
+    ,'target.expandAll': 'Розгорнути все'
+    ,'target.exportJson': 'Експорт JSON',
+    'target.exportCsv': 'Експорт CSV',
+    'target.exportTree': 'Експорт HTML',
+    'target.exportHtml': 'Експорт HTML',
+    'target.filter': 'Фільтр URL, статусу або типу',
+    'target.sortNewest': 'Спочатку нові',
+    'target.sortOldest': 'Спочатку старі',
+    'target.sortStatus': 'Статус',
+    'target.sortDepth': 'Глибина',
+    'target.sortUrl': 'URL',
+    'target.sortType': 'Тип вмісту',
+    'target.sortTitle': 'Сортувати результати цілі',
+    'target.networkFilterTitle': 'Фільтрувати мережеві докази браузера',
+    'target.networkAll': 'Усі мережеві події',
+    'target.networkXhr': 'API/XHR/fetch',
+    'target.networkDocuments': 'Документи',
+    'target.networkScripts': 'Скрипти',
+    'target.networkOther': 'Інше',
+    'target.compareMaps': 'Порівняти статичну/браузерну карту',
+    'target.clearFilter': 'Очистити',
+    'target.index': '#',
+    'target.contentType': 'Тип вмісту',
+    'target.time': 'Час',
+    'target.actions': 'Дії',
+    'target.noPages': 'Сторінки не знайдено.',
+    'target.noMatches': 'Немає відповідних сторінок.',
+    'target.repeater': 'Repeater',
+    'target.intruder': 'Intruder'
+    ,'osint.title': 'Workspace OSINT'
+    ,'osint.subtitle': 'Пасивна розвідка веб-цілі'
+    ,'osint.url': 'URL цілі'
+    ,'osint.wafCheck': 'Запустити безпечний WAF canary'
+    ,'osint.disclaimer': 'Використовуйте лише для дозволених перевірок.'
+    ,'osint.run': 'Запустити OSINT'
+    ,'osint.clear': 'Очистити'
+    ,'osint.export': 'Експорт JSON'
+    ,'osint.exportCsv': 'Експорт CSV'
+    ,'osint.summary': 'Підсумок'
+    ,'osint.dns': 'DNS / IP'
+    ,'osint.http': 'HTTP / редиректи'
+    ,'osint.security': 'Безпека / WAF'
+    ,'osint.tech': 'Технології'
+    ,'osint.discovery': 'Виявлення'
+    ,'osint.cookies': 'Cookies'
+    ,'osint.graphTitle': 'Граф сутностей'
+    ,'osint.noGraph': 'Немає графа'
+    ,'osint.graphNamePrompt': 'Назва графа'
+    ,'osint.graphCreate': 'Створити граф'
+    ,'osint.graphAdd': 'Додати сутність'
+    ,'osint.graphClear': 'Очистити граф'
+    ,'osint.graphClearConfirm': 'Очистити граф «{name}»? Усі {entities} entities та {relations} relations буде видалено без можливості відновлення.'
+    ,'osint.graphCleared': 'Граф очищено: видалено {entities} entities, {relations} relations.'
+    ,'osint.graphDeleteGraph': 'Видалити граф'
+    ,'osint.graphDeleteGraphConfirm': 'Видалити граф «{name}»? Сам граф теж зникне з списку разом із {entities} entities та {relations} relations — відновити це неможливо.'
+    ,'osint.graphGraphDeleted': 'Граф «{name}» видано: {entities} entities, {relations} relations.'
+    ,'osint.graphDeleteConfirm': 'Видалити сутність «{identity}» разом із {relations} пов’язаними зв’язками?'
+    ,'osint.graphDeleted': 'Entity «{identity}» видалено, relations — {relations}.'
+    ,'osint.graphRelationDeleted': 'Relation {type} видалено.'
+    ,'osint.graphEdit': 'Редагувати'
+    ,'osint.graphDelete': 'Видалити сутність'
+    ,'osint.graphDeleteRelation': 'Видалити relation'
+    ,'osint.graphRelationDeleteConfirm': 'Видалити зв’язок {type} між {source} та {target}?'
+    ,'osint.graphEditSaved': 'Entity оновлено.'
+    ,'osint.graphRelationDetails': 'Деталі relation'
+    ,'osint.graphRelationType': 'Тип зв’язку'
+    ,'osint.graphRelationSource': 'Джерело'
+    ,'osint.graphRelationTarget': 'Ціль'
+    ,'osint.transformIdle': 'Очікує'
+    ,'osint.transformRunning': 'Виконується'
+    ,'osint.transformCompleted': 'Завершено'
+    ,'osint.transformEmpty': 'Нічого не знайдено'
+    ,'osint.transformFailed': 'Помилка'
+    ,'osint.transformRunningDetail': '{transform} для {value} виконується…'
+    ,'osint.transformsNone': 'Для сутностей цього типу немає трансформів'
+    ,'osint.transformsUnavailable': 'Реєстр трансформів недоступний'
+    ,'osint.transformChooseValue': 'Обрати трансформ і значення…'
+    ,'osint.transform.url_host': 'Витягнути хост'
+    ,'osint.transform.domain_normalize': 'Нормалізувати домен'
+    ,'osint.transform.wayback_urls': 'Архівні URL'
+    ,'osint.transform.subdomains': 'Знайти піддомени'
+    ,'osint.transform.dns_records': 'DNS-записи'
+    ,'osint.transform.ghdb_links': 'Dork-и з GHDB'
+    ,'osint.transform.ghdb_search': 'Активний пошук GHDB'
+    ,'osint.transform.s3_buckets': 'Кандидати на S3-бакети'
+    ,'osint.transform.reverse_dns': 'Зворотний DNS'
+    ,'osint.transform.ip_geo': 'Геолокація IP'
+    ,'osint.transform.email_recon': 'Розвідка пошути'
+    ,'osint.transform.email_domain': 'Домен із пошти'
+    ,'osint.transform.username_normalize': 'Нормалізувати ім’я'
+    ,'osint.transform.username_enum': 'Перебір імен'
+    ,'osint.transform.github_recon': 'Публічний профіль GitHub'
+    ,'osint.transform.cidr_range': 'Діапазон CIDR'
+    ,'osint.transform.asn_lookup': 'Автономна система (ASN)'
+    ,'osint.transform.technology_probe': 'Зондування технологій'
+    ,'osint.transform.http_probe': 'Зондування хоста (httpx)'
+    ,'osint.transform.username_search': 'Пошук імені'
+    ,'osint.transform.git_secrets': 'Секрети в комітах'
+    ,'osint.transform.secret_scan': 'Секрети на хостах'
+    ,'osint.transform.breach_exposure': 'Компрометації в публічних базах'
+    ,'osint.transform.identity_graph': 'Граф ідентичності (Gravatar, Keybase, HudsonRock)'
+    ,'osint.transformsForType': 'Трансформи для цього типу:'
+    ,'osint.transformsTypeInert': 'Цей тип не приймає жоден трансформ: вузол буде записано, але з нього нічого не дістанеться. Додавайте його, якщо сама присутність у графі й є доказом.'
+    ,'osint.transformCompletedDetail': '{transform} для {value}: збережено {entities} entities, {relations} relations.'
+    ,'osint.transformRejectedDetail': '{transform} для {value}: {rejected} рядків відхилено іменами, які не є коректним значенням графа.'
+    ,'osint.transformEmptyDetail': '{transform} для {value} завершився без результатів — 0 entities, 0 relations. Перевірте warnings нижче.'
+    ,'osint.transformFailedDetail': '{transform} для {value} не вдався: {error}'
+    ,'osint.transformPaused': 'Пауза'
+    ,'osint.transformCancelled': 'Скасовано'
+    ,'osint.transformPause': 'Пауза'
+    ,'osint.transformResume': 'Продовжити'
+    ,'osint.transformCancel': 'Скасувати'
+    ,'osint.transformNames': '{count} імен'
+    ,'osint.transformIndexes': 'індекси {done}/{total}'
+    ,'osint.transformIndexing': 'відповідає: {index}'
+    ,'osint.transformFileDetail': 'Результат ({rows} рядків) записано у файл {name}'
+    ,'osint.transformFileOpen': 'Відкрити список'
+    ,'osint.transformFileDownload': 'Завантажити'
+    ,'osint.transformLocalOnly': 'лише локально'
+    ,'osint.transformNetwork': 'мережа'
+    ,'osint.transformZone': 'зона: {zone}'
+    ,'osint.transformReadLimit': 'межа читання: {bytes} Б'
+    ,'osint.transformReadWholeBody': 'прочитано ціле тіло'
+    ,'osint.transformDurationMs': '{value} мс'
+    ,'osint.transformDurationSec': '{value} с'
+    ,'osint.transformDurationMin': '{minutes} хв {seconds} с'
+    ,'osint.transformWarnings': 'Попередження'
+    ,'osint.graphRefresh': 'Оновити'
+    ,'osint.graphLayout': 'Авто-розкладка'
+    ,'osint.graphFilter': 'Фільтр entities'
+    ,'osint.graphDetails': 'Деталі сутності'
+    ,'osint.graphEmpty': 'Створіть або виберіть граф для відображення entities.'
+    ,'osint.graphCreated': 'Граф створено.'
+    ,'osint.graphEntityAdded': 'Entity додано.'
+    ,'osint.graphTransformStarted': 'Трансформація: {name}'
+    ,'osint.graphTransformDone': 'Transform завершено.'
+    ,'osint.graphNetworkConfirm': 'Запустити {transform} для {identity}? Це публічний мережевий запит без обмежень кількості чи розміру тіла застосунком.'
+    ,'osint.graphNodeCount': '{rendered}/{total} вузлів · {relations} зв’язків'
+    ,'osint.graphType': 'Тип'
+    ,'osint.graphIdentity': 'Ідентифікатор'
+    ,'osint.graphRisk': 'Оцінка ризику'
+    ,'osint.graphObserved': 'Спостережено'
+    ,'osint.graphProperties': 'Властивості / походження'
+    // Навігація полотна графа: розкладка, масштаб, підказка та легенда.
+    // Кожен рядок проходить через data-i18n, тож у UA-режимі в блоці графа не
+    // залишається ні суміші української з англійською, ні жодного «сирого» рядка.
+    ,'osint.graphPanelAria': 'Граф сутностей OSINT'
+    ,'osint.graphCanvasAria': 'Полотно графа сутностей OSINT'
+    ,'osint.graphLayoutAria': 'Розкладка графа'
+    ,'osint.graphLayoutGrid': 'Сітка — рівномірно'
+    ,'osint.graphLayoutRadial': 'Силами — зв’язки'
+    ,'osint.graphLayoutConcentric': 'Кільцями — рівні ризику'
+    ,'osint.graphLayoutBreadth': 'У ширину — дерево'
+    ,'osint.graphExportHtml': 'Експорт графа HTML'
+    ,'osint.graphNavAria': 'Навігація полотном графа'
+    ,'osint.graphZoomOut': 'Зменшити масштаб'
+    ,'osint.graphZoomIn': 'Збільшити масштаб'
+    ,'osint.graphFit': 'Вмістити'
+    ,'osint.graphReset': 'Скинути'
+    ,'osint.graphHelpTitle': 'Навігація:'
+    ,'osint.graphHelpText': 'колесо — масштаб · перетягування тла — панорама · перетягування вузла — переміщення · клік — деталі сутності · ПКМ — трансформації'
+    ,'osint.graphLegendAria': 'Типи сутностей'
+    ,'osint.graphLegendDomain': 'домен'
+    ,'osint.graphLegendIp': 'IP'
+    ,'osint.graphLegendEmail': 'email'
+    ,'osint.graphLegendUser': 'користувач'
+    ,'osint.graphLegendRisk': 'ризик'
+    ,'decoder.title': 'Декодер'
+    ,'decoder.subtitle': 'Кодування, декодування та перетворення даних'
+    ,'decoder.apply': 'Застосувати'
+    ,'decoder.swap': 'Поміняти місцями'
+    ,'decoder.clear': 'Очистити'
+    ,'decoder.input': 'Вхід'
+    ,'decoder.inputHint': 'Текст, hex або байти'
+    ,'decoder.output': 'Результат'
+    ,'decoder.hexInput': 'Інтерпретувати вхід як hex'
+    ,'decoder.hexOutput': 'Показати результат як hex'
+
+    /* ── Локалізація: дії рядків, діалоги підтвердження та a11y-підписи ──────
+       Усе, що читає оператор, проходить через словник, тож вибір мови
+       перемикає кожен видимий рядок, а не лише заголовки вкладок. */
+    ,'row.inspect': 'Переглянути'
+    ,'row.sendRepeater': 'Надіслати в Repeater'
+    ,'row.sendIntruder': 'Надіслати в Intruder'
+    ,'row.moreActions': 'Більше дій'
+    ,'row.copyCurl': 'Копіювати як cURL'
+    ,'row.copyJson': 'Копіювати як JSON'
+    ,'confirm.clearHistory': 'Очистити всі записи History?'
+    ,'confirm.clearTraffic': 'Очистити весь трафік?'
+    ,'confirm.deleteProject': 'Видалити цей проєкт і всі пов’язані дані workspace? Цю дію не можна скасувати.'
+    ,'confirm.runFormActions': 'Режим форми: краулер сам знайде всі поля й кнопки в DOM на кожній сторінці й працюватиме з ними без селекторів. Це надішле запити, які можуть змінити стан цілі. Продовжити?'
+    ,'comparer.emptyResult': 'Результати порівняння з’являться тут.'
+    ,'session.savedLocally': 'Збережено локально'
+    ,'session.savedLocallyFull': 'Сесію збережено локально'
+    ,'session.exported': 'Сесію експортовано'
+    ,'session.importUnreadable': 'Помилка імпорту: файл не вдалося прочитати'
+    ,'session.keepOneWorkspace': 'Залишіть хоча б один workspace для кожного інструмента.'
+
+    /* ── Project hub:knowledge-концентрація активного проєкту ────────────────
+       Розділ збирає докази в одному місці, тож кожен його заголовок і підпис
+       теж проходить через словник, а не лишається лише в розмітці. */
+    ,'hub.kicker': 'Робочий workspace'
+    ,'hub.title': 'Knowledge hub проєкту'
+    ,'hub.description': 'Компактний огляд спостереженого трафіку, активів і пов’язаної автоматизації активного проєкту.'
+    ,'hub.tabOverview': 'Огляд'
+    ,'hub.tabMap': 'Карта активів'
+    ,'hub.tabSecrets': 'Секрети'
+    ,'hub.tabScanner': 'Сканування'
+    ,'hub.tabWorkflows': 'Workflow'
+    ,'hub.tabAi': 'Знімок для AI'
+    ,'hub.evidenceOverview': 'Огляд доказів'
+    ,'hub.technology': 'Спостереження технологій'
+    ,'hub.osintGraphs': 'Графи OSINT'
+    ,'hub.observedEndpoints': 'Спостережені ендпоінти'
+    ,'hub.secretObservations': 'Виявлені секрети'
+    ,'hub.secretHint': 'JWT, cookie та облікові дані показані повністю, такими, якими вони йшли.'
+    ,'hub.scannerRuns': 'Запуски Scanner'
+    ,'hub.linkedAutomation': 'Пов’язана автоматизація'
+    ,'hub.activeProject': 'Активний проєкт'
+    ,'hub.workspaceLabel': 'workspace'
+    ,'hub.metric.traffic': 'спостережень трафіку'
+    ,'hub.metric.endpoints': 'ендпоінтів'
+    ,'hub.metric.target_jobs': 'завдань Target'
+    ,'hub.metric.scans': 'сканувань'
+
+    ,'hub.technologyLine': 'Спостереження технологій: {tech}'
+    ,'hub.noneYet': 'поки що немає'
+    ,'hub.entities': 'сутностей'
+    ,'hub.relations': 'зв’язків'
+    ,'osint.graphKeyboardLabel': 'Сутності графа — стрілки перемикають, Enter відкриває деталі'
+    ,'hub.current': 'поточний'
+    ,'hub.openInOsint': 'Відкрити в OSINT'
+    ,'hub.noGraphs': 'Графів OSINT ще немає. Запустіть OSINT або створіть граф на вкладці OSINT.'
+    ,'hub.noQueryParameters': 'без параметрів запиту'
+    ,'hub.noResponseYet': 'відповіді ще немає'
+    ,'hub.noEndpoints': 'Спостережених ендпоінтів ще немає.'
+    ,'hub.secretValueMissing': '[значення не зафіксовано]'
+    ,'hub.noSecrets': 'Посилань на секрети не виявлено.'
+    ,'hub.findings': 'знахідок'
+    ,'hub.noScans': 'До цього проєкту ще не прив’язано жодного запуску Scanner.'
+    ,'hub.noWorkflows': 'До цього проєкту не підв’язано жодного workflow.'
+    ,'hub.tabDashboard': '⚡ Live-дашборд'
+    ,'hub.hudEngine': 'РУШІЙ:'
+    ,'hub.hudRoute': 'ВИХІДНИЙ МАРШРУТ:'
+    ,'hub.hudLatency': 'ЗАТРИМКА:'
+    ,'hub.hudTarget': 'ЦІЛЬ:'
+    ,'hub.hudOnline': 'ОНЛАЙН'
+    ,'hub.hudDirect': 'ПРЯМИЙ (Без проксі)'
+    ,'hub.none': 'Немає'
+    ,'hub.btnQuickScan': 'Швидке активне сканування'
+    ,'hub.btnCrawl': 'Обхід цілі'
+    ,'hub.btnNuclei': 'Запустити Nuclei'
+    ,'hub.btnFusionReport': 'Зведений звіт'
+    ,'hub.btnFusionReportTitle': 'Сформувати об’єднаний мультирушійний звіт Fusion (JSON, SARIF, HTML)'
+    ,'hub.btnRefresh': 'Оновити'
+    ,'hub.btnRefreshTitle': 'Оновити стан наживо'
+    ,'hub.kpiEndpointsLabel': 'Виявлені ендпоінти'
+    ,'hub.kpiEndpointsSub': 'Зафіксовано в активному воркспейсі'
+    ,'hub.kpiTrafficLabel': 'Зафіксований трафік'
+    ,'hub.kpiTrafficSub': 'Записано обмінів'
+    ,'hub.kpiVulnsLabel': 'Знайдені вразливості'
+    ,'hub.badgeCrit': 'Крит'
+    ,'hub.badgeHigh': 'Вис'
+    ,'hub.badgeMed': 'Сер'
+    ,'hub.badgeLow': 'Низ'
+    ,'hub.kpiTasksLabel': 'Активні завдання'
+    ,'hub.kpiTasksSub': 'Фонових процесів у роботі'
+    ,'hub.activeTasksTitle': 'Активні завдання та диспетчер сканування'
+    ,'hub.autoRefreshNotice': 'Автооновлення: 3с'
+    ,'hub.noTasksRunning': 'Зараз немає активних фонових завдань.'
+    ,'hub.startActiveScan': '⚡ Почати активне сканування'
+    ,'hub.taskActiveEngineScan': 'Активне сканування рушія'
+    ,'hub.taskTargetMapCrawler': 'Обхід карти цілей Target'
+    ,'hub.taskRunning': 'Виконується'
+    ,'hub.taskStopping': 'Зупиняється…'
+    ,'hub.taskCancelled': 'Скасовано'
+    ,'hub.taskCompleted': 'Завершено'
+    ,'hub.taskFailed': 'Помилка виконання'
+    ,'hub.taskPending': 'Очікує запуску'
+    ,'hub.btnCancel': 'Скасувати'
+    ,'hub.btnOpenInTarget': 'Відкрити в Target'
+    ,'hub.btnOpenInScanner': 'Відкрити у Scanner'
+    ,'hub.btnStartInTarget': 'Запустити в Target'
+    ,'hub.btnConfigureInScanner': 'Налаштувати у Scanner'
+    ,'hub.btnRemoveTask': '✕ Видалити'
+    ,'hub.findingsStreamTitle': 'Потік знайдених вразливостей'
+    ,'hub.findingsShowMore': 'Показати ще · {count} з {total}'
+    ,'hub.filterAll': 'Всі'
+    ,'hub.filterCrit': 'Крит'
+    ,'hub.filterHigh': 'Вис'
+    ,'hub.filterMed': 'Сер'
+    ,'hub.filterLow': 'Низ'
+    ,'hub.noFindingsYet': 'Знахідок безпеки ще не зафіксовано.'
+    ,'hub.noFindingsMatchFilter': 'Жодна знахідка не відповідає фільтру [{filter}].'
+    ,'hub.findingDefaultTitle': 'Знайдена вразливість'
+    ,'hub.sev_critical': 'КРИТИЧНИЙ'
+    ,'hub.sev_high': 'ВИСОКИЙ'
+    ,'hub.sev_medium': 'СЕРЕДНІЙ'
+    ,'hub.sev_low': 'НИЗЬКИЙ'
+    ,'hub.sev_info': 'ІНФО'
+    ,'hub.drawerEndpoint': 'Ендпоінт та модуль'
+    ,'hub.drawerDesc': 'Опис'
+    ,'hub.drawerRemediation': 'Підказки щодо усунення'
+    ,'hub.drawerPoc': 'Підтвердження концепції (cURL)'
+    ,'hub.drawerCopyCurl': '📋 Копіювати cURL'
+    ,'hub.drawerCopied': 'Скопійовано!'
+    ,'hub.drawerEvidence': 'Виявлені докази'
+    ,'hub.drawerNoDesc': 'Розширений опис відсутній.'
+    ,'hub.drawerDefaultRemediation': 'Застосуйте сувору валідацію вхідних даних, принцип найменших привілеїв та заголовки керування кешуванням.'
+    ,'hub.drawerNoEvidence': 'Сирих доказів не зафіксовано.'
+
+    /* ── Локалізація: інспектор Repeater, підписи палітри й залишки, які ────
+       лишилися англійськими в українському словнику. */
+    ,'repeater.inspectorTitle': 'Request Inspector — параметри запиту · заголовки · тіло'
+    ,'repeater.inspectorButton': 'Інспектор'
+    ,'repeater.queryParams': 'Параметри запиту'
+    ,'repeater.bodyParams': 'Параметри тіла'
+    ,'repeater.addParam': '+ Додати параметр'
+    ,'repeater.headers': 'Заголовки'
+    ,'repeater.raw': 'Сирий'
+    ,'table.key': 'Ключ'
+    ,'table.value': 'Значення'
+    ,'table.name': 'Назва'
+    ,'proxy.torCheck': 'Перевірка Tor'
+    ,'automation.groupTriggers': 'Тригери'
+    ,'automation.groupTools': 'Інструменти'
+    ,'automation.groupLogic': 'Логіка'
+    ,'session.workflowImportUnreadable': 'Помилка імпорту workflow: файл не вдалося прочитати'
+    ,'session.workflowImportError': 'Помилка імпорту workflow: {error}'
+    ,'osint.graphRunTransform': 'Запустити transform'
+    ,'osint.valueCopied': 'Значення скопійовано'
+    ,'osint.valuePlaced': 'Значення підставлено в перевірки OSINT'
+    ,'osint.graphRefreshing': 'Граф оновлюється; виберіть його знову, коли буде доступний.'
+    ,'osint.graphRequiredForExport': 'Створіть або виберіть граф перед експортом.'
+    ,'osint.graphExportNeedsBundle': 'Не вдалося прочитати вбудований Cytoscape, тому граф не експортовано.'
+    ,'target.staticMapFirst': 'Спершу запустіть статичну карту, щоб порівняти результати.'
+    ,'attack.starting': 'Запуск атаки…'
+    ,'status.online': 'Онлайн'
+    ,'status.offline': 'Офлайн'
+    ,'projects.updated': 'Проєкт оновлено'
+    ,'projects.deleted': 'Проєкт видалено'
+    ,'a11y.rowActions': 'Дії рядка'
+    ,'a11y.commandPalette': 'Палітра команд'
+    ,'a11y.commandPaletteSearch': 'Пошук команд'
+    ,'a11y.systemStatus': 'Системний стан'
+    ,'a11y.engineHealth': 'Стан Go-движка'
+    ,'a11y.retry': 'Повторити'
+    ,'a11y.retryEngine': 'Повторити перевірку движка'
+    ,'a11y.passiveProxy': 'Пасивний proxy :8080'
+    ,'a11y.engineLabel': 'Рушій'
+    ,'a11y.proxyLabel': 'Пасивний proxy'
+    ,'a11y.routeLabel': 'Маршрут'
+    ,'a11y.activeRoute': 'Активний вихідний маршрут'
+    ,'a11y.mainNav': 'Основна навігація'
+    ,'a11y.projectHubSections': 'Розділи Project hub'
+    ,'a11y.workspacesRepeater': 'Workspace-и Repeater'
+    ,'a11y.workspacesProxy': 'Workspace-и Proxy'
+    ,'a11y.workspacesIntruder': 'Workspace-и Intruder'
+    ,'a11y.workspacesTarget': 'Workspace-и Target'
+    ,'a11y.workspacesOsint': 'Workspace-и OSINT'
+    ,'a11y.workspacesScanner': 'Workspace-и Scanner'
+    ,'a11y.workspacesComparer': 'Workspace-и Comparer'
+    ,'a11y.workspacesDecoder': 'Workspace-и Decoder'
+    ,'a11y.workspacesAi': 'Workspace-и AI'
+    ,'a11y.workspacesAutomation': 'Workspace-и Automation'
+    ,'a11y.resultActions': 'Дії результату'
+    ,'a11y.scannerView': 'Вид Scanner'
+    ,'a11y.workflowName': 'Назва workflow'
+    ,'a11y.workflowMinimap': 'Мінікарта workflow'
+    ,'a11y.workflowCanvas': 'Полотно workflow'
+    ,'a11y.zoomIn': 'Збільшити масштаб'
+    ,'a11y.zoomOut': 'Зменшити масштаб'
+    ,'a11y.toggleInspector': 'Перемкнути інспектор запиту'
+    ,'a11y.sequentialDelay': 'Запити виконуються послідовно, коли затримка більша за нуль'
+    ,'a11y.openTemplateStore': 'Відкрити Template Store'
+    ,'history.sortTitle': 'Сортування History'
+    ,'scanner.title': 'Scanner Pro / безпечна розвідка CMS'
+    ,'scanner.subtitle': 'Авторизовані read-only перевірки'
+    ,'scanner.disclaimer': 'Scanner Pro виконує обмежену read-only розвідку: CMS, публічні шляхи, TLS, cookies, HTTP-методи, заголовки та сигнали конфігураційних exposure. Експлойти, fuzzing, brute force і bypass не виконуються.'
+    ,'scanner.run': 'Запустити Safe CMS Recon'
+    ,'scanner.runTemplates': 'Запустити шаблони'
+    ,'scanner.templatesBar': 'Шаблони'
+    ,'scanner.nucleiHint': 'Завантажте папку шаблонів. Вибраний каталог передається Nuclei через -t; допоміжні файли зберігаються, потрібні прапорці додаються автоматично, а -esc і -nss завжди увімкнені.'
+    ,'scanner.templateCategory': 'Каталог шаблонів'
+    ,'scanner.templateCategoryAll': 'Усі завантажені файли'
+    ,'scanner.templateCategoriesLoaded': 'Каталогів у вибраній папці: {count}'
+    ,'scanner.templateCategoryMissing': 'Каталог «{category}» більше недоступний. Виберіть інший каталог або всі файли.'
+    ,'scanner.customYaml': 'Власний YAML (один документ)'
+    ,'scanner.uploadHint': 'Завантаж .yaml файли або папку, або встав нижче'
+    ,'scanner.clearFiles': 'Очистити файли'
+    ,'scanner.templatesRequired': 'Виберіть хоча б один шаблон або вставте YAML.'
+    ,'scanner.perFileTitle': 'Результат по кожному шаблону'
+    ,'scanner.perFileName': 'Файл'
+    ,'scanner.perFileTemplate': 'Шаблон'
+    ,'scanner.perFileCve': 'CVE / CWE'
+    ,'scanner.perFileStatus': 'Статус'
+    ,'scanner.perFileDetail': 'Деталі'
+    ,'scanner.perFileMatched': 'Спрацьвав'
+    ,'scanner.perFileNotMatched': 'Не спрацював'
+    ,'scanner.perFileNoRequest': 'Ціль не перевірялась'
+    ,'scanner.perFileNoRequestHint': 'Шаблонів без запиту до цілі: {count}. Це code/file-шаблони або JavaScript без мережевих модулів чи перевірок портів. Причина — у стовпці «Деталі».'
+    ,'scanner.perFileFlow': 'Визначення потоку'
+    ,'scanner.perFileUncompiled': 'Бінарник не компілює'
+    ,'scanner.perFileFlowHint': 'Потоків: {count}. Це файли з `flow:`, тобто описи послідовності запитів. Бінарник nuclei їх не виконує, їх виконує власний runner руха. Причина — у стовпці «Деталі».'
+    ,'scanner.perFileWorkflow': 'Оркестратор шаблонів'
+    ,'scanner.perFileWorkflowHint': 'Оркестраторів: {count}. Це файли `workflows:`, які запускають інші шаблони: бінарник виконує їхні підшаблони й робить до цілі запити, але сам не є матчером, тому власного JSONL-запису не дає. Знахідки звітуються під ідентифікатором підшаблону. Причина — у стовпці «Деталі».'
+    ,'scanner.perFileSkipped': 'Не запускався'
+    ,'scanner.perFileShowMore': 'Показати ще · {count} з {total}'
+    ,'scanner.streamInterrupted': 'Потік результатів перервано.'
+    ,'scanner.perFileSkippedReason': 'Файл не запускався.'
+    ,'scanner.perFileSkippedHint': 'Не запущено файлів: {count}. Причину для кожного файлу видно у стовпці «Деталі».'
+    ,'scanner.perFileDuplicate': 'Дубль за вмістом'
+    ,'scanner.perFileDuplicateReason': 'Файл побайтово ідентичний іншому файлу з цього завантаження.'
+    ,'scanner.perFileDuplicateHint': 'Дублів за вмістом: {count}. Це той самий шаблон під іншою назвою, тому один екземпляр і виконується один раз.'
+    ,'scanner.planTitle': 'План запуску'
+    ,'scanner.planBatches': 'Викликів nuclei: {count}'
+    ,'scanner.planReason': 'Причина: {reason}'
+    ,'scanner.planPlanned': 'Файлів до виконання: {count}'
+    ,'scanner.planUnplanned': 'Файлів без запуску: {count}'
+    ,'scanner.planDedup': 'Дедуплікація за вмістом: {unique} унікальних із {uploaded}, сховано {collapsed} копій'
+    ,'scanner.planValidation': 'Перевірка самим nuclei: відхилено {refused}'
+    ,'scanner.diagnosticsTitle': 'Команда nuclei та весь її висновок'
+    ,'scanner.diagnosticsCommand': 'Команда'
+    ,'scanner.diagnosticsStream': '— потік {stream} —'
+    ,'scanner.perFileInvalid': 'Некоректний'
+    ,'scanner.perFileAll': 'Усі файли'
+    ,'scanner.perFileOnlyMatched': 'Тільки спрацьовані'
+    ,'scanner.perFileFilter': 'Фільтр за назвою файлу, id, CVE або тегом'
+    ,'scanner.perFileFindings': 'Знахідок'
+    ,'scanner.perFilePartial': 'показано {shown} з {total} файлів (звіт обрізано для кешу браузера)'
+    ,'scanner.perFileEmpty': 'Немає файлів за цим фільтром.'
+    ,'scanner.perFileNoMatch': 'Шаблон відпрацьовано, збігів немає.'
+    ,'scanner.perFileInvalidReason': 'Файл не було передано nuclei.'
+    ,'scanner.perFileInvalidHint': 'Некоректних файлів: {count}. Файл не запускався — виправте причину у стовпці «Деталі».'
+    ,'scanner.perFileGroupFolders': 'Групувати за папками'
+    ,'scanner.perFileGroupFoldersAria': 'Показувати результат по папках'
+    ,'scanner.perFileGroupFoldersTitle': 'Увімкнено: один рядок на папку з лічильниками. Вимкніть, щоб бачити один рядок на кожен файл.'
+    ,'scanner.perFileFolderExpand': 'Показати {count} файлів у {folder}'
+    ,'scanner.perFileFolderCollapse': 'Сховати файли в {folder}'
+    ,'scanner.perFileFolderFiles': 'файлів у цій папці'
+    ,'scanner.perFileFolderMatching': 'файлів у цій папці під фільтром'
+    ,'scanner.perFileFolderFindings': 'знахідок у папці'
+    ,'scanner.perFileShowEvidence': 'Показати докази · {count}'
+    ,'scanner.reportLargeFiles': 'У звіті {rows} файлів і {findings} знахідок. Таблиця містить усі файли, а вивід кожного шаблону завантажується лише за кнопкою, тому пошук і фільтри працюють так само швидко.'
+    ,'scanner.perFileFolderIds': 'унікальних id шаблонів'
+    ,'scanner.perFileFolderCve': 'файлів із CVE / CWE'
+    ,'scanner.perFileFolderLoose': 'Файли без папки'
+    ,'scanner.perFileGroupedEmpty': 'Немає папок за цим фільтром.'
+    ,'scanner.uploadZoneAria': 'Завантаження файлів шаблонів або цілої папки'
+    ,'scanner.uploadZoneTitle': 'Перетягніть сюди файли шаблонів або цілу папку'
+    ,'scanner.uploadZoneOr': 'або'
+    ,'scanner.pickFiles': 'Обрати файли'
+    ,'scanner.pickFolder': 'Обрати папку'
+    ,'scanner.dropReading': 'Читаємо перетягнуті файли...'
+    ,'scanner.fileUnreadable': 'Не вдалося прочитати файл: {name}'
+    // Читання папки корпусу: лічильник, бо без нього повільне читання
+    // невідрізниме від завислого — виміряно на `http` (11 658 документів).
+    ,'scanner.progressReading': 'Читаю файли {done} з {total}…'
+    // Файл, який браузер не прочитав, не викидає всю папку: решту завантажено.
+    ,'scanner.filesUnreadable': 'Не прочитано {count} файл(ів). Решту завантажено.'
+    // Читання завершене — інакше лічильник зупиняється на «N з N…» і виглядає так,
+    // ніби воно ще читає: виміряно на `http` (11 664 файли, chip уже в списку).
+    ,'scanner.filesRead': 'Прочитано {count} файл(ів).'
+    ,'scanner.uploading': 'Завантаження шаблонів: {count} файл(ів)...'
+    ,'scanner.uploadChunk': 'Завантажено {done} з {total} · запит {chunk} з {chunks}'
+    ,'scanner.optionsTitle': 'Опції сканування'
+    ,'scanner.optionsHint': 'Кожна опція відповідає рівно одному прапорцю nuclei. Порожні поля не додають жодного прапорця; явне значення опції має пріоритет над ENV-значенням движка.'
+    ,'scanner.optSeverity': 'Серйозність'
+    ,'scanner.optExcludeSeverity': 'Виключити severity'
+    ,'scanner.optTemplateIds': 'ID шаблонів'
+    ,'scanner.optExcludeMatchers': 'Виключити matchers'
+    ,'scanner.optConcurrency': 'Паралелізм'
+    ,'scanner.optPayloadConcurrency': 'Паралелізм пейлоадів'
+    ,'scanner.optProbeConcurrency': 'Паралелізм перевірок'
+    ,'scanner.optRateLimit': 'Rate limit (запитів/с)'
+    ,'scanner.optRateWindow': 'Вікно обмеження (с)'
+    ,'scanner.optRateWindowHint': '1'
+    ,'scanner.optDebug': 'Налагодження (друкувати кожен запит і відповідь)'
+    ,'scanner.optRetries': 'Ретраї'
+    ,'scanner.optTimeout': 'Таймаут запиту (с)'
+    ,'scanner.optMaxRedirects': 'Макс. редиректів'
+    ,'scanner.optMaxHostErrors': 'Макс. помилок хоста'
+    ,'scanner.optFollowRedirects': 'Простежувати редиректи'
+    ,'scanner.optFollowHostRedirects': 'Редиректи в межах хоста'
+    ,'scanner.optHeadless': 'Увімкнути headless-шаблони'
+    ,'scanner.optInteractsh': 'Використовувати interactsh (OAST)'
+    ,'scanner.optStoreResponse': 'Зберігати request/response'
+    ,'scanner.optOmitRaw': 'Не включати raw request/response'
+    ,'scanner.optNoColor': 'Вимкнути ANSI-кольори'
+    ,'scanner.optMatcherStatus': 'Показувати статус matcher'
+    ,'scanner.optTagsHint': 'через кому'
+    ,'scanner.optIdsHint': 'CVE-2021-44228, log4j*'
+    ,'scanner.optPathsHint': 'helpers/, workflows/'
+    ,'scanner.progressQueued': 'Підготовка'
+    ,'scanner.progressUploading': 'Завантаження {done} з {total} · запит {chunk} з {chunks}'
+    ,'scanner.progressScanning': 'Сканування'
+    ,'scanner.progressDone': 'Завершено'
+    ,'scanner.progressFailed': 'Помилка сканування'
+    ,'scanner.progressCancelled': 'Скасовано'
+    ,'scanner.progressCancelling': 'Скасування…'
+    ,'scanner.progressCancel': 'Скасувати'
+    ,'scanner.progressPaused': 'Пауза'
+    ,'scanner.progressPause': 'Пауза'
+    ,'scanner.progressResume': 'Продовжити'
+    ,'scanner.progressPausing': 'Пауза…'
+    ,'scanner.progressResuming': 'Продовження…'
+    ,'scanner.progressTemplates': 'шаблонів'
+    ,'scanner.progressRequests': 'запитів'
+    ,'scanner.progressNoteMoreRequests': 'Запитів більше, ніж файлів: {files} шаблонів надіслали {extra} запитів понад норму — payloads, attack, кілька шляхів або повтор після помилки.'
+    ,'scanner.progressMatched': 'знахідок'
+    ,'scanner.progressErrors': 'помилок'
+    ,'scanner.viewCms': 'CMS скан'
+    ,'scanner.profileLabel': 'Профіль'
+    ,'scanner.profileGenericWeb': 'Загальний веб'
+    ,'scanner.profileCMS': 'Фокус на CMS'
+    ,'scanner.profileAPI': 'API та хмара'
+    ,'scanner.profileSecurityHeaders': 'Заголовки безпеки (Пасивний)'
+    ,'scanner.viewNuclei': 'Nuclei скан'
+    ,'scanner.corpusChecks': 'Перевірок'
+    ,'scanner.corpusTags': 'Теги'
+    ,'scanner.corpusRun': 'Запустити весь корпус'
+    ,'scanner.corpusCancel': 'Зупинити прогін'
+    ,'scanner.corpusCancelTitle': 'Зупинити поточний прогін корпусу'
+    ,'scanner.corpusCancelling': 'Зупинка…'
+    ,'scanner.corpusCancelFailed': 'Не вдалося зупинити прогін: %s'
+    ,'scanner.corpusLost': 'Прогін не завершився: двигун перезапустився, а цей прогін не зберіг жодної знахідки. Запустіть корпус ще раз.'
+    ,'scanner.corpusRestored': 'Звіт відновлено: %s знахідок. Прогін уже не йде — двигун перезапустився, але знахідки, які він знайшов, збережені.'
+    ,'scanner.corpusLiveFindings': 'Знахідок поки: %s'
+    ,'scanner.corpusDetailTitle': 'Повний доказ'
+    ,'scanner.corpusDetailRequest': 'Запит'
+    ,'scanner.corpusDetailStatus': 'Код'
+    ,'scanner.corpusDetailCheck': 'Перевірка'
+    ,'scanner.corpusDetailDescription': 'Опис'
+    ,'scanner.corpusDetailEvidence': 'Доказ'
+    ,'scanner.corpusStatsIdle': 'Натисніть «Запустити весь корпус».'
+    ,'scanner.corpusNone': 'Корпус відповів цілком і жодна перевірка не збіглася.'
+    ,'scanner.corpusSkipped': 'Не перевіризано · %s перевірок не отримали відповіді: з’єднання або через відмовилась'
+    ,'scanner.corpusFilter': 'Фільтр за шяхам, перевіркою чи доказом'
+    ,'scanner.corpusColId': '№'
+    ,'scanner.corpusColMethod': 'Метод'
+    ,'scanner.corpusColPath': 'Шлях'
+    ,'scanner.corpusColStatus': 'Status'
+    ,'scanner.corpusColCheck': 'Check'
+    ,'scanner.corpusColEvidence': 'Evidence'
+    ,'scanner.corpusShowMore': 'Show more · {count} of {total}'
+    ,'scanner.corpusStats': 'Перевірок: %s · унікальних шляхів: %s · у базі: %s'
+    ,'scanner.corpusRunning': 'Прогін триває…'
+    ,'scanner.corpusDone': 'Готово: %s знахідок із %s перевірок за %s запитів'
+    ,'scanner.corpusFailed': 'Прогін не вдався: %s'
+    ,'scanner.corpusNeedTarget': 'Вкажіть ціль у полі Target'
+    ,'scanner.viewCorpus': 'Корпус скан'
+    ,'scanner.targetLabel': 'Ціль'
+    ,'scanner.corpusPhase': 'Перевіряю ціль'
+    ,'scanner.corpusElapsed': 'Триває %s'
+    ,'scanner.corpusTotal': 'Перевірок у корпусі: %s · унікальних шляхів: %s'
+    ,'scanner.corpusLive': 'Запитів: %s з %s · знахідок: %s'
+    ,'scanner.exportCorpusAria': 'Експорт результатів корпус скану'
+    ,'scanner.corpusExportCsvHint': 'Один рядок на знахідку'
+    ,'scanner.corpusTotalChecks': 'Перевірок'
+    ,'scanner.corpusTotalRequests': 'Запитів'
+    ,'scanner.corpusTotalFindings': 'Знахідок'
+    ,'scanner.corpusSkippedCard': 'Пропущено'
+    ,'scanner.exportLabel': 'Експорт'
+    ,'scanner.exportJsonHint': 'Повний звіт як є'
+    ,'scanner.exportHtmlHint': 'Інтерактивний звіт'
+    ,'scanner.exportCsvHint': 'По рядку на файл'
+    ,'scanner.exportCmsAria': 'Експорт CMS-сканування'
+    ,'scanner.exportNucleiAria': 'Експорт Nuclei-сканування'
+    ,'scanner.optionsAdvanced': 'Додаткові опції'
+    ,'scanner.optSeverityAria': 'Фільтр severity'
+    ,'scanner.optExcludeSeverityAria': 'Виключені severity'
+    ,'scanner.findingsTitle': 'Знахідки'
+    ,'scanner.reportFiles': 'Файлів'
+    ,'scanner.statsTitle': 'Статистика запуску'
+    ,'scanner.exportGenerated': 'Згенеровано'
+    ,'scanner.filesNotRestored': 'Назви файлів збережено, але їхній вміст завеликий для сховища браузера — оберіть файли повторно перед запуском.'
+    ,'scanner.templatesNotStored': 'Вміст шаблонів не вдалося зберегти для наступного завантаження: {message}. Файли лишаються доступними до перезавантаження сторінки.'
+    ,'scanner.templatesRestoring': 'Відновлення вмісту обраних шаблонів…'
+    ,'scanner.runFailed': 'Запуск nuclei завершився з кодом {code} ({status}):'
+
+    ,'scanner.clear': 'Очистити'
+    ,'scanner.export': 'Експорт JSON'
+    ,'scanner.exportCsv': 'Експорт CSV'
+    ,'session.save': 'Зберегти сесію'
+    ,'session.export': 'Експорт'
+    ,'session.import': 'Імпорт'
+    ,'session.snapshotTrimmed': 'Сесію збережено частково: великий звіт обрізано для кешу браузера. Повний звіт лишається в пам’яті та в експорті'
+    ,'session.snapshotStorageFailed': 'Сесію не збережено: {message}'
+    ,'session.snapshotMirrorFailed': 'Дубль сесії не вмістився в сховище; робочі простори збережені, резервну копію тримає IndexedDB'
+    ,'route.address': 'host:port (порожньо = напряму)'
+    ,'route.apply': 'Застосувати маршрут'
+    ,'route.cancel': 'Скасувати маршрут'
+    ,'route.applied': 'Маршрут застосовано; скасовано операцій: {count}'
+    ,'proxy.title': 'Маршрут проксі'
+    ,'proxy.subtitle': 'Спільний вихідний маршрут для активних інструментів'
+    ,'proxy.address': 'Адреса SOCKS5 (порожньо = напряму)'
+    ,'proxy.hint': 'Маршрут використовується Repeater, Intruder, Target, OSINT, Scanner і passive proxy. Apply/Cancel route скасовує активні операції старих маршрутів, включно з AI та Automation.'
+    ,'proxy.current': 'Поточний маршрут'
+    ,'proxy.empty': 'Завантаження маршруту...'
+    ,'proxy.direct': 'Пряме з’єднання'
+    ,'proxy.protocol': 'Протокол'
+    ,'proxy.addressLabel': 'Адреса'
+    ,'proxy.status': 'Стан'
+    ,'proxy.directValue': 'Пряме'
+    ,'proxy.notUsed': 'не використовується'
+    ,'proxy.active': 'активний'
+    ,'proxy.targetPlaceholder': 'https://check.torproject.org/'
+    ,'proxy.timeout': 'Таймаут мс'
+    ,'proxy.check': 'Перевірити підключення'
+    ,'proxy.checkEmpty': 'Запустіть перевірку маршруту, щоб побачити стан цілі, затримку та зовнішню IP-адресу.'
+    ,'route.directRestored': 'Пряме з’єднання відновлено'
+    ,'proxy.checkSitesTitle': 'Сайти для ручної перевірки'
+    ,'proxy.checkSitesHint': 'Відкривайте їх у браузері з proxy 127.0.0.1:8080 або перевіряйте через активний маршрут.'
+    ,'ai.title': 'Runtime агента'
+    ,'ai.subtitle': 'Автономне тестування через типізовані інструменти'
+    ,'ai.disclaimer': 'Перший runtime виконує явний типізований план і не має доступу до shell, файлової системи або довільного HTTP.'
+    ,'ai.mission': 'Місія'
+    ,'ai.missionPlaceholder': 'Опишіть дозволену QA-місію'
+    ,'ai.plan': 'JSON-план інструментів'
+    ,'ai.provider': 'Провайдер'
+    ,'ai.endpoint': 'Endpoint LLM (необов’язково)'
+    ,'ai.model': 'Модель (необов’язково)'
+    ,'ai.apiKey': 'API key (не зберігається)'
+    ,'ai.useProjectContext': 'Додати контекст активного Project до цього запиту'
+    ,'ai.projectContextReady': 'Проєкт: {name}'
+    ,'ai.projectContextMissing': 'Спочатку виберіть Project'
+    ,'ai.generate': 'Згенерувати план'
+    ,'ai.start': 'Запустити місію'
+    ,'ai.cancel': 'Скасувати'
+    ,'ai.clear': 'Очистити'
+    ,'ai.steps': 'Кроки'
+    ,'ai.events': 'Події'
+    ,'ai.empty': 'Запусків агента ще немає.'
+    ,'ai.emptyEvents': 'Подій ще немає.'
+    ,'ai.emptyStateHint': 'Задайте питання щодо безпеки, виберіть пресет з бічної панелі або прикріпіть трафік для аналізу вразливостей.'
+    ,'ai.thinking': 'AI аналізує запит та генерує відповідь…'
+    ,'ai.senderYou': 'Ви'
+    ,'ai.senderSystem': 'Система'
+    ,'ai.reactAgentLabel': '⚡ Автономний агент (ReAct)'
+    ,'ai.reactAgentTooltip': 'Автономне дослідження з викликом інструментів (ReAct Loop: пошук у трафіку, перевірка ендпоінтів, запис вразливостей)'
+    ,'ai.currentModelTooltip': 'Поточна модель'
+    ,'ai.settingsTooltip': 'Розширені налаштування моделі'
+    ,'ai.settingsLabel': 'Параметри'
+    ,'ai.exportTooltip': 'Експортувати результати аудиту та діалог'
+    ,'ai.exportLabel': 'Експорт'
+    ,'ai.exportHtmlTitle': 'HTML Звіт'
+    ,'ai.exportHtmlDesc': 'Інтерактивний звіт аудиту'
+    ,'ai.exportJsonTitle': 'JSON Експорт'
+    ,'ai.exportJsonDesc': 'Діалог та ReAct кроки'
+    ,'ai.sendToAutomation': 'В Automation'
+    ,'ai.quickPresets': 'Швидкі пресети аудиту'
+    ,'ai.presetVulnTitle': 'Аналіз вразливостей'
+    ,'ai.presetVulnDesc': 'Пошук OWASP Top-10 & BOLA/IDOR'
+    ,'ai.presetHeadersTitle': 'Security Headers & CSP'
+    ,'ai.presetHeadersDesc': 'Аудит заголовків та cookie'
+    ,'ai.presetPocTitle': 'Генерація PoC експлойту'
+    ,'ai.presetPocDesc': 'Формування тестового payload'
+    ,'ai.presetReportTitle': 'Звіт безпеки'
+    ,'ai.presetReportDesc': 'Резюме знахідок і рекомендації'
+    ,'ai.chipSqliLabel': '💉 Тест на SQLi & IDOR'
+    ,'ai.chipCookiesLabel': '🍪 Перевірка Cookies & Auth'
+    ,'ai.chipPocLabel': '🎯 PoC для Repeater'
+    ,'ai.chipSummaryLabel': '📋 Резюме звіту'
+    ,'ai.chipSqliPrompt': 'Аналізуй прикріплені дані на наявність SQL Injection та IDOR'
+    ,'ai.chipCookiesPrompt': 'Перевір заголовки відповіді та cookies на відсутність HttpOnly, Secure, SameSite'
+    ,'ai.chipPocPrompt': 'Склади PoC HTTP-запит для перевірки цієї вразливості в Repeater'
+    ,'ai.chipSummaryPrompt': 'Зроби коротке резюме знахідок з рекомендаціями для звіту'
+    ,'ai.promptVulnAnalysis': 'Проведи всебічний аналіз прикріплених даних (запити, відповіді, ендпоінти) на наявність вразливостей OWASP Top 10, IDOR, ін’єкцій, порушень логіки аутентифікації чи витоку чутливих даних.'
+    ,'ai.promptHeadersCheck': 'Проаналізуй HTTP заголовки відповіді та cookies: перевір працездатність CSP, HSTS, X-Content-Type-Options, параметри SameSite, HttpOnly та Secure для cookies. Запропонуй виправлення.'
+    ,'ai.promptPocGenerator': 'Склади робочий Proof of Concept (PoC) HTTP-запит або curl-команду для відтворення знайденої потенційної аномалії чи вразливості у вкладці Repeater.'
+    ,'ai.promptReportSummary': 'Згенеруй структурований звіт з безпеки (Security Assessment Report) на основі проаналізованого трафіку з описом впливу (Impact), рівнем критичності (Severity) та детальними кроками виправлення (Remediation).'
+    ,'ai.attachReportTitle': 'Прикріпити звіт (HTML, JSON, HAR, TXT, CSV)'
+    ,'ai.attachReportLabel': 'Прикріпити звіт'
+    ,'ai.kbdSend': 'для надсилання'
+    ,'ai.copy': 'Копіювати'
+    ,'ai.copyTitle': 'Скопіювати відповідь'
+    ,'ai.copied': 'Скопійовано'
+    ,'ai.toastError': 'Помилка'
+    ,'ai.toastCopyCodeFailed': 'Не вдалося скопіювати код'
+    ,'ai.toastCopyMsgFailed': 'Не вдалося скопіювати повідомлення'
+    ,'ai.confirmClear': 'Очистити історію повідомлень поточного діалогу?'
+    ,'ai.modalTitle': 'Параметри AI Провайдера'
+    ,'ai.modalSubtitle': 'Налаштування підключення та параметрів моделі'
+    ,'ai.modalClose': 'Закрити'
+    ,'ai.modalEndpoint': 'Endpoint URL:'
+    ,'ai.modalEndpointHint': 'Базовий URL API для вибраного провайдера або локального Ollama'
+    ,'ai.modalModel': 'Назва моделі:'
+    ,'ai.modalModelHint': 'Ідентифікатор моделі в реєстрі провайдера'
+    ,'ai.modalApiKey': 'API Ключ:'
+    ,'ai.modalApiKeyHint': 'Зберігається лише для поточної сесії браузера (не зберігається в БД)'
+    ,'ai.modalReset': 'Відновити стандартні'
+    ,'ai.modalSave': 'Зберегти налаштування'
+    ,'target.requestTimeout': 'Таймаут запиту (мс)'
+    ,'target.failurePause': 'Пауза після збоїв'
+    ,'target.pause': 'Пауза краулера'
+    ,'target.resume': 'Продовжити краул'
+    ,'scanner.activeFailurePause': 'Пауза після збоїв'
+    ,'scanner.activeRecordedLimit': 'Запитів у черзі resend'
+    ,'scanner.activePause': 'Пауза'
+    ,'scanner.activeResume': 'Продовжити'
+    ,'scanner.activeResend': 'Переотправити запити без відповіді'
+    ,'scanner.activePausedShort': 'Прогін на паузі'
+    ,'scanner.activePausedToast': 'Прогін зупинено між зондами; сокети звільнено, прогрес збережено'
+    ,'scanner.activeResumedShort': 'Прогін продовжено'
+    ,'scanner.activePausedAt': 'На паузі:'
+    ,'scanner.activeDropped': 'Зондів скинуто паузою'
+    ,'scanner.activeFailedRequests': 'Без відповіді'
+    ,'scanner.activeFirstFailure': 'Перший збій:'
+    ,'scanner.activeConsecutive': 'Підряд'
+    ,'scanner.activeRecorded': 'Записано'
+    ,'scanner.activeResent': 'Переотправлено'
+    ,'scanner.activeResendAnswered': 'Відповіли'
+    ,'scanner.activeResendStillFailing': 'знову без відповіді'
+    ,'scanner.activeActionFailed': 'Дію не виконано'
+    ,'ai.toastSettingsSaved': 'Параметри моделі успішно збережено'
+    ,'ai.autonomousActions': 'Автономні дії агента'
+    ,'ai.expandSteps': 'Розгорнути кроки ▾'
+    ,'ai.step': 'Крок'
+    ,'ai.result': 'Результат'
+    ,'ai.taskCompleted': 'Завдання виконано.'
+    ,'ai.noMessagesToExport': 'Немає повідомлень для експорту в поточному діалозі'
+    ,'ai.defaultContext': 'Загальний контекст'
+    ,'nav.automation': 'Автоматизація'
+    ,'automation.palette': 'Вузли'
+    ,'automation.new': 'Новий workflow'
+    ,'automation.search': 'Пошук workflow'
+    ,'automation.namePlaceholder': 'Назва workflow'
+    ,'automation.save': 'Зберегти'
+     ,'automation.saveTemplate': 'Зберегти як шаблон'
+     ,'automation.templateSaved': 'Шаблон збережено локально.'
+     ,'automation.templateTitle': 'Назва шаблону'
+     ,'automation.templateCategory': 'Категорія'
+     ,'automation.templateDescription': 'Опис'
+    ,'automation.run': 'Запустити'
+    ,'automation.activate': 'Активувати'
+    ,'automation.deactivate': 'Деактивувати'
+    ,'automation.delete': 'Видалити'
+    ,'automation.refreshRuns': 'Оновити запуски'
+    ,'automation.connectHint': 'Натисніть на вихідний порт, потім на вхідний, щоб з’єднати вузли.'
+    ,'automation.inspector': 'Налаштування вузла'
+    ,'automation.selectNode': 'Виберіть вузол для редагування.'
+    ,'automation.runs': 'Виконання'
+    ,'automation.noRuns': 'Запусків ще немає.'
+    ,'automation.saved': 'Workflow збережено.'
+    ,'automation.deleted': 'Workflow видалено.'
+    ,'automation.newDraft': 'Новий workflow'
+    ,'automation.confirmRun': 'Цей workflow містить активні дії. Продовжити запуск?'
+    ,'automation.confirmActivate': 'Активація запускатиме цей workflow автоматично. Продовжити?'
+    ,'automation.savedLocally': 'Workflow збережено локально.'
+    ,'automation.node.manual_trigger': 'Ручний тригер'
+    ,'automation.node.schedule_trigger': 'Тригер за розкладом'
+    ,'automation.node.webhook_trigger': 'Webhook-тригер'
+    ,'automation.node.repeater': 'Repeater'
+     ,'automation.node.repeater_burst': 'Repeater Burst'
+     ,'automation.node.last_byte_sync': 'Last-Byte Sync'
+    ,'automation.node.target': 'Карта цілі'
+    ,'automation.node.target_browser': 'Browser Target'
+     ,'automation.node.oast_listener': 'OAST Listener'
+     ,'automation.node.oast_collect': 'OAST Collect'
+    ,'automation.node.osint': 'OSINT'
+    ,'automation.node.scanner': 'Scanner'
+    ,'automation.node.intruder': 'Intruder'
+    ,'automation.node.decoder': 'Decoder'
+    ,'automation.node.comparer': 'Comparer'
+    ,'automation.node.condition': 'Умова'
+    ,'automation.node.merge': 'Об’єднання'
+    ,'automation.node.set': 'Встановити значення'
+    ,'automation.node.template': 'Шаблон'
+    ,'automation.node.delay': 'Затримка'
+    ,'automation.node.ai_agent': 'AI Agent'
+    ,'automation.node.output': 'Результат'
+    ,'automation.params': 'Параметри JSON'
+    ,'automation.nodeName': 'Назва вузла'
+    ,'automation.disabled': 'Вимкнено'
+    ,'automation.input': 'Вхід'
+    ,'automation.outputPort': 'Вихід'
+    ,'automation.status': 'Статус'
+    ,'automation.started': 'Початок'
+    ,'automation.finished': 'Завершення'
+    ,'automation.mode': 'Режим'
+    ,'automation.noWorkflow': 'Немає workflow для цього Project.'
+    ,'automation.unsaved': 'Збережіть workflow перед запуском.'
+    ,'automation.invalidGraph': 'Граф workflow неповний або містить помилку.'
+
+    ,'automation.fit': 'Вмістити'
+    ,'automation.autoLayout': 'Авто-layout'
+    ,'automation.export': 'Експорт'
+    ,'automation.import': 'Імпорт'
+     ,'automation.templates': 'Шаблони'
+     ,'automation.templatesHint': 'Відкрити вбудований Template Store'
+     ,'automation.templateStore': 'Сховище шаблонів'
+     ,'automation.templateSearch': 'Пошук шаблонів, нод або тегів'
+     ,'automation.templateAll': 'Усі шаблони'
+     ,'automation.templateFeatured': 'Рекомендовані шаблони'
+     ,'automation.templatePreview': 'Переглянути'
+     ,'automation.templateImport': 'Імпортувати'
+     ,'automation.templateClose': 'Закрити'
+     ,'automation.templateRisk': 'Ризик'
+     ,'automation.templateExecution': 'Виконання'
+     ,'automation.templateNodes': 'Вузли'
+     ,'automation.templateTime': 'Час'
+     ,'automation.templateVariables': 'Змінні'
+     ,'automation.templateScope': 'Перевірка перед запуском'
+     ,'automation.templateConfirm': 'Підтвердьте виконання дії перед запуском'
+     ,'automation.templateRequired': 'Заповніть обов’язкові змінні перед імпортом.'
+     ,'automation.templateImported': 'Шаблон імпортовано на canvas.'
+     ,'automation.templateLoadError': 'Помилка завантаження Template Store'
+     ,'automation.templateNoResults': 'Шаблонів не знайдено'
+     ,'automation.templateComingSoon': 'Ще недоступно'
+    ,'automation.pause': 'Пауза'
+    ,'automation.resume': 'Продовжити'
+    ,'automation.cancel': 'Скасувати'
+    ,'automation.addParam': 'Додати параметр'
+    ,'automation.additionalParams': 'Додаткові параметри'
+    ,'automation.useCurrent': 'Використати поточний workspace'
+    ,'automation.openTool': 'Відкрити в інструменті'
+    ,'automation.emptyRepeater': 'Заповніть Repeater перед передачею.'
+    ,'automation.emptyIntruder': 'Заповніть Intruder перед передачею.'
+    ,'automation.objectRequired': 'Параметри мають бути JSON-об’єктом.'
+    ,'automation.transferError': 'Помилка передачі налаштувань'
+    ,'automation.field.method': 'Метод'
+    ,'automation.field.url': 'URL'
+    ,'automation.field.headers': 'Заголовки'
+    ,'automation.field.body': 'Тіло'
+    ,'automation.field.urls': 'Список запитів'
+     ,'automation.field.iterations': 'Ітерації'
+     ,'automation.field.concurrency': 'Паралельність'
+     ,'automation.field.delay_ms': 'Затримка між хвилями (мс)'
+     ,'automation.field.timeout_ms': 'Timeout запиту (мс)'
+    ,'automation.field.delay_ms': 'Затримка (мс)'
+    ,'automation.field.engine': 'Рушій'
+    ,'automation.field.max_pages': 'Максимум сторінок'
+    ,'automation.field.max_depth': 'Максимальна глибина'
+    ,'automation.field.same_origin': 'Лише той самий origin'
+    ,'automation.field.allowed_hosts': 'Дозволені хости'
+    ,'automation.field.excluded_hosts': 'За винятком хостів'
+    ,'automation.field.include_paths': 'Включити шляхи'
+    ,'automation.field.exclude_paths': 'Виключити шляхи'
+     ,'automation.field.server_url': 'URL OAST-провайдера'
+     ,'automation.field.auth_token': 'Токен провайдера'
+     ,'automation.field.listener_id': 'ID слухача'
+     ,'automation.field.poll_interval_sec': 'Інтервал опитування (с)'
+     ,'automation.field.timeout_sec': 'Timeout (с)'
+     ,'automation.field.capture_protocols': 'Протоколи'
+    ,'automation.field.browser': 'Браузер'
+    ,'automation.field.actions': 'Дії браузера'
+    ,'automation.field.allow_state_changing_actions': 'Дозволити дії зі зміною стану'
+    ,'automation.field.waf_check': 'Нешкідливий WAF-canary'
+    ,'automation.field.profile': 'Профіль'
+    ,'automation.field.base_request': 'Визначення raw-запиту'
+    ,'automation.field.mode': 'Режим'
+    ,'automation.field.payloads': 'Словники / payloads'
+    ,'automation.field.transformations': 'Трансформації'
+    ,'automation.field.concurrency': 'Паралельність'
+    ,'automation.field.operation': 'Операція'
+    ,'automation.field.input': 'Вхідне значення'
+    ,'automation.field.left': 'Ліве значення'
+    ,'automation.field.right': 'Праве значення'
+    ,'automation.field.field': 'Поле / JSON path'
+    ,'automation.field.operator': 'Оператор'
+    ,'automation.field.value': 'Очікуване значення'
+    ,'automation.field.values': 'Значення'
+    ,'automation.field.text': 'Шаблон'
+    ,'automation.field.seconds': 'Секунди'
+    ,'automation.field.prompt': 'Промпт'
+    ,'automation.field.provider': 'Провайдер'
+    ,'automation.field.endpoint': 'Ендпоінт'
+    ,'automation.field.model': 'Модель'
+    ,'automation.field.label': 'Мітка результату'
+    ,'automation.field.format': 'Формат'
+    ,'automation.field.cron': 'Cron-вираз'
+    ,'scanner.viewActive': 'Активний сканер'
+    ,'scanner.activeHint': 'Активний сканер обходить ціль, знаходить кожну інʼєкційну поверхню, перевіряє її девʼятьма модулями виявлення, поєднує підтверджені знахідки в ланцюги атак і додає доказ до кожної. Знахідка отримує рейтинг лише тоді, коли її вплив було доведено; решта позначається як непідтверджена і обмежується нижче за high.'
+    ,'scanner.activeRun': 'Запустити активний скан'
+    ,'scanner.activeNeedUrl': 'Спершу вкажіть ціль'
+    ,'scanner.activeNeedUrlHint': 'Активному сканеру потрібна абсолютна адреса http або https.'
+    ,'scanner.activeStarting': 'Запуск активного скану…'
+    ,'scanner.activeCancelling': 'Скасовування активного скану…'
+    ,'scanner.activeFailed': 'Активний скан не запустився:'
+    ,'scanner.activeDoneLine': 'Активний скан завершено: знахідок {count}, ціль {url}'
+    ,'scanner.activeFailedLine': 'Активний скан не завершився: {error}'
+    ,'scanner.activeFailedShort': 'Активний скан не завершився'
+    ,'scanner.activeFailedNoReason': 'рушій не назвав причини'
+    ,'scanner.activeCancelledLine': 'Активний скан скасовано, ціль {url}'
+    ,'scanner.activeKeptPrevious': 'У таблиці залишився попередній замір.'
+    ,'scanner.activeMaxPages': 'Максимум сторінок'
+    ,'scanner.activeMaxDepth': 'Глибина посилань'
+    ,'scanner.activeConcurrency': 'Воркерів'
+    ,'scanner.activeDelay': 'Пауза між пробами (мс)'
+    ,'scanner.activeBlindDelay': 'Затримка сліпої перевірки (мс)'
+    ,'scanner.activeParams': 'Імена прихованих параметрів, по одному в рядку'
+    ,'scanner.activeParamsHint': 'report_token\ndebug'
+    ,'scanner.activeWordlist': 'Словник шляхів, по одному в рядку'
+    ,'scanner.activeWordlistHint': '/admin/\n/.env'
+    ,'scanner.activeWordlistsNote': 'Обидва списки ваші, і обидва необовʼязкові: порожній список означає, що прогін не витратить на цю пробу жодного запиту. Імена параметрів — це те, що обхід Target прочитав із власного JavaScript застосунку: скопіюйте їх із панелі Target. Словник шляхів — це файл зі шляхами.'
+    ,'scanner.activeTimeout': 'Таймаут запиту (мс)'
+    ,'scanner.activeSameOrigin': 'Залишатися на тому ж хості'
+    ,'scanner.activeOptionsHint': 'Кожне поле — це число, яке вибрали ви: 0 для сторінок і паузи означає «без межі», −1 для глибини означає «без обмеження глибини», і жодне значення тут не зменшує те, що скан може побачити. Скан зупиняється, коли ви його скасовуєте або коли ціль перестає відповідати.'
+    ,'scanner.activeFindingsTitle': 'Знахідки'
+    ,'scanner.activeProven': 'Доведено'
+    ,'scanner.activeCapped': 'Знижено'
+    ,'scanner.activeFilterHint': 'Фільтр за назвою, модулем, ендпоинтом або доказом'
+    ,'scanner.activeAllSeverities': 'Усі рівні'
+    ,'scanner.activeProvenOnly': 'Лише доведені'
+    ,'scanner.activeColumnSeverity': 'Рівень'
+    ,'scanner.activeColumnProof': 'Доказ'
+    ,'scanner.activeColumnModule': 'Модуль'
+    ,'scanner.activeColumnEndpoint': 'Ендпоинт'
+    ,'scanner.activeColumnEvidence': 'Доказове поле'
+    ,'scanner.activeProofVerified': 'Доведено'
+    ,'scanner.activeProofShow': 'Доказ впливу'
+    ,'scanner.activeProofColumns': 'колонок'
+    ,'scanner.activeSchemaShow': 'Схема, прочитана через цю ін\'єкцію'
+    ,'scanner.activeSchemaTables': 'таблиць'
+    ,'scanner.activeSchemaColumnsOf': 'колонки'
+    ,'scanner.activeSchemaTruncated': 'список обрізано межею'
+    ,'scanner.activeSchemaDatabases': 'бази даних'
+    ,'scanner.activeProofUnverified': 'Непідтверджено'
+    ,'scanner.activeShowCurl': 'Показати curl'
+    ,'scanner.activePages': 'Сторінок'
+    ,'scanner.activeSurfaces': 'Поверхонь'
+    ,'scanner.activeFound': 'Знахідок'
+    ,'scanner.activeRequests': 'Запитів'
+    ,'scanner.activeExportCsvHint': 'Один рядок на знахідку'
+    ,'scanner.exportActiveAria': 'Експорт активного скану'
+    ,'settings.modalTitle': 'Налаштування вкладки'
+    ,'settings.tabSettings': 'Налаштування вкладки'
+    ,'settings.navDns': '🌐 Мережа та DNS'
+    ,'settings.navAppearance': '🎨 Зовнішній вигляд'
+    ,'settings.navTool': '🛠 Параметри інструмента'
+    ,'settings.navShortcuts': '⌨️ Шорткати та пресети'
+    ,'settings.dnsScope': 'Область дії DNS'
+    ,'settings.dnsScopeGlobal': 'Глобально для всього проекту'
+    ,'settings.dnsScopeTab': 'Індивідуально для цієї вкладки'
+    ,'settings.dnsMode': 'Режим DNS-резолвера'
+    ,'settings.dnsSystem': 'Системний DNS за замовчуванням (Default)'
+    ,'settings.dnsCustom': 'Кастомний UDP/TCP DNS сервер (IP:порт)'
+    ,'settings.dnsDoh': 'DNS-over-HTTPS (DoH)'
+    ,'settings.dnsStatic': 'Статичні оверрайди хостів (/etc/hosts)'
+    ,'settings.dnsSplit': 'Split-Horizon DNS маршрутизація'
+    ,'settings.customDnsServer': 'Адреса DNS-сервера (IP:порт)'
+    ,'settings.dohEndpoint': 'URL DoH-резолвера'
+    ,'settings.staticHosts': 'Статичні оверрайди (IP Domain на рядок)'
+    ,'settings.splitRules': 'Split-Horizon правила (Шаблон=DNS)'
+    ,'settings.forceTtl0': 'Примусовий повторний резолв перед кожним запитом (Force TTL=0)'
+    ,'settings.flushDns': '🔄 Скинути DNS-кеш'
+    ,'settings.dnsFlushed': 'DNS-кеш успішно скинуто'
+    ,'settings.tlsFingerprint': 'TLS / JA3 / JA4 профіль клієнта'
+    ,'settings.themePreset': 'Тема оформлення (Theme Preset)'
+    ,'settings.themeDefault': 'RequestRider Dark (Стандартна)'
+    ,'settings.themeBurp': 'Burp Classic'
+    ,'settings.themeCyberpunk': 'Cyberpunk Neon'
+    ,'settings.themeMonokai': 'Monokai Pro'
+    ,'settings.themeHighContrast': 'Висококонтрастна (A11y)'
+    ,'settings.customColors': 'Кастомні кольори та підсвічування'
+    ,'settings.statusPalette': 'Кольорове диференціювання HTTP статус-кодів'
+    ,'settings.methodPalette': 'Кольори типів запитів (HTTP Methods)'
+    ,'settings.status2xx': '2xx Успіх'
+    ,'settings.status3xx': '3xx Редирект'
+    ,'settings.status4xx': '4xx Помилка'
+    ,'settings.status5xx': '5xx Сервер'
+    ,'settings.urlSyntax': 'Підсвічування коду та URL'
+    ,'settings.urlPath': 'URL Path'
+    ,'settings.urlParams': 'Query Params'
+    ,'settings.syntaxWrap': 'Word Wrap (Перенесення рядків)'
+    ,'settings.syntaxFontSize': 'Розмір шрифту'
+    ,'settings.resetDefaults': 'Скинути до дефолту'
+    ,'settings.saveApply': 'Зберегти та застосувати'
+    ,'settings.settingsSaved': 'Налаштування успішно збережено'
+    ,'settings.cmdPaletteHint': 'Командна палітра (Ctrl+K або Cmd+K)'
+    ,'settings.exportProfile': '📤 Експорт пресету (.json)'
+    ,'settings.importProfile': '📥 Імпорт пресету (.json)'
+    ,'settings.autoScrollResults': 'Автопрокрутка таблиці результатів'
+    ,'proxy.checkUrlLabel': 'URL для перевірки з’єднання'
+    ,'proxy.passiveProxyTitle': 'Пасивний локальний проксі (Passive Proxy)'
+    ,'proxy.passiveProxyDesc': 'Слухає на 127.0.0.1:8080. Виконує виключно прозоре логування трафіку в Traffic та History без перехоплення чи утримання запитів.'
+    ,'workspace.renameTab': 'Перейменувати вкладку'
+    ,'faq.button': 'FAQ'
+    ,'faq.buttonFull': '❓ FAQ / Довідка'
+    ,'faq.modalTitle': 'Довідник та інструкція користувача'
+    ,'faq.modalSubtitle': 'Швидкий посібник та детальний опис усіх функцій інструментів'
+    ,'faq.searchPlaceholder': 'Пошук по функціях, трансформах, режимах...'
+    ,'faq.headerTooltip': 'Довідник інструментів та FAQ (F1)'
+    ,'faq.allTools': 'Усі інструменти'
+  },
+  en: {
+    'projects.title': 'Projects',
+    'projects.subtitle': 'Organize workspaces, History, Traffic and Workflows',
+    'projects.active': 'Active project',
+    'projects.scope': 'Project groups data and workflows; it does not enforce URL policy',
+    'projects.purpose': 'Project is a folder for History, Traffic, Workflows and OSINT graphs. It is not an allowlist and does not block other URLs.',
+    'projects.noActiveSummary': 'No active Project selected. Tools can be used without one.',
+    'projects.new': 'New project',
+    'projects.manage': 'Manage project',
+    'projects.delete': 'Delete project',
+    'projects.deleteHint': 'Deleting a project permanently deletes all linked records.',
+    'projects.available': 'Available projects',
+    'projects.empty': 'No projects yet. Create one to organize your workspace.',
+    'projects.countOne': 'project',
+    'projects.countMany': 'projects',
+    'projects.select': 'Select project',
+    'projects.manageShort': 'Manage',
+    'projects.dialogTitle': 'Manage project',
+    'common.name': 'Name',
+    'common.target': 'Target',
+    // Used as a column label by the Project report's scanner table. `tr()` hands
+    // back the key when the dictionary has no entry, so a missing key is not an
+    // absent label — it is the word `common.url` printed into a report the analyst
+    // files.
+    'common.url': 'URL',
+    'common.environment': 'Environment',
+    'common.routeProfile': 'Route profile',
+    'common.cancel': 'Cancel',
+    'common.save': 'Save',
+    'common.confirm': 'Confirm',
+    'common.close': 'Close',
+    'projects.noTarget': 'No target',
+    'projects.noEnvironment': 'No environment',
+    'projects.none': 'No project',
+    'projects.label': 'Project',
+    'projects.exportLabel': 'Export',
+    'projects.exportAria': 'Export project',
+    'projects.exportJsonHint': 'Re-importable bundle',
+    'projects.exportHtmlHint': 'Interactive report',
+    'projects.exportCsvHint': 'One row per record',
+    'projects.import': 'Import project',
+    'projects.exportWorking': 'Reading project…',
+    'projects.exportFailed': 'Project export failed',
+    'projects.importWorking': 'Importing project…',
+    'projects.importConfirm': 'Import "{name}" as a new project? The current project stays untouched and the imported one appears next to it.',
+    'projects.importDone': 'Project "{name}" imported',
+    'projects.importFailed': 'Project import failed',
+    'projects.importEmpty': 'The bundle contained no records',
+    'projects.reportOverview': 'Project',
+    'projects.reportNotes': 'Notes',
+    'projects.reportTech': 'Technology observations',
+    'projects.reportEndpoints': 'Endpoints',
+    'projects.reportScans': 'Scans',
+    'projects.reportTargets': 'Target crawls',
+    'projects.reportWorkflows': 'Workflows',
+    'projects.reportEntities': 'OSINT entities',
+    'projects.reportRelations': 'OSINT relations',
+    'projects.reportSecrets': 'Secret references',
+    'projects.reportEndpointsTitle': 'Observed endpoints',
+    'projects.reportScansTitle': 'Scanner runs',
+    'projects.reportGraphsTitle': 'OSINT graphs',
+    'projects.reportWorkflowsTitle': 'Linked automation',
+    'projects.reportSecretsTitle': 'Secret references',
+    'projects.reportTrafficTitle': 'Recorded traffic',
+    'projects.reportEngine': 'Engine',
+    'projects.reportHighest': 'Highest severity',
+    'projects.reportFindings': 'Findings',
+    'projects.reportStatuses': 'Statuses',
+    'projects.reportParameters': 'Parameters',
+    'projects.reportStatus': 'Status',
+    'projects.reportNodes': 'Nodes',
+    'projects.reportSchedule': 'Schedule',
+    'projects.reportSize': 'Size',
+    'projects.reportSource': 'Source',
+    'projects.exportFusion': 'Unified Fusion Report',
+    'projects.exportFusionHint': '4-Level multi-engine HTML report',
+    'projects.exportSarif': 'SARIF 2.1.0',
+    'projects.exportSarifHint': 'OASIS standard security format',
+    'projects.reportSchemaVersion': 'Schema version',
+    'projects.reportExportedAt': 'Exported at',
+    'projects.reportVulnerabilities': 'Vulnerabilities',
+    'projects.reportPostureScore': 'Posture Score',
+    'projects.reportSeverityBreakdown': 'Severity Breakdown',
+    'projects.reportVulnerabilitiesTitle': 'Vulnerability Findings Ledger',
+    'projects.reportNoVulnerabilities': 'No vulnerabilities detected',
+    'projects.reportRemediation': 'Remediation Guidance',
+    'projects.reportSeverity': 'Severity',
+    'projects.reportProofOfConcept': 'Proof of Concept (PoC)',
+    'projects.reportPrint': 'Print / Save as PDF',
+    'projects.reportFilterAll': 'All',
+    'projects.reportFilterCrit': 'Critical',
+    'projects.reportFilterHigh': 'High',
+    'projects.reportFilterMed': 'Medium',
+    'projects.reportFilterLow': 'Low',
+    'projects.reportFilterInfo': 'Info',
+    'projects.reportKey': 'Key',
+    'projects.reportRef': 'Value reference',
+    'projects.reportGraph': 'Graph',
+    'projects.reportFilter': 'Search this section',
+    'projects.reportEmpty': 'No records in this section yet.',
+    'projects.reportLargeSection': 'This section holds {rows} records. The table contains every one of them, and the search above reads all of them.',
+    'projects.reportEvidenceNote': 'The complete request and response bodies of every exchange are in this project’s JSON bundle: it can be imported back and every exchange reopened in Repeater. This report shows the workspace overview rather than duplicating those bodies.',
+    'projects.reportCount.endpoints': 'endpoints',
+    'projects.reportCount.secret_references': 'secret references',
+    'projects.reportCount.scanner_runs': 'scanner runs',
+    'projects.reportCount.target_jobs': 'Target crawls',
+    'projects.reportCount.workflows': 'workflows',
+    'projects.reportCount.workflow_runs': 'executions',
+    'projects.reportCount.osint_graphs': 'OSINT graphs',
+    'projects.reportCount.osint_entities': 'entities',
+    'projects.reportCount.osint_relations': 'relations',
+    'projects.reportCount.traffic': 'exchanges',
+    'projects.reportCount.intruder_attacks': 'attacks',
+    'projects.reportCount.capture_contexts': 'capture contexts',
+    'intruder.exportLabel': 'Export',
+    'intruder.exportAria': 'Export Intruder results',
+    'intruder.exportJsonHint': 'Every exchange as-is',
+    'intruder.exportHtmlHint': 'Interactive report',
+    'intruder.exportCsvHint': 'One row per result',
+    'intruder.detectEnabled': 'Detect a successful login',
+    'intruder.detectHint': 'Before the run the request is replayed with an impossible credential to learn what a failed login answers, and every result is compared with that answer.',
+    'intruder.detectSignalsAria': 'Signals compared with the failed login',
+    'intruder.detectSignalStatus': 'Status',
+    'intruder.detectSignalRedirect': 'Redirect',
+    'intruder.detectSignalCookie': 'Cookie',
+    'intruder.detectSignalLength': 'Response size',
+    'intruder.detectSignalBody': 'Body',
+    'intruder.detectTolerance': 'Size tolerance (bytes)',
+    'intruder.detectToleranceTitle': 'Response sizes within this many bytes of the failed-login size count as the same size',
+    'intruder.detectCalibration': 'Failed-login samples',
+    'intruder.detectCalibrationTitle': 'How many failed-login answers are captured before the run starts',
+    'intruder.detectRuleTypeAria': 'Match rule type',
+    'intruder.detectRuleBodyContains': 'Body contains',
+    'intruder.detectRuleBodyNotContains': 'Body does not contain',
+    'intruder.detectRuleHeaderContains': 'Header contains',
+    'intruder.detectRuleStatusEquals': 'Status equals',
+    'intruder.detectRuleHeaderName': 'Header name',
+    'intruder.detectRuleValue': 'Value',
+    'intruder.detectRuleRegex': 'Regex',
+    'intruder.detectRuleAdd': 'Add rule',
+    'intruder.detectRuleClear': 'Clear rules',
+    'intruder.detectRuleRemove': 'Remove rule',
+    'intruder.detectNoRules': 'No rules: the signals above decide on their own.',
+    'intruder.detectOff': 'Login detection is off.',
+    'intruder.detectCalibrating': 'Capturing what a failed login answers…',
+    'intruder.detectUnavailable': 'No failed-login sample could be captured — only the rules are in use.',
+    'intruder.detectBaseline': 'Failed login: status {status}, size {size} B, samples {samples}, tolerance {tolerance} B. Decided by: {decided}.',
+    'intruder.detectDecidedRules': 'the rules',
+    'intruder.detectDecidedSignals': 'the signals',
+    'intruder.detectColumn': 'Match',
+    'intruder.detectBadge': 'MATCH',
+    'intruder.detectMatches': 'matches',
+    'intruder.detectOnlyMatches': 'Only matches',
+    'intruder.detectBaselineShort': 'Failed login',
+    'intruder.detectReason_status': 'status',
+    'intruder.detectReason_redirect': 'redirect',
+    'intruder.detectReason_cookie': 'new cookie',
+    'intruder.detectReason_length': 'other size',
+    'intruder.detectReason_body': 'other body',
+    'intruder.detectReason_status_equals': 'status',
+    'intruder.detectReason_body_contains': 'body contains',
+    'intruder.detectReason_body_not_contains': 'body does not contain',
+    'intruder.detectReason_header_contains': 'header contains',
+    'intruder.reportResults': 'Results',
+    'intruder.reportResultsTitle': 'Attack results',
+    'intruder.reportError': 'Error',
+    'intruder.reportPayloads': 'Payloads',
+    'intruder.reportElapsed': 'Response time',
+    'intruder.reportBytes': 'Response bytes',
+    'intruder.reportMode': 'Mode',
+    'intruder.reportTarget': 'Target',
+    'intruder.reportProject': 'Project',
+    'intruder.reportAttackId': 'Attack id',
+    'intruder.reportStatus': 'Status',
+    'intruder.reportJobs': 'Requests sent',
+    'intruder.reportFailed': 'failed',
+    'intruder.reportDictionaries': 'Dictionaries',
+    'intruder.reportRunTitle': 'About this attack',
+    'intruder.reportEvidence': 'Request & response',
+    'intruder.reportEvidenceShow': 'Show',
+    'intruder.reportEvidenceFor': 'Show request and response for result {index}',
+    'intruder.reportLarge': 'This report holds {rows} results and {bytes} bytes of responses. The table contains every result; the full request and response are loaded only when opened, so search and filters stay just as fast.',
+    'intruder.reportRequest': 'Request',
+    'intruder.reportResponse': 'Response',
+    'intruder.reportIndex': '#',
+    'intruder.reportFilter': 'Search status, URL or payload',
+    'intruder.reportAll': 'All',
+    'intruder.reportNoMatch': 'Nothing matches this filter.',
+    'intruder.reportEmpty': 'This attack returned no results.',
+    'intruder.reportPath': 'Path',
+    'intruder.reportObserved': 'Observed',
+    'export.unsupported': 'That export format is unavailable',
+    'export.failed': 'The export did not finish',
+    'scanner.reportRefused': 'The server refused the scanner report',
+    'projects.namePrompt': 'Project name',
+    'nav.projects': 'Projects',
+    'nav.repeater': 'Repeater',
+    'nav.intruder': 'Intruder',
+    'nav.target': 'Target',
+    'nav.osint': 'OSINT',
+    'nav.decoder': 'Decoder',
+    'nav.scanner': 'Scanner',
+    'nav.proxy': 'Tor/Proxy',
+    'nav.history': 'History',
+    'nav.traffic': 'Traffic',
+    'nav.ai': 'AI',
+    'target.engine': 'Engine',
+    'target.staticEngine': 'Static HTTP crawler',
+    'target.browserEngine': 'Browser-driven',
+    'target.navigationMode': 'Navigation mode',
+    'target.formMode': 'Form mode (auto)',
+    'target.mode': 'Target mode',
+    'target.formHint': 'Form mode: the crawler finds every field and button in the DOM by itself and drives them without selectors.',
+    'target.navigationHint': 'Navigation mode: read-only browser crawl.',
+    'target.autoScopeLabel': 'Automatic pass',
+    'target.autoScopeForms': 'Forms only',
+    'target.autoScopeClicks': 'Controls only',
+    'target.autoScopeBoth': 'Forms and controls',
+    'target.autoHintForms': 'Fills every field and submits every form. No button is clicked.',
+    'target.autoHintClicks': 'Clicks buttons and toggles. Forms are neither filled nor submitted.',
+    'target.autoHintBoth': 'Forms and controls together. Links are not clicked, the crawler opens them itself.',
+    'target.autoActions': 'auto actions',
+    'target.autoForms': 'forms',
+    'target.autoControls': 'clicks',
+    'target.autoFailed': 'failed',
+    'target.autoTitle': 'Automatic actions on this page',
+    'target.browser': 'Browser',
+    'target.captureContext': 'Passive capture context',
+    'target.noCaptureContext': 'No capture context (not linked to a Project)',
+    'target.captureName': 'Capture context name',
+    'target.captureNoProject': 'No Project (unlinked capture context)',
+    'target.captureCreate': 'Create capture context',
+    'target.captureReady': 'Capture: {name} · {scope}',
+    'target.captureUnscoped': 'Not linked to a Project',
+    'target.captureBrowserOnly': 'Capture context is used by browser-driven mode',
+    'target.captureRouteHint': 'Passive capture classification requires the local proxy route',
+    'agent.startConversation': 'Start a QA conversation.',
+    'repeater.rawEditor': 'Raw HTTP request editor',
+    'repeater.shortcut': 'Ctrl/Cmd + Enter to send',
+    'button.send': 'Send',
+    'button.copyResponse': 'Copy response',
+    'button.clear': 'Clear',
+    'label.request': 'Request',
+    'label.response': 'Response',
+    'response.empty': 'Response will appear here.',
+    host: 'Host',
+    path: 'Path / query',
+    'button.mark': 'Add § markers',
+    'button.apply': 'Apply transformation',
+    'button.clearTransformations': 'Clear transformations',
+    'button.addDictionary': 'Add dictionary',
+    'button.runAttack': 'Run attack',
+    'button.saveAttack': 'Save attack',
+    'button.pauseAttack': 'Pause attack',
+    'button.resumeAttack': 'Resume attack',
+    'button.cancelAttack': 'Cancel attack',
+    'button.clearResults': 'Clear results',
+    'button.loadSelected': 'Load selected',
+    'button.runSelected': 'Run selected',
+    'button.clearFilter': 'Clear filter',
+    'button.exportHistory': 'Export selected JSON',
+    'button.deleteSelected': 'Delete selected',
+    'button.clearHistory': 'Clear history',
+    'button.refreshTraffic': 'Clear',
+    'button.pauseTraffic': 'Pause',
+    'button.resumeTraffic': 'Resume',
+    'button.exportTraffic': 'Export all',
+    'traffic.recording': 'Recording',
+    'traffic.paused': 'Paused',
+    'traffic.pause': 'Pause traffic capture',
+    'traffic.resume': 'Resume traffic capture',
+    'traffic.sort': 'Sort traffic',
+    'traffic.rowActions': 'Row actions',
+    'traffic.scopeLinked': 'project-linked',
+    'traffic.scopeIn': 'legacy project-linked',
+    'traffic.scopeOut': 'legacy scope metadata',
+    'traffic.scopeInvalid': 'invalid context',
+    'traffic.scopeUnscoped': 'unscoped',
+    'header.target': 'Target',
+    'header.optionalOverride': 'Optional connection override',
+    'header.selectMark': 'Select text and mark it',
+    'header.transformations': 'Transformations',
+    'header.dictionaries': 'Payload dictionaries',
+    'header.selectedRequest': 'Selected request',
+    'header.selectedResponse': 'Selected response',
+    'header.attackResult': 'Select an Intruder result',
+    'hint.payloadDictionary': 'Dictionary values are substituted into the marked request. Use one dictionary for Sniper/Battering Ram, or multiple dictionaries for Pitchfork/Cluster Bomb. The generator only creates repetitive test values quickly; it does not run an attack automatically.',
+    'hint.optionalHTTPS': 'HTTPS',
+    'hint.https': 'HTTPS',
+    'port': 'Port',
+    'hint.savedAttacks': 'Saved attacks',
+    'hint.filter': 'Filter status or payload',
+    'hint.originalOrder': 'Original order',
+    'hint.ascending': 'Ascending',
+    'hint.descending': 'Descending',
+    'hint.onePayload': 'one payload per line',
+    'hint.valuePrependAppend': 'Value for prepend/append',
+    'intruder.dictionaryName': 'Dictionary name',
+    'intruder.dictionaryDefault': 'Dictionary {index}',
+    'intruder.chooseDictionaryFile': 'Choose dictionary file',
+    'intruder.payloadsLoaded': 'Payloads loaded: {count}',
+    'intruder.dictionaryError': 'Dictionary error: {error}',
+    'intruder.transformationsCleared': 'Transformations cleared.',
+    'state.requestEmpty': 'Request is empty.',
+    'state.responseEmpty': 'Response will appear here.',
+    'state.responsePending': 'Waiting for response...',
+    'state.noResults': 'No results.',
+    'state.selectHistory': 'Select a history record.',
+    'history.loadMore': 'Load more · {count} of {total}',
+    'history.loadMoreDone': 'All {total} History records loaded',
+    'history.loadingRecord': 'Reading the full exchange…',
+    'history.loadFailedTitle': 'History',
+    'traffic.loadMore': 'Load more from database · {count} of {total}',
+    'traffic.loadMoreHint': 'Durable passive proxy records',
+    'traffic.loadingRecord': 'Reading the full exchange…',
+    'traffic.selectRow': 'Select the row to read the exchange.',
+    'traffic.loadFailedTitle': 'Traffic',
+    'state.selectTraffic': 'Select a traffic record.',
+    'table.source': 'Source',
+    'table.close': 'Close dialog',
+    // A History row names the tool that sent it and the run it belongs to, so a
+    // scan's seventeen proxied requests are not read as ambient browsing.
+    'history.source.repeater': 'Repeater',
+    'history.source.intruder': 'Intruder',
+    'history.source.lastByte': 'Last-Byte',
+    'history.source.proxy': 'Proxy',
+    'history.source.tool': 'Tool',
+    'history.source.unknown': 'Other',
+    'table.sourceIP': 'Source IP',
+    'table.host': 'Host',
+    'table.method': 'Method',
+    'table.url': 'URL',
+    'table.status': 'Status',
+    'table.length': 'Length',
+    'table.mime': 'MIME',
+    'table.payload': 'Payload',
+    'table.time': 'Time',
+    'table.actions': 'Actions',
+    'table.resizeHandleAria': 'Resize table height. Arrows change height, Enter fills the screen, Escape leaves',
+    'button.view': 'View',
+    'button.saveRow': 'Save row',
+    'button.sendAI': 'Send to AI',
+    'button.sendExchangeAI': 'Send exchange to AI',
+    'button.sendResultsAI': 'Send results to AI',
+    'button.sendMapAI': 'Send map to AI',
+    'button.sendOSINTAI': 'Send OSINT to AI',
+    'button.sendScannerAI': 'Send scan to AI',
+    'button.sendChat': 'Send',
+     'button.sendAutomation': 'Send to Automation',
+    'agent.attachedDetails': 'Details',
+    'agent.clearAll': 'Clear all',
+    'agent.remove': 'Remove',
+    'ai.chatPlaceholder': 'Ask the agent to inspect evidence or perform an approved QA step',
+    'button.remove': 'Remove',
+    'button.compare': 'Compare',
+    'button.copy': 'Copy',
+    'status.pending': 'pending',
+    'label.concurrency': 'Concurrency',
+    'label.start': 'Start',
+    'label.end': 'End',
+    'label.step': 'Step',
+    'button.compareRequest': 'Compare request',
+    'button.compareResponse': 'Compare response',
+    'button.decodeRequest': 'Decode request',
+    'button.decodeResponse': 'Decode response',
+    'button.tagNote': 'Tag / note',
+    'state.attackResults': 'Results will appear here.',
+    'state.loaded': 'loaded',
+    'state.payloads': 'payloads'
+    ,'exchange.hostSearch': 'Search domain or host'
+    ,'intruder.attackMode': 'Attack mode'
+    ,'intruder.delay': 'Delay between requests (ms)'
+    ,'intruder.review': 'Review'
+    ,'intruder.target': 'Target'
+    ,'intruder.targetUnset': 'Target not set'
+    ,'intruder.route': 'Route'
+    ,'intruder.routeDirect': 'Direct connection'
+    ,'intruder.mode': 'Mode'
+    ,'intruder.mode.sniper': 'Sniper'
+    ,'intruder.mode.batteringRam': 'Battering Ram'
+    ,'intruder.mode.pitchfork': 'Pitchfork'
+    ,'intruder.mode.clusterBomb': 'Cluster Bomb'
+    ,'intruder.delayShort': 'Delay'
+    ,'intruder.concurrency': 'Concurrency'
+    ,'intruder.estimatedJobs': 'Estimated jobs'
+    ,'target.empty': 'Enter a URL and build a map.'
+    ,'osint.empty': 'Enter a URL and run checks.'
+    ,'osint.noData': 'No data.'
+    ,'scanner.empty': 'Enter an authorized URL and run Safe CMS Recon.'
+    ,'scanner.emptyNuclei': 'Enter an authorized URL, upload template files, and run the templates.'
+    ,'scanner.emptyActive': 'Enter an authorized URL and start an active scan.'
+    ,'scanner.urlRequired': 'Enter a URL first.'
+    ,'scanner.running': 'Running safe reconnaissance...'
+    ,'proxy.targetRequired': 'Target URL is required.'
+    ,'proxy.checking': 'Checking route...'
+    ,'state.sending': 'Sending...'
+    ,'state.noAttackResults': 'No results.'
+    ,'attack.status': 'Attack'
+    ,'attack.loadingResults': 'loading results'
+    ,'attack.completed': 'completed'
+    ,'attack.failed': 'failed'
+    ,'attack.showing': 'showing'
+    ,'repeater.compareResponse': 'Compare response'
+    ,'decoder.operation': 'Decoder operation'
+    ,'decoder.inputPlaceholder': 'Paste a value, request fragment or response body'
+    ,'decoder.outputPlaceholder': 'Decoded value will appear here'
+    ,'scanner.urlPlaceholder': 'https://example.test/'
+    ,'decoder.error': 'Error: {message}'
+    ,'repeater.error': 'Error: {message}'
+    ,'repeater.requestError': 'request error'
+    ,'scanner.completed': 'Completed {result}. {posture}'
+    ,'scanner.successfully': 'successfully'
+    ,'scanner.withWarnings': 'with warnings'
+    ,'scanner.postureReview': 'Security posture requires review.'
+    ,'scanner.postureStable': 'Security posture is stable in passive read-only checks.'
+    ,'scanner.target': 'Target'
+    ,'scanner.highestSeverity': 'Highest severity'
+    ,'scanner.findingCount': 'Finding count'
+    ,'scanner.httpStatus': 'HTTP status'
+    ,'scanner.technologies': 'Technologies'
+    ,'scanner.pathChecks': 'Read-only public path checks'
+    ,'scanner.noFindings': 'No findings were returned by the safe reconnaissance checks.'
+    ,'scanner.evidence': 'Evidence'
+    ,'scanner.recommendation': 'Recommendation'
+    ,'scanner.cmsFindingsTitle': 'Safe CMS Recon Findings'
+    ,'scanner.cmsFilterHint': 'Filter by title, category, evidence or recommendation'
+    ,'scanner.cmsAllCategories': 'All categories'
+    ,'scanner.cmsColumnSeverity': 'Severity'
+    ,'scanner.cmsColumnCategory': 'Category'
+    ,'scanner.cmsColumnFinding': 'Finding / Surface'
+    ,'scanner.cmsColumnEvidence': 'Evidence'
+    ,'scanner.cmsColumnRecommendation': 'Recommendation'
+    ,'scanner.cmsRawSummary': 'Diagnostic Raw Log'
+    ,'scanner.cmsNoMatches': 'No findings match the current filter.'
+    ,'ai.attachedToNext': '{label} attached to the next AI message.'
+    ,'ai.attachedChat': 'Attached to chat'
+    ,'ai.nothingAttached': 'Nothing attached'
+    ,'ai.details': 'Details'
+    ,'ai.compact': 'Compact'
+    ,'ai.clearAll': 'Clear all'
+    ,'ai.remove': 'Remove'
+    ,'target.map': 'Map'
+    ,'target.pages': 'pages'
+    ,'target.unknown': 'unknown'
+    ,'comparer.title': 'Comparer'
+    ,'comparer.subtitle': 'Compare two requests or responses'
+    ,'comparer.left': 'Left item'
+    ,'comparer.right': 'Right item'
+    ,'comparer.firstPlaceholder': 'Paste the first request or response'
+    ,'comparer.secondPlaceholder': 'Paste the second request or response'
+    ,'comparer.words': 'Compare words'
+    ,'comparer.bytes': 'Compare bytes'
+    ,'comparer.decodeLeft': 'Decode left'
+    ,'comparer.decodeRight': 'Decode right'
+    ,'comparer.swap': 'Swap sides'
+    ,'comparer.empty': 'Comparison results will appear here.'
+    ,'workspace.close': 'Close workspace'
+    ,'workspace.rename': 'Double-click to rename'
+    ,'workspace.new': 'New workspace'
+    ,'workspace.name': 'Workspace name'
+    ,'comparer.compareResponse': 'Compare response'
+    ,'target.title': 'Target site map',
+    'target.scope': 'Same origin by default',
+    'target.url': 'Start URL',
+    'target.maxPages': 'Max pages'
+    ,'target.groupLimits': 'Limits'
+    ,'target.groupBrowser': 'Browser crawler'
+    ,'target.groupStatic': 'Static crawler',
+    'target.maxDepth': 'Max depth',
+    'target.delay': 'Delay ms',
+    'target.navigationTimeout': 'Navigation timeout ms',
+    'target.autoWaitTimeout': 'Auto-fill wait ms',
+    'target.proxyServers': 'Proxy endpoints',
+    'target.proxyServersPlaceholder': 'http://proxy1:8080, http://proxy2:8080',
+    'target.proxyServersHint': 'A list of endpoints, comma or newline separated. Empty means no proxy. One endpoint is the same as the plain proxy field; two or more are spread across the crawl workers, so the crawl leaves from different addresses.',
+    'target.proxyPoolManage': 'Manage proxy pool',
+    'target.proxyPoolTitle': 'Proxy pool endpoints',
+    'target.proxyPoolSubtitle': 'One endpoint per line (HTTP/SOCKS5). Deduplicated automatically.',
+    'target.proxyPoolPlaceholder': 'http://10.0.0.1:8080\nhttp://user:pass@10.0.0.2:8080\nsocks5://10.0.0.3:1080',
+    'target.proxyPoolStats': '{count} endpoints',
+    'target.proxyDistribution': 'Worker Mode:',
+    'target.proxyDistSplit': 'Split queue across proxies (sharded)',
+    'target.proxyDistReplicate': 'Replicate full queue to each proxy (redundant)',
+    'target.browserProfile': 'Browser profile',
+    'target.browserProfilePlaceholder': '/path/to/profile',
+    'target.browserProfileHint': 'A Firefox or Chromium profile directory. The crawl starts from it, so extensions, settings and identity are kept. Empty means a normal launch without a profile.',
+    'target.autoWaitTimeoutHint': 'How long form mode waits for a page to render a form or control. The wait ends at the first candidate, so a page with nothing to fill returns immediately.',
+    'target.navigationTimeoutHint': '0 means no navigation deadline: a slow page is not cut off. Use Cancel to stop a job that never finishes.',
+    'target.antiDetect': 'Anti-detect',
+    'target.antiDetectHint': 'Removes automation traces — navigator.webdriver, empty plugin list, software renderer, zeroed window size — and rewrites the whole fingerprint, User-Agent included: one profile is drawn per context, so the User-Agent, navigator.platform, the client hints and the WebGL renderer cannot disagree with each other. Turn it off to see the untouched fingerprint.',
+    'target.antiDetectNativeTitle': 'Anti-detect comes from the browser itself',
+    'target.antiDetectNativeRuntime': 'Runtime with its own fingerprint layer',
+    'target.browserUnavailable': 'Unavailable runtimes',
+    'target.browserNotMeasured': 'the browser worker has not measured this runtime (restart browser-worker)',
+    'target.browserCheckFailed': 'Browser availability could not be checked',
+    'target.browserChecking': 'Checking browser availability…',
+    'target.acceptLanguage': 'Accept-Language',
+    'target.retryAttempts': 'Retry attempts',
+    'target.bypassLadder': '403 bypass ladder',
+    'target.bypassHint': 'When the edge answers 403, the crawler tries other shapes of the same request. That adds one request per form for every refused page, so it is off by default.',
+    'target.bypassIdle': 'off',
+    'target.bypassLoading': 'loading forms…',
+    'target.bypassReady': 'on — {count} forms',
+    'target.bypassEmpty': 'the engine reported no forms',
+    'target.bypassUnavailable': 'form list unavailable ({error})',
+    'target.retryNote': 'Retries',
+    'target.retryWaited': 'waited',
+    'target.antiDetectTitle': 'Fingerprint the site saw',
+    'target.antiDetectApplied': 'Applied',
+    'target.antiDetectReal': 'Real renderer',
+    'target.jsLabel': 'JS',
+    'target.jsEndpoints': 'endpoints',
+    'target.jsSources': 'sources',
+    'target.jsSecrets': 'secrets',
+    'target.jsTitle': 'What this JavaScript names',
+    'target.jsMethod': 'Method',
+    'target.jsParams': 'Parameters',
+    'target.jsProbeWords': 'Fuzzing wordlist',
+    'target.jsFindingsTitle': 'JavaScript findings',
+    'target.jsNoEndpoints': 'No endpoint named.',
+    'target.jsNoSecrets': 'No secret found.',
+    'target.jsNoFindings': 'No other findings.',
+    'target.jsLibraries': 'Vulnerable libraries',
+    // The count on the row badge and the tooltip line. The operator read a report
+    // in which six findings for the same library differed only in the version
+    // that fixed them, and could not tell which defect any of them was.
+    'target.jsVulnerableLibs': 'vulnerable libraries',
+    'target.jsVulnerableLib': 'Vulnerable library',
+    'target.jsNoLibraries': 'No vulnerable library found.',
+    'target.jsNoProbeWords': 'No fuzzing words.',
+    'target.jsProbeWordsDropped': 'Dropped by the bound',
+    'target.jsSecretRule': 'Rule',
+    'target.jsFingerprint': 'Fingerprint',
+    'target.jsLine': 'Line',
+    'target.jsParsed': 'parsed',
+    'target.jsDeferred': 'references with an expression instead of a value were not enqueued',
+    'target.enrichLabel': 'analysis',
+    'target.enrichTitle': 'page analysis',
+    'target.enrichFiles': 'ranked files',
+    'target.enrichPatterns': 'pattern hits',
+    'target.enrichInfo': 'text findings',
+    'target.enrichInsecureForms': 'unprotected forms',
+    'target.enrichHosts': 'external hosts',
+    'target.enrichNotableFiles': 'files by extension',
+    'target.enrichCsrf': 'forms',
+    'target.enrichReusedTokens': 'token reused',
+    'target.enrichExternalHosts': 'external hosts',
+    'target.enrichSecrets': 'secrets',
+    'target.enrichRejected': 'matches rejected by filters',
+    'target.enrichSubdomains': 'subdomains',
+    // Headings and empty states of the page-analysis window. The window exists
+    // because a tooltip is not somewhere a list of 34 hosts can be read; without
+    // the empty states a section with nothing in it looks like a render fault.
+    'target.enrichFindingsTitle': 'page analysis',
+    'target.enrichNoNotableFiles': 'no file was ranked as worth reading',
+    'target.enrichNoPatterns': 'no pattern matched',
+    'target.enrichNoInfo': 'no address or contact in the text',
+    'target.enrichNoCsrf': 'no unprotected form found',
+    'target.enrichNoSecrets': 'no secret found',
+    'target.enrichNoSubdomains': 'no subdomain found',
+    'target.enrichNoHosts': 'no external host found',
+    'target.enrichNoAnalysis': 'No page was analysed.',
+    'target.enrichNothingOnRow': 'the analysis found nothing on this row',
+    // The `jsvar.sh` port: the names the program binds. Counted apart from the
+    // findings on purpose — on a real bundle this is five figures, and inside one
+    // table with the incidents it would bury them.
+    'target.jsVariables': 'variable names in the bundle',
+    'target.jsLibraries': 'libraries with known vulnerabilities',
+    'target.jsFixedIn': 'fixed in',
+    'target.jsVersionUnknown': 'version not read',
+    'target.jsFailed': 'parse failed',
+    'target.jsSinks': 'DOM writes',
+    'target.jsFinding': 'finding',
+    'target.exportEvidence': 'Export row evidence',
+    'target.antiDetectOff': 'Anti-detect is off: the page saw the untouched fingerprint.',
+    'target.sameOrigin': 'Same origin only',
+    'target.start': 'Build map',
+    'target.cancel': 'Cancel',
+    'target.cancelling': 'Cancelling...',
+    'target.jobGone': 'The crawl is gone: the browser worker was restarted and the job lived in its memory. Build the map again.',
+    'target.preview': 'Map preview'
+    ,'target.collapseAll': 'Collapse all'
+    ,'target.expandAll': 'Expand all'
+    ,'target.exportJson': 'Export JSON',
+    'target.exportCsv': 'Export CSV',
+    'target.exportTree': 'Export HTML',
+    'target.exportHtml': 'Export HTML',
+    'target.filter': 'Filter URL, status or type',
+    'target.sortNewest': 'Newest first',
+    'target.sortOldest': 'Oldest first',
+    'target.sortStatus': 'Status',
+    'target.sortDepth': 'Depth',
+    'target.sortUrl': 'URL',
+    'target.sortType': 'Content type',
+    'target.sortTitle': 'Sort target results',
+    'target.networkFilterTitle': 'Filter browser network evidence',
+    'target.networkAll': 'All network',
+    'target.networkXhr': 'API/XHR/fetch',
+    'target.networkDocuments': 'Documents',
+    'target.networkScripts': 'Scripts',
+    'target.networkOther': 'Other',
+    'target.compareMaps': 'Compare static/browser',
+    'target.clearFilter': 'Clear',
+    'target.index': '#',
+    'target.contentType': 'Content type',
+    'target.time': 'Time',
+    'target.actions': 'Actions',
+    'target.noPages': 'No pages discovered.',
+    'target.noMatches': 'No matching pages.',
+    'target.repeater': 'Repeater',
+    'target.intruder': 'Intruder'
+    ,'osint.title': 'OSINT workspace'
+    ,'osint.subtitle': 'Passive web intelligence checks'
+    ,'osint.url': 'Target URL'
+    ,'osint.wafCheck': 'Run benign WAF canary'
+    ,'osint.disclaimer': 'Use only against targets you are authorized to assess.'
+    ,'osint.run': 'Run OSINT checks'
+    ,'osint.clear': 'Clear'
+    ,'osint.export': 'Export JSON'
+    ,'osint.exportCsv': 'Export CSV'
+    ,'osint.summary': 'Summary'
+    ,'osint.dns': 'DNS / IP'
+    ,'osint.http': 'HTTP / redirects'
+    ,'osint.security': 'Security / WAF'
+    ,'osint.tech': 'Technologies'
+    ,'osint.discovery': 'Discovery'
+    ,'osint.cookies': 'Cookies'
+    ,'osint.graphTitle': 'Entity Graph'
+    ,'osint.noGraph': 'No graph'
+    ,'osint.graphNamePrompt': 'Graph name'
+    ,'osint.graphCreate': 'Create graph'
+    ,'osint.graphAdd': 'Add entity'
+    ,'osint.graphClear': 'Clear graph'
+    ,'osint.graphClearConfirm': 'Clear graph “{name}”? All {entities} entities and {relations} relations will be deleted and cannot be restored.'
+    ,'osint.graphCleared': 'Graph cleared: removed {entities} entities, {relations} relations.'
+    ,'osint.graphDeleteGraph': 'Delete graph'
+    ,'osint.graphDeleteGraphConfirm': 'Delete graph “{name}”? The graph itself leaves the list too, together with {entities} entities and {relations} relations — this cannot be undone.'
+    ,'osint.graphGraphDeleted': 'Graph “{name}” deleted: {entities} entities, {relations} relations.'
+    ,'osint.graphDeleteConfirm': 'Delete entity “{identity}” together with {relations} attached relations?'
+    ,'osint.graphDeleted': 'Entity “{identity}” deleted, relations — {relations}.'
+    ,'osint.graphRelationDeleted': 'Relation {type} deleted.'
+    ,'osint.graphEdit': 'Edit'
+    ,'osint.graphDelete': 'Delete entity'
+    ,'osint.graphDeleteRelation': 'Delete relation'
+    ,'osint.graphRelationDeleteConfirm': 'Delete the {type} relation between {source} and {target}?'
+    ,'osint.graphEditSaved': 'Entity updated.'
+    ,'osint.graphRelationDetails': 'Relation details'
+    ,'osint.graphRelationType': 'Relation type'
+    ,'osint.graphRelationSource': 'Source'
+    ,'osint.graphRelationTarget': 'Target'
+    ,'osint.transformIdle': 'Idle'
+    ,'osint.transformRunning': 'Running'
+    ,'osint.transformCompleted': 'Completed'
+    ,'osint.transformEmpty': 'No results'
+    ,'osint.transformFailed': 'Failed'
+    ,'osint.transformRunningDetail': '{transform} for {value} is running…'
+    ,'osint.transformsNone': 'No transform applies to this entity type'
+    ,'osint.transformsUnavailable': 'Transform registry unavailable'
+    ,'osint.transformChooseValue': 'Choose transform and value…'
+    ,'osint.transform.url_host': 'Extract host'
+    ,'osint.transform.domain_normalize': 'Normalize domain'
+    ,'osint.transform.wayback_urls': 'Archived URLs'
+    ,'osint.transform.subdomains': 'Discover subdomains'
+    ,'osint.transform.dns_records': 'DNS records'
+    ,'osint.transform.ghdb_links': 'GHDB recon dorks'
+    ,'osint.transform.ghdb_search': 'Active GHDB dork search'
+    ,'osint.transform.s3_buckets': 'Cloud bucket candidates'
+    ,'osint.transform.reverse_dns': 'Reverse DNS'
+    ,'osint.transform.ip_geo': 'Local IP geolocation'
+    ,'osint.transform.email_recon': 'Email recon'
+    ,'osint.transform.email_domain': 'Extract email domain'
+    ,'osint.transform.username_normalize': 'Normalize username'
+    ,'osint.transform.username_enum': 'Username enum'
+    ,'osint.transform.github_recon': 'GitHub public profile'
+    ,'osint.transform.cidr_range': 'CIDR range'
+    ,'osint.transform.asn_lookup': 'Autonomous system (ASN)'
+    ,'osint.transform.technology_probe': 'Technology probe'
+    ,'osint.transform.http_probe': 'Host probe (httpx)'
+    ,'osint.transform.username_search': 'Username search'
+    ,'osint.transform.git_secrets': 'Secrets in commits'
+    ,'osint.transform.secret_scan': 'Secrets on hosts'
+    ,'osint.transform.breach_exposure': 'Breaches in public corpora'
+    ,'osint.transform.identity_graph': 'Identity graph (Gravatar, Keybase, HudsonRock)'
+    ,'osint.transformsForType': 'Transforms for this type:'
+    ,'osint.transformsTypeInert': 'No transform accepts this type: the node will be recorded but nothing can be discovered from it. Add it when its presence in the graph is itself the evidence.'
+    ,'osint.transformCompletedDetail': '{transform} for {value}: stored {entities} entities, {relations} relations.'
+    ,'osint.transformRejectedDetail': '{transform} for {value}: {rejected} row(s) rejected because the identity is not a usable graph value.'
+    ,'osint.transformEmptyDetail': '{transform} for {value} returned nothing — 0 entities, 0 relations. Check the warnings below.'
+    ,'osint.transformFailedDetail': '{transform} for {value} failed: {error}'
+    ,'osint.transformPaused': 'Paused'
+    ,'osint.transformCancelled': 'Cancelled'
+    ,'osint.transformPause': 'Pause'
+    ,'osint.transformResume': 'Continue'
+    ,'osint.transformCancel': 'Cancel'
+    ,'osint.transformNames': '{count} names'
+    ,'osint.transformIndexes': 'indexes {done}/{total}'
+    ,'osint.transformIndexing': 'answering: {index}'
+    ,'osint.transformFileDetail': 'Result ({rows} rows) written to file {name}'
+    ,'osint.transformFileOpen': 'Open list'
+    ,'osint.transformFileDownload': 'Download'
+    ,'osint.transformLocalOnly': 'local only'
+    ,'osint.transformNetwork': 'network'
+    ,'osint.transformZone': 'zone: {zone}'
+    ,'osint.transformReadLimit': 'read limit: {bytes} B'
+    ,'osint.transformReadWholeBody': 'whole body read'
+    ,'osint.transformDurationMs': '{value} ms'
+    ,'osint.transformDurationSec': '{value} s'
+    ,'osint.transformDurationMin': '{minutes} min {seconds} s'
+    ,'osint.transformWarnings': 'Warnings'
+    ,'osint.graphRefresh': 'Refresh'
+    ,'osint.graphLayout': 'Auto-layout'
+    ,'osint.graphFilter': 'Filter entities'
+    ,'osint.graphDetails': 'Entity details'
+    ,'osint.graphEmpty': 'Create or select a graph to render entities.'
+    ,'osint.graphCreated': 'Graph created.'
+    ,'osint.graphEntityAdded': 'Entity added.'
+    ,'osint.graphTransformStarted': 'Transform: {name}'
+    ,'osint.graphTransformDone': 'Transform completed.'
+    ,'osint.graphNetworkConfirm': 'Run {transform} for {identity}? This is a public network request without an application count/body cap.'
+    ,'osint.graphNodeCount': '{rendered}/{total} nodes · {relations} relations'
+    ,'osint.graphType': 'Type'
+    ,'osint.graphIdentity': 'Identity'
+    ,'osint.graphRisk': 'Risk score'
+    ,'osint.graphObserved': 'Observed'
+    ,'osint.graphProperties': 'Properties / provenance'
+    ,'osint.graphPanelAria': 'OSINT entity graph'
+    ,'osint.graphCanvasAria': 'OSINT entity graph canvas'
+    ,'osint.graphLayoutAria': 'Graph layout'
+    ,'osint.graphLayoutGrid': 'Grid — even spread'
+    ,'osint.graphLayoutRadial': 'Force-directed — relations'
+    ,'osint.graphLayoutConcentric': 'Concentric — risk levels'
+    ,'osint.graphLayoutBreadth': 'Breadthfirst — tree'
+    ,'osint.graphExportHtml': 'Export graph HTML'
+    ,'osint.graphNavAria': 'Graph canvas navigation'
+    ,'osint.graphZoomOut': 'Zoom out'
+    ,'osint.graphZoomIn': 'Zoom in'
+    ,'osint.graphFit': 'Fit'
+    ,'osint.graphReset': 'Reset'
+    ,'osint.graphHelpTitle': 'Navigation:'
+    ,'osint.graphHelpText': 'wheel — zoom · drag the background — pan · drag a node — move · click — entity details · right click — transforms'
+    ,'osint.graphLegendAria': 'Entity types'
+    ,'osint.graphLegendDomain': 'domain'
+    ,'osint.graphLegendIp': 'IP'
+    ,'osint.graphLegendEmail': 'email'
+    ,'osint.graphLegendUser': 'user'
+    ,'osint.graphLegendRisk': 'risk'
+    ,'decoder.title': 'Decoder'
+    ,'decoder.subtitle': 'Encode, decode and transform request data'
+    ,'decoder.apply': 'Apply'
+    ,'decoder.swap': 'Swap input/output'
+    ,'decoder.clear': 'Clear'
+    ,'decoder.input': 'Input'
+    ,'decoder.inputHint': 'Text, hex or bytes'
+    ,'decoder.output': 'Output'
+    ,'decoder.hexInput': 'Interpret input as hex'
+    ,'decoder.hexOutput': 'Show output as hex'
+
+    /* Row actions, confirmation dialogs and accessibility labels. Everything the
+       operator reads comes from the dictionary, so choosing a language switches
+       every visible string and not only the tab headings. */
+    ,'row.inspect': 'Inspect'
+    ,'row.sendRepeater': 'Send to Repeater'
+    ,'row.sendIntruder': 'Send to Intruder'
+    ,'row.moreActions': 'More actions'
+    ,'row.copyCurl': 'Copy as cURL'
+    ,'row.copyJson': 'Copy as JSON'
+    ,'confirm.clearHistory': 'Clear all History records?'
+    ,'confirm.clearTraffic': 'Clear all Traffic packets?'
+    ,'confirm.deleteProject': 'Delete this project and all related workspace data? This cannot be undone.'
+    ,'confirm.runFormActions': 'Form mode: the crawler finds every field and button in the DOM on each page by itself and drives them without selectors. This sends requests that may change target state. Continue?'
+    ,'comparer.emptyResult': 'Comparison results will appear here.'
+    ,'session.savedLocally': 'Saved locally'
+    ,'session.savedLocallyFull': 'Session saved locally'
+    ,'session.exported': 'Session exported'
+    ,'session.importUnreadable': 'Import error: file could not be read'
+    ,'session.keepOneWorkspace': 'Keep at least one workspace for each tool.'
+
+    /* The Project hub gathers the evidence in one place, so its headings and
+       captions come from the dictionary as well instead of living only in the
+       markup. */
+    ,'hub.kicker': 'Operational workspace'
+    ,'hub.title': 'Project knowledge hub'
+    ,'hub.description': 'A compact view of observed traffic, assets and linked automation for the active project.'
+    ,'hub.tabOverview': 'Overview'
+    ,'hub.tabMap': 'Asset map'
+    ,'hub.tabSecrets': 'Secrets'
+    ,'hub.tabScanner': 'Scanner'
+    ,'hub.tabWorkflows': 'Workflows'
+    ,'hub.tabAi': 'AI snapshot'
+    ,'hub.evidenceOverview': 'Evidence overview'
+    ,'hub.technology': 'Technology observations'
+    ,'hub.osintGraphs': 'OSINT graphs'
+    ,'hub.observedEndpoints': 'Observed endpoints'
+    ,'hub.secretObservations': 'Observed secrets'
+    ,'hub.secretHint': 'JWT, cookies and credentials are shown in full, exactly as they travelled.'
+    ,'hub.scannerRuns': 'Scanner runs'
+    ,'hub.linkedAutomation': 'Linked automation'
+    ,'hub.activeProject': 'Active project'
+    ,'hub.workspaceLabel': 'workspace'
+    ,'hub.metric.traffic': 'observed exchanges'
+    ,'hub.metric.endpoints': 'endpoints'
+    ,'hub.metric.target_jobs': 'target jobs'
+    ,'hub.metric.scans': 'scans'
+
+    ,'hub.technologyLine': 'Technology observations: {tech}'
+    ,'hub.noneYet': 'none yet'
+    ,'hub.entities': 'entities'
+    ,'hub.relations': 'relations'
+    ,'osint.graphKeyboardLabel': 'Graph entities — arrow keys to walk, Enter for details'
+    ,'hub.current': 'current'
+    ,'hub.openInOsint': 'Open in OSINT'
+    ,'hub.noGraphs': 'No OSINT graphs yet. Run OSINT or create a graph from the OSINT tab.'
+    ,'hub.noQueryParameters': 'no query parameters'
+    ,'hub.noResponseYet': 'no response yet'
+    ,'hub.noEndpoints': 'No observed endpoints yet.'
+    ,'hub.secretValueMissing': '[value not recorded]'
+    ,'hub.noSecrets': 'No secret references observed.'
+    ,'hub.findings': 'findings'
+    ,'hub.noScans': 'No scanner runs linked to this project yet.'
+    ,'hub.noWorkflows': 'No workflows linked to this project.'
+    ,'hub.tabDashboard': '⚡ Live Dashboard'
+    ,'hub.hudEngine': 'ENGINE:'
+    ,'hub.hudRoute': 'OUTBOUND ROUTE:'
+    ,'hub.hudLatency': 'LATENCY:'
+    ,'hub.hudTarget': 'TARGET:'
+    ,'hub.hudOnline': 'ONLINE'
+    ,'hub.hudDirect': 'DIRECT (No Proxy)'
+    ,'hub.none': 'None'
+    ,'hub.btnQuickScan': 'Quick Active Scan'
+    ,'hub.btnCrawl': 'Crawl Target'
+    ,'hub.btnNuclei': 'Run Nuclei'
+    ,'hub.btnFusionReport': 'Fusion Report'
+    ,'hub.btnFusionReportTitle': 'Generate Unified Multi-Engine Fusion Report (JSON, SARIF, HTML)'
+    ,'hub.btnRefresh': 'Refresh'
+    ,'hub.btnRefreshTitle': 'Refresh Live State'
+    ,'hub.kpiEndpointsLabel': 'Discovered Endpoints'
+    ,'hub.kpiEndpointsSub': 'Observed in active workspace'
+    ,'hub.kpiTrafficLabel': 'Captured Traffic'
+    ,'hub.kpiTrafficSub': 'Exchanges recorded'
+    ,'hub.kpiVulnsLabel': 'Vulnerabilities Found'
+    ,'hub.badgeCrit': 'Crit'
+    ,'hub.badgeHigh': 'High'
+    ,'hub.badgeMed': 'Med'
+    ,'hub.badgeLow': 'Low'
+    ,'hub.kpiTasksLabel': 'Active Tasks'
+    ,'hub.kpiTasksSub': 'Background jobs in progress'
+    ,'hub.activeTasksTitle': 'Active Tasks & Scan Orchestrator'
+    ,'hub.autoRefreshNotice': 'Auto-refresh: 3s'
+    ,'hub.noTasksRunning': 'No background tasks running right now.'
+    ,'hub.startActiveScan': '⚡ Start Active Scan'
+    ,'hub.taskActiveEngineScan': 'Active Engine Scan'
+    ,'hub.taskTargetMapCrawler': 'Target Map Crawler'
+    ,'hub.taskRunning': 'Running'
+    ,'hub.taskStopping': 'Stopping...'
+    ,'hub.taskCancelled': 'Cancelled'
+    ,'hub.taskCompleted': 'Completed'
+    ,'hub.taskFailed': 'Failed'
+    ,'hub.taskPending': 'Pending'
+    ,'hub.btnCancel': 'Cancel'
+    ,'hub.btnOpenInTarget': 'Open in Target'
+    ,'hub.btnOpenInScanner': 'Open in Scanner'
+    ,'hub.btnStartInTarget': 'Start in Target'
+    ,'hub.btnConfigureInScanner': 'Configure in Scanner'
+    ,'hub.btnRemoveTask': '✕ Remove'
+    ,'hub.findingsStreamTitle': 'Security Findings Stream'
+    ,'hub.findingsShowMore': 'Show more · {count} of {total}'
+    ,'hub.filterAll': 'All'
+    ,'hub.filterCrit': 'Crit'
+    ,'hub.filterHigh': 'High'
+    ,'hub.filterMed': 'Med'
+    ,'hub.filterLow': 'Low'
+    ,'hub.noFindingsYet': 'No security findings recorded yet.'
+    ,'hub.noFindingsMatchFilter': 'No findings matched filter [{filter}].'
+    ,'hub.findingDefaultTitle': 'Vulnerability Finding'
+    ,'hub.sev_critical': 'CRITICAL'
+    ,'hub.sev_high': 'HIGH'
+    ,'hub.sev_medium': 'MEDIUM'
+    ,'hub.sev_low': 'LOW'
+    ,'hub.sev_info': 'INFO'
+    ,'hub.drawerEndpoint': 'Endpoint & Module'
+    ,'hub.drawerDesc': 'Description'
+    ,'hub.drawerRemediation': 'Remediation Guidance'
+    ,'hub.drawerPoc': 'Proof of Concept (cURL)'
+    ,'hub.drawerCopyCurl': '📋 Copy cURL'
+    ,'hub.drawerCopied': 'Copied!'
+    ,'hub.drawerEvidence': 'Observed Evidence'
+    ,'hub.drawerNoDesc': 'No extended description provided.'
+    ,'hub.drawerDefaultRemediation': 'Apply strict input sanitization, principle of least privilege, and cache control headers.'
+    ,'hub.drawerNoEvidence': 'No raw evidence captured.'
+
+    /* Repeater inspector, palette group headings, and the values that were still
+       left in English in the Ukrainian dictionary. */
+    ,'repeater.inspectorTitle': 'Request Inspector — Query Params · Headers · Body'
+    ,'repeater.inspectorButton': 'Inspector'
+    ,'repeater.queryParams': 'Query params'
+    ,'repeater.bodyParams': 'Body params'
+    ,'repeater.addParam': '+ Add param'
+    ,'repeater.headers': 'Headers'
+    ,'repeater.raw': 'Raw'
+    ,'table.key': 'Key'
+    ,'table.value': 'Value'
+    ,'table.name': 'Name'
+    ,'proxy.torCheck': 'Tor Check'
+    ,'automation.groupTriggers': 'Triggers'
+    ,'automation.groupTools': 'Tools'
+    ,'automation.groupLogic': 'Logic'
+    ,'session.workflowImportUnreadable': 'Workflow import error: file could not be read'
+    ,'session.workflowImportError': 'Workflow import error: {error}'
+    ,'osint.graphRunTransform': 'Run transform'
+    ,'osint.valueCopied': 'Value copied'
+    ,'osint.valuePlaced': 'Value placed in OSINT checks'
+    ,'osint.graphRefreshing': 'Graph is being refreshed; select it again when available.'
+    ,'osint.graphRequiredForExport': 'Create or select a graph before exporting.'
+    ,'osint.graphExportNeedsBundle': 'The vendored Cytoscape bundle could not be read, so the graph was not exported.'
+    ,'target.staticMapFirst': 'Run a static map first to compare results.'
+    ,'attack.starting': 'Starting attack…'
+    ,'status.online': 'Online'
+    ,'status.offline': 'Offline'
+    ,'projects.updated': 'Project updated'
+    ,'projects.deleted': 'Project deleted'
+    ,'a11y.rowActions': 'Row actions'
+    ,'a11y.commandPalette': 'Command palette'
+    ,'a11y.commandPaletteSearch': 'Search commands'
+    ,'a11y.systemStatus': 'System status'
+    ,'a11y.engineHealth': 'Go engine health'
+    ,'a11y.retry': 'Retry'
+    ,'a11y.retryEngine': 'Retry engine check'
+    ,'a11y.passiveProxy': 'Passive proxy :8080'
+    ,'a11y.engineLabel': 'Engine'
+    ,'a11y.proxyLabel': 'Passive proxy'
+    ,'a11y.routeLabel': 'Route'
+    ,'a11y.activeRoute': 'Active outbound route'
+    ,'a11y.mainNav': 'Main navigation'
+    ,'a11y.projectHubSections': 'Project hub sections'
+    ,'a11y.workspacesRepeater': 'Repeater workspaces'
+    ,'a11y.workspacesProxy': 'Proxy workspaces'
+    ,'a11y.workspacesIntruder': 'Intruder workspaces'
+    ,'a11y.workspacesTarget': 'Target workspaces'
+    ,'a11y.workspacesOsint': 'OSINT workspaces'
+    ,'a11y.workspacesScanner': 'Scanner workspaces'
+    ,'a11y.workspacesComparer': 'Comparer workspaces'
+    ,'a11y.workspacesDecoder': 'Decoder workspaces'
+    ,'a11y.workspacesAi': 'AI workspaces'
+    ,'a11y.workspacesAutomation': 'Automation workspaces'
+    ,'a11y.resultActions': 'Result actions'
+    ,'a11y.scannerView': 'Scanner view'
+    ,'a11y.workflowName': 'Workflow name'
+    ,'a11y.workflowMinimap': 'Workflow minimap'
+    ,'a11y.workflowCanvas': 'Workflow canvas'
+    ,'a11y.zoomIn': 'Zoom in'
+    ,'a11y.zoomOut': 'Zoom out'
+    ,'a11y.toggleInspector': 'Toggle request inspector'
+    ,'a11y.sequentialDelay': 'Requests run sequentially when delay is greater than zero'
+    ,'a11y.openTemplateStore': 'Open Template Store'
+    ,'history.sortTitle': 'Sort history'
+    ,'scanner.title': 'Scanner Pro / Safe CMS Recon'
+    ,'scanner.subtitle': 'Authorized read-only checks'
+    ,'scanner.disclaimer': 'Scanner Pro performs read-only reconnaissance: CMS fingerprints, public paths, TLS, cookies, methods, headers, and configuration exposure signals. It does not exploit, fuzz, brute-force, or bypass access controls.'
+    ,'scanner.run': 'Run Safe CMS Recon'
+    ,'scanner.runTemplates': 'Run templates'
+    ,'scanner.templatesBar': 'Templates'
+    ,'scanner.nucleiHint': 'Upload a template folder. The selected folder is passed to Nuclei with -t; helper files are preserved, required template flags are added automatically, and -esc and -nss are always enabled.'
+    ,'scanner.templateCategory': 'Template folder'
+    ,'scanner.templateCategoryAll': 'All uploaded files'
+    ,'scanner.templateCategoriesLoaded': '{count} folders in the selected upload'
+    ,'scanner.templateCategoryMissing': 'Folder "{category}" is no longer available. Choose another folder or all files.'
+    ,'scanner.customYaml': 'Custom YAML (single document)'
+    ,'scanner.uploadHint': 'Upload .yaml files or a folder, or paste below'
+    ,'scanner.clearFiles': 'Clear files'
+    ,'scanner.templatesRequired': 'Select at least one template or paste YAML.'
+    ,'scanner.perFileTitle': 'Per-template result'
+    ,'scanner.perFileName': 'File'
+    ,'scanner.perFileTemplate': 'Template'
+    ,'scanner.perFileCve': 'CVE / CWE'
+    ,'scanner.perFileStatus': 'Status'
+    ,'scanner.perFileDetail': 'Details'
+    ,'scanner.perFileMatched': 'Matched'
+    ,'scanner.perFileNotMatched': 'Not matched'
+    ,'scanner.perFileNoRequest': 'Target not checked'
+    ,'scanner.perFileFlow': 'Flow definition'
+    ,'scanner.perFileUncompiled': 'Not compiled by the binary'
+    ,'scanner.perFileFlowHint': 'Flows: {count}. These are files carrying `flow:`, a description of a request sequence. The nuclei binary does not execute them; our own runner does. The reason is in the Details column.'
+    ,'scanner.perFileWorkflow': 'Template orchestrator'
+    ,'scanner.perFileWorkflowHint': 'Orchestrators: {count}. These are `workflows:` files, which run other templates: the binary runs their subtemplates and requests the target, but an orchestrator is not a matcher and emits no JSONL record of its own. Results are reported under the subtemplate\'s own template id. The reason is in the Details column.'
+    ,'scanner.perFileNoRequestHint': 'Templates that made no request to the target: {count}. These are code/file templates or JavaScript templates without network modules or port probes. The reason is in the Details column.'
+    ,'scanner.perFileSkipped': 'Not run'
+    ,'scanner.perFileShowMore': 'Show more · {count} of {total}'
+    ,'scanner.streamInterrupted': 'The result stream was interrupted.'
+    ,'scanner.perFileSkippedReason': 'The file was not run.'
+    ,'scanner.perFileSkippedHint': 'Files not run: {count}. Each reason is in the Details column.'
+    ,'scanner.perFileDuplicate': 'Duplicate copy'
+    ,'scanner.perFileDuplicateReason': 'The file is byte-identical to another file in this upload.'
+    ,'scanner.perFileDuplicateHint': 'Duplicate copies: {count}. Each is the same template under a different name, so one copy is executed once.'
+    ,'scanner.planTitle': 'Run plan'
+    ,'scanner.planBatches': 'Nuclei invocations: {count}'
+    ,'scanner.planReason': 'Reason: {reason}'
+    ,'scanner.planPlanned': 'Files to be executed: {count}'
+    ,'scanner.planUnplanned': 'Files not executed: {count}'
+    ,'scanner.planDedup': 'Content dedup: {unique} unique of {uploaded}, {collapsed} copies collapsed'
+    ,'scanner.planValidation': 'Checked by nuclei itself: {refused} refused'
+    ,'scanner.diagnosticsTitle': 'Nuclei command and full output'
+    ,'scanner.diagnosticsCommand': 'Command'
+    ,'scanner.diagnosticsStream': '--- {stream} ---'
+    ,'scanner.perFileInvalid': 'Invalid'
+    ,'scanner.perFileAll': 'All files'
+    ,'scanner.perFileOnlyMatched': 'Matched only'
+    ,'scanner.perFileFilter': 'Filter by file name, template id, CVE or tag'
+    ,'scanner.perFileFindings': 'Findings'
+    ,'scanner.perFilePartial': 'showing {shown} of {total} files (report trimmed for the browser cache)'
+    ,'scanner.perFileEmpty': 'No files match this filter.'
+    ,'scanner.perFileNoMatch': 'Template ran, no matches.'
+    ,'scanner.perFileInvalidReason': 'File was not handed to nuclei.'
+    ,'scanner.perFileInvalidHint': 'Invalid files: {count}. They were not scanned — fix the reason in the Details column.'
+    ,'scanner.perFileGroupFolders': 'Group by folder'
+    ,'scanner.perFileGroupFoldersAria': 'Show the result grouped by folder'
+    ,'scanner.perFileGroupFoldersTitle': 'On: one row per folder with its counters. Turn it off for one row per file.'
+    ,'scanner.perFileFolderExpand': 'Show the {count} files in {folder}'
+    ,'scanner.perFileFolderCollapse': 'Hide the files in {folder}'
+    ,'scanner.perFileFolderFiles': 'files in this folder'
+    ,'scanner.perFileFolderMatching': 'files in this folder match the filter'
+    ,'scanner.perFileFolderFindings': 'findings in the folder'
+    ,'scanner.perFileShowEvidence': 'Show evidence · {count}'
+    ,'scanner.reportLargeFiles': 'This report covers {rows} files and {findings} findings. The table contains every file; the output of each template is loaded only on request, so search and filters stay just as fast.'
+    ,'scanner.perFileFolderIds': 'distinct template ids'
+    ,'scanner.perFileFolderCve': 'files with CVE / CWE'
+    ,'scanner.perFileFolderLoose': 'Files without a folder'
+    ,'scanner.perFileGroupedEmpty': 'No folders match this filter.'
+    ,'scanner.uploadZoneAria': 'Upload template files or a whole folder'
+    ,'scanner.uploadZoneTitle': 'Drop template files or a whole folder here'
+    ,'scanner.uploadZoneOr': 'or'
+    ,'scanner.pickFiles': 'Choose files'
+    ,'scanner.pickFolder': 'Choose folder'
+    ,'scanner.dropReading': 'Reading dropped files...'
+    ,'scanner.fileUnreadable': 'File could not be read: {name}'
+    // Reading a corpus folder counts itself, because without a number a slow read
+    // and a stuck one look the same — measured on `http` (11 658 documents).
+    ,'scanner.progressReading': 'Reading files {done} of {total}…'
+    // A file the browser will not decode no longer costs the operator the folder:
+    // the readable ones are staged and the count is stated.
+    ,'scanner.filesUnreadable': '{count} file(s) could not be read. The rest were loaded.'
+    // The read is over, said so: a counter left at «N of N…» reads as still working,
+    // which is the same «it is stuck» impression the counter was added to remove —
+    // measured on `http`: 11 664 files in the chip while the line still said
+    // «Reading files 11664 of 11664…».
+    ,'scanner.filesRead': 'Read {count} file(s).'
+    ,'scanner.uploading': 'Uploading templates: {count} file(s)...'
+    ,'scanner.uploadChunk': 'Uploaded {done} of {total} · request {chunk} of {chunks}'
+    ,'scanner.optionsTitle': 'Scan options'
+    ,'scanner.optionsHint': 'Each option maps to exactly one nuclei flag. Empty fields add no flag; an explicit option value takes precedence over the engine ENV fallback.'
+    ,'scanner.optSeverity': 'Severity'
+    ,'scanner.optExcludeSeverity': 'Exclude severity'
+    ,'scanner.optTemplateIds': 'Template IDs'
+    ,'scanner.optExcludeMatchers': 'Exclude matchers'
+    ,'scanner.optConcurrency': 'Concurrency'
+    ,'scanner.optPayloadConcurrency': 'Payload concurrency'
+    ,'scanner.optProbeConcurrency': 'Probe concurrency'
+    ,'scanner.optRateLimit': 'Rate limit (req/s)'
+    ,'scanner.optRateWindow': 'Rate window (s)'
+    ,'scanner.optRateWindowHint': '1'
+    ,'scanner.optDebug': 'Debug (print every request and response)'
+    ,'scanner.optRetries': 'Retries'
+    ,'scanner.optTimeout': 'Request timeout (s)'
+    ,'scanner.optMaxRedirects': 'Max redirects'
+    ,'scanner.optMaxHostErrors': 'Max host errors'
+    ,'scanner.optFollowRedirects': 'Follow redirects'
+    ,'scanner.optFollowHostRedirects': 'Follow same-host redirects'
+    ,'scanner.optHeadless': 'Enable headless templates'
+    ,'scanner.optInteractsh': 'Use interactsh (OAST)'
+    ,'scanner.optStoreResponse': 'Store request/response'
+    ,'scanner.optOmitRaw': 'Omit raw request/response'
+    ,'scanner.optNoColor': 'Disable ANSI colours'
+    ,'scanner.optMatcherStatus': 'Show matcher status'
+    ,'scanner.optTagsHint': 'comma-separated'
+    ,'scanner.optIdsHint': 'CVE-2021-44228, log4j*'
+    ,'scanner.optPathsHint': 'helpers/, workflows/'
+    ,'scanner.progressQueued': 'Preparing'
+    ,'scanner.progressUploading': 'Uploading {done} of {total} · request {chunk} of {chunks}'
+    ,'scanner.progressScanning': 'Scanning'
+    ,'scanner.progressDone': 'Finished'
+    ,'scanner.progressFailed': 'Scan failed'
+    ,'scanner.progressCancelled': 'Cancelled'
+    ,'scanner.progressCancelling': 'Cancelling…'
+    ,'scanner.progressCancel': 'Cancel'
+    ,'scanner.progressPaused': 'Paused'
+    ,'scanner.progressPause': 'Pause'
+    ,'scanner.progressResume': 'Resume'
+    ,'scanner.progressPausing': 'Pausing…'
+    ,'scanner.progressResuming': 'Resuming…'
+    ,'scanner.progressTemplates': 'templates'
+    ,'scanner.progressRequests': 'requests'
+    ,'scanner.progressNoteMoreRequests': 'More requests than files: {files} templates sent {extra} requests beyond one each — payloads, an attack recipe, several paths, or a retry after an error.'
+    ,'scanner.progressMatched': 'matches'
+    ,'scanner.progressErrors': 'errors'
+    ,'scanner.viewCms': 'CMS scan'
+    ,'scanner.profileLabel': 'Profile'
+    ,'scanner.profileGenericWeb': 'Generic Web'
+    ,'scanner.profileCMS': 'CMS Focus'
+    ,'scanner.profileAPI': 'API & Cloud'
+    ,'scanner.profileSecurityHeaders': 'Security Headers (Passive)'
+    ,'scanner.viewNuclei': 'Nuclei scan'
+    ,'scanner.corpusChecks': 'Checks'
+    ,'scanner.corpusTags': 'Tags'
+    ,'scanner.corpusRun': 'Run the whole corpus'
+    ,'scanner.corpusCancel': 'Stop the run'
+    ,'scanner.corpusCancelTitle': 'Stop the running corpus scan'
+    ,'scanner.corpusCancelling': 'Stopping…'
+    ,'scanner.corpusCancelFailed': 'Could not stop the run: %s'
+    ,'scanner.corpusRestored': 'Report restored: %s findings. The run is no longer live — the engine restarted, but what it found was kept.'
+    ,'scanner.corpusLost': 'The run did not finish: the engine restarted and this run kept no findings. Run the corpus again.'
+    ,'scanner.corpusLiveFindings': 'Findings so far: %s'
+    ,'scanner.corpusDetailTitle': 'Full evidence'
+    ,'scanner.corpusDetailRequest': 'Request'
+    ,'scanner.corpusDetailStatus': 'Status'
+    ,'scanner.corpusDetailCheck': 'Check'
+    ,'scanner.corpusDetailDescription': 'Description'
+    ,'scanner.corpusDetailEvidence': 'Evidence'
+    ,'scanner.corpusStatsIdle': 'Press "Run the whole corpus" to see what it covers.'
+    ,'scanner.corpusNone': 'The corpus answered every check and nothing matched.'
+    ,'scanner.corpusSkipped': '%s checks got no answer: no connection, no response, or a timeout'
+    ,'scanner.corpusFilter': 'Фільтр за шяхам, перевіркою чи доказом'
+    ,'scanner.corpusColId': '№'
+    ,'scanner.corpusColMethod': 'Метод'
+    ,'scanner.corpusColPath': 'Шлях'
+    ,'scanner.corpusColStatus': 'Код'
+    ,'scanner.corpusColCheck': 'Перевірка'
+    ,'scanner.corpusColEvidence': 'Доказ'
+    ,'scanner.corpusShowMore': 'Показати ще · {count} з {total}'
+    ,'scanner.corpusStats': 'Checks: %s · unique paths: %s · in corpus: %s'
+    ,'scanner.corpusRunning': 'Running…'
+    ,'scanner.corpusDone': 'Done: %s findings from %s checks in %s requests'
+    ,'scanner.corpusFailed': 'Run failed: %s'
+    ,'scanner.corpusNeedTarget': 'Set a target in the Target field'
+    ,'scanner.viewCorpus': 'Corpus scan'
+    ,'scanner.targetLabel': 'Target'
+    ,'scanner.corpusPhase': 'Enumerating the target'
+    ,'scanner.corpusElapsed': 'Elapsed %s'
+    ,'scanner.corpusTotal': 'Checks in corpus: %s · unique paths: %s'
+    ,'scanner.corpusLive': 'Requests: %s of %s · findings: %s'
+    ,'scanner.exportCorpusAria': 'Export corpus scan'
+    ,'scanner.corpusExportCsvHint': 'One row per finding'
+    ,'scanner.corpusTotalChecks': 'Checks'
+    ,'scanner.corpusTotalRequests': 'Requests'
+    ,'scanner.corpusTotalFindings': 'Findings'
+    ,'scanner.corpusSkippedCard': 'Skipped'
+    ,'scanner.exportLabel': 'Export'
+    ,'scanner.exportJsonHint': 'Full report as-is'
+    ,'scanner.exportHtmlHint': 'Interactive report'
+    ,'scanner.exportCsvHint': 'One row per file'
+    ,'scanner.exportCmsAria': 'Export CMS scan'
+    ,'scanner.exportNucleiAria': 'Export Nuclei scan'
+    ,'scanner.optionsAdvanced': 'Advanced options'
+    ,'scanner.optSeverityAria': 'Severity filter'
+    ,'scanner.optExcludeSeverityAria': 'Excluded severity'
+    ,'scanner.findingsTitle': 'Findings'
+    ,'scanner.reportFiles': 'Files'
+    ,'scanner.statsTitle': 'Run statistics'
+    ,'scanner.exportGenerated': 'Generated'
+    ,'scanner.filesNotRestored': 'File names were kept but their contents are too large for browser storage — pick the files again before running.'
+    ,'scanner.templatesNotStored': 'Template contents could not be saved for the next reload: {message}. The files stay available until this page is reloaded.'
+    ,'scanner.templatesRestoring': 'Restoring the contents of the chosen templates…'
+    ,'scanner.runFailed': 'Nuclei exited with code {code} ({status}):'
+    ,'scanner.clear': 'Clear'
+    ,'scanner.export': 'Export JSON'
+    ,'scanner.exportCsv': 'Export CSV'
+    ,'session.save': 'Save session'
+    ,'session.export': 'Export'
+    ,'session.import': 'Import'
+    ,'session.snapshotTrimmed': 'Session saved in part: a large report was trimmed for the browser cache. The full report stays in memory and in export'
+    ,'session.snapshotStorageFailed': 'Session was not saved: {message}'
+    ,'session.snapshotMirrorFailed': 'The session duplicate did not fit in storage; the workspaces are saved and IndexedDB holds the backup copy'
+    ,'route.address': 'host:port (empty = direct)'
+    ,'route.apply': 'Apply route'
+    ,'route.cancel': 'Cancel route'
+    ,'route.applied': 'Route applied; cancelled operations: {count}'
+    ,'proxy.title': 'Proxy route'
+    ,'proxy.subtitle': 'Shared outbound route for active tools'
+    ,'proxy.address': 'SOCKS5 address (empty = direct)'
+    ,'proxy.hint': 'Repeater, Intruder, Target, OSINT, Scanner and the passive proxy share this route. Apply/Cancel route cancels active old-route operations, including AI and Automation.'
+    ,'proxy.current': 'Current route'
+    ,'proxy.empty': 'Loading route...'
+    ,'proxy.direct': 'Direct connection'
+    ,'proxy.protocol': 'Protocol'
+    ,'proxy.addressLabel': 'Address'
+    ,'proxy.status': 'Status'
+    ,'proxy.directValue': 'Direct'
+    ,'proxy.notUsed': 'not used'
+    ,'proxy.active': 'active'
+    ,'proxy.targetPlaceholder': 'https://check.torproject.org/'
+    ,'proxy.timeout': 'Timeout ms'
+    ,'proxy.check': 'Check connection'
+    ,'proxy.checkEmpty': 'Run a route check to see target status, latency and external IP.'
+    ,'route.directRestored': 'Direct connection restored'
+    ,'proxy.checkSitesTitle': 'Sites for manual verification'
+    ,'proxy.checkSitesHint': 'Open them in a browser configured with proxy 127.0.0.1:8080 or verify them through the active route.'
+    ,'ai.title': 'Agent Runtime'
+    ,'ai.subtitle': 'Autonomous testing through typed tools'
+    ,'ai.disclaimer': 'The first runtime executes an explicit typed plan and has no shell, filesystem or arbitrary HTTP access.'
+    ,'ai.mission': 'Mission'
+    ,'ai.missionPlaceholder': 'Describe the authorized QA mission'
+    ,'ai.plan': 'Tool plan JSON'
+    ,'ai.provider': 'Provider'
+    ,'ai.endpoint': 'LLM endpoint (optional)'
+    ,'ai.model': 'Model (optional)'
+    ,'ai.apiKey': 'API key (not saved)'
+    ,'ai.useProjectContext': 'Include active Project context for this message'
+    ,'ai.projectContextReady': 'Project: {name}'
+    ,'ai.projectContextMissing': 'Select a Project first'
+    ,'ai.generate': 'Generate plan'
+    ,'ai.start': 'Start mission'
+    ,'ai.cancel': 'Cancel'
+    ,'ai.clear': 'Clear'
+    ,'ai.steps': 'Steps'
+    ,'ai.events': 'Events'
+    ,'ai.empty': 'No agent run yet.'
+    ,'ai.emptyEvents': 'No events yet.'
+    ,'ai.emptyStateHint': 'Ask a security question, select a preset from the sidebar, or attach traffic for vulnerability analysis.'
+    ,'ai.thinking': 'AI is analyzing request and generating response…'
+    ,'ai.senderYou': 'You'
+    ,'ai.senderSystem': 'System'
+    ,'ai.reactAgentLabel': '⚡ Autonomous Agent (ReAct)'
+    ,'ai.reactAgentTooltip': 'Autonomous investigation with tool execution (ReAct Loop: traffic search, endpoint testing, vulnerability logging)'
+    ,'ai.currentModelTooltip': 'Current model'
+    ,'ai.settingsTooltip': 'Advanced model settings'
+    ,'ai.settingsLabel': 'Settings'
+    ,'ai.exportTooltip': 'Export audit results and dialogue'
+    ,'ai.exportLabel': 'Export'
+    ,'ai.exportHtmlTitle': 'HTML Report'
+    ,'ai.exportHtmlDesc': 'Interactive audit report'
+    ,'ai.exportJsonTitle': 'JSON Export'
+    ,'ai.exportJsonDesc': 'Dialogue and ReAct steps'
+    ,'ai.sendToAutomation': 'To Automation'
+    ,'ai.quickPresets': 'Quick audit presets'
+    ,'ai.presetVulnTitle': 'Vulnerability analysis'
+    ,'ai.presetVulnDesc': 'Scan OWASP Top-10 & BOLA/IDOR'
+    ,'ai.presetHeadersTitle': 'Security Headers & CSP'
+    ,'ai.presetHeadersDesc': 'Audit headers and cookies'
+    ,'ai.presetPocTitle': 'PoC exploit generation'
+    ,'ai.presetPocDesc': 'Generate test payload'
+    ,'ai.presetReportTitle': 'Security report'
+    ,'ai.presetReportDesc': 'Findings summary and remediation'
+    ,'ai.chipSqliLabel': '💉 Test SQLi & IDOR'
+    ,'ai.chipCookiesLabel': '🍪 Check Cookies & Auth'
+    ,'ai.chipPocLabel': '🎯 PoC for Repeater'
+    ,'ai.chipSummaryLabel': '📋 Report summary'
+    ,'ai.chipSqliPrompt': 'Analyze attached data for SQL Injection and IDOR vulnerabilities'
+    ,'ai.chipCookiesPrompt': 'Check response headers and cookies for missing HttpOnly, Secure, SameSite flags'
+    ,'ai.chipPocPrompt': 'Draft a PoC HTTP request to verify this vulnerability in Repeater'
+    ,'ai.chipSummaryPrompt': 'Provide a concise summary of findings with recommendations for the report'
+    ,'ai.promptVulnAnalysis': 'Perform a comprehensive analysis of the attached data (requests, responses, endpoints) for OWASP Top 10 vulnerabilities, IDOR, injection flaws, authentication logic bypasses, or sensitive data exposure.'
+    ,'ai.promptHeadersCheck': 'Analyze HTTP response headers and cookies: verify CSP, HSTS, X-Content-Type-Options, as well as SameSite, HttpOnly and Secure flags for cookies. Suggest remediations.'
+    ,'ai.promptPocGenerator': 'Draft a working Proof of Concept (PoC) HTTP request or curl command to reproduce the detected anomaly or vulnerability in the Repeater tab.'
+    ,'ai.promptReportSummary': 'Generate a structured Security Assessment Report based on the analyzed traffic, describing the impact, severity level, and detailed remediation steps.'
+    ,'ai.attachReportTitle': 'Attach report (HTML, JSON, HAR, TXT, CSV)'
+    ,'ai.attachReportLabel': 'Attach report'
+    ,'ai.kbdSend': 'to send'
+    ,'ai.copy': 'Copy'
+    ,'ai.copyTitle': 'Copy response'
+    ,'ai.copied': 'Copied'
+    ,'ai.toastError': 'Error'
+    ,'ai.toastCopyCodeFailed': 'Failed to copy code'
+    ,'ai.toastCopyMsgFailed': 'Failed to copy message'
+    ,'ai.confirmClear': 'Clear message history of the current chat?'
+    ,'ai.modalTitle': 'AI Provider Settings'
+    ,'ai.modalSubtitle': 'Connection and model configuration'
+    ,'ai.modalClose': 'Close'
+    ,'ai.modalEndpoint': 'Endpoint URL:'
+    ,'ai.modalEndpointHint': 'Base API URL for the selected provider or local Ollama'
+    ,'ai.modalModel': 'Model name:'
+    ,'ai.modalModelHint': 'Model identifier in the provider registry'
+    ,'ai.modalApiKey': 'API Key:'
+    ,'ai.modalApiKeyHint': 'Stored only for the current browser session (not saved in DB)'
+    ,'ai.modalReset': 'Restore defaults'
+    ,'ai.modalSave': 'Save settings'
+    ,'target.requestTimeout': 'Request timeout (ms)'
+    ,'target.failurePause': 'Pause after failures'
+    ,'target.pause': 'Pause crawl'
+    ,'target.resume': 'Resume crawl'
+    ,'scanner.activeFailurePause': 'Pause after failures'
+    ,'scanner.activeRecordedLimit': 'Requests kept for resend'
+    ,'scanner.activePause': 'Pause'
+    ,'scanner.activeResume': 'Resume'
+    ,'scanner.activeResend': 'Resend requests that never answered'
+    ,'scanner.activePausedShort': 'Run paused'
+    ,'scanner.activePausedToast': 'Stopped between probes, sockets released, progress kept'
+    ,'scanner.activeResumedShort': 'Run resumed'
+    ,'scanner.activePausedAt': 'Paused:'
+    ,'scanner.activeDropped': 'probes dropped by pause'
+    ,'scanner.activeFailedRequests': 'no answer'
+    ,'scanner.activeFirstFailure': 'first failure:'
+    ,'scanner.activeConsecutive': 'consecutive'
+    ,'scanner.activeRecorded': 'recorded'
+    ,'scanner.activeResent': 'Resent'
+    ,'scanner.activeResendAnswered': 'answered'
+    ,'scanner.activeResendStillFailing': 'still no answer'
+    ,'scanner.activeActionFailed': 'Action failed'
+    ,'ai.toastSettingsSaved': 'Model settings saved successfully'
+    ,'ai.autonomousActions': 'Autonomous agent actions'
+    ,'ai.expandSteps': 'Expand steps ▾'
+    ,'ai.step': 'Step'
+    ,'ai.result': 'Observation'
+    ,'ai.taskCompleted': 'Task completed.'
+    ,'ai.noMessagesToExport': 'No messages to export in current chat'
+    ,'ai.defaultContext': 'Default context'
+    ,'nav.automation': 'Automation'
+    ,'automation.palette': 'Nodes'
+    ,'automation.new': 'New workflow'
+    ,'automation.search': 'Search workflows'
+    ,'automation.namePlaceholder': 'Workflow name'
+    ,'automation.save': 'Save'
+     ,'automation.saveTemplate': 'Save as template'
+     ,'automation.templateSaved': 'Template saved locally.'
+     ,'automation.templateTitle': 'Template name'
+     ,'automation.templateCategory': 'Category'
+     ,'automation.templateDescription': 'Description'
+    ,'automation.run': 'Run'
+    ,'automation.activate': 'Activate'
+    ,'automation.deactivate': 'Deactivate'
+    ,'automation.delete': 'Delete'
+    ,'automation.refreshRuns': 'Refresh runs'
+    ,'automation.connectHint': 'Click an output handle, then an input handle to connect nodes.'
+    ,'automation.inspector': 'Node inspector'
+    ,'automation.selectNode': 'Select a node to edit it.'
+    ,'automation.runs': 'Executions'
+    ,'automation.noRuns': 'No executions yet.'
+    ,'automation.saved': 'Workflow saved.'
+    ,'automation.deleted': 'Workflow deleted.'
+    ,'automation.newDraft': 'New workflow'
+    ,'automation.confirmRun': 'This workflow contains active actions. Continue?'
+    ,'automation.confirmActivate': 'Activating this workflow will run it automatically. Continue?'
+    ,'automation.savedLocally': 'Workflow saved locally.'
+    ,'automation.node.manual_trigger': 'Manual trigger'
+    ,'automation.node.schedule_trigger': 'Schedule trigger'
+    ,'automation.node.webhook_trigger': 'Webhook trigger'
+    ,'automation.node.repeater': 'Repeater'
+     ,'automation.node.repeater_burst': 'Repeater Burst'
+     ,'automation.node.last_byte_sync': 'Last-Byte Sync'
+    ,'automation.node.target': 'Target map'
+    ,'automation.node.target_browser': 'Browser Target'
+     ,'automation.node.oast_listener': 'OAST Listener'
+     ,'automation.node.oast_collect': 'OAST Collect'
+    ,'automation.node.osint': 'OSINT'
+    ,'automation.node.scanner': 'Scanner'
+    ,'automation.node.intruder': 'Intruder'
+    ,'automation.node.decoder': 'Decoder'
+    ,'automation.node.comparer': 'Comparer'
+    ,'automation.node.condition': 'Condition'
+    ,'automation.node.merge': 'Merge'
+    ,'automation.node.set': 'Set values'
+    ,'automation.node.template': 'Template'
+    ,'automation.node.delay': 'Delay'
+    ,'automation.node.ai_agent': 'AI Agent'
+    ,'automation.node.output': 'Output'
+    ,'automation.params': 'JSON parameters'
+    ,'automation.nodeName': 'Node name'
+    ,'automation.disabled': 'Disabled'
+    ,'automation.input': 'Input'
+    ,'automation.outputPort': 'Output'
+    ,'automation.status': 'Status'
+    ,'automation.started': 'Started'
+    ,'automation.finished': 'Finished'
+    ,'automation.mode': 'Mode'
+    ,'automation.noWorkflow': 'No workflow for this Project.'
+    ,'automation.unsaved': 'Save the workflow before running it.'
+    ,'automation.invalidGraph': 'The workflow graph is incomplete or invalid.'
+
+    ,'automation.fit': 'Fit'
+    ,'automation.autoLayout': 'Auto layout'
+    ,'automation.export': 'Export'
+    ,'automation.import': 'Import'
+     ,'automation.templates': 'Templates'
+     ,'automation.templatesHint': 'Open the built-in Template Store'
+     ,'automation.templateStore': 'Template Store'
+     ,'automation.templateSearch': 'Search templates, nodes, or tags'
+     ,'automation.templateAll': 'All templates'
+     ,'automation.templateFeatured': 'Featured templates'
+     ,'automation.templatePreview': 'Preview'
+     ,'automation.templateImport': 'Import'
+     ,'automation.templateClose': 'Close'
+     ,'automation.templateRisk': 'Risk'
+     ,'automation.templateExecution': 'Execution'
+     ,'automation.templateNodes': 'Nodes'
+     ,'automation.templateTime': 'Time'
+     ,'automation.templateVariables': 'Variables'
+     ,'automation.templateScope': 'Review before run'
+     ,'automation.templateConfirm': 'Review this action before running it'
+     ,'automation.templateRequired': 'Fill required variables before importing.'
+     ,'automation.templateImported': 'Template imported to canvas.'
+     ,'automation.templateLoadError': 'Template Store could not be loaded'
+     ,'automation.templateNoResults': 'No templates found'
+     ,'automation.templateComingSoon': 'Not available yet'
+    ,'automation.pause': 'Pause'
+    ,'automation.resume': 'Resume'
+    ,'automation.cancel': 'Cancel'
+    ,'automation.addParam': 'Add parameter'
+    ,'automation.additionalParams': 'Additional parameters'
+    ,'automation.useCurrent': 'Use current workspace'
+    ,'automation.openTool': 'Open in tool'
+    ,'automation.emptyRepeater': 'Fill Repeater before transferring it.'
+    ,'automation.emptyIntruder': 'Fill Intruder before transferring it.'
+    ,'automation.objectRequired': 'Parameters must be a JSON object.'
+    ,'automation.transferError': 'Tool configuration transfer error'
+    ,'automation.field.method': 'Method'
+    ,'automation.field.url': 'URL'
+    ,'automation.field.headers': 'Headers'
+    ,'automation.field.body': 'Body'
+    ,'automation.field.urls': 'Requests list'
+     ,'automation.field.iterations': 'Iterations'
+     ,'automation.field.concurrency': 'Concurrency'
+     ,'automation.field.delay_ms': 'Delay between waves (ms)'
+     ,'automation.field.timeout_ms': 'Request timeout (ms)'
+    ,'automation.field.delay_ms': 'Delay (ms)'
+    ,'automation.field.engine': 'Crawler'
+    ,'automation.field.max_pages': 'Max pages'
+    ,'automation.field.max_depth': 'Max depth'
+    ,'automation.field.same_origin': 'Same origin only'
+    ,'automation.field.allowed_hosts': 'Allowed hosts'
+    ,'automation.field.excluded_hosts': 'Excluded hosts'
+    ,'automation.field.include_paths': 'Include paths'
+    ,'automation.field.exclude_paths': 'Exclude paths'
+     ,'automation.field.server_url': 'OAST provider URL'
+     ,'automation.field.auth_token': 'Provider auth token'
+     ,'automation.field.listener_id': 'Listener ID'
+     ,'automation.field.poll_interval_sec': 'Poll interval (sec)'
+     ,'automation.field.timeout_sec': 'Timeout (sec)'
+     ,'automation.field.capture_protocols': 'Capture protocols'
+    ,'automation.field.browser': 'Browser'
+    ,'automation.field.actions': 'Browser actions'
+    ,'automation.field.allow_state_changing_actions': 'Allow state-changing actions'
+    ,'automation.field.waf_check': 'Benign WAF canary'
+    ,'automation.field.profile': 'Profile'
+    ,'automation.field.base_request': 'Raw request definition'
+    ,'automation.field.mode': 'Mode'
+    ,'automation.field.payloads': 'Dictionaries / payloads'
+    ,'automation.field.transformations': 'Transformations'
+    ,'automation.field.concurrency': 'Concurrency'
+    ,'automation.field.operation': 'Operation'
+    ,'automation.field.input': 'Input value'
+    ,'automation.field.left': 'Left value'
+    ,'automation.field.right': 'Right value'
+    ,'automation.field.field': 'Field / JSON path'
+    ,'automation.field.operator': 'Operator'
+    ,'automation.field.value': 'Expected value'
+    ,'automation.field.values': 'Values'
+    ,'automation.field.text': 'Template'
+    ,'automation.field.seconds': 'Seconds'
+    ,'automation.field.prompt': 'Prompt'
+    ,'automation.field.provider': 'Provider'
+    ,'automation.field.endpoint': 'Endpoint'
+    ,'automation.field.model': 'Model'
+    ,'automation.field.label': 'Output label'
+    ,'automation.field.format': 'Format'
+    ,'automation.field.cron': 'Cron expression'
+    ,'scanner.viewActive': 'Active scan'
+    ,'scanner.activeHint': 'The active scanner crawls the target, finds every injectable surface, probes it with nine detector modules, correlates the confirmed findings into attack chains, and attaches a proof to each one. A finding is rated only when its impact was demonstrated; everything else is marked unverified and capped below high.'
+    ,'scanner.activeRun': 'Start active scan'
+    ,'scanner.activeNeedUrl': 'Set a target first'
+    ,'scanner.activeNeedUrlHint': 'The active scanner needs an absolute http or https address.'
+    ,'scanner.activeStarting': 'Starting the active scan…'
+    ,'scanner.activeCancelling': 'Cancelling the active scan…'
+    ,'scanner.activeFailed': 'The active scan did not start:'
+    ,'scanner.activeDoneLine': 'Active scan finished: {count} findings, target {url}'
+    ,'scanner.activeFailedLine': 'The active scan did not finish: {error}'
+    ,'scanner.activeFailedShort': 'The active scan did not finish'
+    ,'scanner.activeFailedNoReason': 'the engine gave no reason'
+    ,'scanner.activeCancelledLine': 'The active scan was cancelled, target {url}'
+    ,'scanner.activeKeptPrevious': 'The table still holds the previous run.'
+    ,'scanner.activeMaxPages': 'Max pages'
+    ,'scanner.activeMaxDepth': 'Link depth'
+    ,'scanner.activeConcurrency': 'Workers'
+    ,'scanner.activeDelay': 'Delay between probes (ms)'
+    ,'scanner.activeBlindDelay': 'Blind delay (ms)'
+    ,'scanner.activeParams': 'Hidden parameter names, one per line'
+    ,'scanner.activeParamsHint': 'report_token\ndebug'
+    ,'scanner.activeWordlist': 'Path wordlist, one path per line'
+    ,'scanner.activeWordlistHint': '/admin/\n/.env'
+    ,'scanner.activeWordlistsNote': 'Both lists are yours and both are optional: an empty list means the run spends not one request on that probe. The parameter names are what the Target crawl read out of the application own JavaScript — copy them from the Target panel. The wordlist is a file of paths.'
+    ,'scanner.activeTimeout': 'Request timeout (ms)'
+    ,'scanner.activeSameOrigin': 'Stay on the same host'
+    ,'scanner.activeOptionsHint': 'Every field is a number you chose: 0 for pages and delay means no bound, −1 for depth means follow links without a depth limit, and no value here reduces what the run can look at. The run stops when you cancel it or when the target stops answering.'
+    ,'scanner.activeFindingsTitle': 'Findings'
+    ,'scanner.activeProven': 'Proven'
+    ,'scanner.activeCapped': 'Downgraded'
+    ,'scanner.activeFilterHint': 'Filter by title, module, endpoint or evidence'
+    ,'scanner.activeAllSeverities': 'All severities'
+    ,'scanner.activeProvenOnly': 'Proven impact only'
+    ,'scanner.activeColumnSeverity': 'Severity'
+    ,'scanner.activeColumnProof': 'Proof'
+    ,'scanner.activeColumnModule': 'Module'
+    ,'scanner.activeColumnEndpoint': 'Endpoint'
+    ,'scanner.activeColumnEvidence': 'Evidence'
+    ,'scanner.activeProofVerified': 'Proven'
+    ,'scanner.activeProofShow': 'Proof of impact'
+    ,'scanner.activeProofColumns': 'columns'
+    ,'scanner.activeSchemaShow': 'Schema read through this injection'
+    ,'scanner.activeSchemaTables': 'tables'
+    ,'scanner.activeSchemaColumnsOf': 'columns'
+    ,'scanner.activeSchemaTruncated': 'list cut at the bound'
+    ,'scanner.activeSchemaDatabases': 'databases'
+    ,'scanner.activeProofUnverified': 'Unverified'
+    ,'scanner.activeShowCurl': 'Show curl'
+    ,'scanner.activePages': 'Pages'
+    ,'scanner.activeSurfaces': 'Surfaces'
+    ,'scanner.activeFound': 'Findings'
+    ,'scanner.activeRequests': 'Requests'
+    ,'scanner.activeExportCsvHint': 'One row per finding'
+    ,'scanner.exportActiveAria': 'Export active scan'
+    ,'settings.modalTitle': 'Tab Settings'
+    ,'settings.tabSettings': 'Tab settings'
+    ,'settings.navDns': '🌐 Network & DNS'
+    ,'settings.navAppearance': '🎨 Appearance'
+    ,'settings.navTool': '🛠 Tool Parameters'
+    ,'settings.navShortcuts': '⌨️ Shortcuts & Presets'
+    ,'settings.dnsScope': 'DNS Scope'
+    ,'settings.dnsScopeGlobal': 'Global for entire project'
+    ,'settings.dnsScopeTab': 'Individual for this tab'
+    ,'settings.dnsMode': 'DNS Resolver Mode'
+    ,'settings.dnsSystem': 'System Default Resolver'
+    ,'settings.dnsCustom': 'Custom UDP/TCP DNS Server (IP:port)'
+    ,'settings.dnsDoh': 'DNS-over-HTTPS (DoH)'
+    ,'settings.dnsStatic': 'Static Host Overrides (/etc/hosts)'
+    ,'settings.dnsSplit': 'Split-Horizon DNS Routing'
+    ,'settings.customDnsServer': 'DNS Server Address (IP:port)'
+    ,'settings.dohEndpoint': 'DoH Resolver URL'
+    ,'settings.staticHosts': 'Static Overrides (IP Domain per line)'
+    ,'settings.splitRules': 'Split-Horizon Rules (Pattern=DNS)'
+    ,'settings.forceTtl0': 'Force re-resolve before each request (Force TTL=0)'
+    ,'settings.flushDns': '🔄 Flush DNS Cache'
+    ,'settings.dnsFlushed': 'DNS cache successfully flushed'
+    ,'settings.tlsFingerprint': 'TLS / JA3 / JA4 Client Profile'
+    ,'settings.themePreset': 'Theme Preset'
+    ,'settings.themeDefault': 'RequestRider Dark (Default)'
+    ,'settings.themeBurp': 'Burp Classic'
+    ,'settings.themeCyberpunk': 'Cyberpunk Neon'
+    ,'settings.themeMonokai': 'Monokai Pro'
+    ,'settings.themeHighContrast': 'High Contrast (A11y)'
+    ,'settings.customColors': 'Custom Colors & Highlighting'
+    ,'settings.statusPalette': 'Status Code Color Coding'
+    ,'settings.methodPalette': 'HTTP Method Request Colors'
+    ,'settings.status2xx': '2xx Success'
+    ,'settings.status3xx': '3xx Redirection'
+    ,'settings.status4xx': '4xx Client Error'
+    ,'settings.status5xx': '5xx Server Error'
+    ,'settings.urlSyntax': 'Code & URL Highlighting'
+    ,'settings.urlPath': 'URL Path'
+    ,'settings.urlParams': 'Query Params'
+    ,'settings.syntaxWrap': 'Word Wrap'
+    ,'settings.syntaxFontSize': 'Font Size'
+    ,'settings.resetDefaults': 'Reset to Defaults'
+    ,'settings.saveApply': 'Save & Apply'
+    ,'settings.settingsSaved': 'Settings saved successfully'
+    ,'settings.cmdPaletteHint': 'Command Palette (Ctrl+K or Cmd+K)'
+    ,'settings.exportProfile': '📤 Export Preset (.json)'
+    ,'settings.importProfile': '📥 Import Preset (.json)'
+    ,'settings.autoScrollResults': 'Auto-scroll results table'
+    ,'proxy.checkUrlLabel': 'Route Check URL'
+    ,'proxy.passiveProxyTitle': 'Passive Local Proxy'
+    ,'proxy.passiveProxyDesc': 'Listens on 127.0.0.1:8080. Performs transparent traffic logging to Traffic and History without holding or intercepting requests.'
+    ,'workspace.renameTab': 'Rename tab'
+    ,'faq.button': 'FAQ'
+    ,'faq.buttonFull': '❓ FAQ / Manual'
+    ,'faq.modalTitle': 'Interactive Tool Manual & FAQ'
+    ,'faq.modalSubtitle': 'Quick guide and deep dive into all tool capabilities'
+    ,'faq.searchPlaceholder': 'Search functions, transforms, attack modes...'
+    ,'faq.headerTooltip': 'Tool Manual & FAQ (F1)'
+    ,'faq.allTools': 'All Tools'
+  }
+
+};
+const localizedSelectors = {
+  'button.mark': '#mark-intruder',
+  'button.apply': '#add-transformation',
+  'button.clearTransformations': '#clear-transformations',
+  'button.addDictionary': '#add-dictionary',
+  'button.runAttack': '#attack',
+  'button.saveAttack': '#save-attack',
+  'button.pauseAttack': '#pause-attack',
+  'button.resumeAttack': '#resume-attack',
+  'button.cancelAttack': '#cancel-attack',
+  'button.clearResults': '#clear-attack',
+  'button.loadSelected': '#load-saved-attack',
+  'button.runSelected': '#rerun-saved-attack',
+  'button.clearFilter': '#clear-attack-filter',
+  'button.exportHistory': '#history-export',
+  'button.deleteSelected': '#history-bulk-delete',
+  'button.clearHistory': '#history-clear',
+  'button.refreshTraffic': '#traffic-refresh',
+  'button.exportTraffic': '#traffic-export-all'
+};
+const localizedText = {
+  'label.request': '#intruder .workspace > section:first-child .workspace-title span:first-child',
+  'label.response': '#history .inspector-panel:nth-child(2) h3, #traffic .inspector-panel:nth-child(2) h3',
+  'header.target': '#intruder .workspace > section:nth-child(2) .workspace-title span:first-child',
+  'header.optionalOverride': '#intruder .workspace > section:nth-child(2) .workspace-title .muted',
+  'header.selectMark': '#intruder .workspace > section:first-child .workspace-title .muted',
+  'header.transformations': '.intruder-transformations > label',
+  'header.dictionaries': '.dictionaries > strong',
+  'hint.payloadDictionary': '.dictionaries > .hint',
+  'hint.savedAttacks': '#saved-attacks option:first-child',
+  'hint.filter': '#attack-filter',
+  'hint.originalOrder': '#attack-sort option[value="index"]',
+  'hint.ascending': '#attack-sort-direction option[value="asc"]',
+  'hint.descending': '#attack-sort-direction option[value="desc"]',
+  'hint.onePayload': '.dictionary-values',
+  'hint.valuePrependAppend': '#transform-value',
+  'target.filter': '#target-filter',
+  'header.selectedRequest': '#history .inspector-panel:first-child h3, #traffic .inspector-panel:first-child h3, #intruder .inspector-panel:first-child h3',
+  'header.selectedResponse': '#history .inspector-panel:nth-child(2) h3, #traffic .inspector-panel:nth-child(2) h3, #intruder .inspector-panel:nth-child(2) h3',
+  'state.attackResults': '#attack-results td',
+  'state.selectHistory': '#history-request-inspector, #history-response-inspector',
+  'state.selectTraffic': '#traffic-request-inspector, #traffic-response-inspector'
+};
+const localizedOptions = {
+  '#mode': [['sniper', 'Sniper'], ['batteringRam', 'Battering Ram'], ['pitchfork', 'Pitchfork'], ['clusterBomb', 'Cluster Bomb']],
+  '#attack-sort': [['index', 'Original order'], ['status', 'Status'], ['time', 'Time'], ['size', 'Size'], ['payload', 'Payload']],
+  '#attack-sort-direction': [['asc', 'Ascending'], ['desc', 'Descending']],
+  '#history-sort': [['-timestamp', 'Newest first'], ['timestamp', 'Oldest first'], ['source', 'Tool / Source (A-Z)'], ['-source', 'Tool / Source (Z-A)'], ['host', 'Host'], ['method', 'Method'], ['url', 'URL']],
+  '#traffic-sort': [['-timestamp', 'Newest first'], ['timestamp', 'Oldest first'], ['source', 'Tool / Source (A-Z)'], ['-source', 'Tool / Source (Z-A)'], ['host', 'Host'], ['method', 'Method'], ['url', 'URL']],
+  '#target-sort': [
+    ['-index', 'Newest first'], ['index', 'Oldest first'],
+    ['-status', 'Status (errors first)'], ['status', 'Status (2xx first)'],
+    ['-depth', 'Depth (deepest first)'], ['depth', 'Depth (shallow first)'],
+    ['url', 'URL (A-Z)'], ['-url', 'URL (Z-A)'],
+    ['content_type', 'Content type (A-Z)'], ['-content_type', 'Content type (Z-A)'],
+    ['-time', 'Time (slowest first)'], ['time', 'Time (fastest first)']
+  ],
+  '#decoder-operation': [
+    ['urlEncode', 'URL encode'], ['urlDecode', 'URL decode'],
+    ['base64Encode', 'Base64 encode'], ['base64Decode', 'Base64 decode'],
+    ['base64UrlEncode', 'Base64 URL-safe encode'], ['base64UrlDecode', 'Base64 URL-safe decode'],
+    ['htmlEncode', 'HTML encode'], ['htmlDecode', 'HTML decode'],
+    ['hexEncode', 'Hex encode'], ['hexDecode', 'Hex decode'],
+    ['asciiHexEncode', 'ASCII Hex encode'], ['asciiHexDecode', 'ASCII Hex decode'],
+    ['octalEncode', 'Octal encode'], ['octalDecode', 'Octal decode'],
+    ['gzipEncode', 'Gzip encode'], ['gzipDecode', 'Gzip decode'],
+    ['byteEncode', 'Byte encode'], ['byteDecode', 'Byte decode'],
+    ['jsonPretty', 'JSON pretty-print'], ['jsonMinify', 'JSON minify'],
+    ['sha256', 'SHA-256 hash']
+  ],
+  '#transform-operation': [['urlEncode', 'URL transform'], ['base64Encode', 'Base64 transform'], ['base64UrlEncode', 'Base64 URL-safe transform'], ['hexEncode', 'Hex transform'], ['htmlEntityEncode', 'HTML entity encode'], ['jsonEscape', 'JSON escape'], ['unicodeEscape', 'Unicode escape'], ['whitespaceNormalize', 'Normalize whitespace'], ['trim', 'Trim'], ['lowercase', 'Lowercase'], ['uppercase', 'Uppercase'], ['prepend', 'Prepend'], ['append', 'Append']]
+};
+
+</script>

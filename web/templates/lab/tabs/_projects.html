@@ -1,0 +1,201 @@
+  <section id="projects" class="tab">
+    <div class="workspace-title"><span data-i18n="projects.title">Projects</span><span class="muted" data-i18n="projects.subtitle">Create and manage isolated QA workspaces</span><button type="button" class="tab-faq-trigger icon-btn" data-tab="projects" title="Довідка / FAQ" aria-label="FAQ & Manual" style="margin-left:auto;">❓ <span data-i18n="faq.button">FAQ</span></button></div>
+
+    <div class="project-management-bar">
+      <div class="project-bar-main">
+        <div class="project-bar-group">
+          <label for="project-select" class="project-bar-label" data-i18n="projects.active">Active project</label>
+          <div class="project-select-wrap">
+            <select id="project-select" data-i18n-aria-label="projects.label" aria-label="Project">
+              <option value="">No project</option>
+            </select>
+          </div>
+        </div>
+        <div class="project-bar-actions">
+          <button type="button" id="project-new" class="primary project-btn-new" data-i18n="projects.new">
+            <span>+</span> <span data-i18n="projects.new">New project</span>
+          </button>
+          <button type="button" id="project-manage" disabled data-i18n="projects.manage">
+            <span>⚙️</span> <span data-i18n="projects.manage">Manage project</span>
+          </button>
+          <button type="button" id="project-delete" class="danger-btn" disabled data-i18n="projects.delete">
+            <span>🗑️</span> <span data-i18n="projects.delete">Delete project</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="project-bar-transfer">
+        <div class="export-menu" data-export-menu="project">
+          <button type="button" id="project-export" class="export-export-trigger project-btn-transfer" aria-haspopup="menu" aria-expanded="false" aria-label="Export project" data-i18n-aria-label="projects.exportAria" disabled>
+            <span>💾</span> <span data-i18n="projects.exportLabel">Export</span>
+            <svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="export-menu-list" role="menu" hidden>
+            <button type="button" role="menuitem" data-format="fusion-html"><b data-i18n="projects.exportFusion">Unified Fusion Report</b><span data-i18n="projects.exportFusionHint">4-Level multi-engine HTML report</span></button>
+            <button type="button" role="menuitem" data-format="sarif"><b data-i18n="projects.exportSarif">SARIF 2.1.0</b><span data-i18n="projects.exportSarifHint">OASIS standard security format</span></button>
+            <button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="projects.exportJsonHint">Re-importable bundle</span></button>
+            <button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="projects.exportHtmlHint">Interactive report</span></button>
+            <button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="projects.exportCsvHint">One row per record</span></button>
+          </div>
+        </div>
+        <button type="button" id="project-import" class="project-btn-transfer" data-i18n="projects.import">
+          <span>📥</span> <span data-i18n="projects.import">Import project</span>
+        </button>
+        <input id="project-import-file" type="file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+
+    <div class="project-status-strip">
+      <div id="project-active-summary" class="project-active-summary" aria-live="polite"></div>
+      <div class="project-status-right">
+        <span id="project-transfer-status" class="muted" aria-live="polite"></span>
+        <span class="muted project-scope-hint" data-i18n="projects.scope">Used by History, Traffic and Target</span>
+      </div>
+    </div>
+
+    <section class="panel project-available-panel">
+      <div class="workspace-title"><span data-i18n="projects.available">Available projects</span><span id="project-count" class="muted">0 projects</span></div>
+      <div id="project-list" class="project-list" aria-live="polite"></div>
+    </section>
+    <section class="project-hub" id="project-hub" hidden>
+      <div class="project-hub-header">
+        <div><p class="project-hub-kicker" data-i18n="hub.kicker">Operational workspace</p><h2 class="project-hub-title" data-i18n="hub.title">Project knowledge hub</h2><p class="project-hub-description" data-i18n="hub.description">A compact view of observed traffic, assets and linked automation for the active project.</p></div>
+        <div id="project-hub-active" class="project-active-summary" style="margin:0;min-width:220px"></div>
+      </div>
+      <div class="project-hub-layout">
+      <div class="project-hub-nav" role="tablist" aria-label="Project hub sections" data-i18n-aria-label="a11y.projectHubSections">
+        <button type="button" class="project-hub-tab primary" data-hub-tab="dashboard" data-i18n="hub.tabDashboard">⚡ Live Dashboard</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="overview" data-i18n="hub.tabOverview">Overview</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="map" data-i18n="hub.tabMap">Asset map</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="secrets" data-i18n="hub.tabSecrets">Secrets</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="scanner" data-i18n="hub.tabScanner">Scanner</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="workflows" data-i18n="hub.tabWorkflows">Workflows</button>
+        <button type="button" class="project-hub-tab" data-hub-tab="ai" data-i18n="hub.tabAi">AI snapshot</button>
+      </div>
+      <div class="project-hub-content">
+      <div id="project-hub-dashboard" class="project-hub-panel">
+        <div class="hub-dashboard-wrap">
+          <div class="hub-hud-bar">
+            <div class="hub-hud-items">
+              <div class="hub-hud-item"><span class="hub-live-dot"></span> <span class="hub-hud-k" data-i18n="hub.hudEngine">ENGINE:</span> <span class="hub-hud-v ok" id="hub-engine-status">ONLINE (8081)</span></div>
+              <div class="hub-hud-item"><span class="hub-hud-k" data-i18n="hub.hudRoute">OUTBOUND ROUTE:</span> <span class="hub-hud-v" id="hub-egress-route">DIRECT</span></div>
+              <div class="hub-hud-item"><span class="hub-hud-k" data-i18n="hub.hudLatency">LATENCY:</span> <span class="hub-hud-v ok" id="hub-ping-latency">&lt; 4ms</span></div>
+              <div class="hub-hud-item"><span class="hub-hud-k" data-i18n="hub.hudTarget">TARGET:</span> <span class="hub-hud-v" id="hub-target-url">—</span></div>
+            </div>
+            <div class="hub-quick-bar">
+              <button type="button" class="primary" id="hub-btn-active-scan"><span>⚡</span> <span data-i18n="hub.btnQuickScan">Quick Active Scan</span></button>
+              <button type="button" id="hub-btn-crawler"><span>🕷️</span> <span data-i18n="hub.btnCrawl">Crawl Target</span></button>
+              <button type="button" id="hub-btn-fusion-report" data-i18n-title="hub.btnFusionReportTitle" title="Generate Unified Multi-Engine Fusion Report (JSON, SARIF, HTML)"><span>🛡️</span> <span data-i18n="hub.btnFusionReport">Fusion Report</span></button>
+            </div>
+          </div>
+
+          <div class="hub-kpi-grid">
+            <div class="hub-kpi-card">
+              <div class="hub-kpi-top"><span class="hub-kpi-label" data-i18n="hub.kpiEndpointsLabel">Discovered Endpoints</span><span class="hub-kpi-icon">🌐</span></div>
+              <div class="hub-kpi-val" id="hub-kpi-endpoints">0</div>
+              <div class="hub-kpi-sub" id="hub-kpi-endpoints-sub" data-i18n="hub.kpiEndpointsSub">Observed in active workspace</div>
+            </div>
+            <div class="hub-kpi-card">
+              <div class="hub-kpi-top"><span class="hub-kpi-label" data-i18n="hub.kpiTrafficLabel">Captured Traffic</span><span class="hub-kpi-icon">📡</span></div>
+              <div class="hub-kpi-val" id="hub-kpi-traffic">0</div>
+              <div class="hub-kpi-sub" id="hub-kpi-traffic-sub" data-i18n="hub.kpiTrafficSub">Exchanges recorded</div>
+            </div>
+            <div class="hub-kpi-card">
+              <div class="hub-kpi-top"><span class="hub-kpi-label" data-i18n="hub.kpiVulnsLabel">Vulnerabilities Found</span><span class="hub-kpi-icon">🛡️</span></div>
+              <div class="hub-kpi-val" id="hub-kpi-vulns" style="color:#f87171">0</div>
+              <div class="hub-kpi-sub" id="hub-kpi-vulns-badges">
+                <span class="hub-chip hub-chip-crit" id="hub-cnt-crit">0 Crit</span>
+                <span class="hub-chip hub-chip-high" id="hub-cnt-high">0 High</span>
+                <span class="hub-chip hub-chip-med" id="hub-cnt-med">0 Med</span>
+                <span class="hub-chip hub-chip-low" id="hub-cnt-low">0 Low</span>
+              </div>
+            </div>
+            <div class="hub-kpi-card">
+              <div class="hub-kpi-top"><span class="hub-kpi-label" data-i18n="hub.kpiTasksLabel">Active Tasks</span><span class="hub-kpi-icon">⚙️</span></div>
+              <div class="hub-kpi-val" id="hub-kpi-tasks">0</div>
+              <div class="hub-kpi-sub" id="hub-kpi-tasks-sub" data-i18n="hub.kpiTasksSub">Background jobs in progress</div>
+            </div>
+          </div>
+
+          <div class="hub-2col-layout">
+            <div class="hub-panel-box">
+              <div class="hub-panel-head">
+                <h3><span>⚙️</span> <span data-i18n="hub.activeTasksTitle">Active Tasks & Scan Orchestrator</span> <span class="badge" id="hub-active-tasks-badge" style="background:#14634e">0</span></h3>
+                <span class="muted" style="font-size:11px" data-i18n="hub.autoRefreshNotice">Auto-refresh: 3s</span>
+              </div>
+              <div class="hub-panel-body" id="hub-active-tasks-list">
+                <div class="project-hub-empty" style="min-height:220px" data-i18n="hub.noTasksRunning">No background tasks running right now.<br><button type="button" class="primary" style="margin-top:10px" id="hub-empty-scan-btn" data-i18n="hub.startActiveScan">⚡ Start Active Scan</button></div>
+              </div>
+            </div>
+
+            <div class="hub-panel-box">
+              <div class="hub-panel-head">
+                <h3><span>🛡️</span> <span data-i18n="hub.findingsStreamTitle">Security Findings Stream</span> <span class="badge" id="hub-findings-badge">0</span></h3>
+                <div class="hub-sev-tabs">
+                  <button type="button" class="hub-sev-btn active" data-hub-filter="ALL" data-i18n="hub.filterAll">All</button>
+                  <button type="button" class="hub-sev-btn" data-hub-filter="CRITICAL" data-i18n="hub.filterCrit">Crit</button>
+                  <button type="button" class="hub-sev-btn" data-hub-filter="HIGH" data-i18n="hub.filterHigh">High</button>
+                  <button type="button" class="hub-sev-btn" data-hub-filter="MEDIUM" data-i18n="hub.filterMed">Med</button>
+                  <button type="button" class="hub-sev-btn" data-hub-filter="LOW" data-i18n="hub.filterLow">Low</button>
+                </div>
+              </div>
+              <div class="hub-panel-body" id="hub-findings-feed-list">
+                <div class="project-hub-empty" style="min-height:220px" data-i18n="hub.noFindingsYet">No security findings recorded yet.</div>
+              </div>
+              <div class="exchange-more" id="hub-findings-more" hidden>
+                <button type="button" class="exchange-more-btn" id="hub-findings-more-btn" data-i18n="hub.findingsShowMore">Show more findings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="hub-finding-drawer" class="hub-drawer-overlay" hidden style="display:none !important">
+          <div class="hub-drawer-modal" role="dialog" aria-modal="true">
+            <div class="hub-drawer-header">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span id="hub-drawer-sev-chip" class="hub-chip hub-chip-crit">CRITICAL</span>
+                <strong id="hub-drawer-title" style="font-size:15px;color:var(--text)">Finding Title</strong>
+              </div>
+              <button type="button" id="hub-drawer-close" style="background:transparent;border:0;color:var(--muted);font-size:18px;cursor:pointer" aria-label="Close" data-i18n-aria-label="common.close">✕</button>
+            </div>
+            <div class="hub-drawer-body">
+              <div class="hub-drawer-field">
+                <span class="hub-drawer-label" data-i18n="hub.drawerEndpoint">Endpoint & Module</span>
+                <span class="hub-drawer-val mono" id="hub-drawer-endpoint">—</span>
+              </div>
+              <div class="hub-drawer-field">
+                <span class="hub-drawer-label" data-i18n="hub.drawerDesc">Description</span>
+                <span class="hub-drawer-val" id="hub-drawer-desc">—</span>
+              </div>
+              <div class="hub-drawer-field">
+                <span class="hub-drawer-label" data-i18n="hub.drawerRemediation">Remediation Guidance</span>
+                <span class="hub-drawer-val" id="hub-drawer-remediation" style="color:#6ee7b7">—</span>
+              </div>
+              <div class="hub-drawer-field">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span class="hub-drawer-label" data-i18n="hub.drawerPoc">Proof of Concept (cURL)</span>
+                  <button type="button" id="hub-drawer-copy-curl" style="padding:4px 8px;font-size:11px"><span id="hub-drawer-copy-curl-text" data-i18n="hub.drawerCopyCurl">📋 Copy cURL</span></button>
+                </div>
+                <pre class="code-editor" id="hub-drawer-curl" style="max-height:140px;overflow:auto;margin:0;font-size:11px">—</pre>
+              </div>
+              <div class="hub-drawer-field">
+                <span class="hub-drawer-label" data-i18n="hub.drawerEvidence">Observed Evidence</span>
+                <pre class="code-editor" id="hub-drawer-evidence" style="max-height:120px;overflow:auto;margin:0;font-size:11px">—</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="project-hub-overview" class="project-hub-panel" hidden>
+        <h3 class="project-hub-section-title" data-i18n="hub.evidenceOverview">Evidence overview</h3><div id="project-hub-metrics" class="project-hub-metrics"></div>
+        <div class="project-hub-section-title" data-i18n="hub.technology">Technology observations</div><div id="project-hub-tech" class="hint"></div>
+        <div class="project-hub-section-title" data-i18n="hub.osintGraphs">OSINT graphs</div><div id="project-hub-graphs" class="project-hub-list"></div>
+      </div>
+      <div id="project-hub-map" class="project-hub-panel" hidden><h3 class="project-hub-section-title" data-i18n="hub.observedEndpoints">Observed endpoints</h3><div id="project-hub-endpoints" class="project-hub-list"></div></div>
+      <div id="project-hub-secrets" class="project-hub-panel" hidden><h3 class="project-hub-section-title" data-i18n="hub.secretObservations">Observed secrets</h3><div class="hint" data-i18n="hub.secretHint">JWT, cookies and credentials are shown in full, exactly as they travelled.</div><div id="project-hub-secrets-list" class="project-hub-list"></div></div>
+      <div id="project-hub-scanner" class="project-hub-panel" hidden><h3 class="project-hub-section-title" data-i18n="hub.scannerRuns">Scanner runs</h3><div id="project-hub-scans-list" class="project-hub-list"></div></div>
+      <div id="project-hub-workflows" class="project-hub-panel" hidden><h3 class="project-hub-section-title" data-i18n="hub.linkedAutomation">Linked automation</h3><div id="project-hub-workflows-list" class="project-hub-list"></div></div>
+      <div id="project-hub-ai" class="project-hub-panel" hidden><pre id="project-hub-ai-snapshot" class="code-editor" style="white-space:pre-wrap"></pre></div>
+      </div></div>
+    </section>
+  </section>
