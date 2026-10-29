@@ -1,0 +1,479 @@
+// --- Versioned UI Preferences v2 (Layout, Appearance, Custom Colors, DNS, and Tab Settings) ---
+const UI_PREFS_STORAGE_KEY = 'requestrider-ui-preferences-v2';
+const UI_PREFS_STORAGE_KEY_V1 = 'requestrider-ui-preferences-v1';
+const UI_PREFS_SCHEMA_VERSION = 2;
+
+const THEME_PRESETS = {
+  default: {
+    name: 'RequestRider Dark',
+    vars: {
+      '--bg': '#080c12',
+      '--panel': '#101722',
+      '--panel-2': '#0d141e',
+      '--line': '#263548',
+      '--text': '#dbe7f5',
+      '--muted': '#8294aa',
+      '--accent': '#43d9a3',
+      '--accent-strong': '#62e8b5',
+      '--button': '#182333',
+      '--button-hover': '#22344b',
+      '--syn-method': '#4ade80',
+      '--syn-path': '#22d3ee',
+      '--syn-status': '#fbbf24',
+      '--syn-key': '#c084fc',
+      '--syn-string': '#fb923c',
+      '--syn-number': '#a5b4fc',
+      '--syn-literal': '#f0abfc',
+      '--syn-tag': '#2dd4bf',
+      '--syn-attr': '#e879f9',
+      '--syn-punct': '#8294aa',
+      '--syn-marker': '#f06b38',
+      '--status-2xx': '#22c55e',
+      '--status-3xx': '#3b82f6',
+      '--status-4xx': '#f59e0b',
+      '--status-5xx': '#ef4444',
+      '--method-get': '#34d399',
+      '--method-post': '#fbbf24',
+      '--method-put': '#60a5fa',
+      '--method-delete': '#fb7185',
+      '--method-patch': '#c084fc',
+      '--method-options': '#a1a1aa'
+    }
+  },
+  burp: {
+    name: 'Burp Classic',
+    vars: {
+      '--bg': '#1e2125',
+      '--panel': '#272b31',
+      '--panel-2': '#22252a',
+      '--line': '#3e4451',
+      '--text': '#e6e9ed',
+      '--muted': '#8e98a8',
+      '--accent': '#ff6633',
+      '--accent-strong': '#ff855c',
+      '--button': '#2c323b',
+      '--button-hover': '#38404c',
+      '--syn-method': '#ff6633',
+      '--syn-path': '#56b6c2',
+      '--syn-status': '#e5c07b',
+      '--syn-key': '#e06c75',
+      '--syn-string': '#98c379',
+      '--syn-number': '#d19a66',
+      '--syn-literal': '#c678dd',
+      '--syn-tag': '#e06c75',
+      '--syn-attr': '#d19a66',
+      '--syn-punct': '#abb2bf',
+      '--syn-marker': '#ff6633',
+      '--status-2xx': '#98c379',
+      '--status-3xx': '#61afef',
+      '--status-4xx': '#e5c07b',
+      '--status-5xx': '#e06c75',
+      '--method-get': '#ff6633',
+      '--method-post': '#ffaa00',
+      '--method-put': '#61afef',
+      '--method-delete': '#e06c75',
+      '--method-patch': '#c678dd',
+      '--method-options': '#abb2bf'
+    }
+  },
+  cyberpunk: {
+    name: 'Cyberpunk Neon',
+    vars: {
+      '--bg': '#05050a',
+      '--panel': '#0c0e1a',
+      '--panel-2': '#070912',
+      '--line': '#00f0ff44',
+      '--text': '#f0f6fc',
+      '--muted': '#7d8a9e',
+      '--accent': '#00ffcc',
+      '--accent-strong': '#33ffd6',
+      '--button': '#141829',
+      '--button-hover': '#1e243d',
+      '--syn-method': '#00ffcc',
+      '--syn-path': '#ff007f',
+      '--syn-status': '#ffff00',
+      '--syn-key': '#ff007f',
+      '--syn-string': '#00ffff',
+      '--syn-number': '#ff9900',
+      '--syn-literal': '#ff00ff',
+      '--syn-tag': '#00ffcc',
+      '--syn-attr': '#ffff00',
+      '--syn-punct': '#00f0ff88',
+      '--syn-marker': '#ff0055',
+      '--status-2xx': '#00ffcc',
+      '--status-3xx': '#00bfff',
+      '--status-4xx': '#ffff00',
+      '--status-5xx': '#ff0055',
+      '--method-get': '#00ffcc',
+      '--method-post': '#ffff00',
+      '--method-put': '#00bfff',
+      '--method-delete': '#ff0055',
+      '--method-patch': '#ff00ff',
+      '--method-options': '#00f0ff'
+    }
+  },
+  monokai: {
+    name: 'Monokai Pro',
+    vars: {
+      '--bg': '#222222',
+      '--panel': '#2d2a2e',
+      '--panel-2': '#252326',
+      '--line': '#403e41',
+      '--text': '#fcfcfa',
+      '--muted': '#939293',
+      '--accent': '#a6e22e',
+      '--accent-strong': '#bbf348',
+      '--button': '#363438',
+      '--button-hover': '#49464b',
+      '--syn-method': '#f92672',
+      '--syn-path': '#66d9ef',
+      '--syn-status': '#fd971f',
+      '--syn-key': '#66d9ef',
+      '--syn-string': '#e6db74',
+      '--syn-number': '#ae81ff',
+      '--syn-literal': '#ae81ff',
+      '--syn-tag': '#f92672',
+      '--syn-attr': '#a6e22e',
+      '--syn-punct': '#939293',
+      '--syn-marker': '#fd971f',
+      '--status-2xx': '#a6e22e',
+      '--status-3xx': '#66d9ef',
+      '--status-4xx': '#fd971f',
+      '--status-5xx': '#f92672',
+      '--method-get': '#a6e22e',
+      '--method-post': '#fd971f',
+      '--method-put': '#66d9ef',
+      '--method-delete': '#f92672',
+      '--method-patch': '#ae81ff',
+      '--method-options': '#939293'
+    }
+  },
+  highContrast: {
+    name: 'High Contrast (A11y)',
+    vars: {
+      '--bg': '#000000',
+      '--panel': '#0a0a0a',
+      '--panel-2': '#050505',
+      '--line': '#ffffff',
+      '--text': '#ffffff',
+      '--muted': '#cccccc',
+      '--accent': '#00ffff',
+      '--accent-strong': '#80ffff',
+      '--button': '#1a1a1a',
+      '--button-hover': '#333333',
+      '--syn-method': '#00ff00',
+      '--syn-path': '#00ffff',
+      '--syn-status': '#ffff00',
+      '--syn-key': '#ff00ff',
+      '--syn-string': '#ffff00',
+      '--syn-number': '#00ffff',
+      '--syn-literal': '#ff80df',
+      '--syn-tag': '#00ff00',
+      '--syn-attr': '#ffff00',
+      '--syn-punct': '#ffffff',
+      '--syn-marker': '#ff0000',
+      '--status-2xx': '#00ff00',
+      '--status-3xx': '#00ffff',
+      '--status-4xx': '#ffff00',
+      '--status-5xx': '#ff0000',
+      '--method-get': '#00ff00',
+      '--method-post': '#ffff00',
+      '--method-put': '#00ffff',
+      '--method-delete': '#ff0000',
+      '--method-patch': '#ff00ff',
+      '--method-options': '#ffffff'
+    }
+  }
+};
+
+function defaultUIPreferences() {
+  return {
+    version: UI_PREFS_SCHEMA_VERSION,
+    layout: {
+      repeaterSplitRatio: '1.08fr 0.92fr',
+      inspectorHeight: 'auto',
+      sidebarCollapsed: false,
+    },
+    shortcuts: {
+      profile: 'default',
+      sendRequest: 'Ctrl+Enter',
+      searchHistory: 'Ctrl+F',
+      commandPalette: 'Ctrl+K',
+    },
+    viewModes: {
+      historyDensity: 'compact',
+      trafficAutoScroll: true,
+      rawSyntaxHighlight: true,
+    },
+    tables: {
+      historySort: '-timestamp',
+      trafficSort: '-id',
+    },
+    appearance: {
+      theme: 'default',
+      customColors: {
+        methodGet: '#34d399',
+        methodPost: '#fbbf24',
+        methodPut: '#60a5fa',
+        methodDelete: '#fb7185',
+        methodPatch: '#c084fc',
+        methodOptions: '#a1a1aa',
+        headerName: '#93c5fd',
+        headerVal: '#e2e8f0',
+        urlProto: '#f43f5e',
+        urlHost: '#38bdf8',
+        urlPath: '#22d3ee',
+        urlParamKey: '#fbbf24',
+        urlParamVal: '#fde68a',
+        status2xx: '#22c55e',
+        status3xx: '#3b82f6',
+        status4xx: '#f59e0b',
+        status5xx: '#ef4444',
+        status401: '#f97316',
+        status429: '#ec4899',
+        status502: '#dc2626'
+      },
+      syntaxHighlighting: {
+        wrap: true,
+        fontSize: '13px',
+        showWhitespace: false
+      },
+      statusCodes: {
+        badgeStyle: 'filled',
+        showTabDot: true
+      }
+    },
+    dns: {
+      mode: 'system', // 'system', 'custom', 'doh', 'static', 'split'
+      customServer: '1.1.1.1:53',
+      dohUrl: 'https://cloudflare-dns.com/dns-query',
+      staticHosts: '127.0.0.1 localhost',
+      splitRules: '*.corp.internal=10.0.0.2:53',
+      forceTTL0: false,
+      tlsFingerprint: 'chrome' // 'chrome', 'firefox', 'safari', 'golang'
+    },
+    tabs: {
+      repeater: {
+        dnsMode: 'inherit',
+        timeout: 15,
+        followRedirects: 'same-host',
+        httpVersion: 'auto',
+        tabColorDot: true,
+        fontSize: '13px',
+        wordWrap: true
+      },
+      intruder: {
+        dnsMode: 'inherit',
+        mode: 'sniper',
+        concurrency: 1,
+        delayMs: 150,
+        detectEnabled: true,
+        autoScroll: true
+      },
+      target: {
+        dnsMode: 'inherit',
+        engine: 'static',
+        browser: 'firefox',
+        sameOrigin: true,
+        antiDetect: true,
+        maxDepth: -1,
+        maxPages: 0,
+        delayMs: 0
+      },
+      osint: {
+        dnsMode: 'inherit',
+        wildcardDetection: true,
+        timeout: 20,
+        layout: 'cose',
+        maxNodes: 1000,
+        animation: true,
+        autoFit: true,
+        hideIsolated: false
+      },
+      scanner: {
+        dnsMode: 'inherit',
+        probeTimeout: 10,
+        defaultProfile: 'Standard'
+      },
+      traffic: {
+        bufferSize: 1000,
+        ringBuffer: true,
+        hide404: false,
+        hideStatic: true,
+        autoScroll: true,
+        statusColorBadges: true
+      },
+      proxy: {
+        routeAddress: '',
+        checkUrl: 'https://check.torproject.org/',
+        checkTimeout: 15000,
+        listenerAddr: '127.0.0.1',
+        listenerPort: 8080
+      },
+      comparer: {
+        granularity: 'word',
+        ignoreCase: false,
+        ignoreWhitespace: true,
+        ignoreDynamicHeaders: true,
+        syncScroll: true
+      },
+      decoder: {
+        autoDetect: true,
+        outputFormat: 'text'
+      },
+      automation: {
+        timeout: 120,
+        failFast: false,
+        snapGrid: true,
+        showMinimap: true
+      },
+      ai: {
+        endpoint: 'http://127.0.0.1:11434',
+        model: 'qwen2.5-coder',
+        contextLimit: 4096,
+        temperature: 0.2,
+        systemPreset: 'analyst'
+      }
+    }
+  };
+}
+
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') return target;
+  const output = Object.assign({}, target);
+  for (const [key, value] of Object.entries(source)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      output[key] = deepMerge(target[key] || {}, value);
+    } else if (value !== undefined) {
+      output[key] = value;
+    }
+  }
+  return output;
+}
+
+function migrateUIPreferences(stored) {
+  const current = defaultUIPreferences();
+  if (!stored || typeof stored !== 'object') return current;
+  if (typeof stored.version !== 'number' || stored.version < 1) {
+    stored.version = 1;
+  }
+  // Seamless migration from v1 to v2:
+  const migrated = deepMerge(current, stored);
+  migrated.version = UI_PREFS_SCHEMA_VERSION;
+  return migrated;
+}
+
+function loadUIPreferences() {
+  try {
+    let raw = localStorage.getItem(UI_PREFS_STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(UI_PREFS_STORAGE_KEY_V1);
+    }
+    if (!raw) return defaultUIPreferences();
+    const parsed = JSON.parse(raw);
+    const result = migrateUIPreferences(parsed);
+    // If we loaded v1, persist as v2 for future fast loads
+    if (parsed.version !== UI_PREFS_SCHEMA_VERSION) {
+      localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(result));
+    }
+    return result;
+  } catch (error) {
+    console.warn('Failed to load uiPreferences, falling back to defaults:', error);
+    return defaultUIPreferences();
+  }
+}
+
+function applyUIThemeAndColors(prefs) {
+  if (!prefs) prefs = loadUIPreferences();
+  const root = document.documentElement;
+  const themeName = prefs?.appearance?.theme || 'default';
+  const theme = THEME_PRESETS[themeName] || THEME_PRESETS.default;
+
+  // 1. Apply base theme CSS variables
+  if (theme && theme.vars) {
+    for (const [prop, val] of Object.entries(theme.vars)) {
+      root.style.setProperty(prop, val);
+    }
+  }
+
+  // 2. Apply granular custom color overrides if specified
+  const custom = prefs?.appearance?.customColors;
+  if (custom) {
+    if (custom.status2xx) root.style.setProperty('--status-2xx', custom.status2xx);
+    if (custom.status3xx) root.style.setProperty('--status-3xx', custom.status3xx);
+    if (custom.status4xx) root.style.setProperty('--status-4xx', custom.status4xx);
+    if (custom.status5xx) root.style.setProperty('--status-5xx', custom.status5xx);
+    if (custom.methodGet) root.style.setProperty('--method-get', custom.methodGet);
+    if (custom.methodPost) root.style.setProperty('--method-post', custom.methodPost);
+    if (custom.methodPut) root.style.setProperty('--method-put', custom.methodPut);
+    if (custom.methodDelete) root.style.setProperty('--method-delete', custom.methodDelete);
+    if (custom.methodPatch) root.style.setProperty('--method-patch', custom.methodPatch);
+    if (custom.methodOptions) root.style.setProperty('--method-options', custom.methodOptions);
+    if (custom.urlPath) root.style.setProperty('--syn-path', custom.urlPath);
+    if (custom.urlParamKey) root.style.setProperty('--syn-status', custom.urlParamKey);
+  }
+
+  // 3. Apply editor syntax typography (font-size & word-wrap)
+  const syntax = prefs?.appearance?.syntaxHighlighting;
+  if (syntax) {
+    const editors = document.querySelectorAll('.code-editor, .raw-editor, .raw-editor-highlight');
+    editors.forEach(ed => {
+      if (syntax.fontSize) ed.style.fontSize = syntax.fontSize;
+      if (syntax.wrap !== undefined) {
+        ed.style.whiteSpace = syntax.wrap ? 'pre-wrap' : 'pre';
+        ed.style.wordBreak = syntax.wrap ? 'break-word' : 'normal';
+      }
+    });
+  }
+}
+
+function saveUIPreferences(patch) {
+  try {
+    const current = loadUIPreferences();
+    const updated = deepMerge(current, patch);
+    updated.version = UI_PREFS_SCHEMA_VERSION;
+    localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(updated));
+    applyUIThemeAndColors(updated);
+    window.dispatchEvent(new CustomEvent('rr:tab-settings-updated', {
+      detail: { allSettings: updated }
+    }));
+    return updated;
+  } catch (error) {
+    console.warn('Failed to save uiPreferences:', error);
+    return null;
+  }
+}
+
+function saveTabPreferences(tabName, tabSettings) {
+  try {
+    const current = loadUIPreferences();
+    if (!current.tabs) current.tabs = {};
+    current.tabs[tabName] = deepMerge(current.tabs[tabName] || {}, tabSettings);
+    localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(current));
+    applyUIThemeAndColors(current);
+    window.dispatchEvent(new CustomEvent('rr:tab-settings-updated', {
+      detail: { tab: tabName, settings: current.tabs[tabName], allSettings: current }
+    }));
+    return current;
+  } catch (error) {
+    console.warn(`Failed to save tab preferences for ${tabName}:`, error);
+    return null;
+  }
+}
+
+function applyUIPreferences() {
+  const prefs = loadUIPreferences();
+  applyUIThemeAndColors(prefs);
+  if (prefs?.layout?.repeaterSplitRatio) {
+    const workspaces = document.querySelectorAll('.workspace');
+    workspaces.forEach(el => {
+      if (prefs.layout.repeaterSplitRatio.includes('fr')) {
+        el.style.gridTemplateColumns = prefs.layout.repeaterSplitRatio;
+      }
+    });
+  }
+  if (prefs?.tables?.historySort && $('history-sort')) {
+    const opt = $('history-sort').querySelector(`option[value="${prefs.tables.historySort}"]`);
+    if (opt) $('history-sort').value = prefs.tables.historySort;
+  }
+}

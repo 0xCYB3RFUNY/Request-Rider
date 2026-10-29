@@ -1,0 +1,493 @@
+const $ = id => document.getElementById(id);
+const json = value => { try { return JSON.parse(value || '{}'); } catch { throw new Error('Headers must be valid JSON'); } };
+
+// ---------------------------------------------------------------------------
+// Raw HTTP and payload colouring - pattern tables.
+//
+// These live at the top of the script, not next to the functions that read
+// them, and that position is load-bearing. The workspace bootstrap runs as a
+// top-level statement and calls restoreWorkspaceState() -> highlightHTTPText()
+// while this script is still evaluating. Function declarations are hoisted and
+// exist by then; a `const` is not, so a table declared further down this file
+// is still in its temporal dead zone at that call, and the page throws
+// "Cannot access 'SYN_REQUEST_LINE' before initialization" while restoring the
+// first workspace. Do not move this block back down next to the functions.
+const SYN_SENSITIVE_EXACT = /^(?:pass|passwd|password|pwd|secret|token|auth|authorization|api[_-]?key|apikey|app[_-]?key|access[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|client[_-]?secret|private[_-]?key|session|sessionid|sessid|jsessionid|phpsessid|aspsessionid|cookie|credential|credentials|cvv|cvc|ssn|pin|pincode|passcode|otp|credit[_-]?card|card[_-]?number|cardnumber|account[_-]?number)$/i;
+// A field called token_count is a counter, not a credential, so a name that
+// ends in a counter word is never painted as a secret.
+const SYN_SENSITIVE_SUFFIX = /(?:count|counts|total|size|length|len|num|enabled|flag|type|name|index|limit|ttl|expires|expiry|at|id)$/i;
+// Substring matching is deliberate and over-inclusive on purpose: in a payload
+// review a name that merely looks like a credential is worth the colour, while a
+// name that hides a credential is not.
+const SYN_SENSITIVE_PART = /(?:pass|secret|token|api[_-]?key|apikey|authorization|credential|private[_-]?key|session|cvv|cvc|ssn)/i;
+const SYN_TEXTUAL_TYPE = /^(?:text\/|application\/(?:json|xml|xhtml\+xml|x-javascript|javascript|ecmascript|x-www-form-urlencoded|graphql|x-ndjson|x-yaml|yaml|x-tar|x-sh)\b|multipart\/)/i;
+const SYN_METHOD = /^(?:GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|TRACE|CONNECT)$/;
+const SYN_REQUEST_LINE = /^([A-Za-z]+)([ \t]+)(\S+)(?:([ \t]+)(HTTP\/[\d.]+))?$/;
+const SYN_STATUS_LINE = /^(HTTP\/[\d.]+)([ \t]+)(\d{3})(?:([ \t]+)([\s\S]*))?$/;
+// RFC 9110 field-name token. Curly braces and quotes are not token characters,
+// which is what keeps a JSON body line from ever being read as a header. The
+// optional space is captured rather than swallowed: it belongs to the evidence.
+const SYN_HEADER_SPLIT = /^([!#$%&'*+\-.^_`|~0-9A-Za-z]+):([ \t]?)([\s\S]*)$/;
+const SYN_NAME_CHARS = "[!#$%&'*+\\-.^_`|~%0-9A-Za-z\\u00c0-\\uffff]";
+const SYN_AMP_PAIR = new RegExp(`(${SYN_NAME_CHARS}+(?:\\[[^\\]]*\\])*)=([^&;]*)([&;]?)`, 'g');
+const SYN_SEMI_PAIR = new RegExp(`(${SYN_NAME_CHARS}+(?:\\[[^\\]]*\\])*)=([^;]*)(;?)`, 'g');
+const SYN_PLAIN_TOKEN = new RegExp(
+  "([\"'`])([A-Za-z_][\\w.\\-\\[\\]]{0,80})\\1([ \\t]*[:=][ \\t]*)([^\"'\\s,;&}\\]]*)"
+  + "|([\"'`])(password|passwd|secret|token|api[_-]?key|authorization|cookie|sessionid|cvv|ssn)([\"'`])"
+  + '|([A-Za-z_][\\w.\\-\\[\\]]{0,80})([ \\t]*=[ \\t]*)([^\\s"\'&;]{1,200})',
+  'gi'
+);
+const SYN_JSON_TOKEN = /("(?:\\.|[^"\\])*")([ \t]*:)|("(?:\\.|[^"\\])*")|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(\btrue\b|\bfalse\b)|(\bnull\b)|([{}[\],:])/g;
+const SYN_MARKUP_TOKEN = new RegExp(
+  '(<!--[\\s\\S]*?-->)'
+  + '|(!\\[CDATA\\[[\\s\\S]*?\\]\\]>)'
+  + '|(</?)([A-Za-z_][\\w.:-]*)'
+  + '|([A-Za-z_][\\w.:-]*)(\\s*=\\s*)("[^"]*"|\'[^\']*\')'
+  + '|(/?>)'
+  + '|(&#?[0-9A-Za-z]+;)',
+  'g'
+);
+const SYN_MARKER_LINE = /^(\[(?:error|binary|base64)[^\]\n]*)(\][ \t]*)([\s\S]*)$/;
+// Cookie parsing. `Cookie` carries pairs separated by `; `, `Set-Cookie` carries
+// exactly one cookie followed by attributes that are also `; `-separated, so one
+// scanner reads both and the attribute decision is made by position instead of by
+// guessing from the name. A pair with no `=` is an attribute (`Secure`,
+// `HttpOnly`) rather than a cookie, which is why the value group is optional.
+const SYN_COOKIE_PAIR = new RegExp(`(${SYN_NAME_CHARS}+)(=)?([^;]*)(;?)`, 'g');
+// Names that are attributes of the cookie just parsed, not cookies themselves.
+// A Set-Cookie carries them after the first `;`, so this list only decides the
+// tone, never which run is a cookie.
+const SYN_COOKIE_ATTRIBUTE = /^(?:expires|max-age|domain|path|secure|httponly|samesite|partitioned|priority|version|comment)$/i;
+const SYN_NUMBER = /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
+const lines = value => value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+const markerCount = value => {
+  const normalized = String(value).replace(/%C2%A7/gi, '§');
+  return (normalized.match(/§/g) || []).length + (normalized.match(/\{\{/g) || []).length * 2 + (normalized.match(/%[^%]+%/g) || []).length * 2;
+};
+const markerPositionCount = value => {
+  const normalized = String(value).replace(/%C2%A7/gi, '§');
+  return (normalized.match(/§[^§]+§/g) || []).length + (normalized.match(/\{\{[^{}]+\}\}/g) || []).length + (normalized.match(/%[^%]+%/g) || []).length;
+};
+const dictionaries = [];
+let currentRoute = { address: '' };
+const historyItems = new Map();
+const trafficItems = new Map();
+const trafficCacheKey = 'intruder-lab-traffic-items';
+const trafficCacheStateKey = 'intruder-lab-traffic-cache-state';
+let lastResponse = {};
+let trafficStream;
+let trafficRenderFrame = 0;
+let trafficScrollFrame = 0;
+let trafficRenderTimer = null;
+let trafficRenderPending = false;
+const trafficSelectedKeys = new Set();
+let trafficSelectedKey = null;
+let trafficVisibleItems = [];
+const trafficRowHeight = 38;
+const trafficRowWindow = 50;
+const TRAFFIC_MAX_ITEMS = 5000;
+let trafficCursor = localStorage.getItem('intruder-lab-traffic-cursor') || '0';
+// Coalesced Traffic persistence. Both the snapshot and the stream cursor are
+// written at most once per window instead of once per SSE frame, because a
+// synchronous localStorage write per event is expensive in one tab and contends
+// with every other tab on the same origin.
+let trafficPersistTimer = null;
+let trafficCursorTimer = null;
+const TRAFFIC_PERSIST_DEBOUNCE_MS = 2000;
+let activeAttackId = null;
+let attackPollTimer = null;
+let attackPollGeneration = 0;
+let currentAttackResults = [];
+let renderedAttackKey = '';
+let attackResultCursor = 0;
+let attackStatusText = '';
+// The engine's own job counters, kept so an exported report can state how far the
+// attack actually got instead of only how many results are on screen.
+let attackReportTotal = 0;
+let attackReportCompleted = 0;
+let attackReportFailed = 0;
+let attackReportStatus = '';
+let attackVisibleIndices = [];
+let attackRenderFrame = 0;
+const attackRowWindow = 160;
+const attackRowHeight = 40;
+const activeAttackStorageKey = 'intruder-lab-active-attack';
+// The latest detection block from the engine poll. It is page state, not
+// per-result state, because it is the same answer for every row of a run.
+let attackDetection = null;
+const savedAttacks = new Map();
+let transformations = [];
+let trafficSort = '-timestamp';
+let trafficCurrentMode = 'all';
+let activeTargetMapId = null;
+let activeTargetMapKind = 'static';
+let targetMapTimer = null;
+let targetCheckpoint = null;
+let currentTargetMap = {pages: []};
+let lastStaticTargetMap = null;
+let targetNetworkFilter = 'all';
+// Declared with the rest of the Target state: workspace restore runs before the
+// controls are built, and a later `let` would be a temporal dead zone there.
+let targetAutoScope = 'both';
+let targetSort = '-index';
+let targetFilter = '';
+let targetCaptureContexts = [];
+let targetCaptureContextId = '';
+// Same rule as the state above, and for the same measured reason: the workspace
+// restore calls `renderTargetBrowserAvailability()` while it is putting the
+// saved runtime back, and that happens long before the middle of this script is
+// evaluated. Declared here, a later `let` would be a temporal dead zone there —
+// caught by the live browser check at 1356×652 and 1920×1080, not by a unit
+// test and not by `node --check`.
+let targetBrowserAvailability = null;
+// True only while the measurement is in flight. `null` alone cannot say whether
+// the question has been asked yet, and the panel has to be able to.
+let targetBrowserAvailabilityPending = false;
+// Why the panel has no answer, when the answer is a failure rather than a
+// measurement. Held in state because the panel is repainted by several callers,
+// and a message written straight into the node does not survive the next one.
+let targetBrowserAvailabilityError = null;
+let currentOSINT = null;
+let osintRequestController = null;
+let osintGraphId = '';
+let currentOsintGraph = null;
+let osintGraphEntities = new Map();
+let osintGraphRelations = [];
+let osintGraphPositions = new Map();
+let osintGraphSelectedId = '';
+let osintGraphSelectedRelationId = '';
+let osintGraphLayoutMode = 'grid';
+let osintGraphFilter = '';
+let osintGraphLoadSequence = 0;
+// Cytoscape state. It is declared with the rest of the graph state, above the
+// first `applyLanguage()` call: that call re-renders every view, including the
+// graph, and a `let` declared further down the script would still be in its
+// temporal dead zone at that moment.
+let osintGraphCy = null;
+let osintGraphLayoutRun = 0;
+let osintGraphSvgRendererRegistered = false;
+let osintGraphFocusId = '';
+
+// The two inner Scanner views, declared here for the same reason as the Cytoscape
+// state above: `applyLanguage()` runs once during boot, before the tab has ever
+// been opened, and the redraw it performs for the active-scan table reads
+// `scannerViews`. Declared at its historical place — some thousand lines further
+// down, next to the code that consumes it — the name would still be in its
+// temporal dead zone at that moment.
+//
+// The failure was silent and total: `scannerViews.active` threw
+// `can't access lexical declaration 'scannerViews' before initialization`, the
+// rest of the application script stopped executing, and the symptom was not a
+// missing redraw but a workspace in which **no tab switches at all** — the nav
+// handlers were never bound.
+//
+// `osintTransformCapabilityPromise` is the same defect on the OSINT side: the boot
+// pass reaches `loadOsintTransformCapabilities` through the graph render, and a
+// `let` declared with its consumer further down throws on that read.
+// `empty` is the key this view's placeholder is worded with. The report block
+// below the panels is shared by all three views, so the sentence it shows while
+// it holds no report has to come from the view that is open — it used to be one
+// CMS sentence for every view, which told an operator on Nuclei or on the active
+// scanner to run a recon he is not running.
+const scannerViews = {
+  cms: {current: null, exportSelect: 'scanner-export-cms', empty: 'scanner.empty'},
+  active: {current: null, exportSelect: 'scanner-export-active', empty: 'scanner.emptyActive'},
+  corpus: {current: null, exportSelect: 'scanner-export-corpus', empty: 'scanner.emptyCorpus'}
+};
+Object.defineProperty(scannerViews, 'nuclei', {get() { return scannerViews.active; }, set(v) { scannerViews.active.current = v; }, enumerable: false});
+let hubActiveFindingsCache = [];
+let hubSelectedFilter = 'ALL';
+let hubPollingTimer = null;
+let osintTransformCapabilityPromise = null;
+
+// Zoom bounds are the on-screen scale, because the container has no viewBox to
+// pre-shrink the content. 0.02 fits a graph that overflows in every direction,
+// 12 is a single node filling the stage. The step is multiplicative, not
+// additive: a fixed step cannot cross a 0.02…12 range at a useful speed, and it
+// gives the same relative step at every scale.
+const OSINT_GRAPH_MIN_ZOOM = 0.02;
+const OSINT_GRAPH_MAX_ZOOM = 12;
+const OSINT_GRAPH_ZOOM_STEP = 1.25;
+// The wheel gets its own, much smaller step.
+//
+// The wheel was the core's own scroll zoom, and the core computes it as
+// `zoom * 10^delta`, where `delta` comes from the wheel event and is multiplied by
+// 33 in line mode. Firefox reports a notch as a few lines, so one notch of the
+// wheel was worth a factor of about 1.5–1.6 — the owner reported it as "50% and
+// very abrupt", and the number matches. Zooming by hand, about the pointer,
+// replaces it: 10% a notch is a scale a graph can be read at, where a notch and a
+// half is a jump past whatever the cursor was over.
+const OSINT_GRAPH_WHEEL_STEP = 1.1;
+
+// Whether the vendored library is actually here. A missing bundle must produce an
+// explicit message on the canvas, not a blank box and a thrown Error.
+osintGraphSvgRendererRegistered = typeof window.cytoscape === 'function';
+let osintTransformTimer = null;
+let osintTransformRunSequence = 0;
+// osintTransformJobId is the background transform the control buttons act on.
+// It is cleared when the transform is no longer in flight.
+let osintTransformJobId = null;
+// osintTransformStatus is the panel content the job poll reported last, so the
+// local elapsed timer can repaint the panel without inventing its own state.
+let osintTransformStatus = {state: 'idle', detail: '', options: {}};
+let decoderOutputStatus = '';
+let comparerMode = 'words';
+let pendingTargetMode = 'navigation';
+let targetMode = null;
+let targetModeReady = false;
+let currentScanner = null;
+let workflowItems = [];
+const workflowToolKinds = {
+  repeater: 'repeater',
+  target: 'target',
+  target_browser: 'target',
+  osint: 'osint',
+  scanner: 'scanner',
+  intruder: 'intruder',
+  decoder: 'decoder',
+  comparer: 'comparer',
+  ai_agent: 'ai'
+};
+let workflowCurrentId = null;
+let workflowNodes = [];
+let workflowConnections = [];
+let workflowSelectedNodeId = '';
+let workflowCurrentRun = null;
+let workflowRunTimer = null;
+let workflowRunSource = null;
+let workflowDrag = null;
+let workflowPendingConnection = null;
+let workflowDirty = false;
+const WORKFLOW_MIN_ZOOM = 0.2;
+const WORKFLOW_MAX_ZOOM = 2.5;
+const WORKFLOW_ZOOM_STEP = 1.25;
+const WORKFLOW_WHEEL_STEP = 1.1;
+let workflowZoom = 1;
+let workflowPanX = 0;
+let workflowPanY = 0;
+let workflowTemplates = [];
+let workflowTemplateSelectedId = '';
+let workflowTemplateSearch = '';
+let workflowTemplateCategory = '';
+let workflowTemplateExecution = '';
+let workflowTemplateRisk = '';
+let workflowTemplateScopeConfirmed = false;
+const workflowTemplateStorageKey = 'requestrider-workflow-templates-v1';
+let workflowCustomTemplates = [];
+let workflowPanning = null;
+let projectSocket = null;
+let projectWebSocketSupportPromise = null;
+let activeProjectId = document.body.dataset.activeProjectId || (() => {
+  try { return localStorage.getItem('requestrider-project') || ''; } catch (e) { return ''; }
+})();
+let projectItems = [];
+let lastEngineHealth = null;
+let lastProjectHubPayload = null;
+let lastOpenedFinding = null;
+
+function getStatusBadgeClass(status) {
+  const value = Number(status);
+  if (!Number.isFinite(value) || value === 0) {
+    return 'status-error';
+  }
+  if (value >= 100 && value < 200) {
+    return 'status-1xx';
+  }
+  if (value >= 200 && value < 300) {
+    return 'status-2xx';
+  }
+  if (value >= 300 && value < 400) {
+    return 'status-3xx';
+  }
+  if (value >= 400 && value < 500) {
+    return 'status-4xx';
+  }
+  if (value >= 500 && value < 600) {
+    return 'status-5xx';
+  }
+  return 'status-error';
+}
+
+function getMethodBadgeClass(method) {
+  const normalized = String(method || '').toUpperCase();
+  return `method-badge method-${normalized.toLowerCase()}`;
+}
+
+function formatUrlMarkup(urlText) {
+  const value = String(urlText || '').trim();
+  if (!value) {
+    return '<span class="url-dim">—</span>';
+  }
+  try {
+    const parsed = new URL(value);
+    const query = parsed.search ? `<span class="url-query">${escapeHTML(parsed.search)}</span>` : '';
+    const path = parsed.pathname ? `<span class="url-path">${escapeHTML(parsed.pathname)}</span>` : '<span class="url-path">/</span>';
+    return `<span class="url-dim">${escapeHTML(parsed.protocol)}//</span><span class="url-host">${escapeHTML(parsed.host)}</span>${path}${query}`;
+  } catch (error) {
+    return `<span class="url-fallback">${value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`;
+  }
+}
+
+function showToast(title, message, tone = 'info') {
+  const container = document.getElementById('toast-stack') || (() => {
+    const node = document.createElement('div');
+    node.id = 'toast-stack';
+    node.setAttribute('role', 'region');
+    node.setAttribute('aria-live', 'polite');
+    node.setAttribute('aria-label', 'Notifications');
+    document.body.appendChild(node);
+    return node;
+  })();
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${tone}`;
+  toast.setAttribute('role', 'status');
+  toast.innerHTML = `<button type="button" class="toast-close" aria-label="Close">✕</button><strong>${String(title || 'Notification').replace(/</g, '&lt;')}</strong><span>${String(message || '').replace(/</g, '&lt;')}</span>`;
+  const dismiss = () => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-4px)';
+    setTimeout(() => toast.remove(), 220);
+  };
+  const closeBtn = toast.querySelector('.toast-close');
+  if (closeBtn) closeBtn.addEventListener('click', dismiss);
+  container.appendChild(toast);
+  setTimeout(dismiss, 3500);
+}
+
+function projectWebSocketSupport() {
+  if (!projectWebSocketSupportPromise) {
+    projectWebSocketSupportPromise = fetch('/api/project-events/status', {
+      headers: {'Accept': 'application/json'}
+    }).then(response => {
+      if (!response.ok) throw new Error('project event capability unavailable');
+      return response.json();
+    }).then(payload => Boolean(payload.websocket)).catch(() => false);
+  }
+  return projectWebSocketSupportPromise;
+}
+
+async function connectProjectWebSocket(projectId) {
+  if (!projectId || String(projectId) !== String(activeProjectId)
+      || projectSocket && [WebSocket.OPEN, WebSocket.CONNECTING].includes(projectSocket.readyState)) {
+    return;
+  }
+  if (!await projectWebSocketSupport()
+      || String(projectId) !== String(activeProjectId)) {
+    return;
+  }
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const socketUrl = `${protocol}://${window.location.host}/ws/project/${encodeURIComponent(projectId)}/events`;
+  try {
+    projectSocket = new WebSocket(socketUrl);
+    projectSocket.addEventListener('open', () => {
+      showToast('Project live', 'Connected to the active project stream.', 'success');
+    });
+    projectSocket.addEventListener('message', (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        const title = payload.title || payload.type || 'Project event';
+        const message = payload.message || 'New project event received.';
+        showToast(title, message, payload.type === 'oast' ? 'warning' : 'info');
+      } catch (error) {
+        showToast('Project event', 'A live update was received.', 'info');
+      }
+    });
+    projectSocket.addEventListener('close', () => {
+      projectSocket = null;
+      if (String(projectId) === String(activeProjectId)) {
+        setTimeout(() => connectProjectWebSocket(projectId), 2500);
+      }
+    });
+  } catch (error) {
+    projectSocket = null;
+    setTimeout(() => connectProjectWebSocket(projectId), 3000);
+  }
+}
+
+function renderStatusBadge(status) {
+  const value = status === undefined || status === null || status === '' ? '—' : status;
+  const classes = getStatusBadgeClass(value);
+  // Both the attribute and the text position hold target-influenced data, so
+  // both go through escapeHTML: a status is not guaranteed to be numeric.
+  return `<span class="status-badge ${classes}" data-status="${escapeHTML(String(value))}">${escapeHTML(value)}</span>`;
+}
+
+function renderMethodBadge(method) {
+  // `method` is operator-supplied through the raw HTTP editor, so it is
+  // untrusted markup until escaped.
+  return `<span class="method-badge ${getMethodBadgeClass(method)}">${escapeHTML(String(method || 'GET').toUpperCase())}</span>`;
+}
+
+// History holds the requests the operator sent on purpose. A scan, a nuclei run
+// and an OSINT transform are routed through the recording proxy and filed under
+// a correlation context, so their rows read `proxy` like any other proxied
+// request — the name of the run is what tells them apart, and without it a
+// seventeen-request scan looks like ambient browsing.
+//
+// The stored values are the source names the gateway and the engine agreed on,
+// so the mapping is a lookup rather than a guess. An unknown value shows as
+// itself rather than being hidden: a new source must be visible before it is
+// labelled, and `tr()` falls back to the key rather than to an empty cell.
+const HISTORY_SOURCE_KEYS = {
+  repeater: 'history.source.repeater',
+  intruder: 'history.source.intruder',
+  'last-byte': 'history.source.lastByte',
+  proxy: 'history.source.proxy',
+  tool: 'history.source.tool',
+};
+
+function renderHistorySourceCell(item) {
+  const name = String(item.source || 'repeater');
+  const label = escapeHTML(tr(HISTORY_SOURCE_KEYS[name] || 'history.source.unknown'));
+  // A run name is stored text chosen by the gateway, so it is escaped on the
+  // way every other stored string is.
+  const run = String(item.capture_context_name || '').trim();
+  const runLine = run ? `<br><span class="muted" title="${escapeHTML(run)}">${escapeHTML(run)}</span>` : '';
+  return `<span class="chip" title="${escapeHTML(name)}">${label}</span>${runLine}`;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const projectId = document.body.dataset.activeProjectId || '';
+  if (projectId) {
+    connectProjectWebSocket(projectId);
+  }
+  // The transform registry is asked once here so the first right click on a node
+  // already has the engine's answer. Without it the menu is correct only from the
+  // second opening onwards, and the first one would have to say "registry
+  // unavailable" about a registry that was merely a few hundred milliseconds late.
+  loadOsintTransformCapabilities();
+  // Same reasoning for the Target runtime dropdown: which browsers this
+  // installation can start is an answer the worker already measured, and asking
+  // for it at load means the operator is told before choosing rather than after
+  // pressing Build map.
+  loadTargetBrowserAvailability();
+});
+
+let workflowNodeCatalog = [
+  {type: 'manual_trigger', label: 'Manual trigger', inputs: [], outputs: ['main'], defaults: {}},
+  {type: 'schedule_trigger', label: 'Schedule trigger', inputs: [], outputs: ['main'], defaults: {cron: '*/5 * * * *'}},
+  {type: 'webhook_trigger', label: 'Webhook trigger', inputs: [], outputs: ['main'], defaults: {method: 'POST'}},
+  {type: 'repeater', label: 'Repeater', inputs: ['main'], outputs: ['main'], defaults: {method: 'GET', url: '', headers: {}, body: ''}},
+  {type: 'repeater_burst', label: 'Repeater Burst', inputs: ['main'], outputs: ['main'], confirmation: true, defaults: {method: 'GET', url: '', headers: {}, iterations: 3, concurrency: 2, delay_ms: 0, timeout_ms: 0}},
+  {type: 'last_byte_sync', label: 'Last-Byte Sync', inputs: ['main'], outputs: ['main'], confirmation: true, defaults: {method: 'POST', url: '', headers: {}, body: '', iterations: 1, concurrency: 1, delay_ms: 0, hold_ms: 50, timeout_ms: 0}},
+  {type: 'target', label: 'Target map', inputs: ['main'], outputs: ['main'], defaults: {url: '', engine: 'static', max_pages: 0, max_depth: -1, delay_ms: 0, same_origin: false}},
+  {type: 'target_browser', label: 'Target browser', inputs: ['main'], outputs: ['main'], defaults: {url: '', browser: 'firefox', max_pages: 0, max_depth: -1, delay_ms: 0, same_origin: false, capture_context_id: '', actions: [], allow_state_changing_actions: false, auto_interact: false, auto_fill: true, auto_click: true}},
+  {type: 'oast_listener', label: 'OAST Listener', inputs: ['main'], outputs: ['main'], confirmation: true, defaults: {server_url: 'http://127.0.0.1:8766', listener_id: '', poll_interval_sec: 3, timeout_sec: 0, capture_protocols: ['http']}},
+  {type: 'oast_collect', label: 'OAST Collect', inputs: ['main'], outputs: ['main'], defaults: {poll_interval_sec: 1, timeout_sec: 0}},
+  {type: 'osint', label: 'OSINT', inputs: ['main'], outputs: ['main'], defaults: {url: '', waf_check: false}},
+  {type: 'scanner', label: 'Scanner', inputs: ['main'], outputs: ['main'], defaults: {url: '', profile: 'generic_web'}},
+  {type: 'intruder', label: 'Intruder', inputs: ['main'], outputs: ['main'], defaults: {base_request: {}, mode: 'sniper', payloads: [], transformations: [], delay_ms: 150, concurrency: 1}},
+  {type: 'decoder', label: 'Decoder', inputs: ['main'], outputs: ['main'], defaults: {operation: 'urlEncode'}},
+  {type: 'comparer', label: 'Comparer', inputs: ['main'], outputs: ['main'], defaults: {mode: 'words'}},
+  {type: 'condition', label: 'Condition', inputs: ['main'], outputs: ['true', 'false'], defaults: {field: 'status', operator: 'equals', value: ''}},
+  {type: 'merge', label: 'Merge', inputs: ['main'], outputs: ['main'], defaults: {}},
+  {type: 'set', label: 'Set values', inputs: ['main'], outputs: ['main'], defaults: {values: {}}},
+  {type: 'template', label: 'Template', inputs: ['main'], outputs: ['main'], defaults: {text: '{{input}}'}},
+  {type: 'delay', label: 'Delay', inputs: ['main'], outputs: ['main'], defaults: {seconds: 1}},
+  {type: 'ai_agent', label: 'AI Agent', inputs: ['main'], outputs: ['main'], defaults: {prompt: 'Analyze the attached QA evidence.', provider: 'ollama'}},
+  {type: 'output', label: 'Output', inputs: ['main'], outputs: [], defaults: {label: 'Result', format: 'json'}}
+];
+
+// WORKSPACE_SNAPSHOT_BYTES bounds one persisted workspace snapshot.
+const WORKSPACE_SNAPSHOT_BYTES = 2 * 1024 * 1024;
+const WORKSPACE_RESULT_ROWS = 200;
+const WORKSPACE_SCAN_FILE_ROWS = 2000;
