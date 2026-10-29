@@ -1,8 +1,10 @@
 <img width="2912" height="1440" alt="659528573-39bb8059-739c-46b5-83de-2cacfb0189d8" src="https://github.com/user-attachments/assets/5081f1a5-eb41-4dd6-a351-aea2117565eb" />
 <img width="1365" height="625" alt="Screenshot 2026-10-10 at 04-33-23 RequestRider" src="https://github.com/user-attachments/assets/0b4b59e4-fdac-4af4-b274-108986544556" />
 <img width="1365" height="500" alt="Screenshot 2026-10-14 at 16-30-39 RequestRider" src="https://github.com/user-attachments/assets/1f7e9407-86c5-4467-a1d5-849d027a549d" />
-<img width="1343" height="397" alt="Screenshot 2026-10-17 at 09-08-42 RequestRider" src="https://github.com/user-attachments/assets/cba2c912-a909-48c0-b0b7-a52cc036580c" />
-<img width="1365" height="592" alt="Screenshot 2026-10-17 at 09-03-14 RequestRider" src="https://github.com/user-attachments/assets/0ae75422-5665-4b69-9f3f-8cce1b17cc5d" />
+<img width="1355" height="470" alt="Screenshot 2026-10-28 at 18-58-03 RequestRider" src="https://github.com/user-attachments/assets/16489b55-ddae-40dd-b342-4f6829376b76" />
+
+
+<img width="1355" height="470" alt="Screenshot 2026-10-28 at 19-03-00 OWASP Juice Shop" src="https://github.com/user-attachments/assets/b1887f28-c188-437d-8e6f-3c1f5f683333" />
 
 # Request-Rider — Посібник користувача
 
