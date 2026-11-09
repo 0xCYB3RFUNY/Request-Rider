@@ -1,0 +1,400 @@
+const EXPORT_REPORT_CSS = `
+:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--panel-2:#0d141e;--line:#263548;--text:#dbe7f5;--muted:#8294aa;--accent:#43d9a3;--accent-strong:#62e8b5;--purple:#a970ff;--purple-strong:#c79aff;--orange:#f06b38;--green:#34d399;--danger:#f87171;--warning:#f59e0b;--info:#60a5fa;--button:#182333;--button-hover:#22344b;--radius:7px;--accent-tint:#43d9a314}
+*{box-sizing:border-box}
+html{min-height:100%;background:linear-gradient(180deg,#244b68 0,#162d43 38%,#080c12 78%);background-attachment:scroll}
+body{margin:0;padding:20px 22px 40px;color:var(--text);font:13px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+h2{margin:0 0 10px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.strong{font-weight:600}
+.dim{color:var(--muted);font-size:11px}
+pre{margin:3px 0 0;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:#0d1620;color:var(--text);font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.rr-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.rr-brand{display:inline-flex;align-items:center;gap:7px;font-weight:700;letter-spacing:.02em}
+.rr-logo{width:20px;height:20px;flex:none}
+.rr-title{padding:3px 10px;border:1px solid var(--line);border-radius:999px;background:#101b29;font-size:12px}
+.rr-target{color:var(--muted);font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-wrap:anywhere}
+.rr-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px;margin:14px 0 18px}
+.rr-card{display:flex;flex-direction:column;gap:5px;padding:9px 11px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel)}
+.rr-card-k{color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.rr-card-v{font-size:20px;font-weight:600;line-height:1.1}
+.rr-card-v.ok{color:var(--accent)}
+.rr-card-v.bad{color:var(--danger)}
+.rr-card-v.warn{color:var(--warning)}
+.rr-block{margin:0 0 20px}
+.rr-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:9px}
+.rr-tools input[type=search]{flex:1;min-width:220px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);color:var(--text);font:12px system-ui,sans-serif}
+.rr-tools input[type=search]:focus{outline:2px solid var(--purple);outline-offset:1px;border-color:var(--purple);box-shadow:0 0 0 1px rgba(169,112,255,.2)}
+.rr-tabs{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:7px;background:#0f1826}
+.rr-tabs button{padding:3px 11px;border:0;border-radius:5px;background:transparent;color:var(--muted);font:11px system-ui,sans-serif;cursor:pointer}
+.rr-tabs button:hover{color:var(--text)}
+.rr-tabs button.on{background:#16233a;color:var(--text)}
+.rr-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.rr-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.rr-table th{position:sticky;top:0;z-index:1;padding:7px 9px;border-bottom:1px solid var(--line);background:#141e2b;color:var(--muted);font-size:10px;letter-spacing:.06em;text-align:left;text-transform:uppercase;white-space:nowrap}
+.rr-table th[data-sort]{cursor:pointer;user-select:none}
+.rr-table th[data-sort]:hover{color:var(--text)}
+.rr-table th[data-sort]::after{content:" \\2195";opacity:.45}
+.rr-table th.asc::after{content:" \\2191";opacity:1}
+.rr-table th.desc::after{content:" \\2193";opacity:1}
+.rr-table td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+.rr-table tbody tr:hover{background:#172536}
+.rr-table tbody tr[hidden]{display:none}
+.rr-detail-row:hover{background:#0a121b}
+/* Deliberately no content-visibility on report table rows. It carries size
+   containment, and size containment does not apply to an internal table element:
+   an intrinsic size of 0 by 34px sets the intrinsic WIDTH to zero as well, so
+   every off-screen row rendered at width 0 and the report showed empty columns
+   once a folder was collapsed. A report of thousands of rows is already cheap
+   because each row's bulky output travels in an inert template, which is the
+   optimisation that actually pays; correct table layout is worth more than one
+   saved rendering pass. */
+.rr-reason{color:#f0b3a6;font-size:11px}
+.rr-match{margin-bottom:6px}
+.rr-match:last-child{margin-bottom:0}
+.rr-match-h{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+/* Template output can print thousands of lines for one file. It is never
+   truncated - the output is the evidence - but it scrolls inside its own frame
+   so a single verbose match cannot stretch the report past what a reader can
+   scroll. */
+.rr-match pre{max-height:52vh;overflow:auto}
+.rr-empty{margin:8px 0 0;color:var(--muted);font-size:12px}
+.rr-note{margin:0 0 9px;padding:6px 9px;border:1px solid var(--line);border-left-color:var(--warning);border-radius:6px;background:var(--panel-2);color:var(--warning);font-size:12px}
+/* A folder scan is reported per folder, exactly like the live table: the folder
+   path, the file count and the per-status counters, with the files below it. */
+.rr-folder-row{background:var(--panel-2)}
+.rr-folder-row:hover{background:#131d2a}
+.rr-folder-row td{border-bottom-color:var(--line)}
+.rr-folder-toggle{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:3px 9px 3px 5px;border:1px solid var(--line);border-radius:999px;background:#101b29;color:var(--text);font:600 11px system-ui,sans-serif;cursor:pointer}
+.rr-folder-toggle:hover{border-color:var(--purple);box-shadow:0 0 14px #a970ff55}
+.rr-folder-toggle:focus-visible{outline:2px solid var(--purple-strong);outline-offset:2px}
+.rr-folder-caret{width:12px;height:12px;flex:none;color:var(--muted)}
+.rr-folder-row[aria-expanded="true"] .rr-folder-caret{color:var(--accent)}
+.rr-folder-row[aria-expanded="true"] .rr-folder-caret path{transform:rotate(90deg);transform-origin:50% 50%}
+.rr-folder-icon{width:14px;height:14px;flex:none;color:var(--accent)}
+.rr-folder-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+.rr-folder-count{flex:none;min-width:26px;padding:1px 7px;border-radius:999px;background:#16233a;color:var(--accent);font-size:10px;font-weight:700;text-align:center}
+.rr-group-counts{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+/* Response class chips. An exchange with no status is an error, not a 0: it never
+   produced an HTTP response, and the report must not imply one did. */
+.st-2xx{background:rgba(47,125,99,.2);border-color:#2f7d63;color:var(--accent)}
+.st-3xx{background:rgba(96,165,250,.14);border-color:rgba(96,165,250,.4);color:#93c5fd}
+.st-4xx{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.36);color:#fbbf24}
+.st-5xx{background:rgba(240,107,56,.12);border-color:rgba(240,107,56,.4);color:#f6a07a}
+.st-error{background:#2a1518;border-color:#8a3a3a;color:#f0908f}
+/* The expander column of a result table. It is a real button so the report stays
+   keyboard-operable: Enter and Space open the exchange, and the caret turns with
+   the row instead of relying on colour alone. */
+.rr-toggle{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:2px 9px 2px 6px;border:1px solid var(--line);border-radius:999px;background:var(--button);color:var(--text);font:600 11px system-ui,sans-serif;cursor:pointer;transition:background .15s ease,border-color .15s ease,box-shadow .15s ease}
+.rr-toggle:hover{border-color:var(--purple);box-shadow:0 0 14px #a970ff55}
+.rr-toggle:focus-visible{outline:2px solid var(--purple-strong);outline-offset:2px}
+.rr-toggle-caret{width:11px;height:11px;flex:none;color:var(--muted)}
+.rr-toggle[aria-expanded="true"] .rr-toggle-caret{color:var(--accent)}
+.rr-toggle[aria-expanded="true"] .rr-toggle-caret path{transform:rotate(90deg);transform-origin:50% 50%}
+/* The raw exchange row. It carries the complete request and response, so it is
+   the reason a result row is expandable at all rather than a truncated cell.
+   The exchange itself arrives in an inert template and is cloned in on the first
+   open, so a report with thousands of results does not build thousands of
+   rendered text nodes before anyone has looked at one. */
+.rr-detail-row td{padding:0;border-bottom:1px solid var(--line);background:#0a121b}
+.rr-detail-row[hidden]{display:none}
+.rr-detail{padding:10px 11px}
+.rr-detail-h{margin:0 0 5px;color:var(--muted);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+/* A response body runs to tens of thousands of lines often enough. It is never
+   truncated - the whole exchange is the evidence - but it scrolls inside its own
+   frame, so one huge row cannot stretch the page to a million pixels and make
+   every other result unreachable. */
+.rr-detail pre{margin-bottom:9px;max-height:60vh;overflow:auto}
+.rr-detail pre:last-child{margin-bottom:0}
+.rr-detail[hidden]{display:none}
+/* A key/value list, used for project metadata and evidence detail that is a set
+   of named facts rather than a raw HTTP message. */
+.rr-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px}
+.rr-kv-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.rr-kv-k{color:var(--muted);font-size:11px}
+.rr-kv-v{min-width:0;text-align:right;font-size:11px;overflow-wrap:anywhere}
+.rr-mt{margin-top:9px}
+.sev-critical{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.4);color:#fb7185}
+.sev-high{background:rgba(240,107,56,.12);border-color:rgba(240,107,56,.4);color:#f6a07a}
+.sev-medium{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.36);color:#fbbf24}
+.sev-low{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.36);color:#60a5fa}
+.sev-info,.sev-unknown{background:rgba(130,148,170,.12);border-color:rgba(130,148,170,.34);color:#a9b8ca}
+.st-matched{background:rgba(47,125,99,.2);border-color:#2f7d63;color:#5fd6ab}
+.st-muted{background:#131c29;color:var(--muted)}
+.st-norequest{background:#141b26;border-color:#3a4a63;color:#9fb0c6;font-style:italic}
+.st-skipped{background:var(--panel-2);border-color:var(--warning);color:var(--warning)}
+.st-invalid{background:#2a1518;border-color:#8a3a3a;color:#f0908f}
+.st-duplicate{background:#1d1a14;border-color:#4a4436;color:#c8b48a}
+.st-workflow{background:#161a24;border-color:#3d4a66;color:#a9bcd8}
+.st-flow{background:#1a1428;border-color:#4a3a6b;color:#b79ce8}
+.st-uncompiled{background:#141821;border-color:#3f4a5c;color:#8fa2bb;font-style:italic}
+.rr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:7px}
+.rr-stat{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.rr-stat-k{color:var(--muted);font-size:11px}
+.rr-stat-v{overflow-wrap:anywhere;font-size:11px}
+.st-crit{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.5);color:#fca5a5}
+.st-high{background:rgba(249,115,22,.18);border-color:rgba(249,115,22,.5);color:#fdba74}
+.st-med{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.5);color:#fde047}
+.st-low{background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.5);color:#93c5fd}
+.st-info{background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.4);color:#cbd5e1}
+.rr-head-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.rr-btn-action{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:6px;background:var(--button);color:var(--text);font:11px system-ui,sans-serif;cursor:pointer;text-decoration:none}
+.rr-btn-action:hover{background:var(--button-hover);border-color:var(--accent)}
+.rr-posture-badge{display:flex;align-items:center;gap:12px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(16,24,38,.8)}
+.rr-grade{font-size:26px;font-weight:900;line-height:1}
+.rr-posture-info{display:flex;flex-direction:column}
+.rr-posture-lbl{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.06em}
+.rr-posture-score{font-size:13px;font-weight:700}
+.rr-sev-bar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.rr-finding-item{border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:8px;overflow:hidden}
+.rr-finding-head{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;background:var(--panel);user-select:none}
+.rr-finding-head:hover{background:#162338}
+.rr-finding-head .rr-caret{width:10px;height:10px;color:var(--muted);transition:transform .15s ease;flex:none}
+.rr-finding-item.open .rr-finding-head .rr-caret{transform:rotate(90deg);color:var(--accent)}
+.rr-finding-title{font-size:12px;font-weight:600;flex:1}
+.rr-finding-content{display:none;padding:12px 14px;border-top:1px solid var(--line);background:var(--panel-2)}
+.rr-finding-item.open .rr-finding-content{display:block}
+.rr-finding-desc{font-size:12px;color:#cbd5e1;line-height:1.5;margin-bottom:8px}
+.rr-finding-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+.rr-finding-rem{padding:8px 12px;border-radius:6px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);color:#a7f3d0;font-size:11px;line-height:1.45;margin-top:8px}
+.rr-foot{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+@media (max-width:720px){body{padding:14px 12px 30px}.rr-card-v{font-size:17px}}
+`;
+
+// EXPORT_REPORT_BRAND is the report masthead, shared by every exported report so
+// a Scanner, Intruder or Project document carries the same mark as the tool that
+// produced it. The mark is the application logo verbatim - the same hexagon, the
+// same green outline and the same violet tick as the header of the app - because
+// an export that wears a different icon reads as somebody else's document.
+//
+// It is a decorative SVG: the brand name sits right next to it, so the mark is
+// hidden from assistive technology rather than announced twice.
+const EXPORT_REPORT_BRAND = '<div class="rr-brand"><svg class="rr-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M32 8 54 20v24L32 56 10 44V20z" fill="none" stroke="#43d9a3" stroke-width="5"/><path d="m22 32 7 7 14-16" fill="none" stroke="#a970ff" stroke-width="5"/></svg><span>RequestRider</span></div>';
+
+// EXPORT_REPORT_JS is the exported report behaviour shared by every exported
+// report: live search, status filter, sortable columns, folder collapse and
+// expandable raw exchanges over the already-rendered rows. It reads only data-*
+// attributes and never injects markup from a value. Folder rows are the report's
+// structure, not just another row: sorting reorders files inside their own
+// folder, and a folder is on screen exactly while one of its files is.
+const EXPORT_REPORT_JS = `
+(function(){
+  var collapsed={};
+  // Which detail rows the reader has opened. A detail row carries the full raw
+  // exchange, so it starts collapsed and stays collapsed across filtering and
+  // sorting: a filter must not silently reveal evidence nobody asked to see.
+  var expanded={};
+  // The raw exchange of a row travels in an inert <template>. Its content is
+  // parsed but never rendered, so a report with thousands of results costs one
+  // node per row instead of one laid-out text block per result. The clone happens
+  // once, on the first open, and the template is then removed so the document
+  // does not hold the exchange twice.
+  function materialiseDetail(target){
+    var source=target.querySelector('template[data-rr-payload]');
+    if(!source) return;
+    // The wrapper is normally part of the template payload, so it does not exist
+    // in the row yet. Building it here is what keeps the exchange from being
+    // dropped: the template is removed right after, so a failed host would take
+    // the evidence with it.
+    var host=target.querySelector('.rr-detail');
+    if(!host){
+      host=document.createElement('div');
+      host.className='rr-detail';
+      source.parentNode.appendChild(host);
+    }
+    host.appendChild(source.content.cloneNode(true));
+    source.remove();
+  }
+  function refreshDetailRows(){
+    [].slice.call(document.querySelectorAll('[data-detail-for]')).forEach(function(row){
+      var owner=document.getElementById(row.getAttribute('data-detail-for'));
+      row.hidden=!expanded[row.id]||!owner||owner.hidden;
+    });
+  }
+  var tables=[].slice.call(document.querySelectorAll('.rr-table'));
+  tables.forEach(function(table){
+    var body=table.tBodies[0];
+    if(!body) return;
+    var headers=[].slice.call(table.querySelectorAll('th[data-sort]'));
+    headers.forEach(function(th){
+      th.addEventListener('click',function(){
+        var key=th.getAttribute('data-sort');
+        var index=[].indexOf.call(th.parentNode.children,th);
+        var next=th.classList.contains('asc')?'desc':'asc';
+        headers.forEach(function(other){other.classList.remove('asc','desc')});
+        th.classList.add(next);
+        var direction=next==='asc'?1:-1;
+        var value=function(row){
+          var cell=row.cells[index];
+          if(!cell) return '';
+          return (cell.getAttribute('data-'+key)||cell.textContent||'').trim().toLowerCase();
+        };
+        var compare=function(a,b){
+          var av=value(a), bv=value(b);
+          if(av<bv) return -1*direction;
+          if(av>bv) return 1*direction;
+          return 0;
+        };
+        if(table.getAttribute('data-grouped')==='1'){
+          // Files are reordered among the slots their own folder already holds,
+          // so a folder's files stay together and the folder rows stay put.
+          var groups={};
+          [].slice.call(body.rows).forEach(function(row){
+            var folder=row.getAttribute('data-folder');
+            if(row.getAttribute('data-kind')==='group'||folder===null) return;
+            (groups[folder]=groups[folder]||[]).push(row);
+          });
+          Object.keys(groups).forEach(function(folder){
+            var slots=groups[folder];
+            slots.slice().sort(compare).forEach(function(row,at){
+              slots[at].parentNode.insertBefore(row,slots[at]);
+            });
+          });
+          return;
+        }
+        // A detail row belongs to the exchange above it, so the pair is compared
+        // as one unit: sorting the exchanges moves each raw request and response
+        // together with the row it belongs to instead of detaching it.
+        var rows=[].slice.call(body.rows);
+        rows.sort(function(a,b){
+          var left=a.getAttribute('data-detail-for')?a.previousElementSibling:a;
+          var right=b.getAttribute('data-detail-for')?b.previousElementSibling:b;
+          var order=compare(left,right);
+          if(order!==0) return order;
+          if(left===a) return -1;
+          return 1;
+        });
+        rows.forEach(function(row){body.appendChild(row)});
+      });
+    });
+  });
+  // An expandable row keeps its raw exchange in a sibling row, so the control is
+  // a real button with aria-expanded instead of a click handler on the row: the
+  // report stays operable from the keyboard alone. The data-rr-detail attribute
+  // marks the row a report wants open from the start, such as the first exchange.
+  [].slice.call(document.querySelectorAll('[data-rr-detail]')).forEach(function(button){
+    var target=document.getElementById(button.getAttribute('data-rr-detail'));
+    if(!target) return;
+    materialiseDetail(target);
+    expanded[target.id]=true;
+    button.setAttribute('aria-expanded','true');
+  });
+  [].slice.call(document.querySelectorAll('[data-rr-toggle]')).forEach(function(button){
+    button.addEventListener('click',function(){
+      var target=document.getElementById(button.getAttribute('data-rr-toggle'));
+      if(!target) return;
+      var open=!expanded[target.id];
+      if(open) materialiseDetail(target);
+      expanded[target.id]=open;
+      button.setAttribute('aria-expanded',String(open));
+      refreshDetailRows();
+    });
+  });
+  // Evidence that belongs inside one table cell rather than in its own row, such
+  // as the matcher output of a scanned template, uses the same inert template and
+  // the same button. Keeping it inert is what lets a report of thousands of files
+  // open at all: the evidence is still in the document, and it is still in the
+  // row that owns it, but it costs nothing until someone reads it.
+  [].slice.call(document.querySelectorAll('[data-rr-payload-toggle]')).forEach(function(button){
+    button.addEventListener('click',function(){
+      var cell=button.closest('td,th');
+      if(!cell) return;
+      var source=cell.querySelector('template[data-rr-payload]');
+      if(!source) return;
+      source.parentNode.appendChild(source.content.cloneNode(true));
+      source.remove();
+      button.remove();
+    });
+  });
+  refreshDetailRows();
+  // Search and status tabs are wired per block, not per document, so a report
+  // with several tables gives each one its own filter instead of one box that
+  // silently narrows a single section. A block opts in by carrying a search
+  // input marked with data-rr-search.
+  var blocks=[].slice.call(document.querySelectorAll('.rr-block'));
+  blocks.forEach(function(block){
+    var search=block.querySelector('[data-rr-search]');
+    if(!search) return;
+    var rows=[].slice.call(block.querySelectorAll('tbody tr'));
+    var groups=rows.filter(function(row){return row.getAttribute('data-kind')==='group'});
+    var empty=block.querySelector('.rr-empty');
+    var tabs=[].slice.call(block.querySelectorAll('.rr-tabs button'));
+    var active='all';
+    function apply(){
+      var needle=search.value.trim().toLowerCase();
+      var shown=0;
+      var matchedFolders={};
+      // While a filter is active the folders stand aside: a file the filter
+      // matched is shown even inside a folder the operator had collapsed, because
+      // reporting "no match" for a file that does match would be a false answer.
+      var filtering=active!=='all'||needle!=='';
+      rows.forEach(function(row){
+        if(row.getAttribute('data-kind')==='group') return;
+        // A detail row is never counted or filtered on its own: it exists only
+        // while the exchange above it is on screen.
+        if(row.getAttribute('data-detail-for')) return;
+        var folder=row.getAttribute('data-folder');
+        var okStatus=active==='all'
+          ||(active==='match'?row.getAttribute('data-match')==='1':row.getAttribute('data-status')===active);
+        var okText=!needle||(row.getAttribute('data-hay')||'').indexOf(needle)>-1;
+        // A collapsed folder is a closed disclosure, not an empty result: it stops
+        // showing its files without removing itself.
+        var show=okStatus&&okText&&(filtering||!folder||!collapsed[folder]);
+        row.hidden=!show;
+        if(okStatus&&okText){
+          shown+=1;
+          matchedFolders[folder]=true;
+        }
+      });
+      groups.forEach(function(row){
+        var folder=row.getAttribute('data-folder');
+        // A folder row only leaves the screen when the filter itself matched none
+        // of its files. Closing a folder keeps it on screen with a closed caret and
+        // its own file count, which is what makes a collapse read as "folded
+        // away" rather than as results that were lost.
+        row.hidden=filtering&&matchedFolders[folder]!==true;
+      });
+      refreshDetailRows();
+      if(empty) empty.hidden=shown!==0;
+    }
+    groups.forEach(function(row){
+      var button=row.querySelector('[data-folder-toggle]');
+      if(!button) return;
+      button.addEventListener('click',function(){
+        var folder=row.getAttribute('data-folder');
+        collapsed[folder]=!collapsed[folder];
+        var open=!collapsed[folder];
+        // The row and the control both carry the state: the row drives the caret
+        // in CSS, and the control is what assistive technology announces. A button
+        // still saying "expanded" while its folder is closed is a lie, and a
+        // static label that still says "hide" is a second one.
+        row.setAttribute('aria-expanded',String(open));
+        button.setAttribute('aria-expanded',String(open));
+        var label=button.getAttribute(open?'data-folder-hide':'data-folder-show');
+        if(label) button.setAttribute('aria-label',label);
+        apply();
+      });
+    });
+    tabs.forEach(function(tab){
+      tab.addEventListener('click',function(){
+        active=tab.getAttribute('data-filter');
+        tabs.forEach(function(other){
+          var on=other===tab;
+          other.classList.toggle('on',on);
+          other.setAttribute('aria-selected',String(on));
+        });
+        apply();
+      });
+    });
+    var searchTimer = null;
+    function applyDebounced() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(apply, 150);
+    }
+    search.addEventListener('input', applyDebounced);
+    if ((search.value && search.value.trim() !== '') || active !== 'all') {
+      apply();
+    }
+  });
+})();
+`;

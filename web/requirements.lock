@@ -1,0 +1,30 @@
+# Pinned dependency record for web/ — generated from the running venv, not hand-written.
+# Regenerate after any deliberate upgrade, on the same interpreter family:
+#   web/.venv/bin/pip freeze | grep -viE '^(pip|setuptools|wheel|pkg-resources|distribute)==' > web/requirements.lock
+# requirements.txt stays the human-maintained input (ranges); this file is what fresh
+# installs resolve to, so two checkouts install the same tree. Hashes (--require-hashes)
+# are a follow-up: generating them needs the full wheel set from PyPI.
+
+amqp==5.4.0
+asgiref==3.12.1
+billiard==4.3.0
+celery==5.6.3
+click==8.5.0
+click-didyoumean==0.3.1
+click-plugins==1.1.1.2
+click-repl==0.4.0
+Django==5.2.17
+kombu==5.6.2
+packaging==26.3
+prompt_toolkit==3.0.53
+psycopg==3.3.6
+psycopg-binary==3.3.6
+python-dateutil==2.9.0.post0
+redis==6.4.0
+six==1.17.0
+sqlparse==0.6.0
+typing_extensions==4.16.0
+tzdata==2026.4
+tzlocal==5.4.4
+vine==5.1.0
+wcwidth==0.9.1

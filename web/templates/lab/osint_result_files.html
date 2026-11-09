@@ -1,0 +1,58 @@
+{% load osint_report %}<!doctype html>
+<html lang="{{ language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% tr "result_files" %} · RequestRider</title>
+{% include "lab/_report_base.html" %}
+</head>
+<body>
+{% include "lab/_report_brand.html" with brand_title=t_result_files brand_subtitle=graph.name %}
+<main>
+  <div class="rr-stats">
+    <span class="rr-stat"><b class="ok">{{ rows_total|intcomma }}</b>{% tr "rows_in_total" %}</span>
+    <span class="rr-stat"><b>{{ files|length }}</b>{% if files|length == 1 %}{% tr "file" %}{% else %}{% tr "files" %}{% endif %}</span>
+    <span class="rr-lang">
+      <a class="rr-btn" href="?lang={{ other_language }}" aria-label="{% tr 'switch_language' %}">{{ other_language_label }}</a>
+    </span>
+  </div>
+
+  <section class="rr-block grow">
+    {% if files %}
+    <div class="rr-scroll">
+      <table class="rr-table">
+        <thead>
+          <tr>
+            <th scope="col">{% tr "file" %}</th>
+            <th scope="col">{% tr "format" %}</th>
+            <th scope="col">{% tr "rows" %}</th>
+            <th scope="col">{% tr "on_disk" %}</th>
+            <th scope="col">{% tr "modified" %}</th>
+            <th scope="col">{% tr "actions" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in files %}
+          <tr>
+            <td><a class="rr-id" href="{{ item.name|urlencode }}">{{ item.name }}</a></td>
+            <td><span class="rr-tag">{{ item.kind }}</span></td>
+            <td class="rr-num">{{ item.rows|intcomma }}</td>
+            <td class="rr-num">{{ item.bytes|filesizeformat }}</td>
+            <td class="rr-num">{{ item.modified_text }}</td>
+            <td>
+              <a class="rr-btn" href="{{ item.name|urlencode }}">{% tr "view" %}</a>
+              <a class="rr-btn" href="{{ item.name|urlencode }}?raw=1" target="_blank" rel="noopener">{% tr "raw" %}</a>
+              <a class="rr-btn" href="{{ item.name|urlencode }}?download=1">{% tr "download" %}</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="rr-note">{% tr "no_files_yet" %}</p>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>

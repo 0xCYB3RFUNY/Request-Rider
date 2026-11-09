@@ -1,0 +1,1237 @@
+{
+  "generated_by": "committed upstream capability snapshot",
+  "upstreams": {
+    "chm0dx/creepyCrawler": {
+      "capabilities": [
+        {
+          "id": "internal:manage_fp",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:prepare_fireprox_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:precheck_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:postcheck_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:url_from_link",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:precheck_response",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:crawler",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:process_robots",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:process_sitemap",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:watcher",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:crawl",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "internal:CreepyCrawler",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:manage_fp",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:prepare_fireprox_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:precheck_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:postcheck_url",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:url_from_link",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:precheck_response",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:crawler",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:process_robots",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:process_sitemap",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:watcher",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:crawl",
+          "note": "",
+          "where": "creepyCrawler.py"
+        },
+        {
+          "id": "func:CreepyCrawler",
+          "note": "",
+          "where": "creepyCrawler.py"
+        }
+      ],
+      "capability_count": 24,
+      "checkout_head": "e17474c1e008b20c4129e3f3ae31315ddec5be8f",
+      "commit_matches": true,
+      "extractor": "pyfuncs",
+      "license": "GPL-3.0",
+      "pinned_commit": "e17474c1e008b20c4129e3f3ae31315ddec5be8f",
+      "public_capability_count": 12,
+      "url": "https://github.com/chm0dx/creepyCrawler"
+    },
+    "edoardottt/cariddi": {
+      "capabilities": [
+        {
+          "id": "func:CheckOutputFile",
+          "note": "",
+          "where": "pkg/input/check.go"
+        },
+        {
+          "id": "func:CheckFlags",
+          "note": "",
+          "where": "pkg/input/check.go"
+        },
+        {
+          "id": "func:ScanFlag",
+          "note": "",
+          "where": "pkg/input/flags.go"
+        },
+        {
+          "id": "func:ScanTargets",
+          "note": "",
+          "where": "pkg/input/input.go"
+        },
+        {
+          "id": "func:GetHeaders",
+          "note": "",
+          "where": "pkg/input/input.go"
+        },
+        {
+          "id": "func:String",
+          "note": "",
+          "where": "pkg/input/stringslice.go"
+        },
+        {
+          "id": "func:Set",
+          "note": "",
+          "where": "pkg/input/stringslice.go"
+        },
+        {
+          "id": "func:Banner",
+          "note": "",
+          "where": "pkg/output/banner.go"
+        },
+        {
+          "id": "func:EncapsulateGreen",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:EncapsulateRed",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:EncapsulateYellow",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:EncapsulateCustomGreen",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:EncapsulateCustomRed",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:EncapsulateCustomYellow",
+          "note": "",
+          "where": "pkg/output/color.go"
+        },
+        {
+          "id": "func:PrintExamples",
+          "note": "",
+          "where": "pkg/output/examples.go"
+        },
+        {
+          "id": "func:PrintHelp",
+          "note": "",
+          "where": "pkg/output/help.go"
+        },
+        {
+          "id": "func:BannerHTML",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:WriteSummaryCard",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:AppendOutputToHTML",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:HeaderHTML",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:FooterHTML",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:BannerFooterHTML",
+          "note": "",
+          "where": "pkg/output/html.go"
+        },
+        {
+          "id": "func:GetJSONString",
+          "note": "",
+          "where": "pkg/output/jsonl.go"
+        },
+        {
+          "id": "func:TestJSONOutput",
+          "note": "",
+          "where": "pkg/output/jsonl_test.go"
+        },
+        {
+          "id": "func:hasValidExtensionFlag",
+          "note": "",
+          "where": "pkg/output/output.go"
+        },
+        {
+          "id": "func:PrintSimpleOutput",
+          "note": "",
+          "where": "pkg/output/output.go"
+        },
+        {
+          "id": "func:TxtOutput",
+          "note": "",
+          "where": "pkg/output/output.go"
+        },
+        {
+          "id": "func:HTMLOutput",
+          "note": "",
+          "where": "pkg/output/output.go"
+        },
+        {
+          "id": "func:getResponseHash",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:FormatResponse",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:getResponseFileName",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:UpdateIndex",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:WriteHTTPResponse",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:StoreHTTPResponse",
+          "note": "",
+          "where": "pkg/output/responses.go"
+        },
+        {
+          "id": "func:AppendOutputToTxt",
+          "note": "",
+          "where": "pkg/output/txt.go"
+        },
+        {
+          "id": "func:WriteAllTxt",
+          "note": "",
+          "where": "pkg/output/txt.go"
+        }
+      ],
+      "capability_count": 36,
+      "checkout_head": "5ae392d2f064bc6e3a59ed999e337c4a03f4e9e4",
+      "commit_matches": true,
+      "extractor": "gofuncs",
+      "license": "GPL-3.0",
+      "pinned_commit": "5ae392d2f064bc6e3a59ed999e337c4a03f4e9e4",
+      "public_capability_count": 36,
+      "url": "https://github.com/edoardottt/cariddi"
+    },
+    "praetorian-inc/titus": {
+      "capabilities": [
+        {
+          "id": "rule-set:316-files-539-rules",
+          "note": "",
+          "where": "pkg/rule/rules"
+        }
+      ],
+      "capability_count": 1,
+      "checkout_head": "510c4076c81c17d73f254bdadaeb5286b3ec7dc3",
+      "commit_matches": true,
+      "extractor": "titus",
+      "license": "AGPL-3.0",
+      "pinned_commit": "510c4076c81c17d73f254bdadaeb5286b3ec7dc3",
+      "public_capability_count": 1,
+      "url": "https://github.com/praetorian-inc/titus"
+    },
+    "s0md3v/Bolt": {
+      "capabilities": [
+        {
+          "id": "internal:banner",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "internal:fuzzy",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "internal:staticParts",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "internal:extractForms",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "internal:datanize",
+          "note": "",
+          "where": "core/datanize.py"
+        },
+        {
+          "id": "internal:sumi",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:su",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:sus",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:sq",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:logo",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:pr",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:stringpart",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:randgen",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:monobitfrequencytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:blockfrequencytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:runstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:longestrunones8",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:longestrunones128",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:longestrunones10000",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:spectraltest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:nonoverlappingtemplatematchingtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:occurances",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:overlappingtemplatematchingtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:maurersuniversalstatistictest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:lempelzivcompressiontest1",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:serialtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:cumultativesumstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:cumultativesumstestreverse",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:pik",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:randomexcursionstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:getfreq",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:randomexcursionsvarianttest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:aproximateentropytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:matrank",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:mrank",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:proc",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:binarymatrixranktest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:lincomplex",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:linearcomplexitytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:isRandom",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:adder",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "internal:evaluate",
+          "note": "",
+          "where": "core/evaluate.py"
+        },
+        {
+          "id": "internal:photon",
+          "note": "",
+          "where": "core/photon.py"
+        },
+        {
+          "id": "internal:rec",
+          "note": "",
+          "where": "core/photon.py"
+        },
+        {
+          "id": "internal:prompt",
+          "note": "",
+          "where": "core/prompt.py"
+        },
+        {
+          "id": "internal:ranger",
+          "note": "",
+          "where": "core/ranger.py"
+        },
+        {
+          "id": "internal:requester",
+          "note": "",
+          "where": "core/requester.py"
+        },
+        {
+          "id": "internal:tweaker",
+          "note": "",
+          "where": "core/tweaker.py"
+        },
+        {
+          "id": "internal:longestCommonSubstring",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:stringToBinary",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:strength",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:isProtected",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:extractHeaders",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:getUrl",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:getParams",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:remove_file",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "internal:zetanize",
+          "note": "",
+          "where": "core/zetanize.py"
+        },
+        {
+          "id": "internal:e",
+          "note": "",
+          "where": "core/zetanize.py"
+        },
+        {
+          "id": "internal:d",
+          "note": "",
+          "where": "core/zetanize.py"
+        },
+        {
+          "id": "func:banner",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "func:fuzzy",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "func:staticParts",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "func:extractForms",
+          "note": "",
+          "where": "bolt.py"
+        },
+        {
+          "id": "func:datanize",
+          "note": "",
+          "where": "core/datanize.py"
+        },
+        {
+          "id": "func:sumi",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:su",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:sus",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:sq",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:logo",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:pr",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:stringpart",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:randgen",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:monobitfrequencytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:blockfrequencytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:runstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:longestrunones8",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:longestrunones128",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:longestrunones10000",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:spectraltest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:nonoverlappingtemplatematchingtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:occurances",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:overlappingtemplatematchingtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:maurersuniversalstatistictest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:lempelzivcompressiontest1",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:serialtest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:cumultativesumstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:cumultativesumstestreverse",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:pik",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:randomexcursionstest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:getfreq",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:randomexcursionsvarianttest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:aproximateentropytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:matrank",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:mrank",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:proc",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:binarymatrixranktest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:lincomplex",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:linearcomplexitytest",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:isRandom",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:adder",
+          "note": "",
+          "where": "core/entropy.py"
+        },
+        {
+          "id": "func:evaluate",
+          "note": "",
+          "where": "core/evaluate.py"
+        },
+        {
+          "id": "func:photon",
+          "note": "",
+          "where": "core/photon.py"
+        },
+        {
+          "id": "func:rec",
+          "note": "",
+          "where": "core/photon.py"
+        },
+        {
+          "id": "func:prompt",
+          "note": "",
+          "where": "core/prompt.py"
+        },
+        {
+          "id": "func:ranger",
+          "note": "",
+          "where": "core/ranger.py"
+        },
+        {
+          "id": "func:requester",
+          "note": "",
+          "where": "core/requester.py"
+        },
+        {
+          "id": "func:tweaker",
+          "note": "",
+          "where": "core/tweaker.py"
+        },
+        {
+          "id": "func:longestCommonSubstring",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:stringToBinary",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:strength",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:isProtected",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:extractHeaders",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:getUrl",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:getParams",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:remove_file",
+          "note": "",
+          "where": "core/utils.py"
+        },
+        {
+          "id": "func:zetanize",
+          "note": "",
+          "where": "core/zetanize.py"
+        },
+        {
+          "id": "func:e",
+          "note": "",
+          "where": "core/zetanize.py"
+        },
+        {
+          "id": "func:d",
+          "note": "",
+          "where": "core/zetanize.py"
+        }
+      ],
+      "capability_count": 118,
+      "checkout_head": "37aa096db93e026f0524fe94c67dc1dae8985f3e",
+      "commit_matches": true,
+      "extractor": "pyfuncs",
+      "license": "MIT",
+      "pinned_commit": "37aa096db93e026f0524fe94c67dc1dae8985f3e",
+      "public_capability_count": 59,
+      "url": "https://github.com/s0md3v/Bolt"
+    },
+    "tomnomnom/gf": {
+      "capabilities": [
+        {
+          "id": "pattern-set:aws-keys",
+          "note": "",
+          "where": "examples/aws-keys.json"
+        },
+        {
+          "id": "pattern-set:base64",
+          "note": "",
+          "where": "examples/base64.json"
+        },
+        {
+          "id": "pattern-set:cors",
+          "note": "",
+          "where": "examples/cors.json"
+        },
+        {
+          "id": "pattern-set:debug-pages",
+          "note": "",
+          "where": "examples/debug-pages.json"
+        },
+        {
+          "id": "pattern-set:firebase",
+          "note": "",
+          "where": "examples/firebase.json"
+        },
+        {
+          "id": "pattern-set:fw",
+          "note": "",
+          "where": "examples/fw.json"
+        },
+        {
+          "id": "pattern-set:go-functions",
+          "note": "",
+          "where": "examples/go-functions.json"
+        },
+        {
+          "id": "pattern-set:http-auth",
+          "note": "",
+          "where": "examples/http-auth.json"
+        },
+        {
+          "id": "pattern-set:ip",
+          "note": "",
+          "where": "examples/ip.json"
+        },
+        {
+          "id": "pattern-set:json-sec",
+          "note": "",
+          "where": "examples/json-sec.json"
+        },
+        {
+          "id": "pattern-set:meg-headers",
+          "note": "",
+          "where": "examples/meg-headers.json"
+        },
+        {
+          "id": "pattern-set:php-curl",
+          "note": "",
+          "where": "examples/php-curl.json"
+        },
+        {
+          "id": "pattern-set:php-errors",
+          "note": "",
+          "where": "examples/php-errors.json"
+        },
+        {
+          "id": "pattern-set:php-serialized",
+          "note": "",
+          "where": "examples/php-serialized.json"
+        },
+        {
+          "id": "pattern-set:php-sinks",
+          "note": "",
+          "where": "examples/php-sinks.json"
+        },
+        {
+          "id": "pattern-set:php-sources",
+          "note": "",
+          "where": "examples/php-sources.json"
+        },
+        {
+          "id": "pattern-set:s3-buckets",
+          "note": "",
+          "where": "examples/s3-buckets.json"
+        },
+        {
+          "id": "pattern-set:sec",
+          "note": "",
+          "where": "examples/sec.json"
+        },
+        {
+          "id": "pattern-set:servers",
+          "note": "",
+          "where": "examples/servers.json"
+        },
+        {
+          "id": "pattern-set:strings",
+          "note": "",
+          "where": "examples/strings.json"
+        },
+        {
+          "id": "pattern-set:takeovers",
+          "note": "",
+          "where": "examples/takeovers.json"
+        },
+        {
+          "id": "pattern-set:upload-fields",
+          "note": "",
+          "where": "examples/upload-fields.json"
+        },
+        {
+          "id": "pattern-set:urls",
+          "note": "",
+          "where": "examples/urls.json"
+        },
+        {
+          "id": "embedded:aws-keys",
+          "note": "",
+          "where": "examples/aws-keys.json"
+        },
+        {
+          "id": "embedded:base64",
+          "note": "",
+          "where": "examples/base64.json"
+        },
+        {
+          "id": "embedded:cors",
+          "note": "",
+          "where": "examples/cors.json"
+        },
+        {
+          "id": "embedded:debug-pages",
+          "note": "",
+          "where": "examples/debug-pages.json"
+        },
+        {
+          "id": "embedded:firebase",
+          "note": "",
+          "where": "examples/firebase.json"
+        },
+        {
+          "id": "embedded:fw",
+          "note": "",
+          "where": "examples/fw.json"
+        },
+        {
+          "id": "embedded:go-functions",
+          "note": "",
+          "where": "examples/go-functions.json"
+        },
+        {
+          "id": "embedded:http-auth",
+          "note": "",
+          "where": "examples/http-auth.json"
+        },
+        {
+          "id": "embedded:ip",
+          "note": "",
+          "where": "examples/ip.json"
+        },
+        {
+          "id": "embedded:json-sec",
+          "note": "",
+          "where": "examples/json-sec.json"
+        },
+        {
+          "id": "embedded:meg-headers",
+          "note": "",
+          "where": "examples/meg-headers.json"
+        },
+        {
+          "id": "embedded:php-curl",
+          "note": "",
+          "where": "examples/php-curl.json"
+        },
+        {
+          "id": "embedded:php-errors",
+          "note": "",
+          "where": "examples/php-errors.json"
+        },
+        {
+          "id": "embedded:php-serialized",
+          "note": "",
+          "where": "examples/php-serialized.json"
+        },
+        {
+          "id": "embedded:php-sinks",
+          "note": "",
+          "where": "examples/php-sinks.json"
+        },
+        {
+          "id": "embedded:php-sources",
+          "note": "",
+          "where": "examples/php-sources.json"
+        },
+        {
+          "id": "embedded:s3-buckets",
+          "note": "",
+          "where": "examples/s3-buckets.json"
+        },
+        {
+          "id": "embedded:sec",
+          "note": "",
+          "where": "examples/sec.json"
+        },
+        {
+          "id": "embedded:servers",
+          "note": "",
+          "where": "examples/servers.json"
+        },
+        {
+          "id": "embedded:strings",
+          "note": "",
+          "where": "examples/strings.json"
+        },
+        {
+          "id": "embedded:takeovers",
+          "note": "",
+          "where": "examples/takeovers.json"
+        },
+        {
+          "id": "embedded:upload-fields",
+          "note": "",
+          "where": "examples/upload-fields.json"
+        },
+        {
+          "id": "embedded:urls",
+          "note": "",
+          "where": "examples/urls.json"
+        }
+      ],
+      "capability_count": 46,
+      "checkout_head": "dcd4c361f9f5ba302294ed38b8ce278e8ba69006",
+      "commit_matches": true,
+      "extractor": "gf",
+      "license": "MIT",
+      "pinned_commit": "dcd4c361f9f5ba302294ed38b8ce278e8ba69006",
+      "public_capability_count": 46,
+      "url": "https://github.com/tomnomnom/gf"
+    },
+    "trap-bytes/gourlex": {
+      "capabilities": [
+        {
+          "id": "func:extractURLsAndPathsFromResponse",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:printURLsAndPaths",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:validateUrl",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:createHTTPClientWProxy",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:isValidProxy",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:colorize",
+          "note": "",
+          "where": "gourlex.go"
+        },
+        {
+          "id": "func:printBanner",
+          "note": "",
+          "where": "gourlex.go"
+        }
+      ],
+      "capability_count": 7,
+      "checkout_head": "bd2143dd6b7b47f037e6d14ae1dfc79798099791",
+      "commit_matches": true,
+      "extractor": "gofuncs",
+      "license": "MIT",
+      "pinned_commit": "bd2143dd6b7b47f037e6d14ae1dfc79798099791",
+      "public_capability_count": 7,
+      "url": "https://github.com/trap-bytes/gourlex"
+    }
+  }
+}
