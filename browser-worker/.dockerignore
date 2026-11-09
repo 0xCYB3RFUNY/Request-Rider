@@ -1,0 +1,33 @@
+# Build context for browser-worker/Dockerfile.
+#
+# The Dockerfile copies worker.py and nothing else, but the build context is
+# still the whole directory. This keeps a local virtualenv, test artefacts and
+# a stray Firefox binary out of the transfer and out of any future layer.
+
+# Local virtualenv used to run the worker on the host.
+.venv/
+venv/
+env/
+
+# Test-only code and bytecode. worker.py is the only file the image needs.
+# Тестовые файлы не нужны в production image.
+test_*.py
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# A host-installed Firefox must never be baked in; the image installs its own.
+firefox/
+*.log
+
+# Never bake a secret into an image.
+.env
+.env.*
+data/
+*.key
+*.pem
+
+# Local editor and OS noise.
+.git/
+.gitignore
+.DS_Store

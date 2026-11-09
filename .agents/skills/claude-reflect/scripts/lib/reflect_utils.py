@@ -1,0 +1,1934 @@
+#!/usr/bin/env python3
+"""Shared utilities for claude-reflect hooks and scripts.
+
+Cross-platform compatible (Windows, macOS, Linux).
+"""
+import json
+import re
+import os
+import sys
+import unicodedata
+from collections import deque
+from pathlib import Path
+from datetime import datetime, timezone
+from typing import List, Dict, Any, Optional, Tuple
+
+# =============================================================================
+# Hook I/O encoding
+# =============================================================================
+
+def ensure_utf8_io() -> None:
+    """Force stdin/stdout/stderr to UTF-8 so hooks work on a Windows console.
+
+    Windows defaults these streams to the locale codepage (cp1252, cp1251...).
+    Two failures follow, both silent to the user:
+
+    * Reading a non-ASCII prompt off stdin mangles it, so the *stored* learning
+      is mojibake even though capture "succeeded".
+    * Printing the acknowledgement raises ``UnicodeEncodeError`` on any emoji,
+      which trips each hook's top-level ``except`` and replaces the
+      confirmation with a stderr warning on every single capture.
+
+    No-ops where a stream cannot be reconfigured -- already wrapped, detached,
+    or replaced by a test harness.
+
+    Credit: stdout/stderr half from #38 (@keitaemsden-lab), stdin half
+    reported in #41 (@George-tmm).
+    """
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8")
+        except (ValueError, OSError, AttributeError):
+            pass
+
+
+# =============================================================================
+# Path utilities
+# =============================================================================
+
+def get_queue_path(project_dir: Optional[str] = None) -> Path:
+    """Get path to learnings queue file, scoped to the current project.
+
+    Queue files are stored per-project to prevent cross-project leakage:
+      ~/.claude/projects/<encoded>/learnings-queue.json
+
+    Falls back to global path if project directory cannot be determined.
+    """
+    try:
+        folder_name = get_project_folder_name(project_dir)
+        return get_claude_dir() / "projects" / folder_name / "learnings-queue.json"
+    except Exception:
+        # Fallback to global path if encoding fails
+        return Path.home() / ".claude" / "learnings-queue.json"
+
+
+def project_dir_from_transcript(transcript_path: Optional[str]) -> Optional[Path]:
+    """The project folder Claude Code is using, taken from the hook payload.
+
+    Every hook payload carries ``transcript_path``, and the transcript lives
+    at ``~/.claude/projects/<folder>/<session>.jsonl``. Its parent directory
+    is therefore the folder Claude Code itself chose -- authoritative, with
+    nothing to reproduce.
+
+    This matters because the encoding is not simple: every non-alphanumeric
+    character becomes a dash, the substitution counts UTF-16 code units so an
+    emoji becomes two dashes, and a name over 200 characters is truncated and
+    given a hash we cannot recompute. Reading the answer beats deriving it.
+
+    Returns None when the field is missing or does not sit under
+    ``<claude dir>/projects/``, so the caller falls back to the encoder.
+    """
+    if not transcript_path:
+        return None
+    try:
+        parent = Path(transcript_path).expanduser().parent
+        if parent.parent.name != "projects":
+            return None
+        if not parent.name:
+            return None
+    except (OSError, ValueError):
+        return None
+    return parent
+
+
+def queue_path_for_folder(project_folder: Path) -> Path:
+    """Queue file inside an already-resolved project folder."""
+    return project_folder / "learnings-queue.json"
+
+
+def load_queue_at(path: Path) -> List[Dict[str, Any]]:
+    """Read a queue from an explicit path. No migration, no encoding."""
+    if not path.exists():
+        return []
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+        return loaded if isinstance(loaded, list) else []
+    except (ValueError, IOError, OSError):
+        return []
+
+
+def save_queue_at(path: Path, items: List[Dict[str, Any]]) -> None:
+    """Write a queue to an explicit path, atomically.
+
+    A plain write_text truncates first, so a crash or a concurrent reader
+    between truncate and write sees an empty or half-written file -- which
+    the loaders treat as "no learnings" and the migration used to treat as
+    "safe to delete".
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + f".tmp.{os.getpid()}")
+    try:
+        tmp.write_text(json.dumps(items, indent=2), encoding="utf-8")
+        tmp.replace(path)
+    finally:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+
+
+def get_global_queue_path() -> Path:
+    """Get path to the legacy global learnings queue file.
+
+    Used for migration: items from the old global queue are distributed
+    to their per-project queues on first access.
+    """
+    return Path.home() / ".claude" / "learnings-queue.json"
+
+
+def migrate_global_queue() -> None:
+    """Migrate items from the legacy global queue to per-project queues.
+
+    Each queue item has a 'project' field with the original cwd.
+    Items are distributed to their respective project queues, then
+    the global queue is cleared.
+    """
+    global_path = get_global_queue_path()
+    if not global_path.exists():
+        return
+
+    try:
+        items = json.loads(global_path.read_text(encoding="utf-8"))
+    except (ValueError, IOError):
+        return
+
+    if not items:
+        # Empty global queue — remove file so future calls skip immediately
+        global_path.unlink(missing_ok=True)
+        return
+
+    # Group items by project
+    by_project: Dict[str, List[Dict[str, Any]]] = {}
+    for item in items:
+        project = item.get("project", "")
+        if project not in by_project:
+            by_project[project] = []
+        by_project[project].append(item)
+
+    # Write each group to its project queue
+    for project, project_items in by_project.items():
+        if not project:
+            continue
+        try:
+            project_queue_path = get_queue_path(project)
+            # Merge with any existing project queue
+            existing = []
+            if project_queue_path.exists():
+                try:
+                    existing = json.loads(
+                        project_queue_path.read_text(encoding="utf-8")
+                    )
+                except (ValueError, IOError):
+                    existing = []
+            existing.extend(project_items)
+            project_queue_path.parent.mkdir(parents=True, exist_ok=True)
+            project_queue_path.write_text(
+                json.dumps(existing, indent=2), encoding="utf-8"
+            )
+        except Exception:
+            continue
+
+    # Remove global queue after successful migration so future calls skip via exists() check
+    global_path.unlink(missing_ok=True)
+
+
+def get_backup_dir() -> Path:
+    """Get path to learnings backup directory."""
+    return Path.home() / ".claude" / "learnings-backups"
+
+
+def get_claude_dir() -> Path:
+    """Get path to .claude directory."""
+    return Path.home() / ".claude"
+
+
+def get_cleanup_period_days() -> Optional[int]:
+    """Get cleanupPeriodDays from ~/.claude/settings.json. Returns None if not set."""
+    settings_path = get_claude_dir() / "settings.json"
+    if not settings_path.exists():
+        return None
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        return settings.get("cleanupPeriodDays")
+    except (ValueError, IOError):
+        return None
+
+
+# Directories to exclude when searching for CLAUDE.md files
+EXCLUDED_DIRS = {
+    'node_modules', '.git', '.svn', '.hg', 'venv', '.venv', 'env', '.env',  # noqa: SEC-AUDITOR
+    '__pycache__', '.pytest_cache', '.mypy_cache', 'dist', 'build',
+    '.next', '.nuxt', 'coverage', '.coverage', 'htmlcov',
+    'vendor', 'target', 'out', 'bin', 'obj',
+}
+
+
+def _parse_rule_frontmatter(filepath: Path) -> Optional[Dict[str, Any]]:
+    """Parse YAML-like frontmatter from a .claude/rules/*.md file.
+
+    Extracts 'paths:' list without requiring PyYAML. Frontmatter is delimited
+    by '---' lines at the start of the file.
+
+    Returns:
+        Dict with parsed fields (e.g. {"paths": ["src/", "lib/"]}), or None
+        if no frontmatter is found.
+    """
+    try:
+        text = filepath.read_text(encoding="utf-8")
+    except (IOError, OSError):
+        return None
+
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return None
+
+    # Find closing ---
+    end_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            end_idx = i
+            break
+
+    if end_idx is None:
+        return None
+
+    result: Dict[str, Any] = {}
+    current_key = None
+    current_list: List[str] = []
+
+    for line in lines[1:end_idx]:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        # Check for "key: value" or "key:" (start of list)
+        if ":" in stripped and not stripped.startswith("-"):
+            # Save previous list if any
+            if current_key and current_list:
+                result[current_key] = current_list
+                current_list = []
+
+            key, _, value = stripped.partition(":")
+            current_key = key.strip()
+            value = value.strip()
+            if value:
+                result[current_key] = value
+                current_key = None
+        elif stripped.startswith("- ") and current_key:
+            current_list.append(stripped[2:].strip().strip('"').strip("'"))
+
+    # Save final list
+    if current_key and current_list:
+        result[current_key] = current_list
+
+    return result if result else None
+
+
+# =============================================================================
+# Inclusion graph traversal
+# =============================================================================
+#
+# Memory files (CLAUDE.md, AGENTS.md, rule files) often delegate guidance to
+# other docs via:
+#   - @filename            Claude Code's native include syntax
+#   - [text](relative.md)  standard markdown links
+#
+# These transitively-referenced docs are part of the project's de-facto AI
+# memory and should be reachable as routing targets in /reflect. The traversal
+# is bounded (depth cap + cycle detection) and skips fenced code blocks,
+# external URLs, and same-file anchors.
+
+# Default depth cap: 0 = seeds only, 1 = direct references, ...
+# 3 hops covers the typical CLAUDE.md → AGENTS.md → standards.md → details.md
+# chain. Real-world docs rarely delegate further.
+DEFAULT_INCLUSION_DEPTH = 3
+
+# Soft cap on total nodes discovered by inclusion-graph BFS, across all seeds.
+# Prevents pathological fanout from exhausting memory on a misconfigured tree.
+DEFAULT_INCLUSION_MAX_NODES = 200
+
+# Cap on bytes read from any single memory file when extracting inclusions.
+MAX_INCLUSION_FILE_BYTES = 1 * 1024 * 1024
+
+# @-include syntax: @path.md, @./path.md, @~/.claude/CLAUDE.md
+# Lookbehind prevents matching email addresses (foo@bar.md).
+_INCLUDE_RE = re.compile(r"(?<![\w.])@([\w./\-_~]+\.md)\b")
+
+# Inline markdown link: [text](target). Captures the target path.
+# Reference-style ([text][ref]) is intentionally not handled.
+_MD_LINK_RE = re.compile(r"\[[^\]\[]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+
+# Fenced code block delimiters: ``` or ~~~ (any indentation, any info string).
+_FENCE_RE = re.compile(r"^\s*(?:```|~~~)")
+
+# External URL schemes — never followed.
+_EXTERNAL_SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.\-]*:", re.IGNORECASE)
+
+
+def _parse_inclusions(filepath: Path) -> List[str]:
+    """Extract @-include and inline markdown link targets from a memory file.
+
+    Skips fenced code blocks, external URLs, and same-file anchors.
+    Strips in-page anchors (foo.md#section → foo.md). Reads are capped
+    at MAX_INCLUSION_FILE_BYTES; returns [] on any read error.
+
+    Returns:
+        Raw target strings in document order.
+    """
+    try:
+        with open(filepath, "rb") as fh:
+            blob = fh.read(MAX_INCLUSION_FILE_BYTES)
+    except (IOError, OSError):
+        return []
+    text = blob.decode("utf-8", errors="replace")
+
+    refs: List[str] = []
+    in_fence = False
+
+    for line in text.splitlines():
+        if _FENCE_RE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+
+        for match in _INCLUDE_RE.finditer(line):
+            refs.append(match.group(1))
+
+        for match in _MD_LINK_RE.finditer(line):
+            target = match.group(1).strip()
+            if not target or target.startswith("#"):
+                continue
+            if _EXTERNAL_SCHEME_RE.match(target):
+                continue
+            if "#" in target:
+                target = target.split("#", 1)[0]
+            if target:
+                refs.append(target)
+
+    return refs
+
+
+def _resolve_inclusion(
+    target: str,
+    source_file: Path,
+    allowed_roots: Optional[List[Path]] = None,
+) -> Optional[Path]:
+    """Resolve a raw inclusion target to an absolute, existing .md file.
+
+    Handles ~ expansion, absolute paths, and paths relative to source_file's
+    directory. Restricts to .md files — checked on both the raw target and
+    the resolved suffix, so a `foo.md` symlink to /etc/passwd is rejected.
+
+    Confines the resolved path to `allowed_roots` when provided (typically
+    the project root plus ~/.claude/). When `allowed_roots` is None, no
+    containment check is applied — used by tests in isolation.
+
+    Returns the resolved Path, or None if any check fails.
+    """
+    if not target.endswith(".md"):
+        return None
+
+    raw = target.replace("\\", "/")  # Tolerate Windows-style separators in links
+
+    try:
+        if raw.startswith("~"):
+            candidate = Path(raw).expanduser()
+        elif Path(raw).is_absolute():
+            candidate = Path(raw)
+        else:
+            candidate = source_file.parent / raw
+        resolved = candidate.resolve()
+    except (OSError, ValueError):
+        return None
+
+    if resolved.suffix.lower() != ".md":
+        return None
+
+    try:
+        if not resolved.is_file():
+            return None
+    except OSError:
+        return None
+
+    if allowed_roots is not None:
+        for ancestor in allowed_roots:
+            try:
+                resolved.relative_to(ancestor)
+                break
+            except ValueError:
+                continue
+        else:
+            return None
+
+    return resolved
+
+
+def _format_relative_path(path: Path, root: Path) -> str:
+    """Format a path for display: project-relative, then home-relative, then absolute.
+
+    Both inputs are resolved to canonical form so symlinks (notably macOS's
+    /tmp → /private/tmp) don't break the relative_to() comparison. The
+    home-relative branch handles inclusions reached from the global
+    ~/.claude/CLAUDE.md (e.g., user-rules referenced by @ from there).
+    """
+    try:
+        canonical = path.resolve()
+    except OSError:
+        canonical = path
+    try:
+        canonical_root = root.resolve()
+    except OSError:
+        canonical_root = root
+
+    try:
+        rel = canonical.relative_to(canonical_root)
+        return f"./{rel.as_posix()}"
+    except ValueError:
+        pass
+    try:
+        rel = canonical.relative_to(Path.home().resolve())
+        return f"~/{rel.as_posix()}"
+    except (OSError, ValueError):
+        return canonical.as_posix()
+
+
+def _follow_inclusion_graph(
+    seed_files: List[Dict[str, Any]],
+    root: Path,
+    max_depth: int = DEFAULT_INCLUSION_DEPTH,
+    max_nodes: int = DEFAULT_INCLUSION_MAX_NODES,
+) -> List[Dict[str, Any]]:
+    """BFS over @-includes and markdown links from seed memory files.
+
+    Each newly discovered file is reported once with the immediate-parent
+    provenance. FIFO dequeue order means depth N is fully drained before
+    depth N+1, so reported `depth`/`referenced_from` reflect a shortest
+    path from the seed set.
+
+    Args:
+        seed_files: Result entries from the regular discovery pass. Each
+            must have a "path" key.
+        root: Project root. Inclusions confine to {root, get_claude_dir()}
+            so out-of-allowlist references (e.g. /etc/passwd.md) are rejected.
+        max_depth: Maximum hops from any seed (>=0). 0 disables traversal.
+        max_nodes: Cap on total newly-discovered files.
+
+    Returns:
+        List of dicts for newly discovered referenced docs (excluding seeds):
+            {path, relative_path, type='referenced', referenced_from, depth}
+    """
+    if max_depth <= 0 or not seed_files:
+        return []
+
+    try:
+        canonical_root = root.resolve()
+    except OSError:
+        canonical_root = root
+    try:
+        canonical_claude = get_claude_dir().resolve()
+    except OSError:
+        canonical_claude = get_claude_dir()
+    allowed_roots: List[Path] = [canonical_root, canonical_claude]
+
+    seen: set = set()
+    queue: "deque[Tuple[Path, int]]" = deque()
+    for f in seed_files:
+        try:
+            resolved = Path(f["path"]).resolve()
+        except OSError:
+            continue
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        queue.append((resolved, 0))
+    seed_paths = set(seen)
+
+    discovered: List[Dict[str, Any]] = []
+
+    while queue:
+        current, depth = queue.popleft()
+        if depth >= max_depth:
+            continue
+        if len(discovered) >= max_nodes:
+            break
+
+        formatted_current = _format_relative_path(current, root)
+
+        for raw_target in _parse_inclusions(current):
+            resolved = _resolve_inclusion(raw_target, current, allowed_roots)
+            if resolved is None or resolved in seen:
+                continue
+            seen.add(resolved)
+
+            if resolved in seed_paths:
+                continue
+
+            discovered.append({
+                "path": str(resolved),
+                "relative_path": _format_relative_path(resolved, root),
+                "type": "referenced",
+                "referenced_from": formatted_current,
+                "depth": depth + 1,
+            })
+            if len(discovered) >= max_nodes:
+                break
+            queue.append((resolved, depth + 1))
+
+    return discovered
+
+
+def find_claude_files(
+    root_dir: Optional[str] = None,
+    follow_includes: bool = True,
+    max_depth: int = DEFAULT_INCLUSION_DEPTH,
+    max_nodes: int = DEFAULT_INCLUSION_MAX_NODES,
+) -> List[Dict[str, Any]]:
+    """
+    Find all memory tier files in the project tree.
+
+    Args:
+        root_dir: Root directory to search from (defaults to cwd).
+        follow_includes: If True (default), also surface .md docs that the
+            discovered memory files transitively reference via @-includes
+            or markdown links. Bounded by max_depth and cycle-safe; resolved
+            paths are confined to root_dir and ~/.claude/.
+        max_depth: Maximum hops to follow from any seed memory file when
+            follow_includes is True. Set to 0 to disable traversal.
+        max_nodes: Cap on total newly-discovered referenced files.
+
+    Returns:
+        List of dicts with {path, relative_path, type, ...} for each file found.
+        Types: 'global', 'root', 'local', 'subdirectory', 'rule', 'user-rule',
+        'referenced'. Rule files include a 'frontmatter' field. Referenced
+        files include 'referenced_from' and 'depth' fields.
+    """
+    root = Path(root_dir) if root_dir else Path.cwd()
+    results = []
+
+    # Always include global CLAUDE.md
+    global_claude = get_claude_dir() / "CLAUDE.md"
+    if global_claude.exists():
+        results.append({
+            "path": str(global_claude),
+            "relative_path": "~/.claude/CLAUDE.md",
+            "type": "global",
+        })
+
+    # Check root CLAUDE.md
+    root_claude = root / "CLAUDE.md"
+    if root_claude.exists():
+        results.append({
+            "path": str(root_claude),
+            "relative_path": "./CLAUDE.md",
+            "type": "root",
+        })
+
+    # Check CLAUDE.local.md (personal, gitignored)
+    local_claude = root / "CLAUDE.local.md"
+    if local_claude.exists():
+        results.append({
+            "path": str(local_claude),
+            "relative_path": "./CLAUDE.local.md",
+            "type": "local",
+        })
+
+    # Search for CLAUDE.md in subdirectories
+    for dirpath, dirnames, filenames in os.walk(root):
+        # Skip excluded directories
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDED_DIRS]
+
+        # Skip root (already handled)
+        if Path(dirpath) == root:
+            continue
+
+        if "CLAUDE.md" in filenames:
+            full_path = Path(dirpath) / "CLAUDE.md"
+            rel_path = full_path.relative_to(root)
+            # Use as_posix() for consistent forward slashes on all platforms
+            results.append({
+                "path": str(full_path),
+                "relative_path": f"./{rel_path.as_posix()}",
+                "type": "subdirectory",
+            })
+
+    # Discover project rule files: .claude/rules/*.md
+    project_rules_dir = root / ".claude" / "rules"
+    if project_rules_dir.is_dir():
+        for rule_file in sorted(project_rules_dir.glob("*.md")):
+            frontmatter = _parse_rule_frontmatter(rule_file)
+            rel_path = rule_file.relative_to(root)
+            results.append({
+                "path": str(rule_file),
+                "relative_path": f"./{rel_path.as_posix()}",
+                "type": "rule",
+                "frontmatter": frontmatter,
+            })
+
+    # Discover user-level rule files: ~/.claude/rules/*.md
+    user_rules_dir = get_claude_dir() / "rules"
+    if user_rules_dir.is_dir():
+        for rule_file in sorted(user_rules_dir.glob("*.md")):
+            frontmatter = _parse_rule_frontmatter(rule_file)
+            results.append({
+                "path": str(rule_file),
+                "relative_path": f"~/.claude/rules/{rule_file.name}",
+                "type": "user-rule",
+                "frontmatter": frontmatter,
+            })
+
+    # Follow inclusion graph to surface transitively referenced .md docs
+    if follow_includes:
+        results.extend(_follow_inclusion_graph(
+            results, root, max_depth=max_depth, max_nodes=max_nodes,
+        ))
+
+    return results
+
+
+def suggest_claude_file(
+    learning: str,
+    claude_files: List[Dict[str, Any]],
+    learning_type: Optional[str] = None,
+) -> Optional[str]:
+    """
+    Suggest which memory file a learning should go to.
+
+    This is a hint for Claude to use when reasoning about placement.
+    Returns the relative_path of the suggested file, or None to let Claude decide.
+
+    Args:
+        learning: The learning text.
+        claude_files: List from find_claude_files().
+        learning_type: Optional type hint — 'guardrail', 'auto', 'explicit', etc.
+    """
+    learning_lower = learning.lower()
+
+    # Guardrails → .claude/rules/guardrails.md
+    if learning_type == "guardrail":
+        # Check if a guardrails rule file already exists
+        for cf in claude_files:
+            if cf["type"] == "rule" and "guardrail" in Path(cf["path"]).stem.lower():
+                return cf["relative_path"]
+        # Suggest creating one
+        return "./.claude/rules/guardrails.md"
+
+    # Model indicators → existing model-preferences rule or global CLAUDE.md
+    model_indicators = ['gpt-', 'claude-', 'gemini-', 'o3', 'o4']
+    if any(ind in learning_lower for ind in model_indicators):
+        for cf in claude_files:
+            if cf["type"] in ("rule", "user-rule") and "model" in Path(cf["path"]).stem.lower():
+                return cf["relative_path"]
+        return "~/.claude/CLAUDE.md"
+
+    # Global behavioral (always/never/prefer) → global CLAUDE.md
+    global_behavioral = ['always ', 'never ', 'prefer ']
+    if any(ind in learning_lower for ind in global_behavioral):
+        return "~/.claude/CLAUDE.md"
+
+    # Path-scoped rule match: learning mentions a directory covered by a rule's paths
+    for cf in claude_files:
+        if cf["type"] == "rule" and cf.get("frontmatter"):
+            paths = cf["frontmatter"].get("paths", [])
+            if isinstance(paths, list):
+                for p in paths:
+                    if p.lower().rstrip("/") in learning_lower:
+                        return cf["relative_path"]
+
+    # Check if learning mentions a specific subdirectory
+    for cf in claude_files:
+        if cf["type"] == "subdirectory":
+            # Extract directory name from path
+            dir_name = Path(cf["relative_path"]).parent.name.lower()
+            if dir_name in learning_lower:
+                return cf["relative_path"]
+
+    # Default: let Claude decide (return None)
+    return None
+
+
+# =============================================================================
+# Auto memory utilities
+# =============================================================================
+
+def _encode_project_path(path_str: str) -> str:
+    """Encode an absolute path the way Claude Code names its project folders.
+
+    Every character that is not an ASCII letter or digit becomes one dash::
+
+        /Users/bob/myapp       ->  -Users-bob-myapp
+        /Users/bob/my_app      ->  -Users-bob-my-app
+        /tmp/b2hook.ApyRBN     ->  -tmp-b2hook-ApyRBN
+        C:\\Users\\bob\\app     ->  C--Users-bob-app
+
+    Two properties matter and both are load-bearing:
+
+    1. The result must equal the folder Claude Code itself writes session
+       files into. Anything else sends the queue and auto-memory to a folder
+       that ``--scan-history`` never reads, with no error.
+    2. The result must be one legal directory name on every platform. A
+       Windows drive colon survived the old encoder and made ``mkdir`` raise
+       ``WinError 267``, which the hook's top-level handler swallowed.
+    """
+    encoded = []
+    for ch in path_str:
+        if ch.isascii() and ch.isalnum():
+            encoded.append(ch)
+        else:
+            # Claude Code does this with a JavaScript regex that carries no /u
+            # flag, so it matches per UTF-16 CODE UNIT, not per character. A
+            # character outside the BMP -- an emoji in a folder name -- is a
+            # surrogate pair there and becomes TWO dashes. Measured against a
+            # live probe: "/private/tmp/cr-probe2/emoji \U0001f600 x" produced
+            # "-private-tmp-cr-probe2-emoji----x", four dashes for
+            # space + emoji + space.
+            try:
+                units = len(ch.encode("utf-16-le")) // 2
+            except UnicodeEncodeError:
+                # A path byte that is not valid UTF-8 survives os.fsdecode as a
+                # lone surrogate (b"\xe9" -> "\udce9"), which cannot be encoded.
+                # It is one UTF-16 code unit, so one dash.
+                units = 1
+            encoded.append("-" * units)
+    return "".join(encoded)
+
+
+def _legacy_encode_project_path(path_str: str) -> str:
+    """Reproduce the pre-3.2 encoder, for migrating folders it created.
+
+    It replaced only the path separators, so any path holding ``_``, ``.``,
+    a space or any other non-alphanumeric character landed in a folder
+    Claude Code never used.
+    """
+    folder_name = path_str.replace("/", "-").replace("\\", "-")
+    if folder_name.startswith("-"):
+        folder_name = folder_name[1:]
+    return "-" + folder_name
+
+
+def get_project_folder_name(project_dir: Optional[str] = None) -> str:
+    """Encode a project directory path using Claude Code's folder naming convention.
+
+    /Users/bob/myapp → -Users-bob-myapp
+    """
+    project_path = Path(project_dir).resolve() if project_dir else Path.cwd().resolve()
+    # Claude Code normalizes the resolved cwd to NFC before encoding. macOS
+    # hands back NFD for anything Finder or unzip created, and the two differ
+    # in LENGTH -- "café" is 4 code points in NFC and 5 in NFD, so the
+    # decomposed form emits one extra dash and names a folder that does not
+    # exist. Confirmed by probe: a directory stored NFD as
+    # "Мой проект café" got a 35-character folder, not 37.
+    # Claude Code normalizes the resolved cwd to NFC before encoding. macOS
+    # hands back NFD for anything Finder or unzip created, and the two differ
+    # in LENGTH -- "café" is 4 code points composed and 5 decomposed - so the
+    # decomposed form emits an extra dash and names a folder that does not
+    # exist. Confirmed by probe: a directory stored NFD as "Мой проект café"
+    # got a 35-character folder, not 37.
+    canonical = unicodedata.normalize("NFC", str(project_path))
+    encoded = _encode_project_path(canonical)
+    if len(encoded) <= MAX_PROJECT_FOLDER_NAME_LEN:
+        return encoded
+    return _resolve_long_folder_name(encoded, canonical)
+
+
+def migrate_legacy_project_folder(project_dir: Optional[str] = None) -> None:
+    """Move claude-reflect's files out of a folder the pre-3.2 encoder created.
+
+    The old encoder replaced only path separators, so a project path holding
+    ``_``, ``.`` or a space (``/Users/bob/my_app``) got its queue written to
+    ``-Users-bob-my_app`` while Claude Code kept its sessions in
+    ``-Users-bob-my-app``. Nothing errored: the wrong folder existed, so
+    ``--scan-history`` searched it, found no ``*.jsonl`` and reported nothing.
+
+    Only files this plugin owns are moved -- the queue and ``memory/*.md``.
+    Session files are never touched, and the old folder is removed only if
+    moving its contents leaves it empty.
+    """
+    try:
+        project_path = Path(project_dir).resolve() if project_dir else Path.cwd().resolve()
+    except (OSError, ValueError):
+        return
+
+    legacy_name = _legacy_encode_project_path(str(project_path))
+    # Resolve through get_project_folder_name, not _encode_project_path: for a
+    # path over 200 characters those differ, and migrating into a third name
+    # would recreate the split this function exists to heal.
+    current_name = get_project_folder_name(str(project_path))
+    if legacy_name == current_name:
+        return
+
+    projects_dir = get_claude_dir() / "projects"
+    legacy_dir = projects_dir / legacy_name
+    if not legacy_dir.is_dir():
+        return
+    if legacy_dir.is_symlink():
+        # is_dir() follows the link, and moving files out of wherever it
+        # points is not what "migrate our own folder" means.
+        return
+
+    current_dir = projects_dir / current_name
+
+    # Merge the queue, oldest first, dropping items already carried over.
+    legacy_queue = legacy_dir / "learnings-queue.json"
+    current_queue_probe = current_dir / "learnings-queue.json"
+    try:
+        if (legacy_queue.exists() and current_queue_probe.exists()
+                and legacy_queue.resolve() == current_queue_probe.resolve()):
+            # Both names point at one file. Merging it into itself and then
+            # unlinking "the old one" would delete the queue we just wrote.
+            return
+    except OSError:
+        return
+    if legacy_queue.is_file():
+        readable = True
+        try:
+            legacy_items = json.loads(legacy_queue.read_text(encoding="utf-8"))
+        except (ValueError, IOError, OSError):
+            legacy_items, readable = [], False
+        if not isinstance(legacy_items, list):
+            legacy_items, readable = [], False
+        if legacy_items:
+            current_queue = current_dir / "learnings-queue.json"
+            existing: List[Dict[str, Any]] = []
+            if current_queue.is_file():
+                try:
+                    loaded = json.loads(current_queue.read_text(encoding="utf-8"))
+                except (ValueError, IOError, OSError):
+                    # Unreadable is not empty. Treating it as [] would write
+                    # the legacy items OVER the user's only copy -- the same
+                    # principle applied to the legacy file one block up.
+                    return
+                if not isinstance(loaded, list):
+                    return
+                existing = loaded
+            seen = {_queue_item_key(i) for i in existing}
+            merged = existing + [
+                i for i in legacy_items
+                if isinstance(i, dict) and _queue_item_key(i) not in seen
+            ]
+            try:
+                save_queue_at(current_queue, merged)
+            except (IOError, OSError):
+                return
+        if readable:
+            # Only discard the old file once its contents are safely in the
+            # new one. A queue we could not parse is left where it is -- it
+            # is the user's only copy, and deleting it is not our call.
+            try:
+                legacy_queue.unlink()
+            except OSError:
+                pass
+
+    # Move auto-memory files that the correct folder does not already have.
+    legacy_memory = legacy_dir / "memory"
+    if legacy_memory.is_dir():
+        current_memory = current_dir / "memory"
+        for md_file in sorted(legacy_memory.glob("*.md")):
+            target = current_memory / md_file.name
+            if target.exists():
+                # Do not clobber, but do not strand it either: the folder
+                # would survive forever and be re-globbed on every prompt.
+                stamp = md_file.stem + ".from-legacy" + md_file.suffix
+                target = current_memory / stamp
+                if target.exists():
+                    continue
+            try:
+                current_memory.mkdir(parents=True, exist_ok=True)
+                md_file.replace(target)
+            except OSError:
+                continue
+        try:
+            legacy_memory.rmdir()
+        except OSError:
+            pass  # still holds files we did not move
+
+    # The marker is ours as well. Left behind it keeps the legacy folder
+    # alive, which keeps `ls ~/.claude/projects | grep <basename>` in
+    # /reflect resolving to the wrong folder -- so --scan-history keeps
+    # listing zero sessions and the `tr '_' '-'` fallback never fires,
+    # because the first grep never fails.
+    legacy_marker = legacy_dir / ".reflect-initialized"
+    if legacy_marker.is_file():
+        try:
+            current_dir.mkdir(parents=True, exist_ok=True)
+            (current_dir / ".reflect-initialized").touch()
+            legacy_marker.unlink()
+        except OSError:
+            pass
+
+    # Remove the stale folder only when nothing is left in it.
+    try:
+        legacy_dir.rmdir()
+    except OSError:
+        pass  # session files or anything else we do not own
+
+
+def _queue_item_key(item: Any) -> Tuple[str, str]:
+    """Identity of a queue item for de-duplication during migration."""
+    if not isinstance(item, dict):
+        return ("", "")
+    return (str(item.get("timestamp", "")), str(item.get("message", "")))
+
+
+# Claude Code caps a project folder name at this many characters; past it the
+# name is truncated to exactly this length and a short hash is appended, e.g.
+# "<200 chars>-gmu1b2". Measured against a live probe on 2026-09-19.
+MAX_PROJECT_FOLDER_NAME_LEN = 200
+
+
+def _long_name_hash(canonical_path: str) -> str:
+    """Reproduce Claude Code's suffix for an over-long folder name.
+
+    A djb2-style rolling hash over the UTF-16 code units of the NFC-resolved
+    cwd (not of the encoded name), coerced to a signed 32-bit int at each
+    step the way JavaScript's ``|0`` does, then ``Math.abs`` in base 36.
+
+    Verified against a live probe: the 265-character path
+    /private/tmp/cr-probe2/<80 d>/<80 e>/<80 f> produced the suffix
+    "gmu1b2", which this reproduces exactly.
+    """
+    acc = 0
+    units = canonical_path.encode("utf-16-le", errors="surrogatepass")
+    for i in range(0, len(units) - 1, 2):
+        code = units[i] | (units[i + 1] << 8)
+        acc = (acc << 5) - acc + code
+        acc = ((acc + 0x80000000) % 0x100000000) - 0x80000000  # JS  |0
+    acc = abs(acc)
+    if acc == 0:
+        return "0"
+    digits = "0123456789abcdefghijklmnopqrstuvwxyz"
+    out = ""
+    while acc:
+        out = digits[acc % 36] + out
+        acc //= 36
+    return out
+
+
+def _resolve_long_folder_name(encoded: str, canonical_path: str) -> str:
+    """Name the truncated-and-hashed folder Claude Code uses for a long path.
+
+    Claude Code truncates to MAX_PROJECT_FOLDER_NAME_LEN and appends
+    "-<hash>". We can compute that hash (see _long_name_hash), but the
+    algorithm is an implementation detail of a version we do not control, so
+    an existing folder on disk wins over the computed name. The computed name
+    is the fallback for a project Claude Code has not written yet, which is
+    strictly better than the bare prefix -- a name it would never use.
+    """
+    prefix = encoded[:MAX_PROJECT_FOLDER_NAME_LEN]
+    projects_dir = get_claude_dir() / "projects"
+    try:
+        # The encoding leaves only [A-Za-z0-9-], so the prefix is glob-safe.
+        matches = sorted(
+            d.name for d in projects_dir.glob(prefix + "-*") if d.is_dir()
+        )
+    except OSError:
+        return encoded
+
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        # Claude Code has not created it yet: compute the name it will use.
+        return prefix + "-" + _long_name_hash(canonical_path)
+    # Two projects sharing a 200-character prefix. Ask the session files which
+    # folder is ours rather than guessing.
+    for name in matches:
+        for session in (projects_dir / name).glob("*.jsonl"):
+            try:
+                with session.open(encoding="utf-8", errors="replace") as fh:
+                    for line_no, line in enumerate(fh):
+                        if line_no > 8:
+                            break
+                        try:
+                            cwd = json.loads(line).get("cwd")
+                        except (json.JSONDecodeError, AttributeError):
+                            continue
+                        if cwd and _encode_project_path(str(cwd)) == encoded:
+                            return name
+            except (IOError, OSError):
+                continue
+            break
+    return matches[0]
+
+
+def get_auto_memory_path(project_dir: Optional[str] = None) -> Path:
+    """Get the auto memory directory path for a project.
+
+    Returns ~/.claude/projects/<encoded>/memory/
+    """
+    folder_name = get_project_folder_name(project_dir)
+    return get_claude_dir() / "projects" / folder_name / "memory"
+
+
+
+def _read_text_capped(path: Path, limit: int = MAX_INCLUSION_FILE_BYTES) -> Optional[str]:
+    """Read at most `limit` bytes of a memory file.
+
+    The inclusion parser caps its own reads, but the files it discovers were
+    then read in full downstream, so one `@huge.md` could exhaust memory
+    after passing every published limit. Returns None on any read error.
+    """
+    try:
+        with open(path, "rb") as fh:
+            return fh.read(limit).decode("utf-8", errors="replace")
+    except (IOError, OSError):
+        return None
+
+
+def read_auto_memory(project_dir: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Read all .md files from the project's auto memory directory.
+
+    Returns list of {file, name, entries} where entries are non-empty lines.
+    """
+    memory_path = get_auto_memory_path(project_dir)
+    results = []
+
+    if not memory_path.is_dir():
+        return results
+
+    for md_file in sorted(memory_path.glob("*.md")):
+        try:
+            text = _read_text_capped(md_file)
+            if text is None:
+                continue
+            entries = [line.strip() for line in text.splitlines() if line.strip()]
+            results.append({
+                "file": str(md_file),
+                "name": md_file.stem,
+                "entries": entries,
+            })
+        except (IOError, OSError):
+            continue
+
+    return results
+
+
+# Topic keywords for auto memory file naming
+_AUTO_MEMORY_TOPICS = {
+    "model-preferences": ["gpt-", "claude-", "gemini-", "o3", "o4", "model", "llm"],
+    "tool-usage": ["mcp", "tool", "plugin", "api", "endpoint"],
+    "coding-style": ["indent", "format", "style", "naming", "convention", "lint"],
+    "environment": ["venv", "env", "docker", "port", "database", "redis", "postgres"],
+    "workflow": ["commit", "deploy", "test", "build", "ci", "cd", "pipeline"],
+    "debugging": ["debug", "error", "log", "trace", "breakpoint"],
+}
+
+
+def suggest_auto_memory_topic(learning: str) -> str:
+    """Suggest a topic filename for an auto memory entry based on keywords.
+
+    Returns a filename stem like 'model-preferences' or 'general'.
+    """
+    learning_lower = learning.lower()
+    best_topic = "general"
+    best_score = 0
+
+    for topic, keywords in _AUTO_MEMORY_TOPICS.items():
+        score = sum(1 for kw in keywords if kw in learning_lower)
+        if score > best_score:
+            best_score = score
+            best_topic = topic
+
+    return best_topic
+
+
+def read_all_memory_entries(
+    root_dir: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Read bullet-point entries from ALL memory tiers for cross-tier deduplication.
+
+    Scans: CLAUDE.md files, rule files, CLAUDE.local.md, and auto memory.
+
+    Returns list of {text, source_file, source_type, line_number}.
+    """
+    claude_files = find_claude_files(root_dir)
+    entries: List[Dict[str, Any]] = []
+
+    # Read entries from each CLAUDE.md / rule / local file
+    for cf in claude_files:
+        filepath = Path(cf["path"])
+        if cf["type"] == "global":
+            filepath = Path(cf["path"])
+        text = _read_text_capped(filepath)
+        if text is None:
+            continue
+
+        for line_num, line in enumerate(text.splitlines(), start=1):
+            stripped = line.strip()
+            if stripped.startswith("- "):
+                entries.append({
+                    "text": stripped[2:].strip(),
+                    "source_file": cf["relative_path"],
+                    "source_type": cf["type"],
+                    "line_number": line_num,
+                })
+
+    # Read auto memory entries
+    auto_memory = read_auto_memory(root_dir)
+    for mem in auto_memory:
+        for idx, entry_text in enumerate(mem["entries"]):
+            clean = entry_text.lstrip("- ").strip()
+            if clean and not clean.startswith("#"):
+                entries.append({
+                    "text": clean,
+                    "source_file": f"~/.claude/projects/.../memory/{mem['name']}.md",
+                    "source_type": "auto-memory",
+                    "line_number": idx + 1,
+                })
+
+    return entries
+
+
+# =============================================================================
+# Queue operations
+# =============================================================================
+
+def load_queue(project_dir: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Load learnings queue from the project-scoped file.
+
+    On first call, migrates any items from the legacy global queue.
+    """
+    # Migrate legacy global queue if it has items
+    migrate_global_queue()
+    # Migrate a folder left behind by the pre-3.2 path encoder
+    migrate_legacy_project_folder(project_dir)
+
+    path = get_queue_path(project_dir)
+    if not path.exists():
+        return []
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (ValueError, IOError):
+        return []
+
+
+def save_queue(items: List[Dict[str, Any]], project_dir: Optional[str] = None) -> None:
+    """Save learnings queue to the project-scoped file, atomically."""
+    save_queue_at(get_queue_path(project_dir), items)
+
+
+def append_to_queue(item: Dict[str, Any], project_dir: Optional[str] = None) -> None:
+    """Append a single item to the project-scoped queue."""
+    items = load_queue(project_dir)
+    items.append(item)
+    save_queue(items, project_dir)
+
+
+# =============================================================================
+# Timestamp utilities
+# =============================================================================
+
+def iso_timestamp() -> str:
+    """Get current UTC timestamp in ISO 8601 format."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def backup_timestamp() -> str:
+    """Get timestamp for backup filenames."""
+    return datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
+# =============================================================================
+# Pattern definitions (from capture-learning.sh)
+# =============================================================================
+
+# Explicit marker patterns (highest confidence)
+EXPLICIT_PATTERNS = [
+    (r"remember:", "remember:", 0.90, 120),  # pattern, name, confidence, decay_days
+]
+
+# Positive feedback patterns
+POSITIVE_PATTERNS = [
+    (r"perfect!|exactly right|that's exactly", "perfect", 0.70, 90),
+    (r"that's what I wanted|great approach", "great-approach", 0.70, 90),
+    (r"keep doing this|love it|excellent|nailed it", "keep-doing", 0.70, 90),
+]
+
+# Correction patterns (conservative set to minimize false positives)
+# Format: (regex_pattern, pattern_name, is_strong)
+#
+# DESIGN NOTES:
+# - These patterns are English-centric as a FAST first-pass filter
+# - Non-English corrections are caught by semantic filtering during /reflect
+# - We use STRUCTURAL signals (length, questions, task requests) for language-agnostic filtering
+# - Users can use explicit markers like "remember:" in any language
+#
+CORRECTION_PATTERNS = [
+    # Deliberately broad. An allowlist of continuations was tried and it
+    # dropped the highest-value captures this plugin exists for -- project
+    # rules like "no semicolons in this codebase", "no emojis in commit
+    # messages", "no typescript any, ever" -- while still admitting benign
+    # replies, because "it", "this", "you" and "i" are exactly the words that
+    # open one. The benign shapes are denied by name in NON_CORRECTION_PHRASES
+    # instead, and anything that slips past is caught by the semantic pass at
+    # /reflect time. A false positive costs one queue line; a false negative
+    # costs the learning.
+    (r"^no[,.!:;\u2014\u2013-]+\s*\S", "no,", True),
+    (r"^no\s+\S", "no-bare", True),
+    (r"^don't\b|^do not\b", "don't", True),  # Starts with don't/do not
+    (r"^stop\b|^never\b", "stop/never", True),  # Starts with stop/never
+    (r"that's (wrong|incorrect)|that is (wrong|incorrect)", "that's-wrong", True),
+    (r"^actually[,. ]", "actually", False),  # Starts with "actually"
+    (r"^I meant\b|^I said\b", "I-meant/said", True),  # Clarification
+    (r"^I told you\b|^I already told\b", "I-told-you", True),  # Higher confidence
+    (r"use .{1,30} not\b", "use-X-not-Y", True),  # "use X not Y" - limited gap
+]
+
+# Guardrail patterns - "don't do X unless" constraints (highest confidence for corrections)
+# These detect user frustrations about Claude making unwanted changes
+# Format: (regex_pattern, pattern_name, confidence, decay_days)
+GUARDRAIL_PATTERNS = [
+    (r"don't (?:add|include|create) .{1,40} unless", "dont-unless-asked", 0.90, 120),
+    (r"only (?:change|modify|edit|touch) what I (?:asked|requested|said)", "only-what-asked", 0.90, 120),
+    (r"stop (?:refactoring|changing|modifying|editing) (?:unrelated|other|surrounding)", "stop-unrelated", 0.90, 120),
+    (r"don't (?:over-engineer|add extra|be too|make unnecessary)", "dont-over-engineer", 0.85, 90),
+    (r"don't (?:refactor|reorganize|restructure) (?:unless|without)", "dont-refactor-unless", 0.85, 90),
+    (r"leave .{1,30} (?:alone|unchanged|as is)", "leave-alone", 0.85, 90),
+    (r"don't (?:add|include) (?:comments|docstrings|type hints|annotations) (?:unless|to code)", "dont-add-annotations", 0.85, 90),
+    (r"(?:minimal|minimum|only necessary) changes", "minimal-changes", 0.80, 90),
+]
+
+# Structural patterns indicating FALSE POSITIVES (language-agnostic)
+# These focus on MESSAGE STRUCTURE rather than specific words
+FALSE_POSITIVE_PATTERNS = [
+    r"[?\uff1f]$",  # Ends with question mark (ASCII ? or full-width ？)
+    r"[\u55ce\u5417\u5462\u304b\uae4c]$",  # Ends with CJK question particle (嗎吗呢か까)
+    r"^(please|can you|could you|would you|help me)\b",  # Task request openers
+    r"(help|fix|check|review|figure out|set up)\s+(this|that|it|the)\b",  # Task verbs
+    r"(error|failed|could not|cannot|can't|unable to)\s+\w+",  # Error descriptions
+    r"(is|was|are|were)\s+(not|broken|failing)",  # Bug reports
+    r"^I (need|want|would like)\b",  # Task requests
+    r"^(ok|okay|alright)[,.]?\s+(so|now|let)",  # Task continuations
+]
+
+# English phrases that look like correction openers but are NOT corrections
+# Especially important for CJK-mixed text where these appear naturally
+NON_CORRECTION_PHRASES = [
+    r"^no\s+problem",        # "No problem" - agreement
+    r"^no\s+worries",        # "No worries" - agreement
+    r"^no\s+need\b",         # "No need" - acknowledgment
+    r"^no\s+way\b",          # "No way!" - surprise/exclamation
+    r"^don't\s+worry",       # "Don't worry" - reassurance
+    r"^don't\s+mind",        # "Don't mind" - agreement
+    r"^don't\s+bother",      # "Don't bother" - polite decline
+    r"^never\s+mind",        # "Never mind" - dismissal
+    # Answers to a question, not corrections. These are why the "no"
+    # patterns above need a deny-list at all.
+    r"^no\s+idea\b",
+    r"^no\s+(?:it|that|this|we|i|you|they)\s+"
+    r"(?:works?|worked|looks?|seems?|sounds?|reads?)\b",
+    r"^no\s+(?:it|that|this)\s+(?:'s|is|was)\s+(?:fine|good|ok|okay|right|correct)\b",
+    r"^no\s+(?:i|we)\s+(?:think|guess|believe|reckon)\b",
+    r"^no\s+(?:you|we|i)\s+(?:can|could|should)\s+go\s+ahead\b",
+    r"^no\s+(?:i|we)(?:'m|'re| am| are)?\s+(?:all\s+)?(?:good|done|set|fine)\b",
+    # Reports of absence: "no dialog appeared", "no changes were applied".
+    r"^no\s+[\w-]+\s+(?:appeared|happened|occurred|showed|showed\s+up|returned"
+    r"|existed|came|come|changed|matched|was|were|has|have|had)\b",
+    r"^no\s+(?:rush|hurry|pressure|problem|stress)\b",
+    r"^stop\s+worrying",     # "Stop worrying" - reassurance
+]
+
+# CJK correction patterns (parallel to English CORRECTION_PATTERNS)
+# These detect explicit corrections in CJK languages
+# Format: (regex_pattern, pattern_name, is_strong)
+CJK_CORRECTION_PATTERNS = [
+    # Japanese
+    (r"^いや[、,.\s]|^いや違", "iya", True),       # いや、〜 / いや違う - "no, ..."
+    (r"^違う[、，,.\s！!。]|^ちがう[、,.\s]", "chigau", True),  # 違う、〜 - "wrong, ..."
+    (r"そうじゃなく[てけ]|そっちじゃなく[てけ]", "souja-nakute", True),  # "not that"
+    (r"間違[いえっ]て", "machigatte", True),       # 間違ってる - "it's wrong"
+    (r"じゃなくて.{0,30}にして", "janakute-nishite", True),  # 〜じゃなくて〜にして
+    (r"^やめて[。！!]?\s*$", "yamete", True),      # やめて - "stop"
+    (r"^そうじゃない", "souja-nai", True),          # そうじゃない - "that's not right"
+    (r"って言った[のよでじゃ]", "tte-itta", True),   # って言ったのに - "I told you"
+    # Chinese
+    (r"^不是[，,. ]", "bushi", True),              # 不是、〜 - "no, ..."
+    (r"^错了|^錯了", "cuole", True),               # 错了 - "wrong"
+    (r"不要.{0,20}要", "buyao-yao", True),         # 不要X要Y - "don't X, use Y"
+    # Korean
+    (r"^아니[,. ]", "ani", True),                  # 아니, - "no, ..."
+    (r"틀렸", "teullyeoss", True),                 # 틀렸 - "wrong"
+]
+
+# Maximum prompt length for live capture (UserPromptSubmit hook)
+# Prompts longer than this are almost certainly system content, not user corrections.
+# Exception: explicit "remember:" markers are always processed regardless of length.
+MAX_CAPTURE_PROMPT_LENGTH = 500
+
+# Forward-pivot patterns — phrases that indicate the message body is a
+# task instruction following a positive-feedback opener, NOT retrospective
+# feedback. "Perfect! Now let's add X" is structurally a task pivot, not
+# validation of past work. Applied ONLY to positive-pattern matches; real
+# corrections (e.g. "Now let's stop refactoring") still get captured by
+# CORRECTION_PATTERNS since those signals are directive-as-content, not
+# directive-as-followup.
+#
+# Distinct from FALSE_POSITIVE_PATTERNS (which apply to all detections)
+# and NON_CORRECTION_PHRASES (which neutralize correction openers like
+# "no problem"). This list neutralizes positive openers when the message
+# body is a fresh request rather than reflection on past behavior.
+# Narrow on purpose. A broader version rejected ordinary praise: "Nailed it!
+# Please keep using this pattern", "that's exactly right, we need to remember
+# this", "Perfect... Now I understand why it fails" -- all retrospective
+# feedback that merely contains "please", "we need to" or "now I". A pivot
+# has to introduce a NEW instruction, so require an imperative after it
+# rather than any of those words appearing anywhere in the message.
+_SLASH_COMMAND_RE = re.compile(r"/[A-Za-z][\w.-]*(?::[\w.-]+)?(?:\s|$)")
+
+FORWARD_PIVOT_PATTERNS = [
+    r"\b(now|next)[, ]+let'?s\b",
+    r"\b(now|next)[, ]+(we|i)\s+(need to|should|have to|must|will)\b",
+    r"\blet'?s (add|do|build|move|update|change|fix|implement)\b",
+    r"\bgo ahead and\s+\w+",
+]
+
+# Maximum message length for weak patterns (structural heuristic)
+# Long messages are more likely to be context/tasks than corrections
+MAX_WEAK_PATTERN_LENGTH = 150
+
+# Very short messages without question marks are more likely corrections
+MIN_SHORT_CORRECTION_LENGTH = 80
+
+# Minimum length for a positive to be worth queueing.
+# Bare praise ("i love it", "perfect!", "nailed it") has no referent — by the
+# time /reflect runs, there is no way to tell what was being praised, so it
+# cannot become a memory. Longer positives usually name the thing.
+MIN_POSITIVE_CONTEXT_LENGTH = 25
+
+
+def detect_patterns(text: str) -> Tuple[Optional[str], str, float, str, int]:
+    """
+    Detect patterns in text and return classification.
+
+    Returns:
+        Tuple of (type, matched_patterns, confidence, sentiment, decay_days)
+        type: "explicit", "positive", "auto", "guardrail", or None
+        matched_patterns: Space-separated pattern names
+        confidence: 0.0 to 1.0
+        sentiment: "correction" or "positive"
+        decay_days: Number of days until decay
+    """
+    # Slash-command guard — /loop, /reflect, /ia:full-review etc. expand
+    # into long skill bodies that incidentally contain correction tokens
+    # (e.g. "use" + "not" in unrelated text). Slash commands are skill
+    # invocations, never user feedback, so they should never enter the
+    # queue. This is the FIRST check because no downstream pattern
+    # (explicit, positive, correction, guardrail) should fire on them.
+    # A slash COMMAND, not any leading slash. The earlier startswith("/")
+    # also ate absolute paths and comments -- "/etc/hosts is wrong, use
+    # 127.0.0.1 not localhost" and "/Users/bob/gen.ts - remember: never edit
+    # generated files" both vanished, the second one breaking the documented
+    # promise that "remember:" is always processed. A command is one token of
+    # word characters (optionally plugin:name) with no second slash.
+    if _SLASH_COMMAND_RE.match(text.lstrip()):
+        return (None, "", 0.0, "correction", 90)
+
+    # Too short to be actionable (e.g. "OK", "好", "yes")
+    # CJK characters carry more meaning per char, so use a lower threshold
+    stripped = text.strip()
+    has_cjk = bool(re.search(r'[\u3000-\u9fff\uf900-\ufaff\uac00-\ud7af]', stripped))
+    short_threshold = 2 if has_cjk else 4
+    if len(stripped) <= short_threshold:
+        return (None, "", 0.0, "correction", 90)
+
+    # Check for explicit "remember:" - always highest priority
+    for pattern, name, confidence, decay in EXPLICIT_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            return ("explicit", name, confidence, "correction", decay)
+
+    # Check for guardrail patterns - "don't do X unless" constraints
+    # These are high-confidence corrections about unwanted behavior
+    for pattern, name, confidence, decay in GUARDRAIL_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            return ("guardrail", name, confidence, "correction", decay)
+
+    # Check for FALSE POSITIVE patterns - skip these messages
+    for fp_pattern in FALSE_POSITIVE_PATTERNS:
+        if re.search(fp_pattern, text, re.IGNORECASE):
+            return (None, "", 0.0, "correction", 90)
+
+    # Check for non-correction English phrases (before correction patterns)
+    # Prevents "No problem", "Don't worry" etc. from being caught as corrections
+    for nc_pattern in NON_CORRECTION_PHRASES:
+        if re.search(nc_pattern, text, re.IGNORECASE):
+            return (None, "", 0.0, "correction", 90)
+
+    # Check for positive patterns
+    matched_positive = []
+    for pattern, name, confidence, decay in POSITIVE_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            matched_positive.append(name)
+
+    if matched_positive:
+        # Bare praise carries no referent — drop it rather than queue an
+        # item that /reflect cannot turn into anything.
+        if len(text.strip()) < MIN_POSITIVE_CONTEXT_LENGTH:
+            return (None, "", 0.0, "positive", 90)
+
+        # Forward-pivot guard — "Perfect! Now let's add X" matches the
+        # positive pattern but the body is a fresh task instruction, not
+        # retrospective feedback. Reject so we don't pollute the queue
+        # with task pivots (which are never reusable learnings).
+        # Applied ONLY here, not to corrections — "Now let's stop X" is
+        # a legitimate correction even when phrased as a task pivot.
+        for fp_pattern in FORWARD_PIVOT_PATTERNS:
+            if re.search(fp_pattern, text, re.IGNORECASE):
+                return (None, "", 0.0, "correction", 90)
+        return ("positive", " ".join(matched_positive), 0.70, "positive", 90)
+
+    # Skip long messages for weak patterns (likely task requests)
+    text_length = len(text)
+
+    # Check for CJK correction patterns (language-specific)
+    # Use stripped text for anchor patterns (^/$) to handle leading/trailing whitespace
+    matched_cjk = []
+    cjk_strong = False
+    for pattern, name, is_strong in CJK_CORRECTION_PATTERNS:
+        if re.search(pattern, stripped):
+            matched_cjk.append(name)
+            if is_strong:
+                cjk_strong = True
+
+    if matched_cjk:
+        confidence = 0.75 if cjk_strong else 0.60
+        decay_days = 90 if cjk_strong else 60
+        if text_length < MIN_SHORT_CORRECTION_LENGTH:
+            confidence = min(0.90, confidence + 0.10)
+        elif text_length > 300:
+            confidence = max(0.50, confidence - 0.15)
+        return ("auto", " ".join(matched_cjk), confidence, "correction", decay_days)
+
+    # Check for English correction patterns
+    matched_corrections = []
+    pattern_count = 0
+    has_strong_pattern = False
+    has_i_told_you = False
+
+    for pattern, name, is_strong in CORRECTION_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            # Skip weak patterns in long messages
+            if not is_strong and text_length > MAX_WEAK_PATTERN_LENGTH:
+                continue
+            matched_corrections.append(name)
+            pattern_count += 1
+            if is_strong:
+                has_strong_pattern = True
+            if name == "I-told-you":
+                has_i_told_you = True
+
+    if matched_corrections:
+        # Calculate confidence based on pattern count, type, and length
+        if has_i_told_you:
+            confidence = 0.85
+            decay_days = 120
+        elif pattern_count >= 3:
+            confidence = 0.85
+            decay_days = 120
+        elif pattern_count >= 2:
+            confidence = 0.75
+            decay_days = 90
+        elif has_strong_pattern:
+            confidence = 0.70
+            decay_days = 60
+        else:
+            confidence = 0.55  # Reduced for weak single patterns
+            decay_days = 45
+
+        # Adjust confidence based on message length (structural signal)
+        # Short messages are more likely to be direct corrections
+        if text_length < MIN_SHORT_CORRECTION_LENGTH:
+            confidence = min(0.90, confidence + 0.10)  # Boost for short messages
+        elif text_length > 300:
+            confidence = max(0.50, confidence - 0.15)  # Reduce for long messages
+        elif text_length > 150:
+            confidence = max(0.55, confidence - 0.10)
+
+        return ("auto", " ".join(matched_corrections), confidence, "correction", decay_days)
+
+    return (None, "", 0.0, "correction", 90)
+
+
+def create_queue_item(
+    message: str,
+    item_type: str,
+    patterns: str,
+    confidence: float,
+    sentiment: str,
+    decay_days: int,
+    project: Optional[str] = None
+) -> Dict[str, Any]:
+    """Create a properly formatted queue item."""
+    return {
+        "type": item_type,
+        "message": message,
+        "timestamp": iso_timestamp(),
+        "project": project or os.getcwd(),
+        "patterns": patterns,
+        "confidence": confidence,
+        "sentiment": sentiment,
+        "decay_days": decay_days,
+    }
+
+
+# =============================================================================
+# Session file utilities
+# =============================================================================
+
+def extract_user_messages(session_file: Path, corrections_only: bool = False) -> List[str]:
+    """
+    Extract user messages from a Claude Code session file (JSONL format).
+
+    Args:
+        session_file: Path to the session JSONL file
+        corrections_only: If True, only return messages matching correction patterns
+
+    Returns:
+        List of user message texts
+    """
+    if not session_file.exists():
+        return []
+
+    messages = []
+
+    try:
+        with open(session_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                # Filter: type=user, not isMeta
+                if entry.get("type") != "user":
+                    continue
+                if entry.get("isMeta"):
+                    continue
+
+                # Extract text from content (can be string or list)
+                content = entry.get("message", {}).get("content", [])
+
+                # Handle string content directly
+                if isinstance(content, str):
+                    if content and _should_include_message(content):
+                        messages.append(content)
+                # Handle list of content items
+                elif isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and item.get("type") == "text":
+                            text = item.get("text", "")
+                            if text:
+                                # Apply filters (same as bash script)
+                                if _should_include_message(text):
+                                    messages.append(text)
+    except IOError:
+        return []
+
+    if corrections_only:
+        # Filter for correction patterns
+        correction_pattern = (
+            r"(no,? use|don't use|stop using|never use|that's wrong|that's incorrect|"
+            r"not right|not correct|actually[,. ]|I meant|I said|I told you|"
+            r"I already told|you should use|you need to use|use .+ not|not .+, use|remember:)"
+        )
+        messages = [m for m in messages if re.search(correction_pattern, m, re.IGNORECASE)]
+
+    return messages
+
+
+def should_include_message(text: str) -> bool:
+    """Check if a message should be included in learning detection.
+
+    Filters out system content like XML tags, JSON, tool results, and
+    session continuations that should never be treated as user corrections.
+
+    Used by both session file extraction and live capture (UserPromptSubmit hook).
+    """
+    # Skip empty lines
+    if not text.strip():
+        return False
+
+    # Skip lines starting with certain patterns
+    skip_patterns = [
+        r"^<",              # XML tags (<task-notification>, <system-reminder>, etc.)
+        r"^\[",             # Brackets
+        r"^\{",             # JSON
+        r"tool_result",
+        r"tool_use_id",
+        r"<command-",
+        r"<task-notification>",
+        r"<system-reminder>",
+        r"This session is being continued",
+        r"^Analysis:",
+        r"^\*\*",           # Bold text
+        r"^   -",           # Indented lists
+    ]
+
+    for pattern in skip_patterns:
+        if re.search(pattern, text):
+            return False
+
+    return True
+
+
+# Backward-compatible alias
+_should_include_message = should_include_message
+
+
+def extract_tool_rejections(session_file: Path) -> List[str]:
+    """
+    Extract user corrections from tool rejections in session files.
+
+    Matches the behavior of the legacy bash script which looks for:
+    - type == "user" entries
+    - message.content[] array with type == "tool_result"
+    - is_error == true
+    - content containing "The user doesn't want to proceed"
+
+    Args:
+        session_file: Path to the session JSONL file
+
+    Returns:
+        List of user correction texts from tool rejections
+    """
+    if not session_file.exists():
+        return []
+
+    rejections = []
+
+    try:
+        with open(session_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                # Must be a user entry (matches bash: select(.type=="user"))
+                if entry.get("type") != "user":
+                    continue
+
+                # Get message.content array (matches bash: select(.message.content | type == "array"))
+                content = entry.get("message", {}).get("content", [])
+                if not isinstance(content, list):
+                    continue
+
+                # Look for tool_result items in content array
+                for item in content:
+                    if not isinstance(item, dict):
+                        continue
+
+                    # Must be type == "tool_result" (matches bash: select(.type=="tool_result"))
+                    if item.get("type") != "tool_result":
+                        continue
+
+                    # Must have is_error == true (matches bash: select(.is_error==true))
+                    if not item.get("is_error"):
+                        continue
+
+                    # Get the content string
+                    tool_content = item.get("content", "")
+                    if not isinstance(tool_content, str):
+                        continue
+
+                    # Must contain rejection message (matches bash: select(.content | contains(...)))
+                    if "The user doesn't want to proceed" not in tool_content:
+                        continue
+
+                    # Extract text after "the user said:" (matches bash: awk '/the user said:/{getline; print}')
+                    # Note: bash uses lowercase "the user said:", let's be case-insensitive
+                    lower_content = tool_content.lower()
+                    if "the user said:" in lower_content:
+                        # Find the position case-insensitively
+                        idx = lower_content.find("the user said:")
+                        after_marker = tool_content[idx + len("the user said:"):]
+                        # Get the next line (bash uses getline)
+                        lines = after_marker.strip().split("\n")
+                        if lines and lines[0].strip():
+                            rejections.append(lines[0].strip())
+
+    except IOError:
+        return []
+
+    return rejections
+
+
+# =============================================================================
+# Tool execution error patterns
+# =============================================================================
+
+# EXCLUDE: Claude Code guardrails AND global Claude behavior (not project-specific)
+TOOL_ERROR_EXCLUDE_PATTERNS = [
+    # Claude Code guardrails - system enforcing its rules
+    r"File has not been read yet",
+    r"exceeds maximum allowed tokens",
+    r"InputValidationError",
+    r"not valid JSON",
+    r"The user doesn't want to proceed",  # User rejections handled separately
+    # Global Claude behavior issues - not project-specific
+    r"unexpected EOF while looking for matching",  # Bash quoting
+    r"EISDIR|illegal operation on a directory",    # File vs dir confusion
+    r"syntax error.*eval",                          # Bash syntax errors
+]
+
+# PROJECT-SPECIFIC error patterns that reveal env/config/structure issues
+# Format: (error_type, regex_pattern, suggested_guideline_template)
+PROJECT_SPECIFIC_ERROR_PATTERNS = [
+    # Connection/service errors - often reveal env/config issues
+    ("connection_refused",
+     r"Connection refused|ECONNREFUSED|connect ECONNREFUSED",
+     "Check .env for service URLs - don't assume localhost"),  # noqa: SEC-AUDITOR
+    ("env_undefined",
+     r"(\w+_URL|DATABASE_URL|API_KEY|SECRET).*undefined|not set|is not defined",
+     "Load .env file before accessing environment variables"),  # noqa: SEC-AUDITOR
+    # Database-specific errors
+    ("supabase_error",
+     r"supabase|Supabase|SUPABASE",
+     "Check SUPABASE_URL and SUPABASE_KEY in .env"),  # noqa: SEC-AUDITOR
+    ("postgres_error",
+     r"postgres|PostgreSQL|PGHOST|:5432|password authentication failed",
+     "Check DATABASE_URL in .env for PostgreSQL connection"),  # noqa: SEC-AUDITOR
+    ("redis_error",
+     r"redis|REDIS|:6379",
+     "Check REDIS_URL in .env for Redis connection"),  # noqa: SEC-AUDITOR
+    # Path/module errors - reveal project structure
+    ("module_not_found",
+     r"ModuleNotFoundError|Cannot find module|No module named",
+     "Check import paths - verify project structure"),
+    ("venv_not_found",
+     r"venv.*No such file|activate: No such file|\.venv.*not found",
+     "Check virtual environment location"),
+    # Port/service conflicts
+    ("port_in_use",
+     r"address already in use|EADDRINUSE|port.*already.*use",
+     "Check if service is already running on this port"),
+]
+
+
+def extract_tool_errors(
+    session_file: Path,
+    project_specific_only: bool = True
+) -> List[Dict[str, Any]]:
+    """
+    Extract tool execution errors from session files.
+
+    Unlike extract_tool_rejections(), this captures TECHNICAL errors where:
+    - is_error == true
+    - NOT a user rejection (no "doesn't want to proceed")
+    - Optionally filtered for project-specific patterns only
+
+    Args:
+        session_file: Path to the session JSONL file
+        project_specific_only: If True, only return errors matching project-specific patterns
+
+    Returns:
+        List of dicts with {error_type, content, project, timestamp, suggested_guideline}
+    """
+    if not session_file.exists():
+        return []
+
+    errors = []
+
+    try:
+        with open(session_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                # Must be a user entry (tool results come back as user messages)
+                if entry.get("type") != "user":
+                    continue
+
+                # Get message.content array
+                content = entry.get("message", {}).get("content", [])
+                if not isinstance(content, list):
+                    continue
+
+                # Look for tool_result items with is_error
+                for item in content:
+                    if not isinstance(item, dict):
+                        continue
+
+                    if item.get("type") != "tool_result":
+                        continue
+
+                    if not item.get("is_error"):
+                        continue
+
+                    tool_content = item.get("content", "")
+                    if not isinstance(tool_content, str):
+                        continue
+
+                    # Skip if matches exclude patterns
+                    should_exclude = False
+                    for exclude_pattern in TOOL_ERROR_EXCLUDE_PATTERNS:
+                        if re.search(exclude_pattern, tool_content, re.IGNORECASE):
+                            should_exclude = True
+                            break
+
+                    if should_exclude:
+                        continue
+
+                    # If project_specific_only, check for matching patterns
+                    error_type = "unknown"
+                    suggested_guideline = None
+
+                    for etype, pattern, guideline in PROJECT_SPECIFIC_ERROR_PATTERNS:
+                        if re.search(pattern, tool_content, re.IGNORECASE):
+                            error_type = etype
+                            suggested_guideline = guideline
+                            break
+
+                    # Skip unknown errors if project_specific_only
+                    if project_specific_only and error_type == "unknown":
+                        continue
+
+                    errors.append({
+                        "error_type": error_type,
+                        "content": tool_content[:500],  # Truncate long errors
+                        "project": str(session_file.parent.name),
+                        "timestamp": entry.get("timestamp", ""),
+                        "suggested_guideline": suggested_guideline,
+                    })
+
+    except IOError:
+        return []
+
+    return errors
+
+
+def aggregate_tool_errors(
+    errors: List[Dict[str, Any]],
+    min_occurrences: int = 2
+) -> List[Dict[str, Any]]:
+    """
+    Group errors by type and return those with multiple occurrences.
+
+    Only repeated errors are valuable for CLAUDE.md - one-off errors are noise.
+
+    Args:
+        errors: List of error dicts from extract_tool_errors()
+        min_occurrences: Minimum times an error type must occur
+
+    Returns:
+        List of aggregated errors with {error_type, count, suggested_guideline,
+        confidence, sample_errors}
+    """
+    from collections import Counter
+
+    # Count by error type
+    type_counts = Counter(e["error_type"] for e in errors)
+
+    # Group errors by type
+    errors_by_type: Dict[str, List[Dict]] = {}
+    for error in errors:
+        etype = error["error_type"]
+        if etype not in errors_by_type:
+            errors_by_type[etype] = []
+        errors_by_type[etype].append(error)
+
+    # Build aggregated results for types meeting threshold
+    aggregated = []
+    for error_type, count in type_counts.items():
+        if count < min_occurrences:
+            continue
+
+        samples = errors_by_type[error_type][:3]  # Keep up to 3 samples
+        suggested_guideline = samples[0].get("suggested_guideline") if samples else None
+
+        # Higher confidence for more occurrences
+        if count >= 5:
+            confidence = 0.90
+        elif count >= 3:
+            confidence = 0.85
+        else:
+            confidence = 0.70
+
+        aggregated.append({
+            "error_type": error_type,
+            "count": count,
+            "suggested_guideline": suggested_guideline,
+            "confidence": confidence,
+            "decay_days": 180,  # Tool error learnings decay slower
+            "sample_errors": [s["content"][:200] for s in samples],
+        })
+
+    # Sort by count descending
+    aggregated.sort(key=lambda x: x["count"], reverse=True)
+
+    return aggregated

@@ -1,0 +1,7 @@
+Django>=5.2,<6
+psycopg[binary]>=3.2,<4
+celery>=5.5,<6
+# Celery's Redis transport needs a Redis client; kombu does not bundle one.
+# kombu.transport.redis also requires packaging for version inspection.
+packaging>=24.0
+redis>=5,<7

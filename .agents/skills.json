@@ -1,0 +1,2770 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "a11y-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/a11y-audit",
+      "enabled": true
+    },
+    {
+      "name": "ab-test-setup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ab-test-setup",
+      "enabled": true
+    },
+    {
+      "name": "accessibility",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/accessibility",
+      "enabled": true
+    },
+    {
+      "name": "address-sanitizer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/address-sanitizer",
+      "enabled": true
+    },
+    {
+      "name": "adversarial-reviewer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/adversarial-reviewer",
+      "enabled": true
+    },
+    {
+      "name": "aflpp",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/aflpp",
+      "enabled": true
+    },
+    {
+      "name": "agent-architecture-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-architecture-audit",
+      "enabled": true
+    },
+    {
+      "name": "agent-decision-receipts",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-decision-receipts",
+      "enabled": true
+    },
+    {
+      "name": "agent-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-designer",
+      "enabled": true
+    },
+    {
+      "name": "agent-eval",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-eval",
+      "enabled": true
+    },
+    {
+      "name": "agent-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-harness",
+      "enabled": true
+    },
+    {
+      "name": "agent-harness-construction",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-harness-construction",
+      "enabled": true
+    },
+    {
+      "name": "agent-introspection-debugging",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-introspection-debugging",
+      "enabled": true
+    },
+    {
+      "name": "agent-launcher-orchestrator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-launcher-orchestrator",
+      "enabled": true
+    },
+    {
+      "name": "agent-memory",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-memory",
+      "enabled": true
+    },
+    {
+      "name": "agent-payment-x402",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-payment-x402",
+      "enabled": true
+    },
+    {
+      "name": "agent-runtime-gateway-smoke-test",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-runtime-gateway-smoke-test",
+      "enabled": true
+    },
+    {
+      "name": "agent-security-hardening",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-security-hardening",
+      "enabled": true
+    },
+    {
+      "name": "agent-self-evaluation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-self-evaluation",
+      "enabled": true
+    },
+    {
+      "name": "agent-sort",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-sort",
+      "enabled": true
+    },
+    {
+      "name": "agent-workflow-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agent-workflow-designer",
+      "enabled": true
+    },
+    {
+      "name": "agenthub",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agenthub",
+      "enabled": true
+    },
+    {
+      "name": "agentic-actions-auditor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agentic-actions-auditor",
+      "enabled": true
+    },
+    {
+      "name": "agentic-app-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agentic-app-audit",
+      "enabled": true
+    },
+    {
+      "name": "agentic-engineering",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agentic-engineering",
+      "enabled": true
+    },
+    {
+      "name": "agentic-os",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/agentic-os",
+      "enabled": true
+    },
+    {
+      "name": "ai-first-engineering",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ai-first-engineering",
+      "enabled": true
+    },
+    {
+      "name": "ai-regression-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ai-regression-testing",
+      "enabled": true
+    },
+    {
+      "name": "ai-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ai-security",
+      "enabled": true
+    },
+    {
+      "name": "algorand-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/algorand-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "android-clean-architecture",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/android-clean-architecture",
+      "enabled": true
+    },
+    {
+      "name": "angular-developer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/angular-developer",
+      "enabled": true
+    },
+    {
+      "name": "api-connector-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/api-connector-builder",
+      "enabled": true
+    },
+    {
+      "name": "api-design",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/api-design",
+      "enabled": true
+    },
+    {
+      "name": "api-design-reviewer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/api-design-reviewer",
+      "enabled": true
+    },
+    {
+      "name": "api-test-suite-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/api-test-suite-builder",
+      "enabled": true
+    },
+    {
+      "name": "apple-hig-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/apple-hig-expert",
+      "enabled": true
+    },
+    {
+      "name": "ar-resume",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ar-resume",
+      "enabled": true
+    },
+    {
+      "name": "ar-status",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ar-status",
+      "enabled": true
+    },
+    {
+      "name": "architecture-decision-records",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/architecture-decision-records",
+      "enabled": true
+    },
+    {
+      "name": "atheris",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/atheris",
+      "enabled": true
+    },
+    {
+      "name": "audit-augmentation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/audit-augmentation",
+      "enabled": true
+    },
+    {
+      "name": "audit-context-building",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/audit-context-building",
+      "enabled": true
+    },
+    {
+      "name": "audit-prep-assistant",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/audit-prep-assistant",
+      "enabled": true
+    },
+    {
+      "name": "automation-audit-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/automation-audit-ops",
+      "enabled": true
+    },
+    {
+      "name": "autonomous-agent-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/autonomous-agent-harness",
+      "enabled": true
+    },
+    {
+      "name": "autonomous-loops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/autonomous-loops",
+      "enabled": true
+    },
+    {
+      "name": "autoresearch-agent",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/autoresearch-agent",
+      "enabled": true
+    },
+    {
+      "name": "aws-solution-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/aws-solution-architect",
+      "enabled": true
+    },
+    {
+      "name": "awwwards",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/awwwards",
+      "enabled": true
+    },
+    {
+      "name": "azure-cloud-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/azure-cloud-architect",
+      "enabled": true
+    },
+    {
+      "name": "backend-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/backend-patterns",
+      "enabled": true
+    },
+    {
+      "name": "benchmark",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/benchmark",
+      "enabled": true
+    },
+    {
+      "name": "benchmark-methodology",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/benchmark-methodology",
+      "enabled": true
+    },
+    {
+      "name": "benchmark-optimization-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/benchmark-optimization-loop",
+      "enabled": true
+    },
+    {
+      "name": "blueprint",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/blueprint",
+      "enabled": true
+    },
+    {
+      "name": "boardroom",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/boardroom",
+      "enabled": true
+    },
+    {
+      "name": "boost-asio-pro",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/boost-asio-pro",
+      "enabled": true
+    },
+    {
+      "name": "brag",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/brag",
+      "enabled": true
+    },
+    {
+      "name": "brag-slim",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/brag-slim",
+      "enabled": true
+    },
+    {
+      "name": "brownfield-retrospective",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/brownfield-retrospective",
+      "enabled": true
+    },
+    {
+      "name": "browser-automation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/browser-automation",
+      "enabled": true
+    },
+    {
+      "name": "browser-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/browser-harness",
+      "enabled": true
+    },
+    {
+      "name": "browser-qa",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/browser-qa",
+      "enabled": true
+    },
+    {
+      "name": "browserstack",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/browserstack",
+      "enabled": true
+    },
+    {
+      "name": "build-iterated-agentic-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/build-iterated-agentic-loop",
+      "enabled": true
+    },
+    {
+      "name": "bun-runtime",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/bun-runtime",
+      "enabled": true
+    },
+    {
+      "name": "burp-suite",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/burp-suite",
+      "enabled": true
+    },
+    {
+      "name": "burpsuite-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/burpsuite-expert",
+      "enabled": true
+    },
+    {
+      "name": "burpsuite-project-parser",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/burpsuite-project-parser",
+      "enabled": true
+    },
+    {
+      "name": "c-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/c-review",
+      "enabled": true
+    },
+    {
+      "name": "cairo-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cairo-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "canary-watch",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/canary-watch",
+      "enabled": true
+    },
+    {
+      "name": "capacity-planner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/capacity-planner",
+      "enabled": true
+    },
+    {
+      "name": "capture",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/capture",
+      "enabled": true
+    },
+    {
+      "name": "cargo-fuzz",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cargo-fuzz",
+      "enabled": true
+    },
+    {
+      "name": "change-impact",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/change-impact",
+      "enabled": true
+    },
+    {
+      "name": "changelog",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/changelog",
+      "enabled": true
+    },
+    {
+      "name": "changelog-generator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/changelog-generator",
+      "enabled": true
+    },
+    {
+      "name": "chaos-engineering",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/chaos-engineering",
+      "enabled": true
+    },
+    {
+      "name": "chaos-experiment",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/chaos-experiment",
+      "enabled": true
+    },
+    {
+      "name": "chrome-mcp-troubleshooting",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/chrome-mcp-troubleshooting",
+      "enabled": true
+    },
+    {
+      "name": "ci-cd-pipeline-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ci-cd-pipeline-builder",
+      "enabled": true
+    },
+    {
+      "name": "cisco-ios-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cisco-ios-patterns",
+      "enabled": true
+    },
+    {
+      "name": "ciso-advisor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ciso-advisor",
+      "enabled": true
+    },
+    {
+      "name": "ciso-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ciso-review",
+      "enabled": true
+    },
+    {
+      "name": "ck",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ck",
+      "enabled": true
+    },
+    {
+      "name": "claude-devfleet",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/claude-devfleet",
+      "enabled": true
+    },
+    {
+      "name": "claude-handoff",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/claude-handoff",
+      "enabled": true
+    },
+    {
+      "name": "claude-reflect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/claude-reflect",
+      "enabled": true
+    },
+    {
+      "name": "click-path-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/click-path-audit",
+      "enabled": true
+    },
+    {
+      "name": "clickhouse-io",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/clickhouse-io",
+      "enabled": true
+    },
+    {
+      "name": "cloud-pentest",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cloud-pentest",
+      "enabled": true
+    },
+    {
+      "name": "cloud-saas-exposure",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cloud-saas-exposure",
+      "enabled": true
+    },
+    {
+      "name": "cloud-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cloud-security",
+      "enabled": true
+    },
+    {
+      "name": "code-improver",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/code-improver",
+      "enabled": true
+    },
+    {
+      "name": "code-maturity-assessor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/code-maturity-assessor",
+      "enabled": true
+    },
+    {
+      "name": "code-reviewer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/code-reviewer",
+      "enabled": true
+    },
+    {
+      "name": "code-tour",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/code-tour",
+      "enabled": true
+    },
+    {
+      "name": "codebase-onboarding",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/codebase-onboarding",
+      "enabled": true
+    },
+    {
+      "name": "codehealth-mcp",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/codehealth-mcp",
+      "enabled": true
+    },
+    {
+      "name": "codeql",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/codeql",
+      "enabled": true
+    },
+    {
+      "name": "coding-standards",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/coding-standards",
+      "enabled": true
+    },
+    {
+      "name": "compliance-os",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/compliance-os",
+      "enabled": true
+    },
+    {
+      "name": "compliance-readiness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/compliance-readiness",
+      "enabled": true
+    },
+    {
+      "name": "compose-multiplatform-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/compose-multiplatform-patterns",
+      "enabled": true
+    },
+    {
+      "name": "config-gc",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/config-gc",
+      "enabled": true
+    },
+    {
+      "name": "configure-ecc",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/configure-ecc",
+      "enabled": true
+    },
+    {
+      "name": "constant-time-analysis",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/constant-time-analysis",
+      "enabled": true
+    },
+    {
+      "name": "constant-time-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/constant-time-testing",
+      "enabled": true
+    },
+    {
+      "name": "content-hash-cache-pattern",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/content-hash-cache-pattern",
+      "enabled": true
+    },
+    {
+      "name": "context-and-decisions",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/context-and-decisions",
+      "enabled": true
+    },
+    {
+      "name": "context-budget",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/context-budget",
+      "enabled": true
+    },
+    {
+      "name": "context-engine",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/context-engine",
+      "enabled": true
+    },
+    {
+      "name": "continuous-agent-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/continuous-agent-loop",
+      "enabled": true
+    },
+    {
+      "name": "continuous-exposure-monitoring",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/continuous-exposure-monitoring",
+      "enabled": true
+    },
+    {
+      "name": "continuous-learning",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/continuous-learning",
+      "enabled": true
+    },
+    {
+      "name": "continuous-learning-v2",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/continuous-learning-v2",
+      "enabled": true
+    },
+    {
+      "name": "contract-first",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/contract-first",
+      "enabled": true
+    },
+    {
+      "name": "conventional-commit-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/conventional-commit-review",
+      "enabled": true
+    },
+    {
+      "name": "cosmos-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cosmos-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "cost-aware-llm-pipeline",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cost-aware-llm-pipeline",
+      "enabled": true
+    },
+    {
+      "name": "cost-tracking",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cost-tracking",
+      "enabled": true
+    },
+    {
+      "name": "coverage",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/coverage",
+      "enabled": true
+    },
+    {
+      "name": "coverage-analysis",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/coverage-analysis",
+      "enabled": true
+    },
+    {
+      "name": "cpp-coding-standards",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cpp-coding-standards",
+      "enabled": true
+    },
+    {
+      "name": "cpp-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cpp-testing",
+      "enabled": true
+    },
+    {
+      "name": "crypto-protocol-diagram",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/crypto-protocol-diagram",
+      "enabled": true
+    },
+    {
+      "name": "cs-agile-product-owner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-agile-product-owner",
+      "enabled": true
+    },
+    {
+      "name": "cs-backend-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-backend-engineer",
+      "enabled": true
+    },
+    {
+      "name": "cs-backend-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-backend-review",
+      "enabled": true
+    },
+    {
+      "name": "cs-engineering-lead",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-engineering-lead",
+      "enabled": true
+    },
+    {
+      "name": "cs-frontend-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-frontend-engineer",
+      "enabled": true
+    },
+    {
+      "name": "cs-frontend-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-frontend-review",
+      "enabled": true
+    },
+    {
+      "name": "cs-fullstack-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-fullstack-engineer",
+      "enabled": true
+    },
+    {
+      "name": "cs-fullstack-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-fullstack-review",
+      "enabled": true
+    },
+    {
+      "name": "cs-karpathy-reviewer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-karpathy-reviewer",
+      "enabled": true
+    },
+    {
+      "name": "cs-senior-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-senior-engineer",
+      "enabled": true
+    },
+    {
+      "name": "cs-wiki-ingestor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-wiki-ingestor",
+      "enabled": true
+    },
+    {
+      "name": "cs-wiki-librarian",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-wiki-librarian",
+      "enabled": true
+    },
+    {
+      "name": "cs-wiki-linter",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/cs-wiki-linter",
+      "enabled": true
+    },
+    {
+      "name": "csharp-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/csharp-testing",
+      "enabled": true
+    },
+    {
+      "name": "dart-flutter-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dart-flutter-patterns",
+      "enabled": true
+    },
+    {
+      "name": "dashboard-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dashboard-builder",
+      "enabled": true
+    },
+    {
+      "name": "data-quality-auditor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/data-quality-auditor",
+      "enabled": true
+    },
+    {
+      "name": "data-scraper-agent",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/data-scraper-agent",
+      "enabled": true
+    },
+    {
+      "name": "data-throughput-accelerator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/data-throughput-accelerator",
+      "enabled": true
+    },
+    {
+      "name": "database-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/database-designer",
+      "enabled": true
+    },
+    {
+      "name": "database-migrations",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/database-migrations",
+      "enabled": true
+    },
+    {
+      "name": "database-schema-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/database-schema-designer",
+      "enabled": true
+    },
+    {
+      "name": "deep-research",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/deep-research",
+      "enabled": true
+    },
+    {
+      "name": "deep-work",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/deep-work",
+      "enabled": true
+    },
+    {
+      "name": "deepseek-harness-setup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/deepseek-harness-setup",
+      "enabled": true
+    },
+    {
+      "name": "defi-amm-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/defi-amm-security",
+      "enabled": true
+    },
+    {
+      "name": "delivery-gate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/delivery-gate",
+      "enabled": true
+    },
+    {
+      "name": "dependency-auditor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dependency-auditor",
+      "enabled": true
+    },
+    {
+      "name": "deployment-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/deployment-patterns",
+      "enabled": true
+    },
+    {
+      "name": "design-control-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/design-control-loop",
+      "enabled": true
+    },
+    {
+      "name": "design-system",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/design-system",
+      "enabled": true
+    },
+    {
+      "name": "dev-team",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dev-team",
+      "enabled": true
+    },
+    {
+      "name": "devcontainer-setup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/devcontainer-setup",
+      "enabled": true
+    },
+    {
+      "name": "devops-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/devops-engineer",
+      "enabled": true
+    },
+    {
+      "name": "diagramming-code",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/diagramming-code",
+      "enabled": true
+    },
+    {
+      "name": "differential-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/differential-review",
+      "enabled": true
+    },
+    {
+      "name": "dimensional-analysis",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dimensional-analysis",
+      "enabled": true
+    },
+    {
+      "name": "django-celery",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/django-celery",
+      "enabled": true
+    },
+    {
+      "name": "django-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/django-patterns",
+      "enabled": true
+    },
+    {
+      "name": "django-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/django-security",
+      "enabled": true
+    },
+    {
+      "name": "django-tdd",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/django-tdd",
+      "enabled": true
+    },
+    {
+      "name": "django-verification",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/django-verification",
+      "enabled": true
+    },
+    {
+      "name": "dmux-workflows",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dmux-workflows",
+      "enabled": true
+    },
+    {
+      "name": "docker-development",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/docker-development",
+      "enabled": true
+    },
+    {
+      "name": "docker-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/docker-patterns",
+      "enabled": true
+    },
+    {
+      "name": "docs-governance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/docs-governance",
+      "enabled": true
+    },
+    {
+      "name": "documentation-lookup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/documentation-lookup",
+      "enabled": true
+    },
+    {
+      "name": "dotnet-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dotnet-patterns",
+      "enabled": true
+    },
+    {
+      "name": "dwarf-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dwarf-expert",
+      "enabled": true
+    },
+    {
+      "name": "dynamic-workflow-mode",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/dynamic-workflow-mode",
+      "enabled": true
+    },
+    {
+      "name": "e2e-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/e2e-testing",
+      "enabled": true
+    },
+    {
+      "name": "ecc-guide",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ecc-guide",
+      "enabled": true
+    },
+    {
+      "name": "ecc-recipes",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ecc-recipes",
+      "enabled": true
+    },
+    {
+      "name": "ecc-tools-cost-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ecc-tools-cost-audit",
+      "enabled": true
+    },
+    {
+      "name": "email-domain-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/email-domain-security",
+      "enabled": true
+    },
+    {
+      "name": "embedded-iot-mentor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/embedded-iot-mentor",
+      "enabled": true
+    },
+    {
+      "name": "engineering-advanced-skills",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/engineering-advanced-skills",
+      "enabled": true
+    },
+    {
+      "name": "engineering-skills",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/engineering-skills",
+      "enabled": true
+    },
+    {
+      "name": "enterprise-agent-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/enterprise-agent-ops",
+      "enabled": true
+    },
+    {
+      "name": "entry-point-analyzer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/entry-point-analyzer",
+      "enabled": true
+    },
+    {
+      "name": "env-secrets-manager",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/env-secrets-manager",
+      "enabled": true
+    },
+    {
+      "name": "error-handling",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/error-handling",
+      "enabled": true
+    },
+    {
+      "name": "esign-field-placement",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/esign-field-placement",
+      "enabled": true
+    },
+    {
+      "name": "eval",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/eval",
+      "enabled": true
+    },
+    {
+      "name": "eval-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/eval-harness",
+      "enabled": true
+    },
+    {
+      "name": "evm-token-decimals",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/evm-token-decimals",
+      "enabled": true
+    },
+    {
+      "name": "exa-search",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/exa-search",
+      "enabled": true
+    },
+    {
+      "name": "experiment-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/experiment-designer",
+      "enabled": true
+    },
+    {
+      "name": "exposure-risk-quantification",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/exposure-risk-quantification",
+      "enabled": true
+    },
+    {
+      "name": "extract",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/extract",
+      "enabled": true
+    },
+    {
+      "name": "fastapi-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fastapi-patterns",
+      "enabled": true
+    },
+    {
+      "name": "feature-flags-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/feature-flags-architect",
+      "enabled": true
+    },
+    {
+      "name": "firebase-apk-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/firebase-apk-scanner",
+      "enabled": true
+    },
+    {
+      "name": "fix",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fix",
+      "enabled": true
+    },
+    {
+      "name": "flag-cleanup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/flag-cleanup",
+      "enabled": true
+    },
+    {
+      "name": "flox-environments",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/flox-environments",
+      "enabled": true
+    },
+    {
+      "name": "flutter-dart-code-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/flutter-dart-code-review",
+      "enabled": true
+    },
+    {
+      "name": "focused-fix",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/focused-fix",
+      "enabled": true
+    },
+    {
+      "name": "foundation-models-on-device",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/foundation-models-on-device",
+      "enabled": true
+    },
+    {
+      "name": "fp-check",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fp-check",
+      "enabled": true
+    },
+    {
+      "name": "frontend-a11y",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/frontend-a11y",
+      "enabled": true
+    },
+    {
+      "name": "frontend-design-direction",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/frontend-design-direction",
+      "enabled": true
+    },
+    {
+      "name": "frontend-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/frontend-patterns",
+      "enabled": true
+    },
+    {
+      "name": "fsharp-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fsharp-testing",
+      "enabled": true
+    },
+    {
+      "name": "full-page-screenshot",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/full-page-screenshot",
+      "enabled": true
+    },
+    {
+      "name": "fuzzing-dictionary",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fuzzing-dictionary",
+      "enabled": true
+    },
+    {
+      "name": "fuzzing-obstacles",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/fuzzing-obstacles",
+      "enabled": true
+    },
+    {
+      "name": "gan-style-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gan-style-harness",
+      "enabled": true
+    },
+    {
+      "name": "gateguard",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gateguard",
+      "enabled": true
+    },
+    {
+      "name": "gcp-cloud-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gcp-cloud-architect",
+      "enabled": true
+    },
+    {
+      "name": "gdpr-audit-prep",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gdpr-audit-prep",
+      "enabled": true
+    },
+    {
+      "name": "gdpr-dsgvo-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gdpr-dsgvo-expert",
+      "enabled": true
+    },
+    {
+      "name": "generate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/generate",
+      "enabled": true
+    },
+    {
+      "name": "generating-python-installer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/generating-python-installer",
+      "enabled": true
+    },
+    {
+      "name": "gh-cli",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/gh-cli",
+      "enabled": true
+    },
+    {
+      "name": "git-workflow",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/git-workflow",
+      "enabled": true
+    },
+    {
+      "name": "git-worktree-manager",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/git-worktree-manager",
+      "enabled": true
+    },
+    {
+      "name": "github-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/github-ops",
+      "enabled": true
+    },
+    {
+      "name": "github-triage",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/github-triage",
+      "enabled": true
+    },
+    {
+      "name": "goal-prompt",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/goal-prompt",
+      "enabled": true
+    },
+    {
+      "name": "golang-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/golang-patterns",
+      "enabled": true
+    },
+    {
+      "name": "golang-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/golang-testing",
+      "enabled": true
+    },
+    {
+      "name": "google-harness2",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/google-harness2",
+      "enabled": true
+    },
+    {
+      "name": "google-workspace",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/google-workspace",
+      "enabled": true
+    },
+    {
+      "name": "google-workspace-cli",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/google-workspace-cli",
+      "enabled": true
+    },
+    {
+      "name": "google-workspace-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/google-workspace-ops",
+      "enabled": true
+    },
+    {
+      "name": "grade-iterate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/grade-iterate",
+      "enabled": true
+    },
+    {
+      "name": "graph-evolution",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/graph-evolution",
+      "enabled": true
+    },
+    {
+      "name": "harness-writing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/harness-writing",
+      "enabled": true
+    },
+    {
+      "name": "helm-chart-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/helm-chart-builder",
+      "enabled": true
+    },
+    {
+      "name": "hermes-imports",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hermes-imports",
+      "enabled": true
+    },
+    {
+      "name": "hexagonal-architecture",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hexagonal-architecture",
+      "enabled": true
+    },
+    {
+      "name": "hivemind",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hivemind",
+      "enabled": true
+    },
+    {
+      "name": "homelab-network-readiness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/homelab-network-readiness",
+      "enabled": true
+    },
+    {
+      "name": "homelab-network-setup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/homelab-network-setup",
+      "enabled": true
+    },
+    {
+      "name": "homelab-pihole-dns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/homelab-pihole-dns",
+      "enabled": true
+    },
+    {
+      "name": "homelab-vlan-segmentation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/homelab-vlan-segmentation",
+      "enabled": true
+    },
+    {
+      "name": "homelab-wireguard-vpn",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/homelab-wireguard-vpn",
+      "enabled": true
+    },
+    {
+      "name": "hookify-rules",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hookify-rules",
+      "enabled": true
+    },
+    {
+      "name": "hub-init",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hub-init",
+      "enabled": true
+    },
+    {
+      "name": "hub-status",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/hub-status",
+      "enabled": true
+    },
+    {
+      "name": "human-gate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/human-gate",
+      "enabled": true
+    },
+    {
+      "name": "i18n-sync",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/i18n-sync",
+      "enabled": true
+    },
+    {
+      "name": "identity-provider-recon",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/identity-provider-recon",
+      "enabled": true
+    },
+    {
+      "name": "implement-spec",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/implement-spec",
+      "enabled": true
+    },
+    {
+      "name": "improve-claude-md",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/improve-claude-md",
+      "enabled": true
+    },
+    {
+      "name": "incident-commander",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/incident-commander",
+      "enabled": true
+    },
+    {
+      "name": "information-security-manager-iso27001",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/information-security-manager-iso27001",
+      "enabled": true
+    },
+    {
+      "name": "inherit-legacy-style",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/inherit-legacy-style",
+      "enabled": true
+    },
+    {
+      "name": "intent-driven-development",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/intent-driven-development",
+      "enabled": true
+    },
+    {
+      "name": "isms-audit-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/isms-audit-expert",
+      "enabled": true
+    },
+    {
+      "name": "iso27001-audit-prep",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/iso27001-audit-prep",
+      "enabled": true
+    },
+    {
+      "name": "iterative-retrieval",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/iterative-retrieval",
+      "enabled": true
+    },
+    {
+      "name": "ito-baskets",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ito-baskets",
+      "enabled": true
+    },
+    {
+      "name": "ito-compute",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ito-compute",
+      "enabled": true
+    },
+    {
+      "name": "ito-inference",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ito-inference",
+      "enabled": true
+    },
+    {
+      "name": "ito-training",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ito-training",
+      "enabled": true
+    },
+    {
+      "name": "java-coding-standards",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/java-coding-standards",
+      "enabled": true
+    },
+    {
+      "name": "jpa-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/jpa-patterns",
+      "enabled": true
+    },
+    {
+      "name": "jury",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/jury",
+      "enabled": true
+    },
+    {
+      "name": "karpathy-check",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/karpathy-check",
+      "enabled": true
+    },
+    {
+      "name": "karpathy-coder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/karpathy-coder",
+      "enabled": true
+    },
+    {
+      "name": "knowledge-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/knowledge-ops",
+      "enabled": true
+    },
+    {
+      "name": "kotlin-coroutines-flows",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kotlin-coroutines-flows",
+      "enabled": true
+    },
+    {
+      "name": "kotlin-exposed-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kotlin-exposed-patterns",
+      "enabled": true
+    },
+    {
+      "name": "kotlin-ktor-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kotlin-ktor-patterns",
+      "enabled": true
+    },
+    {
+      "name": "kotlin-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kotlin-patterns",
+      "enabled": true
+    },
+    {
+      "name": "kotlin-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kotlin-testing",
+      "enabled": true
+    },
+    {
+      "name": "kubernetes-operator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kubernetes-operator",
+      "enabled": true
+    },
+    {
+      "name": "kubernetes-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/kubernetes-patterns",
+      "enabled": true
+    },
+    {
+      "name": "laravel-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/laravel-patterns",
+      "enabled": true
+    },
+    {
+      "name": "laravel-plugin-discovery",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/laravel-plugin-discovery",
+      "enabled": true
+    },
+    {
+      "name": "laravel-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/laravel-security",
+      "enabled": true
+    },
+    {
+      "name": "laravel-tdd",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/laravel-tdd",
+      "enabled": true
+    },
+    {
+      "name": "laravel-verification",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/laravel-verification",
+      "enabled": true
+    },
+    {
+      "name": "latency-critical-systems",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/latency-critical-systems",
+      "enabled": true
+    },
+    {
+      "name": "let-fate-decide",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/let-fate-decide",
+      "enabled": true
+    },
+    {
+      "name": "libafl",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/libafl",
+      "enabled": true
+    },
+    {
+      "name": "libfuzzer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/libfuzzer",
+      "enabled": true
+    },
+    {
+      "name": "liquid-glass-design",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/liquid-glass-design",
+      "enabled": true
+    },
+    {
+      "name": "litreview",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/litreview",
+      "enabled": true
+    },
+    {
+      "name": "living-docs-governance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/living-docs-governance",
+      "enabled": true
+    },
+    {
+      "name": "llm-cost-optimizer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/llm-cost-optimizer",
+      "enabled": true
+    },
+    {
+      "name": "llm-redteam",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/llm-redteam",
+      "enabled": true
+    },
+    {
+      "name": "llm-trading-agent-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/llm-trading-agent-security",
+      "enabled": true
+    },
+    {
+      "name": "llm-wiki",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/llm-wiki",
+      "enabled": true
+    },
+    {
+      "name": "loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/loop",
+      "enabled": true
+    },
+    {
+      "name": "loop-design-check",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/loop-design-check",
+      "enabled": true
+    },
+    {
+      "name": "loop-library",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/loop-library",
+      "enabled": true
+    },
+    {
+      "name": "mailtrap-email-integration",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mailtrap-email-integration",
+      "enabled": true
+    },
+    {
+      "name": "make-interfaces-feel-better",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/make-interfaces-feel-better",
+      "enabled": true
+    },
+    {
+      "name": "markdown-html-orchestrator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/markdown-html-orchestrator",
+      "enabled": true
+    },
+    {
+      "name": "mcp-dependency-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mcp-dependency-review",
+      "enabled": true
+    },
+    {
+      "name": "mcp-server-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mcp-server-audit",
+      "enabled": true
+    },
+    {
+      "name": "mcp-server-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mcp-server-builder",
+      "enabled": true
+    },
+    {
+      "name": "mcp-server-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mcp-server-patterns",
+      "enabled": true
+    },
+    {
+      "name": "md-document",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/md-document",
+      "enabled": true
+    },
+    {
+      "name": "md-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/md-review",
+      "enabled": true
+    },
+    {
+      "name": "memory-engineering",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/memory-engineering",
+      "enabled": true
+    },
+    {
+      "name": "memory-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/memory-review",
+      "enabled": true
+    },
+    {
+      "name": "memory-status",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/memory-status",
+      "enabled": true
+    },
+    {
+      "name": "merge",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/merge",
+      "enabled": true
+    },
+    {
+      "name": "mermaid-to-proverif",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mermaid-to-proverif",
+      "enabled": true
+    },
+    {
+      "name": "migrate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/migrate",
+      "enabled": true
+    },
+    {
+      "name": "migration-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/migration-architect",
+      "enabled": true
+    },
+    {
+      "name": "minimalist",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/minimalist",
+      "enabled": true
+    },
+    {
+      "name": "ml-adoption-playbook",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ml-adoption-playbook",
+      "enabled": true
+    },
+    {
+      "name": "mle-workflow",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mle-workflow",
+      "enabled": true
+    },
+    {
+      "name": "modern-cpp",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/modern-cpp",
+      "enabled": true
+    },
+    {
+      "name": "modern-python",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/modern-python",
+      "enabled": true
+    },
+    {
+      "name": "module-regression",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/module-regression",
+      "enabled": true
+    },
+    {
+      "name": "monorepo-navigator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/monorepo-navigator",
+      "enabled": true
+    },
+    {
+      "name": "motion-advanced",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/motion-advanced",
+      "enabled": true
+    },
+    {
+      "name": "motion-foundations",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/motion-foundations",
+      "enabled": true
+    },
+    {
+      "name": "motion-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/motion-patterns",
+      "enabled": true
+    },
+    {
+      "name": "mutation-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mutation-testing",
+      "enabled": true
+    },
+    {
+      "name": "mybatis-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mybatis-patterns",
+      "enabled": true
+    },
+    {
+      "name": "mysql-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/mysql-patterns",
+      "enabled": true
+    },
+    {
+      "name": "named-persona-adversarial-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/named-persona-adversarial-review",
+      "enabled": true
+    },
+    {
+      "name": "nanoclaw-repl",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nanoclaw-repl",
+      "enabled": true
+    },
+    {
+      "name": "narrow-react-prop-types",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/narrow-react-prop-types",
+      "enabled": true
+    },
+    {
+      "name": "nasiko-control-plane",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nasiko-control-plane",
+      "enabled": true
+    },
+    {
+      "name": "nestjs-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nestjs-patterns",
+      "enabled": true
+    },
+    {
+      "name": "netmiko-ssh-automation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/netmiko-ssh-automation",
+      "enabled": true
+    },
+    {
+      "name": "network-bgp-diagnostics",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/network-bgp-diagnostics",
+      "enabled": true
+    },
+    {
+      "name": "network-config-validation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/network-config-validation",
+      "enabled": true
+    },
+    {
+      "name": "network-interface-health",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/network-interface-health",
+      "enabled": true
+    },
+    {
+      "name": "nextjs-turbopack",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nextjs-turbopack",
+      "enabled": true
+    },
+    {
+      "name": "nodejs-keccak256",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nodejs-keccak256",
+      "enabled": true
+    },
+    {
+      "name": "notebooklm",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/notebooklm",
+      "enabled": true
+    },
+    {
+      "name": "nuxt4-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/nuxt4-patterns",
+      "enabled": true
+    },
+    {
+      "name": "observability-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/observability-designer",
+      "enabled": true
+    },
+    {
+      "name": "open-sourcing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/open-sourcing",
+      "enabled": true
+    },
+    {
+      "name": "openclaw-persona-forge",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/openclaw-persona-forge",
+      "enabled": true
+    },
+    {
+      "name": "opensource-pipeline",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/opensource-pipeline",
+      "enabled": true
+    },
+    {
+      "name": "operator-approval-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/operator-approval-loop",
+      "enabled": true
+    },
+    {
+      "name": "operator-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/operator-audit",
+      "enabled": true
+    },
+    {
+      "name": "orch-add-feature",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-add-feature",
+      "enabled": true
+    },
+    {
+      "name": "orch-build-mvp",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-build-mvp",
+      "enabled": true
+    },
+    {
+      "name": "orch-change-feature",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-change-feature",
+      "enabled": true
+    },
+    {
+      "name": "orch-fix-defect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-fix-defect",
+      "enabled": true
+    },
+    {
+      "name": "orch-pipeline",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-pipeline",
+      "enabled": true
+    },
+    {
+      "name": "orch-refine-code",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/orch-refine-code",
+      "enabled": true
+    },
+    {
+      "name": "org-attack-surface",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/org-attack-surface",
+      "enabled": true
+    },
+    {
+      "name": "osint-autopilot",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/osint-autopilot",
+      "enabled": true
+    },
+    {
+      "name": "osint-investigation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/osint-investigation",
+      "enabled": true
+    },
+    {
+      "name": "osint-methodology",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/osint-methodology",
+      "enabled": true
+    },
+    {
+      "name": "ossfuzz",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ossfuzz",
+      "enabled": true
+    },
+    {
+      "name": "panel-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/panel-review",
+      "enabled": true
+    },
+    {
+      "name": "parallel-execution-optimizer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/parallel-execution-optimizer",
+      "enabled": true
+    },
+    {
+      "name": "performance-profiler",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/performance-profiler",
+      "enabled": true
+    },
+    {
+      "name": "perl-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/perl-patterns",
+      "enabled": true
+    },
+    {
+      "name": "perl-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/perl-security",
+      "enabled": true
+    },
+    {
+      "name": "perl-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/perl-testing",
+      "enabled": true
+    },
+    {
+      "name": "pipeline",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pipeline",
+      "enabled": true
+    },
+    {
+      "name": "plan-canvas",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/plan-canvas",
+      "enabled": true
+    },
+    {
+      "name": "plan-orchestrate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/plan-orchestrate",
+      "enabled": true
+    },
+    {
+      "name": "plankton-code-quality",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/plankton-code-quality",
+      "enabled": true
+    },
+    {
+      "name": "playwright-cli",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/playwright-cli",
+      "enabled": true
+    },
+    {
+      "name": "playwright-pro",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/playwright-pro",
+      "enabled": true
+    },
+    {
+      "name": "plugin-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/plugin-audit",
+      "enabled": true
+    },
+    {
+      "name": "post-mortem",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/post-mortem",
+      "enabled": true
+    },
+    {
+      "name": "post-patch-validation",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/post-patch-validation",
+      "enabled": true
+    },
+    {
+      "name": "postgres-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/postgres-patterns",
+      "enabled": true
+    },
+    {
+      "name": "postmortem",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/postmortem",
+      "enabled": true
+    },
+    {
+      "name": "pr",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pr",
+      "enabled": true
+    },
+    {
+      "name": "pr-improver",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pr-improver",
+      "enabled": true
+    },
+    {
+      "name": "pr-review-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pr-review-expert",
+      "enabled": true
+    },
+    {
+      "name": "prediction-market-oracle-research",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prediction-market-oracle-research",
+      "enabled": true
+    },
+    {
+      "name": "prediction-market-risk-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prediction-market-risk-review",
+      "enabled": true
+    },
+    {
+      "name": "prisma-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prisma-patterns",
+      "enabled": true
+    },
+    {
+      "name": "production-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/production-audit",
+      "enabled": true
+    },
+    {
+      "name": "project-flow-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/project-flow-ops",
+      "enabled": true
+    },
+    {
+      "name": "promote",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/promote",
+      "enabled": true
+    },
+    {
+      "name": "prompt-caching-strategy",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prompt-caching-strategy",
+      "enabled": true
+    },
+    {
+      "name": "prompt-governance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prompt-governance",
+      "enabled": true
+    },
+    {
+      "name": "prompt-optimizer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/prompt-optimizer",
+      "enabled": true
+    },
+    {
+      "name": "property-based-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/property-based-testing",
+      "enabled": true
+    },
+    {
+      "name": "pulse",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pulse",
+      "enabled": true
+    },
+    {
+      "name": "pw-init",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pw-init",
+      "enabled": true
+    },
+    {
+      "name": "pw-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pw-review",
+      "enabled": true
+    },
+    {
+      "name": "python-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/python-patterns",
+      "enabled": true
+    },
+    {
+      "name": "python-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/python-testing",
+      "enabled": true
+    },
+    {
+      "name": "pytorch-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/pytorch-patterns",
+      "enabled": true
+    },
+    {
+      "name": "quarkus-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/quarkus-patterns",
+      "enabled": true
+    },
+    {
+      "name": "quarkus-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/quarkus-security",
+      "enabled": true
+    },
+    {
+      "name": "quarkus-tdd",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/quarkus-tdd",
+      "enabled": true
+    },
+    {
+      "name": "quarkus-verification",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/quarkus-verification",
+      "enabled": true
+    },
+    {
+      "name": "rag-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rag-architect",
+      "enabled": true
+    },
+    {
+      "name": "rails-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rails-patterns",
+      "enabled": true
+    },
+    {
+      "name": "ralphinho-rfc-pipeline",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ralphinho-rfc-pipeline",
+      "enabled": true
+    },
+    {
+      "name": "react-native-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/react-native-patterns",
+      "enabled": true
+    },
+    {
+      "name": "react-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/react-patterns",
+      "enabled": true
+    },
+    {
+      "name": "react-performance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/react-performance",
+      "enabled": true
+    },
+    {
+      "name": "react-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/react-testing",
+      "enabled": true
+    },
+    {
+      "name": "recsys-pipeline-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/recsys-pipeline-architect",
+      "enabled": true
+    },
+    {
+      "name": "recursive-decision-ledger",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/recursive-decision-ledger",
+      "enabled": true
+    },
+    {
+      "name": "red-team",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/red-team",
+      "enabled": true
+    },
+    {
+      "name": "redis-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/redis-patterns",
+      "enabled": true
+    },
+    {
+      "name": "reflect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/reflect",
+      "enabled": true
+    },
+    {
+      "name": "regex-vs-llm-structured-text",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/regex-vs-llm-structured-text",
+      "enabled": true
+    },
+    {
+      "name": "remember",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/remember",
+      "enabled": true
+    },
+    {
+      "name": "repo-scan",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/repo-scan",
+      "enabled": true
+    },
+    {
+      "name": "report",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/report",
+      "enabled": true
+    },
+    {
+      "name": "request-rider-harness",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/request-rider-harness",
+      "enabled": true
+    },
+    {
+      "name": "review-pr",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/review-pr",
+      "enabled": true
+    },
+    {
+      "name": "review-walkthrough",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/review-walkthrough",
+      "enabled": true
+    },
+    {
+      "name": "rpi",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rpi",
+      "enabled": true
+    },
+    {
+      "name": "rules-distill",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rules-distill",
+      "enabled": true
+    },
+    {
+      "name": "run",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/run",
+      "enabled": true
+    },
+    {
+      "name": "run-claude-osint",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/run-claude-osint",
+      "enabled": true
+    },
+    {
+      "name": "run-without-you",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/run-without-you",
+      "enabled": true
+    },
+    {
+      "name": "runbook-generator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/runbook-generator",
+      "enabled": true
+    },
+    {
+      "name": "rust-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rust-patterns",
+      "enabled": true
+    },
+    {
+      "name": "rust-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rust-review",
+      "enabled": true
+    },
+    {
+      "name": "rust-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/rust-testing",
+      "enabled": true
+    },
+    {
+      "name": "ruzzy",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ruzzy",
+      "enabled": true
+    },
+    {
+      "name": "saas-scaffolder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/saas-scaffolder",
+      "enabled": true
+    },
+    {
+      "name": "safety-guard",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/safety-guard",
+      "enabled": true
+    },
+    {
+      "name": "sarif-parsing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/sarif-parsing",
+      "enabled": true
+    },
+    {
+      "name": "search-first",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/search-first",
+      "enabled": true
+    },
+    {
+      "name": "second-opinion",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/second-opinion",
+      "enabled": true
+    },
+    {
+      "name": "secrets-vault-manager",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/secrets-vault-manager",
+      "enabled": true
+    },
+    {
+      "name": "secure-workflow-guide",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/secure-workflow-guide",
+      "enabled": true
+    },
+    {
+      "name": "security-bounty-hunter",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/security-bounty-hunter",
+      "enabled": true
+    },
+    {
+      "name": "security-guidance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/security-guidance",
+      "enabled": true
+    },
+    {
+      "name": "security-pen-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/security-pen-testing",
+      "enabled": true
+    },
+    {
+      "name": "security-review",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/security-review",
+      "enabled": true
+    },
+    {
+      "name": "security-scan",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/security-scan",
+      "enabled": true
+    },
+    {
+      "name": "self-eval",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/self-eval",
+      "enabled": true
+    },
+    {
+      "name": "self-improving-agent",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/self-improving-agent",
+      "enabled": true
+    },
+    {
+      "name": "semgrep",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/semgrep",
+      "enabled": true
+    },
+    {
+      "name": "semgrep-rule-creator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/semgrep-rule-creator",
+      "enabled": true
+    },
+    {
+      "name": "semgrep-rule-variant-creator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/semgrep-rule-variant-creator",
+      "enabled": true
+    },
+    {
+      "name": "senior-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-architect",
+      "enabled": true
+    },
+    {
+      "name": "senior-backend",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-backend",
+      "enabled": true
+    },
+    {
+      "name": "senior-computer-vision",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-computer-vision",
+      "enabled": true
+    },
+    {
+      "name": "senior-data-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-data-engineer",
+      "enabled": true
+    },
+    {
+      "name": "senior-data-scientist",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-data-scientist",
+      "enabled": true
+    },
+    {
+      "name": "senior-devops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-devops",
+      "enabled": true
+    },
+    {
+      "name": "senior-frontend",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-frontend",
+      "enabled": true
+    },
+    {
+      "name": "senior-fullstack",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-fullstack",
+      "enabled": true
+    },
+    {
+      "name": "senior-ml-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-ml-engineer",
+      "enabled": true
+    },
+    {
+      "name": "senior-pm",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-pm",
+      "enabled": true
+    },
+    {
+      "name": "senior-prompt-engineer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-prompt-engineer",
+      "enabled": true
+    },
+    {
+      "name": "senior-qa",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-qa",
+      "enabled": true
+    },
+    {
+      "name": "senior-secops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-secops",
+      "enabled": true
+    },
+    {
+      "name": "senior-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/senior-security",
+      "enabled": true
+    },
+    {
+      "name": "setup",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/setup",
+      "enabled": true
+    },
+    {
+      "name": "setup-ts-deep-modules",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/setup-ts-deep-modules",
+      "enabled": true
+    },
+    {
+      "name": "sharp-edges",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/sharp-edges",
+      "enabled": true
+    },
+    {
+      "name": "ship-gate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ship-gate",
+      "enabled": true
+    },
+    {
+      "name": "show-me",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/show-me",
+      "enabled": true
+    },
+    {
+      "name": "site-architecture",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/site-architecture",
+      "enabled": true
+    },
+    {
+      "name": "skill-comply",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-comply",
+      "enabled": true
+    },
+    {
+      "name": "skill-doctor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-doctor",
+      "enabled": true
+    },
+    {
+      "name": "skill-host-compat",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-host-compat",
+      "enabled": true
+    },
+    {
+      "name": "skill-improver",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-improver",
+      "enabled": true
+    },
+    {
+      "name": "skill-scout",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-scout",
+      "enabled": true
+    },
+    {
+      "name": "skill-security-auditor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-security-auditor",
+      "enabled": true
+    },
+    {
+      "name": "skill-stocktake",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-stocktake",
+      "enabled": true
+    },
+    {
+      "name": "skill-tester",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skill-tester",
+      "enabled": true
+    },
+    {
+      "name": "skillopt-sleep",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/skillopt-sleep",
+      "enabled": true
+    },
+    {
+      "name": "slicing-code-context",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/slicing-code-context",
+      "enabled": true
+    },
+    {
+      "name": "slo-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/slo-architect",
+      "enabled": true
+    },
+    {
+      "name": "slo-design",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/slo-design",
+      "enabled": true
+    },
+    {
+      "name": "snowflake-development",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/snowflake-development",
+      "enabled": true
+    },
+    {
+      "name": "soc2-audit-prep",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/soc2-audit-prep",
+      "enabled": true
+    },
+    {
+      "name": "solana-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/solana-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "spawn",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/spawn",
+      "enabled": true
+    },
+    {
+      "name": "spec-driven-workflow",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/spec-driven-workflow",
+      "enabled": true
+    },
+    {
+      "name": "spec-to-code-compliance",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/spec-to-code-compliance",
+      "enabled": true
+    },
+    {
+      "name": "spec-to-repo",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/spec-to-repo",
+      "enabled": true
+    },
+    {
+      "name": "spinning-up-deep-rl",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/spinning-up-deep-rl",
+      "enabled": true
+    },
+    {
+      "name": "springboot-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/springboot-patterns",
+      "enabled": true
+    },
+    {
+      "name": "springboot-security",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/springboot-security",
+      "enabled": true
+    },
+    {
+      "name": "springboot-tdd",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/springboot-tdd",
+      "enabled": true
+    },
+    {
+      "name": "springboot-verification",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/springboot-verification",
+      "enabled": true
+    },
+    {
+      "name": "sql-database-assistant",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/sql-database-assistant",
+      "enabled": true
+    },
+    {
+      "name": "statistical-analyst",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/statistical-analyst",
+      "enabled": true
+    },
+    {
+      "name": "stress-test",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/stress-test",
+      "enabled": true
+    },
+    {
+      "name": "strict-api",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/strict-api",
+      "enabled": true
+    },
+    {
+      "name": "stripe-integration-expert",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/stripe-integration-expert",
+      "enabled": true
+    },
+    {
+      "name": "substrate-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/substrate-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "swift-actor-persistence",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/swift-actor-persistence",
+      "enabled": true
+    },
+    {
+      "name": "swift-concurrency-6-2",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/swift-concurrency-6-2",
+      "enabled": true
+    },
+    {
+      "name": "swift-protocol-di-testing",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/swift-protocol-di-testing",
+      "enabled": true
+    },
+    {
+      "name": "swiftui-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/swiftui-patterns",
+      "enabled": true
+    },
+    {
+      "name": "tc",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tc",
+      "enabled": true
+    },
+    {
+      "name": "tc-tracker",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tc-tracker",
+      "enabled": true
+    },
+    {
+      "name": "tdd-guide",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tdd-guide",
+      "enabled": true
+    },
+    {
+      "name": "tdd-workflow",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tdd-workflow",
+      "enabled": true
+    },
+    {
+      "name": "tech-debt",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tech-debt",
+      "enabled": true
+    },
+    {
+      "name": "tech-debt-tracker",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tech-debt-tracker",
+      "enabled": true
+    },
+    {
+      "name": "tech-stack-evaluator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tech-stack-evaluator",
+      "enabled": true
+    },
+    {
+      "name": "terminal-opener",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/terminal-opener",
+      "enabled": true
+    },
+    {
+      "name": "terminal-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/terminal-ops",
+      "enabled": true
+    },
+    {
+      "name": "terraform-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/terraform-patterns",
+      "enabled": true
+    },
+    {
+      "name": "test-collaboration",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/test-collaboration",
+      "enabled": true
+    },
+    {
+      "name": "testing-handbook-generator",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/testing-handbook-generator",
+      "enabled": true
+    },
+    {
+      "name": "testrail",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/testrail",
+      "enabled": true
+    },
+    {
+      "name": "threat-detection",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/threat-detection",
+      "enabled": true
+    },
+    {
+      "name": "tinystruct-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tinystruct-patterns",
+      "enabled": true
+    },
+    {
+      "name": "token-budget-advisor",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/token-budget-advisor",
+      "enabled": true
+    },
+    {
+      "name": "token-card",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/token-card",
+      "enabled": true
+    },
+    {
+      "name": "token-integration-analyzer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/token-integration-analyzer",
+      "enabled": true
+    },
+    {
+      "name": "ton-vulnerability-scanner",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ton-vulnerability-scanner",
+      "enabled": true
+    },
+    {
+      "name": "trailmark",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark",
+      "enabled": true
+    },
+    {
+      "name": "trailmark-finding-triage",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark-finding-triage",
+      "enabled": true
+    },
+    {
+      "name": "trailmark-review-gate",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark-review-gate",
+      "enabled": true
+    },
+    {
+      "name": "trailmark-structural",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark-structural",
+      "enabled": true
+    },
+    {
+      "name": "trailmark-summary",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark-summary",
+      "enabled": true
+    },
+    {
+      "name": "trailmark-variant-neighborhood",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/trailmark-variant-neighborhood",
+      "enabled": true
+    },
+    {
+      "name": "tripwire",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/tripwire",
+      "enabled": true
+    },
+    {
+      "name": "ui-demo",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ui-demo",
+      "enabled": true
+    },
+    {
+      "name": "ui-design-system",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ui-design-system",
+      "enabled": true
+    },
+    {
+      "name": "ui-to-vue",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ui-to-vue",
+      "enabled": true
+    },
+    {
+      "name": "uncloud",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/uncloud",
+      "enabled": true
+    },
+    {
+      "name": "unified-memory",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/unified-memory",
+      "enabled": true
+    },
+    {
+      "name": "unified-notifications-ops",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/unified-notifications-ops",
+      "enabled": true
+    },
+    {
+      "name": "universal-scraping-architect",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/universal-scraping-architect",
+      "enabled": true
+    },
+    {
+      "name": "unlazy",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/unlazy",
+      "enabled": true
+    },
+    {
+      "name": "unslop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/unslop",
+      "enabled": true
+    },
+    {
+      "name": "ux-researcher-designer",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/ux-researcher-designer",
+      "enabled": true
+    },
+    {
+      "name": "variant-analysis",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/variant-analysis",
+      "enabled": true
+    },
+    {
+      "name": "vector-forge",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/vector-forge",
+      "enabled": true
+    },
+    {
+      "name": "verification-loop",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/verification-loop",
+      "enabled": true
+    },
+    {
+      "name": "visual-pr",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/visual-pr",
+      "enabled": true
+    },
+    {
+      "name": "vite-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/vite-patterns",
+      "enabled": true
+    },
+    {
+      "name": "vue-patterns",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/vue-patterns",
+      "enabled": true
+    },
+    {
+      "name": "vulnerability-triage-brocards",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/vulnerability-triage-brocards",
+      "enabled": true
+    },
+    {
+      "name": "wiki-ingest",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wiki-ingest",
+      "enabled": true
+    },
+    {
+      "name": "wiki-init",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wiki-init",
+      "enabled": true
+    },
+    {
+      "name": "wiki-lint",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wiki-lint",
+      "enabled": true
+    },
+    {
+      "name": "wiki-log",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wiki-log",
+      "enabled": true
+    },
+    {
+      "name": "wiki-query",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wiki-query",
+      "enabled": true
+    },
+    {
+      "name": "windows-desktop-e2e",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/windows-desktop-e2e",
+      "enabled": true
+    },
+    {
+      "name": "workflow-builder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/workflow-builder",
+      "enabled": true
+    },
+    {
+      "name": "workspace-surface-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/workspace-surface-audit",
+      "enabled": true
+    },
+    {
+      "name": "wrap-up",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wrap-up",
+      "enabled": true
+    },
+    {
+      "name": "write-a-skill",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/write-a-skill",
+      "enabled": true
+    },
+    {
+      "name": "wycheproof",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/wycheproof",
+      "enabled": true
+    },
+    {
+      "name": "yara-rule-authoring",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/yara-rule-authoring",
+      "enabled": true
+    },
+    {
+      "name": "zero-hallucination-coder",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/zero-hallucination-coder",
+      "enabled": true
+    },
+    {
+      "name": "zeroize-audit",
+      "path": "/home/kali/Desktop/DevBackUp-29.10/.agents/skills/zeroize-audit",
+      "enabled": true
+    }
+  ]
+}

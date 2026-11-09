@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "request-rider-mcp": {
+      "command": "/home/kali/Desktop/DevBackUp-29.10/request-rider-mcp/.venv/bin/python",
+      "args": [
+        "/home/kali/Desktop/DevBackUp-29.10/request-rider-mcp/server.py"
+      ],
+      "env": {
+        "REQUEST_RIDER_URL": "http://127.0.0.1:8000",
+        "RR_GATEWAY_URL": "http://127.0.0.1:8000",
+        "RR_ENGINE_URL": "http://127.0.0.1:8081",
+        "RR_WORKER_URL": "http://127.0.0.1:8001"
+      }
+    }
+  }
+}
