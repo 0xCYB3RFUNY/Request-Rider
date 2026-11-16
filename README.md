@@ -31,9 +31,7 @@
 12. [Обробка помилок](#12-обробка-помилок)
 13. [Troubleshooting](#13-troubleshooting)
 14. [FAQ](#14-faq)
-15. [Best practices](#15-best-practices)
-16. [Повний checklist](#16-повний-checklist)
-17. [Матриця покриття функцій](#17-матриця-покриття-функцій)
+
 
 ---
 
