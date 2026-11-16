@@ -1,0 +1,9 @@
+# Build context for tor/Dockerfile.
+#
+# The image needs exactly two files: torrc and the Dockerfile itself.
+
+# Anything beyond the Tor configuration is not part of this image.
+*
+!torrc
+!Dockerfile
+!README.md

@@ -1,0 +1,83 @@
+  <section id="decoder" class="tab">
+    <div id="workspace-tabs-decoder" class="workspace-tabs" aria-label="Decoder workspaces" data-i18n-aria-label="a11y.workspacesDecoder"><div class="tool-corner-actions"><button type="button" class="tab-faq-trigger icon-btn" data-tab="decoder" title="Довідка / FAQ" aria-label="FAQ & Manual">❓ <span data-i18n="faq.button">FAQ</span></button><button type="button" class="tab-settings-trigger icon-btn" data-tab="decoder" title="Налаштування Decoder" aria-label="Налаштування Decoder">⚙️</button></div></div>
+    <div class="workspace-title"><span data-i18n="decoder.title">Decoder</span><span class="muted" data-i18n="decoder.subtitle">Encode, decode and transform request data</span></div>
+    <div class="toolbar">
+      <select id="decoder-operation" aria-label="Decoder operation" data-i18n-aria-label="decoder.operation">
+        <option value="urlEncode">URL encode</option><option value="urlDecode">URL decode</option>
+        <option value="base64Encode">Base64 encode</option><option value="base64Decode">Base64 decode</option>
+        <option value="base64UrlEncode">Base64 URL-safe encode</option><option value="base64UrlDecode">Base64 URL-safe decode</option>
+        <option value="htmlEncode">HTML encode</option><option value="htmlDecode">HTML decode</option>
+        <option value="hexEncode">Hex encode</option><option value="hexDecode">Hex decode</option>
+        <option value="asciiHexEncode">ASCII Hex encode</option><option value="asciiHexDecode">ASCII Hex decode</option>
+        <option value="octalEncode">Octal encode</option><option value="octalDecode">Octal decode</option>
+        <option value="gzipEncode">Gzip encode</option><option value="gzipDecode">Gzip decode</option>
+        <option value="byteEncode">Byte encode</option><option value="byteDecode">Byte decode</option>
+        <option value="jsonPretty">JSON pretty-print</option><option value="jsonMinify">JSON minify</option>
+        <option value="sha256">SHA-256 hash</option>
+      </select>
+      <button type="button" class="primary" id="decoder-apply" data-i18n="decoder.apply">Apply</button>
+      <button type="button" id="decoder-swap" data-i18n="decoder.swap">Swap input/output</button>
+      <button type="button" id="decoder-clear" data-i18n="decoder.clear">Clear</button>
+      <button type="button" id="decoder-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+    </div>
+    <div class="comparer-grid">
+      <section><div class="workspace-title"><span data-i18n="decoder.input">Input</span><span class="muted" data-i18n="decoder.inputHint">Text or hexadecimal data</span></div><textarea id="decoder-input" aria-label="Decoder input" data-i18n-aria-label="decoder.input" spellcheck="false" data-i18n-placeholder="decoder.inputPlaceholder" placeholder="Paste a value, request fragment or response body"></textarea></section>
+      <section><div class="workspace-title"><span data-i18n="decoder.output">Output</span><span id="decoder-status" class="muted"></span></div><textarea id="decoder-output" aria-label="Decoder output" data-i18n-aria-label="decoder.output" spellcheck="false" readonly data-i18n-placeholder="decoder.outputPlaceholder" placeholder="Decoded value will appear here"></textarea></section>
+    </div>
+    <!-- F5: JWT & Crypto Forge Studio -->
+    <div id="jwt-forge-studio" style="margin-top:12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:10px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <strong style="font-size:13px;"><span aria-hidden="true">🔐</span> <span data-i18n="decoder.jwtForgeTitle">JWT &amp; Crypto Forge Studio</span></strong>
+          <span id="jwt-forge-status" class="muted" style="font-size:11.5px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <select id="jwt-project-tokens" style="font-size:11.5px;padding:3px 6px;max-width:220px;"><option value="">-- Project JWT Secrets --</option></select>
+          <button type="button" id="jwt-refresh-context-btn" style="padding:3px 8px;font-size:11px;min-height:24px;">↻ Sync Project</button>
+          <button type="button" class="primary" id="jwt-forge-run-btn" data-i18n="decoder.jwtForgeRun">⚡ Forge Attack Vectors</button>
+        </div>
+      </div>
+      <div class="muted" style="font-size:11px;margin-bottom:8px;padding:4px 8px;background:var(--panel);border-radius:4px;border-left:2px solid var(--accent);">
+        1) Вставте JWT (або оберіть із <strong>Project JWT Secrets</strong>) → 2) Відредагуйте Header / Payload (напр. <code>"role": "admin"</code>) → 3) Натисніть <strong>⚡ Forge Attack Vectors</strong> → 4) Натисніть <strong>↩ Repeater</strong> біля потрібної атаки, щоб повернути токен у запит.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">JWT Token</label>
+          <textarea id="jwt-forge-token" rows="3" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="width:100%;font-family:monospace;font-size:11.5px;"></textarea>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+            <input type="text" id="jwt-forge-secret" placeholder="HMAC Secret (or leave blank)" style="font-size:11.5px;padding:4px 6px;">
+            <input type="text" id="jwt-forge-oast" placeholder="OAST URL for JKU/X5U" style="font-size:11.5px;padding:4px 6px;">
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px;font-size:11px;">
+            <label style="display:inline-flex;align-items:center;gap:4px;text-transform:none;cursor:pointer;"><input type="checkbox" id="jwt-extend-exp"> <span>Extend exp (+1 yr)</span></label>
+            <input type="text" id="jwt-forge-pubkey" placeholder="Public Key PEM (for RS256→HS256)" style="flex:1;font-size:11px;padding:3px 6px;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div>
+            <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Header JSON</label>
+            <textarea id="jwt-forge-header" rows="5" spellcheck="false" style="width:100%;font-family:monospace;font-size:11.5px;"></textarea>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Payload Claims JSON (tamper)</label>
+            <textarea id="jwt-forge-payload" rows="5" spellcheck="false" style="width:100%;font-family:monospace;font-size:11.5px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow-x:auto;">
+        <table class="ri-table" style="width:100%;font-size:11.5px;">
+          <thead>
+            <tr>
+              <th style="width:24%;">Attack Vector</th>
+              <th style="width:14%;">Category</th>
+              <th>Mutated JWT</th>
+              <th style="width:200px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jwt-forge-variants-tbody">
+            <tr><td colspan="4" class="muted" style="text-align:center;padding:10px;">Paste a JWT or pick one from Project Secrets and click «Forge Attack Vectors».</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>

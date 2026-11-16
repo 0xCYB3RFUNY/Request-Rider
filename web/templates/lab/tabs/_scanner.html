@@ -1,0 +1,372 @@
+  <section id="scanner" class="tab">
+    <div id="workspace-tabs-scanner" class="workspace-tabs" aria-label="Scanner workspaces" data-i18n-aria-label="a11y.workspacesScanner"><div class="tool-corner-actions"><button type="button" class="tab-faq-trigger icon-btn" data-tab="scanner" title="Довідка / FAQ" aria-label="FAQ & Manual">❓ <span data-i18n="faq.button">FAQ</span></button><button type="button" class="tab-settings-trigger icon-btn" data-tab="scanner" title="Налаштування Scanner" aria-label="Налаштування Scanner">⚙️</button></div></div>
+    <div class="workspace-title"><span data-i18n="scanner.title">Scanner</span><span class="muted" data-i18n="scanner.subtitle">Read-only reconnaissance</span></div>
+    <div class="scanner-view-switch" role="tablist" aria-label="Scanner view" data-i18n-aria-label="a11y.scannerView">
+      <button type="button" id="scanner-view-cms" role="tab" data-view="cms" aria-selected="true" aria-controls="scanner-panel-cms" data-i18n="scanner.viewCms">CMS scan</button>
+      <button type="button" id="scanner-view-nuclei" role="tab" data-view="nuclei" aria-selected="false" aria-controls="scanner-panel-nuclei" data-i18n="scanner.viewNuclei">Nuclei scan</button>
+      <button type="button" id="scanner-view-active" role="tab" data-view="active" aria-selected="false" aria-controls="scanner-panel-active" data-i18n="scanner.viewActive">Active &amp; Corpus Scanner</button>
+      <button type="button" id="scanner-view-openvas" role="tab" data-view="openvas" aria-selected="false" aria-controls="scanner-panel-openvas" data-i18n="scanner.viewOpenvas">OpenVAS (GVM)</button>
+    </div>
+    <div class="toolbar"><span class="muted" data-i18n="scanner.targetLabel">Target</span><input id="scanner-url" type="url" data-i18n-placeholder="scanner.urlPlaceholder" placeholder="https://example.test/" aria-label="Scanner target URL" data-i18n-aria-label="scanner.urlPlaceholder" style="flex:1;min-width:260px"></div>
+
+    <section id="scanner-panel-cms" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-cms" data-scanner-panel="cms">
+      <div class="hint" data-i18n="scanner.disclaimer">Scanner Pro performs read-only reconnaissance: CMS fingerprints, public paths, TLS, cookies, methods, headers, and configuration exposure signals. It does not exploit, fuzz, brute-force, or bypass access controls.</div>
+      <div class="toolbar">
+        <label class="scanner-type-control" for="scanner-profile"><span class="muted" data-i18n="scanner.profileLabel">Profile</span><select id="scanner-profile"><option value="generic_web" data-i18n="scanner.profileGenericWeb">Generic Web</option><option value="cms" data-i18n="scanner.profileCMS">CMS Focus</option><option value="api" data-i18n="scanner.profileAPI">API &amp; Cloud</option><option value="security_headers" data-i18n="scanner.profileSecurityHeaders">Security Headers (Passive)</option></select></label>
+        <button type="button" class="primary" id="scanner-run" data-i18n="scanner.run">Run Safe CMS Recon</button>
+        <button type="button" id="scanner-clear" data-i18n="scanner.clear">Clear</button>
+        <span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="cms"><button type="button" id="scanner-export-cms" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export cms scan" data-i18n-aria-label="scanner.exportCmsAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list" role="menu" hidden><button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button><button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button><button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.exportCsvHint">One row per file</span></button><button type="button" role="menuitem" data-format="xml"><b>XML</b><span>Structured XML report</span></button><button type="button" role="menuitem" data-format="msf-xml"><b>Metasploit XML</b><span>For msfconsole db_import</span></button></div></div>
+        <button type="button" id="scanner-send-ai" data-i18n="button.sendScannerAI">Send scan to AI</button>
+        <button type="button" id="scanner-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+      </div>
+      <div class="workspace-title" id="scanner-cms-findings-title" hidden><span data-i18n="scanner.cmsFindingsTitle">Reconnaissance Findings</span><span id="scanner-cms-findings-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div class="toolbar" id="scanner-cms-filter-bar" hidden><input id="scanner-cms-filter" aria-label="Filter CMS findings" data-i18n-aria-label="scanner.cmsFilterHint" data-i18n-placeholder="scanner.cmsFilterHint" placeholder="Filter by finding, category, evidence or recommendation" style="flex:1;min-width:200px"><select id="scanner-cms-severity" aria-label="Filter by severity"><option value="" data-i18n="scanner.activeAllSeverities">All severities</option><option value="high">HIGH</option><option value="medium">MEDIUM</option><option value="low">LOW</option><option value="info">INFO</option></select><select id="scanner-cms-category" aria-label="Filter by category"><option value="" data-i18n="scanner.cmsAllCategories">All categories</option><option value="cms">CMS</option><option value="admin">Admin</option><option value="api">API</option><option value="headers">Headers</option><option value="cookie">Cookie</option><option value="tls">TLS</option><option value="waf">WAF</option><option value="misconfiguration">Misconfiguration</option><option value="debug">Debug</option><option value="general">General</option></select></div>
+      <div class="exchange-list" id="scanner-cms-results" hidden><table><colgroup><col style="width:10%"><col style="width:12%"><col style="width:28%"><col style="width:25%"><col style="width:25%"></colgroup><thead><tr><th class="sortable-th" data-sort="severity" data-i18n="scanner.cmsColumnSeverity">Severity</th><th class="sortable-th" data-sort="category" data-i18n="scanner.cmsColumnCategory">Category</th><th class="sortable-th" data-sort="title" data-i18n="scanner.cmsColumnFinding">Finding</th><th class="sortable-th" data-sort="evidence" data-i18n="scanner.cmsColumnEvidence">Evidence</th><th class="sortable-th" data-sort="recommendation" data-i18n="scanner.cmsColumnRecommendation">Recommendation</th></tr></thead><tbody id="scanner-cms-body"></tbody></table></div>
+      <details id="scanner-cms-raw-wrap" class="scanner-raw-details" style="margin-top:10px" open><summary class="muted" style="cursor:pointer;font-size:12px;user-select:none" data-i18n="scanner.cmsRawSummary">Diagnostic Raw Log</summary><pre id="scanner-findings" data-i18n="scanner.empty" style="margin-top:6px">Enter an authorized URL and run Safe CMS Recon.</pre></details>
+    </section>
+
+    <section id="scanner-panel-nuclei" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-nuclei" data-scanner-panel="nuclei" hidden>
+      <div class="toolbar" id="scanner-templates-bar"><span class="muted" data-i18n="scanner.templatesBar">Templates</span><div id="scanner-upload-zone" class="scanner-upload-zone" tabindex="0" role="button" aria-label="Upload template files or a whole folder" data-i18n-aria-label="scanner.uploadZoneAria"><strong data-i18n="scanner.uploadZoneTitle">Drop template files or a whole folder here</strong><span class="muted" data-i18n="scanner.uploadZoneOr">or</span><span class="scanner-upload-actions"><button type="button" id="scanner-pick-files" data-i18n="scanner.pickFiles">Choose files</button><button type="button" id="scanner-pick-folder" data-i18n="scanner.pickFolder">Choose folder</button></span></div><input type="file" id="scanner-yaml-file" accept=".yaml,.yml" multiple hidden aria-hidden="true" tabindex="-1"><input type="file" id="scanner-yaml-dir" webkitdirectory hidden aria-hidden="true" tabindex="-1"><button type="button" id="scanner-files-clear" data-i18n="scanner.clearFiles">Clear files</button><label class="scanner-type-control" for="scanner-template-category"><span class="muted" data-i18n="scanner.templateCategory">Template folder</span><select id="scanner-template-category" aria-describedby="scanner-template-category-status"><option value="" data-i18n="scanner.templateCategoryAll">All uploaded files</option></select></label><span class="scanner-type-status" id="scanner-template-category-status" role="status" aria-live="polite"></span><button type="button" class="primary" id="scanner-templates-run" data-i18n="scanner.runTemplates">Run templates</button><span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="nuclei"><button type="button" id="scanner-export-nuclei" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export nuclei scan" data-i18n-aria-label="scanner.exportNucleiAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list" role="menu" hidden><button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button><button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button><button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.exportCsvHint">One row per file</span></button></div></div></div>
+      <div id="scanner-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-progress-phase" class="scanner-progress-phase"></span>
+          <span id="scanner-progress-pct" class="scanner-progress-pct"></span>
+          <span id="scanner-progress-elapsed" class="scanner-progress-elapsed"></span>
+          <button type="button" id="scanner-progress-pause" class="scanner-progress-pause" data-i18n="scanner.progressPause">Pause</button>
+          <button type="button" id="scanner-progress-cancel" class="scanner-progress-cancel" data-i18n="scanner.progressCancel">Cancel</button>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="scanner-progress-bar"><div class="scanner-progress-fill" id="scanner-progress-fill"></div><div class="scanner-progress-indeterminate" id="scanner-progress-indeterminate"></div></div>
+        <div class="scanner-progress-stats" id="scanner-progress-stats"></div>
+        <p class="scanner-progress-note" id="scanner-progress-note" hidden></p>
+      </div>
+      <div id="scanner-upload-progress" class="scanner-upload-progress" hidden aria-live="polite"></div>
+      <div id="scanner-files-list"></div>
+      <div class="hint" data-i18n="scanner.nucleiHint">Upload a template folder; the selected folder is passed to Nuclei with -t, and helper files are preserved.</div>
+      <details id="scanner-options-wrap" open><summary data-i18n="scanner.optionsTitle">Scan options</summary>
+        <div class="scanner-options-primary">
+          <div class="scanner-chipset"><span class="scanner-chipset-label" data-i18n="scanner.optSeverity">Severity</span><div class="scanner-chips" id="scanner-opt-severity" role="group" aria-label="Severity filter" data-i18n-aria-label="scanner.optSeverityAria"></div></div>
+          <div class="scanner-chipset"><span class="scanner-chipset-label" data-i18n="scanner.optExcludeSeverity">Exclude severity</span><div class="scanner-chips" id="scanner-opt-exclude-severity" role="group" aria-label="Excluded severity" data-i18n-aria-label="scanner.optExcludeSeverityAria"></div></div>
+          <label class="scanner-option"><span data-i18n="scanner.optConcurrency">Concurrency</span><input id="scanner-opt-concurrency" type="number" min="0" step="1" placeholder="25"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optRateLimit">Rate limit (req/s)</span><input id="scanner-opt-rate-limit" type="number" min="0" step="1" placeholder="150"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optRateWindow">Rate window (s)</span><input id="scanner-opt-rate-window" type="number" min="0" step="1" data-i18n-placeholder="scanner.optRateWindowHint" placeholder="1" autocomplete="off"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optTimeout">Request timeout (s)</span><input id="scanner-opt-timeout-seconds" type="number" min="0" step="1" placeholder="10"></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-follow-redirects"><span data-i18n="scanner.optFollowRedirects">Follow redirects</span></label>
+        </div>
+        <details id="scanner-options-advanced"><summary data-i18n="scanner.optionsAdvanced">Advanced options</summary><div class="scanner-options-grid" id="scanner-options-grid">
+          <label class="scanner-option"><span data-i18n="scanner.optTemplateIds">Template IDs</span><input id="scanner-opt-template-ids" type="text" data-i18n-placeholder="scanner.optIdsHint" placeholder="CVE-2021-44228, log4j*" autocomplete="off"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optRetries">Retries</span><input id="scanner-opt-retries" type="number" min="0" step="1" placeholder="1"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optPayloadConcurrency">Payload concurrency</span><input id="scanner-opt-payload-concurrency" type="number" min="0" step="1" placeholder="25"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optProbeConcurrency">Probe concurrency</span><input id="scanner-opt-probe-concurrency" type="number" min="0" step="1" placeholder="50"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optMaxRedirects">Max redirects</span><input id="scanner-opt-max-redirects" type="number" min="0" step="1" placeholder="10"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optMaxHostErrors">Max host errors</span><input id="scanner-opt-max-host-errors" type="number" min="0" step="1" placeholder="30"></label>
+          <label class="scanner-option"><span data-i18n="scanner.optExcludeMatchers">Exclude matchers</span><input id="scanner-opt-exclude-matchers" type="text" data-i18n-placeholder="scanner.optTagsHint" placeholder="fuzzy" autocomplete="off"></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-follow-host-redirects"><span data-i18n="scanner.optFollowHostRedirects">Follow same-host redirects</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-headless"><span data-i18n="scanner.optHeadless">Enable headless templates</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-interactsh" checked><span data-i18n="scanner.optInteractsh">Use interactsh (OAST)</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-store-response"><span data-i18n="scanner.optStoreResponse">Store request/response</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-omit-raw" checked><span data-i18n="scanner.optOmitRaw">Omit raw request/response</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-no-color"><span data-i18n="scanner.optNoColor">Disable ANSI colours</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-debug"><span data-i18n="scanner.optDebug">Debug (print every request and response)</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-opt-matcher-status"><span data-i18n="scanner.optMatcherStatus">Show matcher status</span></label>
+        </div></details>
+        <p class="hint" data-i18n="scanner.optionsHint">Кожна опція відповідає рівно одному прапорцю nuclei. Порожні поля не додають жодного прапорця; явне значення опції має пріоритет над ENV-значенням движка.</p>
+      </details>
+      <details id="scanner-custom-wrap"><summary data-i18n="scanner.customYaml">Custom YAML (single document)</summary><textarea id="scanner-custom-yaml" class="code-editor" spellcheck="false" style="min-height:120px" placeholder="id: my-check&#10;name: My check&#10;author: you&#10;severity: low&#10;http:&#10;  - method: GET&#10;    path: /health&#10;    matchers:&#10;      status: [200]"></textarea></details>
+      <div class="workspace-title" id="scanner-tpl-perfile-title" hidden><span data-i18n="scanner.perFileTitle">Per-template result</span><span id="scanner-tpl-perfile-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div class="toolbar" id="scanner-tpl-perfile-bar" hidden><input id="scanner-tpl-filter" data-i18n-placeholder="scanner.perFileFilter" placeholder="Filter by file name, template id, CVE or tag" style="flex:1;min-width:200px"><select id="scanner-tpl-status"><option value="" data-i18n="scanner.perFileAll">All files</option><option value="matched" data-i18n="scanner.perFileMatched">Matched</option><option value="not_matched" data-i18n="scanner.perFileNotMatched">Not matched</option><option value="no_request" data-i18n="scanner.perFileNoRequest">Target not checked</option><option value="flow" data-i18n="scanner.perFileFlow">Flow definition</option><option value="uncompiled" data-i18n="scanner.perFileUncompiled">Never compiled</option><option value="workflow" data-i18n="scanner.perFileWorkflow">Template orchestrator</option><option value="skipped" data-i18n="scanner.perFileSkipped">Not run</option><option value="invalid" data-i18n="scanner.perFileInvalid">Invalid</option><option value="duplicate" data-i18n="scanner.perFileDuplicate">Duplicate copy</option></select><label class="muted"><input type="checkbox" id="scanner-tpl-only-matched"> <span data-i18n="scanner.perFileOnlyMatched">Matched only</span></label><button type="button" id="scanner-tpl-group" aria-pressed="true" data-i18n="scanner.perFileGroupFolders" data-i18n-title="scanner.perFileGroupFoldersTitle" data-i18n-aria-label="scanner.perFileGroupFoldersAria">Group by folder</button></div>
+      <div class="exchange-list" id="scanner-tpl-results" hidden><table><colgroup><col style="width:30%"><col style="width:11%"><col style="width:18%"><col style="width:9%"><col style="width:32%"></colgroup><thead><tr><th data-i18n="scanner.perFileName">File</th><th data-i18n="scanner.perFileTemplate">Template</th><th data-i18n="scanner.perFileCve">CVE / CWE</th><th data-i18n="scanner.perFileStatus">Status</th><th data-i18n="scanner.perFileDetail">Details</th></tr></thead><tbody id="scanner-tpl-body"></tbody></table></div>
+      <div class="scanner-more" id="scanner-tpl-more" hidden><button type="button" class="scanner-more-btn" id="scanner-tpl-more-btn" data-i18n="scanner.perFileShowMore">Show more</button></div>
+      <p class="scanner-plan" id="scanner-tpl-plan" hidden></p>
+      <details class="scanner-diagnostics" id="scanner-tpl-diagnostics" hidden><summary data-i18n="scanner.diagnosticsTitle">Nuclei command and output</summary><pre id="scanner-tpl-diagnostics-body"></pre></details>
+    </section>
+
+
+    <section id="scanner-panel-active" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-active" data-scanner-panel="active" hidden>
+      <div class="hint" data-i18n="scanner.activeHint">The active scanner crawls the target, finds every injectable surface, probes it with nine detector modules, correlates confirmed findings into attack chains, and runs the entire published vulnerability check corpus. A finding is rated only when its impact was demonstrated; everything else is marked unverified and capped below high.</div>
+      <div class="toolbar">
+        <button type="button" class="primary" id="scanner-active-run" data-i18n="scanner.activeRun">Start active scan</button>
+        <button type="button" id="scanner-corpus-run" data-i18n="scanner.corpusRun">Run Corpus Scan only</button>
+        <button type="button" id="scanner-corpus-cancel" data-i18n="scanner.corpusCancel" data-i18n-title="scanner.corpusCancelTitle" hidden>Stop corpus</button>
+        <span class="status-badge" id="scanner-corpus-status" role="status" aria-live="polite"></span>
+        <span class="hint" id="scanner-corpus-skipped" aria-live="polite"></span>
+        <span class="muted" data-i18n="scanner.exportLabel">Export</span><div class="export-menu" data-export-menu="active"><button type="button" id="scanner-export-active" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export active and corpus scan" data-i18n-aria-label="scanner.exportActiveAria" disabled><span data-i18n="scanner.exportLabel">Export</span><svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="export-menu-list export-menu-list--grouped" role="menu" hidden><div class="export-menu-group"><div class="export-menu-group-label" data-i18n="scanner.exportActiveLabel">Active Scan</div><div class="export-menu-format-row"><button type="button" role="menuitem" data-export-scope="active" data-format="json"><b>JSON</b></button><button type="button" role="menuitem" data-export-scope="active" data-format="html"><b>HTML</b></button><button type="button" role="menuitem" data-export-scope="active" data-format="csv"><b>CSV</b></button><button type="button" role="menuitem" data-export-scope="active" data-format="xml"><b>XML</b></button><button type="button" role="menuitem" data-export-scope="active" data-format="msf-xml"><b>MSF XML</b></button></div></div><div class="export-menu-group"><div class="export-menu-group-label" data-i18n="scanner.exportCorpusLabel">Corpus Scan</div><div class="export-menu-format-row"><button type="button" role="menuitem" data-export-scope="corpus" data-format="json"><b>JSON</b></button><button type="button" role="menuitem" data-export-scope="corpus" data-format="html"><b>HTML</b></button><button type="button" role="menuitem" data-export-scope="corpus" data-format="csv"><b>CSV</b></button><button type="button" role="menuitem" data-export-scope="corpus" data-format="xml"><b>XML</b></button></div></div><div class="export-menu-group"><div class="export-menu-group-label" data-i18n="scanner.exportAllLabel">All Combined</div><div class="export-menu-format-row"><button type="button" role="menuitem" data-export-scope="all" data-format="json"><b>JSON</b></button><button type="button" role="menuitem" data-export-scope="all" data-format="html"><b>HTML</b></button><button type="button" role="menuitem" data-export-scope="all" data-format="csv"><b>CSV</b></button><button type="button" role="menuitem" data-export-scope="all" data-format="xml"><b>XML</b></button><button type="button" role="menuitem" data-export-scope="all" data-format="msf-xml"><b>MSF XML</b></button></div></div></div></div>
+      </div>
+      <div id="scanner-active-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-active-progress-phase" class="scanner-progress-phase"></span>
+          <span id="scanner-active-progress-pct" class="scanner-progress-pct"></span>
+          <span id="scanner-active-progress-elapsed" class="scanner-progress-elapsed"></span>
+          <button type="button" id="scanner-active-pause" class="scanner-progress-cancel" data-i18n="scanner.activePause" hidden>Pause</button>
+          <button type="button" id="scanner-active-resume" class="scanner-progress-cancel" data-i18n="scanner.activeResume" hidden>Resume</button>
+          <button type="button" id="scanner-active-cancel" class="scanner-progress-cancel" data-i18n="scanner.progressCancel">Cancel</button>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-label="Active scan progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="scanner-active-progress-bar"><div class="scanner-progress-fill" id="scanner-active-progress-fill"></div><div class="scanner-progress-indeterminate" id="scanner-active-progress-indeterminate"></div></div>
+        <div class="scanner-progress-stats" id="scanner-active-progress-stats"></div>
+        <p class="scanner-progress-checkpoint" id="scanner-active-progress-checkpoint" role="status" aria-live="polite" hidden></p>
+        <div class="toolbar scanner-active-recovery" id="scanner-active-recovery" hidden>
+          <button type="button" id="scanner-active-resend" data-i18n="scanner.activeResend">Resend requests that never answered</button>
+          <span class="muted" id="scanner-active-resend-summary"></span>
+        </div>
+        <p class="scanner-progress-note" id="scanner-active-progress-note" hidden></p>
+      </div>
+      <div id="scanner-corpus-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-corpus-progress-phase" class="scanner-progress-phase"></span>
+          <span id="scanner-corpus-progress-pct" class="scanner-progress-pct"></span>
+          <span id="scanner-corpus-progress-elapsed" class="scanner-progress-elapsed"></span>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-label="Corpus checks progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="scanner-corpus-progress-bar"><div class="scanner-progress-fill" id="scanner-corpus-progress-fill"></div><div class="scanner-progress-indeterminate" id="scanner-corpus-progress-indeterminate"></div></div>
+        <div class="scanner-progress-stats" id="scanner-corpus-progress-stats"></div>
+      </div>
+      <div class="hint" id="scanner-corpus-stats" aria-live="polite"></div>
+      <details id="scanner-active-options-wrap" open><summary data-i18n="scanner.optionsTitle">Scan options</summary>
+        <div class="scanner-options-primary">
+          <label class="scanner-option"><span data-i18n="scanner.activeProfile">Scan profile</span>
+            <select id="scanner-active-profile">
+              <option value="full">Full (All 70+ modules)</option>
+              <option value="fast">Fast (Core injections + headers)</option>
+              <option value="api">API (REST / GraphQL / Mass Assignment)</option>
+              <option value="llm">AI / LLM (MITRE ATLAS + OAST)</option>
+              <option value="stealth">Stealth (Passive / low-noise)</option>
+            </select>
+          </label>
+          <label class="scanner-option"><span data-i18n="scanner.activeMaxPages">Max pages</span><input id="scanner-active-max-pages" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeMaxDepth">Link depth</span><input id="scanner-active-max-depth" type="number" min="-1" step="1" placeholder="2"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeConcurrency">Workers</span><input id="scanner-active-concurrency" type="number" min="0" step="1" placeholder="8"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeDelay">Delay between probes (ms)</span><input id="scanner-active-delay" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeBlindDelay">Blind delay (ms)</span><input id="scanner-active-blind-delay" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeTimeout">Request timeout (ms)</span><input id="scanner-active-timeout" type="number" min="0" step="1" placeholder="15000"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeFailurePause">Pause after failures</span><input id="scanner-active-failure-pause" type="number" min="-1" step="1" placeholder="20"></label>
+          <label class="scanner-option"><span data-i18n="scanner.activeRecordedLimit">Requests kept for resend</span><input id="scanner-active-recorded" type="number" min="-1" step="1" placeholder="200"></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-same-origin" checked><span data-i18n="scanner.activeSameOrigin">Stay on the same host</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-follow-redirects"><span data-i18n="scanner.optFollowRedirects">Follow redirects</span></label>
+          <label class="scanner-option scanner-option-check"><input type="checkbox" id="scanner-active-include-corpus" checked><span data-i18n="scanner.activeIncludeCorpus">Include published corpus checks</span></label>
+        </div>
+        <div class="scanner-options-primary">
+          <label class="scanner-option scanner-option-wide"><span data-i18n="scanner.activeParams">Hidden parameter names, one per line</span><textarea id="scanner-active-params" rows="3" spellcheck="false" data-i18n-placeholder="scanner.activeParamsHint" placeholder="report_token&#10;debug"></textarea></label>
+          <label class="scanner-option scanner-option-wide"><span data-i18n="scanner.activeWordlist">Path wordlist, one path per line</span><textarea id="scanner-active-wordlist" rows="3" spellcheck="false" data-i18n-placeholder="scanner.activeWordlistHint" placeholder="/admin/&#10;/.env"></textarea></label>
+        </div>
+        <p class="hint" data-i18n="scanner.activeWordlistsNote">Both lists are yours and both are optional: an empty list means the run does not spend a single request on that probe. The parameter names are what the Target crawl read out of the application's own JavaScript — copy them from the Target panel — and the wordlist is a path dictionary.</p>
+        <p class="hint" data-i18n="scanner.activeOptionsHint">Every field is a number you chose: 0 for pages and delay means no bound, −1 for depth means follow links without a depth limit, and no value here reduces what the run can look at. The run stops when you cancel it or the target stops answering.</p>
+      </details>
+      <div class="workspace-title" id="scanner-active-findings-title" hidden><span data-i18n="scanner.activeFindingsTitle">Findings</span><span id="scanner-active-findings-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div id="scanner-live-activity-bar" class="toolbar" role="status" aria-live="polite" style="padding:4px 8px;border:1px solid var(--line,#2d333b);border-radius:6px;margin-bottom:6px;font-size:12px">
+        <span data-i18n="scanner.liveActivityLabel">⚡ Активність:</span>
+        <span id="scanner-live-activity-text" data-i18n="scanner.liveActivityIdle">Очікування запуску перевірок</span>
+        <button type="button" id="scanner-toggle-kanban-btn" style="margin-left:auto" aria-pressed="false" data-i18n="scanner.kanbanToggle">📋 Kanban дошка знахідок</button>
+      </div>
+      <div id="scanner-findings-kanban" class="osint-grid" hidden aria-label="Findings Kanban Board" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px">
+        <div class="osint-card" data-kanban-col="new"><h3 data-i18n="scanner.kanbanNew">📋 Нові (Unverified)</h3><div class="kanban-cards" id="kanban-col-new"></div></div>
+        <div class="osint-card" data-kanban-col="triaged"><h3 data-i18n="scanner.kanbanTriaged">🔎 На перевірці (Triaged)</h3><div class="kanban-cards" id="kanban-col-triaged"></div></div>
+        <div class="osint-card" data-kanban-col="verified"><h3 data-i18n="scanner.kanbanVerified">✅ Підтверджені (Proven)</h3><div class="kanban-cards" id="kanban-col-verified"></div></div>
+        <div class="osint-card" data-kanban-col="mitigated"><h3 data-i18n="scanner.kanbanMitigated">🛡️ Виправлені / Прийняті</h3><div class="kanban-cards" id="kanban-col-mitigated"></div></div>
+      </div>
+      <div class="toolbar" id="scanner-active-filter-bar" hidden><input id="scanner-active-filter" aria-label="Filter active findings" data-i18n-aria-label="scanner.activeFilterHint" data-i18n-placeholder="scanner.activeFilterHint" placeholder="Filter by title, module, endpoint or evidence" style="flex:1;min-width:200px"><select id="scanner-active-severity" aria-label="Filter active findings by severity"><option value="" data-i18n="scanner.activeAllSeverities">All severities</option><option value="critical">CRITICAL</option><option value="high">HIGH</option><option value="medium">MEDIUM</option><option value="low">LOW</option><option value="info">INFO</option></select><label class="muted"><input type="checkbox" id="scanner-active-verified-only"> <span data-i18n="scanner.activeProvenOnly">Proven impact only</span></label></div>
+      <div class="exchange-list" id="scanner-active-results" hidden><table><colgroup><col style="width:11%"><col style="width:12%"><col style="width:11%"><col style="width:33%"><col style="width:33%"></colgroup><thead><tr><th class="sortable-th" data-sort="severity" data-i18n="scanner.activeColumnSeverity">Severity</th><th class="sortable-th" data-sort="proof" data-i18n="scanner.activeColumnProof">Proof</th><th class="sortable-th" data-sort="module" data-i18n="scanner.activeColumnModule">Module</th><th class="sortable-th" data-sort="endpoint" data-i18n="scanner.activeColumnEndpoint">Endpoint</th><th class="sortable-th" data-sort="evidence" data-i18n="scanner.activeColumnEvidence">Evidence</th></tr></thead><tbody id="scanner-active-body"></tbody></table></div>
+      <p class="scanner-plan" id="scanner-active-plan" hidden></p>
+      <details id="scanner-corpus-details-wrap" hidden style="display:none"><summary data-i18n="scanner.corpusDetailsTitle">Corpus Database Checks &amp; Details</summary>
+        <div class="toolbar" id="scanner-corpus-bar" style="margin-top:8px"><input id="scanner-corpus-filter" aria-label="Filter corpus checks" data-i18n-aria-label="scanner.corpusFilter" data-i18n-placeholder="scanner.corpusFilter" placeholder="Filter by path, check or evidence" style="flex:1;min-width:200px"></div>
+        <div class="exchange-list" id="scanner-corpus-findings" hidden><table><colgroup><col style="width:7%"><col style="width:8%"><col style="width:31%"><col style="width:8%"><col style="width:22%"><col style="width:24%"></colgroup><thead><tr><th class="sortable-th" data-sort="id" data-i18n="scanner.corpusColId">#</th><th class="sortable-th" data-sort="method" data-i18n="scanner.corpusColMethod">Method</th><th class="sortable-th" data-sort="path" data-i18n="scanner.corpusColPath">Path</th><th class="sortable-th" data-sort="status" data-i18n="scanner.corpusColStatus">Status</th><th class="sortable-th" data-sort="check" data-i18n="scanner.corpusColCheck">Check</th><th class="sortable-th" data-sort="evidence" data-i18n="scanner.corpusColEvidence">Evidence</th></tr></thead><tbody id="scanner-corpus-rows"></tbody></table></div>
+        <div class="scanner-more" id="scanner-corpus-more" hidden><button type="button" class="scanner-more-btn" id="scanner-corpus-more-btn" data-i18n="scanner.corpusShowMore">Show more</button> <button type="button" class="scanner-more-btn" id="scanner-corpus-show-all-btn" data-i18n="scanner.corpusShowAll" style="margin-left:8px">Show all</button></div>
+        <div class="hint" id="scanner-corpus-note" aria-live="polite"></div>
+      </details>
+    </section>
+
+    <section id="scanner-panel-openvas" class="scanner-panel" role="tabpanel" aria-labelledby="scanner-view-openvas" data-scanner-panel="openvas" hidden>
+      <div class="hint" data-i18n="scanner.openvasHint">OpenVAS (Greenbone Vulnerability Management) executes network &amp; NVT checks via gvmd (GMP over Unix socket or TLS) or imports OpenVAS XML reports into the project.</div>
+      <div class="toolbar" id="scanner-openvas-bar" style="gap:8px;flex-wrap:wrap">
+        <button type="button" id="scanner-openvas-run-btn" class="primary" data-i18n="scanner.openvasRun">Run OpenVAS Scan</button>
+        <button type="button" id="scanner-openvas-status-btn" data-i18n="scanner.openvasCheck">Check gvmd</button>
+        <input type="text" id="scanner-openvas-username" data-i18n-placeholder="scanner.openvasUserHint" placeholder="GVM user (admin)" aria-label="GVM username" autocomplete="username" style="width:125px">
+        <input type="password" id="scanner-openvas-password" data-i18n-placeholder="scanner.openvasPassHint" placeholder="GVM password" aria-label="GVM password" autocomplete="current-password" style="width:135px">
+        <button type="button" id="scanner-openvas-sync-btn" data-i18n="scanner.openvasSync">Sync from GVM</button>
+        <button type="button" id="scanner-openvas-import-btn" data-i18n="scanner.openvasImport">Import OpenVAS XML</button>
+        <a id="scanner-openvas-panel-link" class="btn-link" href="https://127.0.0.1:9392" target="_blank" rel="noopener noreferrer" aria-label="Open GVM (OpenVAS) web panel" data-i18n="scanner.openvasPanelLink">Open GVM Panel ↗</a>
+        <input type="file" id="scanner-openvas-xml-file" accept=".xml,text/xml,application/xml" hidden>
+        <span class="muted" data-i18n="scanner.exportLabel">Export</span>
+        <div class="export-menu" data-export-menu="openvas">
+          <button type="button" id="scanner-export-openvas" class="export-export-trigger" aria-haspopup="menu" aria-expanded="false" aria-label="Export OpenVAS scan" disabled>
+            <span data-i18n="scanner.exportLabel">Export</span>
+            <svg class="export-caret" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="export-menu-list" role="menu" hidden>
+            <button type="button" role="menuitem" data-format="json"><b>JSON</b><span data-i18n="scanner.exportJsonHint">Full report as-is</span></button>
+            <button type="button" role="menuitem" data-format="html"><b>HTML</b><span data-i18n="scanner.exportHtmlHint">Interactive report</span></button>
+            <button type="button" role="menuitem" data-format="csv"><b>CSV</b><span data-i18n="scanner.activeExportCsvHint">One row per finding</span></button>
+            <button type="button" role="menuitem" data-format="xml"><b>XML</b><span data-i18n="scanner.exportXmlHint">Structured XML report</span></button>
+            <button type="button" role="menuitem" data-format="msf-xml"><b>Metasploit XML</b><span data-i18n="scanner.exportMsfHint">For msfconsole db_import</span></button>
+          </div>
+        </div>
+        <span id="scanner-openvas-status-text" class="muted" aria-live="polite" style="margin-left:auto"></span>
+      </div>
+      <div class="toolbar" id="scanner-openvas-task-bar" style="gap:6px;flex-wrap:wrap">
+        <select id="scanner-openvas-task-select" aria-label="Select GVM task" hidden><option value="" data-i18n="scanner.openvasLatest">Latest GVM report</option></select>
+        <button type="button" id="gvm-refresh-options-btn" data-i18n="scanner.gvmReloadOptions">Reload GVM Options</button>
+        <button type="button" id="gvm-new-port-list-btn" data-i18n="scanner.gvmNewPortList">+ New Port List</button>
+        <button type="button" id="gvm-new-credential-btn" data-i18n="scanner.gvmNewCred">+ New Credential</button>
+      </div>
+      <div id="scanner-openvas-progress" class="scanner-progress" hidden aria-live="polite">
+        <div class="scanner-progress-head">
+          <span class="scanner-progress-spinner" aria-hidden="true"></span>
+          <span id="scanner-openvas-progress-phase" class="scanner-progress-phase">Running</span>
+          <span id="scanner-openvas-progress-pct" class="scanner-progress-pct">0%</span>
+        </div>
+        <div class="scanner-progress-track" role="progressbar" aria-label="OpenVAS scan progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="scanner-openvas-progress-bar"><div class="scanner-progress-fill" id="scanner-openvas-progress-fill"></div></div>
+      </div>
+      <details id="scanner-openvas-settings" class="scanner-raw-details" style="margin:6px 0">
+        <summary style="cursor:pointer;font-weight:600" data-i18n="scanner.gvmSettingsTitle">GVM Scan Settings (Target &amp; Task — GSA Parity)</summary>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <div style="padding:10px;border:1px solid var(--line,#2d333b);border-radius:6px;background:rgba(16,27,41,.45)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px">1. Target &amp; Credentials</div>
+            <div class="scanner-options-grid">
+              <label class="scanner-option"><span data-i18n="scanner.gvmTargetName">Target Name</span><input type="text" id="gvm-target-name" data-i18n-placeholder="scanner.gvmTargetNameHint" placeholder="Auto (RR-&lt;target&gt;)"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmHosts">Hosts / CIDR</span><input type="text" id="gvm-hosts" data-i18n-placeholder="scanner.gvmHostsHint" placeholder="Uses URL above if empty"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmExcludeHosts">Exclude Hosts</span><input type="text" id="gvm-exclude-hosts" data-i18n-placeholder="scanner.gvmExcludeHostsHint" placeholder="Comma-separated"></label>
+              <div class="scanner-option"><span data-i18n="scanner.gvmPortList">Port List</span><div style="display:flex;gap:4px;align-items:center"><select id="gvm-port-list" style="flex:1;min-width:0"><option value="" data-i18n="scanner.gvmPortListDefault">Default (gvmd)</option></select><button type="button" id="gvm-inline-port-list-btn" title="Create new Port List" aria-label="Create new Port List" style="padding:3px 8px;min-height:28px">+</button></div></div>
+              <label class="scanner-option"><span data-i18n="scanner.gvmAliveTest">Alive Test</span><select id="gvm-alive-tests">
+                <option value="" data-i18n="scanner.gvmAliveDefault">Scan Config Default</option>
+                <option value="ICMP Ping">ICMP Ping</option>
+                <option value="TCP-ACK Service Ping">TCP-ACK Service Ping</option>
+                <option value="TCP-SYN Service Ping">TCP-SYN Service Ping</option>
+                <option value="ARP Ping">ARP Ping</option>
+                <option value="ICMP &amp; TCP-ACK Service Ping">ICMP &amp; TCP-ACK Service Ping</option>
+                <option value="ICMP &amp; ARP Ping">ICMP &amp; ARP Ping</option>
+                <option value="TCP-ACK Service &amp; ARP Ping">TCP-ACK Service &amp; ARP Ping</option>
+                <option value="ICMP, TCP-ACK Service &amp; ARP Ping">ICMP, TCP-ACK Service &amp; ARP Ping</option>
+                <option value="Consider Alive" data-i18n="scanner.gvmConsiderAlive">Consider Alive</option>
+              </select></label>
+              <div class="scanner-option"><span data-i18n="scanner.gvmSshCred">SSH Credential</span><div style="display:flex;gap:4px;align-items:center"><select id="gvm-ssh-cred" style="flex:1;min-width:0"><option value="" data-i18n="scanner.gvmCredNone">— Not used (unauthenticated) —</option></select><button type="button" class="gvm-cred-new-btn" data-cred-target="gvm-ssh-cred" data-cred-default-type="up" title="Create new SSH Credential" aria-label="Create new SSH Credential" style="padding:3px 8px;min-height:28px">+</button></div></div>
+              <label class="scanner-option"><span data-i18n="scanner.gvmSshPort">SSH Port</span><input type="number" id="gvm-ssh-port" min="1" max="65535" value="22"></label>
+              <div class="scanner-option"><span data-i18n="scanner.gvmSmbCred">SMB Credential</span><div style="display:flex;gap:4px;align-items:center"><select id="gvm-smb-cred" style="flex:1;min-width:0"><option value="" data-i18n="scanner.gvmCredNone">— Not used (unauthenticated) —</option></select><button type="button" class="gvm-cred-new-btn" data-cred-target="gvm-smb-cred" data-cred-default-type="up" title="Create new SMB Credential" aria-label="Create new SMB Credential" style="padding:3px 8px;min-height:28px">+</button></div></div>
+              <div class="scanner-option"><span data-i18n="scanner.gvmEsxiCred">ESXi Credential</span><div style="display:flex;gap:4px;align-items:center"><select id="gvm-esxi-cred" style="flex:1;min-width:0"><option value="" data-i18n="scanner.gvmCredNone">— Not used (unauthenticated) —</option></select><button type="button" class="gvm-cred-new-btn" data-cred-target="gvm-esxi-cred" data-cred-default-type="up" title="Create new ESXi Credential" aria-label="Create new ESXi Credential" style="padding:3px 8px;min-height:28px">+</button></div></div>
+              <div class="scanner-option"><span data-i18n="scanner.gvmSnmpCred">SNMP Credential</span><div style="display:flex;gap:4px;align-items:center"><select id="gvm-snmp-cred" style="flex:1;min-width:0"><option value="" data-i18n="scanner.gvmCredNone">— Not used (unauthenticated) —</option></select><button type="button" class="gvm-cred-new-btn" data-cred-target="gvm-snmp-cred" data-cred-default-type="snmp" title="Create new SNMP Credential" aria-label="Create new SNMP Credential" style="padding:3px 8px;min-height:28px">+</button></div></div>
+            </div>
+            <div class="scanner-options-primary" style="margin:4px 0 0">
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-reverse-lookup-only"><span data-i18n="scanner.gvmReverseOnly">Reverse Lookup Only</span></label>
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-reverse-lookup-unify"><span data-i18n="scanner.gvmReverseUnify">Reverse Lookup Unify</span></label>
+            </div>
+          </div>
+
+          <div style="padding:10px;border:1px solid var(--line,#2d333b);border-radius:6px;background:rgba(16,27,41,.45)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px">2. Task, Scanner &amp; Schedule</div>
+            <div class="scanner-options-grid">
+              <label class="scanner-option"><span data-i18n="scanner.gvmTaskName">Task Name</span><input type="text" id="gvm-task-name" data-i18n-placeholder="scanner.gvmTaskNameHint" placeholder="Auto (RR-Scan-&lt;target&gt;)"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmScanConfig">Scan Config</span><select id="gvm-scan-config"><option value="" data-i18n="scanner.gvmScanConfigDefault">Full and fast (default)</option></select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmScanner">Scanner</span><select id="gvm-scanner"><option value="" data-i18n="scanner.gvmScannerDefault">OpenVAS Default</option></select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmScanOrder">Scan Order</span><select id="gvm-hosts-ordering">
+                <option value="sequential" data-i18n="scanner.gvmOrderSequential">sequential</option>
+                <option value="random" data-i18n="scanner.gvmOrderRandom">random</option>
+                <option value="reverse" data-i18n="scanner.gvmOrderReverse">reverse</option>
+              </select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmMaxChecks">Max NVTs / Host</span><input type="number" id="gvm-max-checks" min="1" max="100" value="4"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmMaxHosts">Max Concurrent Hosts</span><input type="number" id="gvm-max-hosts" min="1" max="200" value="20"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmSourceIface">Source Interface</span><input type="text" id="gvm-source-iface" placeholder="e.g. eth0, tun0"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmMinQod">Min QoD (%)</span><input type="number" id="gvm-min-qod" min="0" max="100" value="70"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmSchedule">Schedule</span><select id="gvm-schedule"><option value="" data-i18n="scanner.gvmScheduleOnce">Once (Immediate)</option></select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmAlert">Alert</span><select id="gvm-alert"><option value="" data-i18n="scanner.gvmAlertNone">None</option></select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmAutoDelete">Auto-Delete Reports</span><select id="gvm-auto-delete">
+                <option value="no" data-i18n="scanner.gvmAutoDeleteNo">Do not automatically delete</option>
+                <option value="keep" data-i18n="scanner.gvmAutoDeleteKeep">Keep newest N reports</option>
+              </select></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmKeepReports">Keep Reports Count</span><input type="number" id="gvm-auto-delete-data" min="1" max="100" value="5"></label>
+              <label class="scanner-option"><span data-i18n="scanner.gvmComment">Comment</span><input type="text" id="gvm-comment" data-i18n-placeholder="scanner.gvmOptionalNote" placeholder="Optional note"></label>
+            </div>
+            <div class="scanner-options-primary" style="margin:4px 0 0">
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-start-immediately" checked><span data-i18n="scanner.gvmStartImmediately">Start immediately</span></label>
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-add-to-assets" checked><span data-i18n="scanner.gvmAddToAssets">Add results to Asset Management</span></label>
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-apply-overrides" checked><span data-i18n="scanner.gvmApplyOverrides">Apply Overrides</span></label>
+              <label class="scanner-option scanner-option-check"><input type="checkbox" id="gvm-alterable"><span data-i18n="scanner.gvmAlterable">Alterable Task</span></label>
+            </div>
+          </div>
+        </div>
+      </details>
+      <dialog id="gvm-credential-dialog" style="background:#101b29;color:var(--text,#e6edf3);border:1px solid var(--line,#2d333b);border-radius:8px;padding:16px;min-width:360px;max-width:480px;box-shadow:0 12px 32px #000a">
+        <form id="gvm-credential-form" method="dialog" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong id="gvm-cred-dialog-title">New GVM Credential</strong>
+            <button type="button" id="gvm-cred-dialog-close" aria-label="Close" style="padding:2px 8px">✕</button>
+          </div>
+          <label class="scanner-option"><span>Name</span><input type="text" id="gvm-cred-name" placeholder="e.g. Target SSH Login" required></label>
+          <label class="scanner-option"><span>Type</span>
+            <select id="gvm-cred-type">
+              <option value="up">Username + Password</option>
+              <option value="usk">Username + SSH Key</option>
+              <option value="snmp">SNMP</option>
+              <option value="pw">Password Only</option>
+            </select>
+          </label>
+          <label class="scanner-option" id="gvm-cred-user-wrap"><span>Username</span><input type="text" id="gvm-cred-username" placeholder="root / administrator"></label>
+          <label class="scanner-option" id="gvm-cred-pass-wrap"><span>Password / Passphrase</span><input type="password" id="gvm-cred-password" placeholder="Password"></label>
+          <div id="gvm-cred-usk-fields" style="display:none;flex-direction:column;gap:8px">
+            <label class="scanner-option"><span>SSH Private Key (PEM)</span><textarea id="gvm-cred-private-key" rows="4" spellcheck="false" placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"></textarea></label>
+            <label class="scanner-option"><span>Key Passphrase (optional)</span><input type="password" id="gvm-cred-passphrase" placeholder="Passphrase"></label>
+          </div>
+          <div id="gvm-cred-snmp-fields" style="display:none;flex-direction:column;gap:8px">
+            <label class="scanner-option"><span>Auth Algorithm</span><select id="gvm-cred-auth-alg"><option value="sha1">SHA1</option><option value="md5">MD5</option><option value="sha256">SHA256</option><option value="sha512">SHA512</option></select></label>
+            <label class="scanner-option"><span>Privacy Password</span><input type="password" id="gvm-cred-priv-pass" placeholder="Optional privacy password"></label>
+            <label class="scanner-option"><span>Privacy Algorithm</span><select id="gvm-cred-priv-alg"><option value="aes">AES</option><option value="des">DES</option></select></label>
+          </div>
+          <label class="scanner-option"><span>Comment (optional)</span><input type="text" id="gvm-cred-comment" placeholder="Optional note"></label>
+          <div id="gvm-cred-dialog-error" class="muted" style="color:#ff7b72;font-size:12px"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+            <button type="button" id="gvm-cred-dialog-cancel">Cancel</button>
+            <button type="submit" class="primary" id="gvm-cred-dialog-save">Create Credential</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog id="gvm-port-list-dialog" style="background:#101b29;color:var(--text,#e6edf3);border:1px solid var(--line,#2d333b);border-radius:8px;padding:16px;min-width:340px;max-width:460px;box-shadow:0 12px 32px #000a">
+        <form id="gvm-port-list-form" method="dialog" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>New GVM Port List</strong>
+            <button type="button" id="gvm-pl-dialog-close" aria-label="Close" style="padding:2px 8px">✕</button>
+          </div>
+          <label class="scanner-option"><span>Name</span><input type="text" id="gvm-pl-name" value="Custom TCP Ports" required></label>
+          <label class="scanner-option"><span>Port Range (GMP format)</span><input type="text" id="gvm-pl-range" value="T:21-25,80,443,3000,8000,8080" required></label>
+          <label class="scanner-option"><span>Comment (optional)</span><input type="text" id="gvm-pl-comment" placeholder="Optional note"></label>
+          <div id="gvm-pl-dialog-error" class="muted" style="color:#ff7b72;font-size:12px"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+            <button type="button" id="gvm-pl-dialog-cancel">Cancel</button>
+            <button type="submit" class="primary" id="gvm-pl-dialog-save">Create Port List</button>
+          </div>
+        </form>
+      </dialog>
+      <div class="exchange-list" id="scanner-openvas-tasks-wrap" hidden style="margin-bottom:8px">
+        <table>
+          <colgroup><col style="width:24%"><col style="width:20%"><col style="width:12%"><col style="width:18%"><col style="width:26%"></colgroup>
+          <thead><tr><th data-i18n="scanner.gvmColTask">GVM Task</th><th data-i18n="scanner.gvmColTarget">Target</th><th data-i18n="scanner.perFileStatus">Status</th><th data-i18n="scanner.gvmColProgress">Progress</th><th data-i18n="scanner.gvmColActions">Actions</th></tr></thead>
+          <tbody id="scanner-openvas-tasks-body"></tbody>
+        </table>
+      </div>
+      <div class="workspace-title" id="scanner-openvas-findings-title" hidden><span>OpenVAS Findings</span><span id="scanner-openvas-findings-stats" class="osint-graph-stats" aria-live="polite"></span></div>
+      <div class="toolbar" id="scanner-openvas-filter-bar" hidden>
+        <input id="scanner-openvas-filter" aria-label="Filter OpenVAS findings" placeholder="Filter by title, host, port, CVE or description" style="flex:1;min-width:200px">
+        <select id="scanner-openvas-severity" aria-label="Filter OpenVAS findings by severity">
+          <option value="">All severities</option>
+          <option value="critical">CRITICAL</option>
+          <option value="high">HIGH</option>
+          <option value="medium">MEDIUM</option>
+          <option value="low">LOW</option>
+          <option value="info">INFO</option>
+        </select>
+      </div>
+      <div class="exchange-list" id="scanner-openvas-results" hidden>
+        <table>
+          <colgroup><col style="width:10%"><col style="width:8%"><col style="width:26%"><col style="width:18%"><col style="width:7%"><col style="width:31%"></colgroup>
+          <thead><tr>
+            <th class="sortable-th" data-gvm-sort="severity" data-i18n="scanner.cmsColumnSeverity">Severity</th>
+            <th class="sortable-th" data-gvm-sort="cvss">CVSS</th>
+            <th class="sortable-th" data-gvm-sort="title" data-i18n="scanner.cmsColumnFinding">Finding</th>
+            <th class="sortable-th" data-gvm-sort="endpoint" data-i18n="scanner.gvmColHostPort">Host / Port</th>
+            <th class="sortable-th" data-gvm-sort="qod">QoD</th>
+            <th data-i18n="scanner.gvmColCveDesc">CVE / Description</th>
+          </tr></thead>
+          <tbody id="scanner-openvas-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div id="scanner-status" class="status"></div>
+  </section>

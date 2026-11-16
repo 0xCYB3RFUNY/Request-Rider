@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "task_id": "6f0e8400-e29b-41d4-a716-446655440000",
+  "task_type": "target.crawl",
+  "workflow_run_id": 42,
+  "workflow_node_id": "target-node",
+  "project_id": 7,
+  "route_generation": 1,
+  "created_at": "2026-09-27T09:00:00Z",
+  "payload": {
+    "url": "http://127.0.0.1:8000/fixture"
+  },
+  "sig": "hmac-sha256 hex over the canonical envelope without this field (web/lab/broker_auth.py, engine/broker_auth.go)"
+}

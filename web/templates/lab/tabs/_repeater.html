@@ -1,0 +1,159 @@
+  <section id="repeater" class="tab active">
+    <div id="workspace-tabs-repeater" class="workspace-tabs" aria-label="Repeater workspaces" data-i18n-aria-label="a11y.workspacesRepeater"><div class="tool-corner-actions"><button type="button" class="tab-faq-trigger icon-btn" data-tab="repeater" title="Довідка / FAQ" aria-label="FAQ & Manual">❓ <span data-i18n="faq.button">FAQ</span></button><button type="button" class="tab-settings-trigger icon-btn" data-tab="repeater" title="Налаштування Repeater" aria-label="Налаштування Repeater">⚙️</button></div></div>
+    <div class="toolbar"><span class="muted" data-i18n="repeater.rawEditor">Редактор raw HTTP-запиту</span><input id="repeater-host" placeholder="Host" data-i18n-placeholder="host" aria-label="Repeater target host" data-i18n-aria-label="a11y.repeaterHost" style="min-width:180px"><label style="display:inline-flex;align-items:center;gap:4px;padding:0;text-transform:none;cursor:pointer"><input type="checkbox" id="repeater-https" aria-label="Use HTTPS" data-i18n-aria-label="hint.https"> <span data-i18n="hint.https">HTTPS</span></label><input id="repeater-path" placeholder="Шлях / запит" data-i18n-placeholder="path" aria-label="Repeater request path" data-i18n-aria-label="a11y.repeaterPath" style="flex:1;min-width:220px"><button class="primary" id="send" data-i18n="button.send">Надіслати</button><button id="copy" data-i18n="button.copyResponse">Копіювати відповідь</button>    <button id="repeater-compare-response" data-i18n="repeater.compareResponse">Compare response</button><button id="clear" data-i18n="button.clear">Очистити</button><button type="button" id="repeater-send-ai" data-i18n="button.sendExchangeAI">Send exchange to AI</button><button type="button" id="repeater-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+    <button type="button" id="repeater-copy-curl" title="Copy as cURL" data-i18n-title="row.copyCurl"><span aria-hidden="true">📋</span> cURL</button>
+    <button type="button" class="tab-faq-trigger" data-tab="repeater" id="repeater-macros-btn" title="Динамічні інлайн-макроси {{...}} (Hackvertor tags)" data-i18n-title="repeater.macrosTitle"><span aria-hidden="true">⚡</span> <span data-i18n="repeater.macrosButton">Macros</span></button>
+    <button type="button" id="repeater-auth-matrix-btn" title="Live Auth Matrix (BOLA / IDOR / BFLA)" data-i18n-title="repeater.authMatrixTitle"><span aria-hidden="true">🛡️</span> <span data-i18n="repeater.authMatrixButton">Auth Matrix</span></button>
+    <button type="button" id="repeater-race-btn" title="Race Condition Chronograph & Multi-Endpoint Barrier" data-i18n-title="repeater.raceSyncTitle"><span aria-hidden="true">⏱️</span> <span data-i18n="repeater.raceSyncButton">Race Sync</span></button>
+    <button type="button" id="repeater-jwt-forge-btn" title="Open JWT in Decoder JWT Forge Studio" data-i18n-title="repeater.jwtForgeTitle"><span aria-hidden="true">🔐</span> <span data-i18n="repeater.jwtForgeButton">JWT Forge</span></button>
+    <select id="repeater-poc-format" aria-label="PoC format" style="font-size:11px;padding:3px 5px;"><option value="python">Python PoC</option><option value="playwright">Playwright</option><option value="go">Go Race PoC</option><option value="curl">cURL</option></select>
+    <button type="button" id="repeater-export-poc-btn" title="Compile Reproducible PoC (F10)" data-i18n-title="repeater.exportPocTitle"><span aria-hidden="true">🧪</span> <span data-i18n="repeater.exportPocButton">Export PoC</span></button>
+    <button type="button" id="repeater-inspector-btn" title="Toggle request inspector" data-i18n-title="a11y.toggleInspector" style="margin-left:auto"><span aria-hidden="true">🔍</span> <span data-i18n="repeater.inspectorButton">Inspector</span></button>
+    </div>
+    <!-- P0: HTTP Request Inspector -->
+    <div id="req-inspector-wrap">
+      <div id="req-inspector-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="req-inspector-body">
+        <span><span aria-hidden="true">🔍</span> <span data-i18n="repeater.inspectorTitle">Request Inspector — Query Params · Headers · Body</span></span>
+        <span class="ri-arrow">▾</span>
+      </div>
+      <div id="req-inspector-body" role="region">
+        <div class="ri-section" id="ri-params-section">
+          <div class="ri-tabs">
+            <button type="button" class="active" id="ri-tab-params" data-i18n="repeater.queryParams" data-ri-tab="params">Query params</button>
+            <button type="button" id="ri-tab-body" data-i18n="repeater.bodyParams" data-ri-tab="body">Body params</button>
+          </div>
+          <div id="ri-params-view">
+            <table class="ri-table" id="ri-params-table"><thead><tr><th data-i18n="table.key">Key</th><th data-i18n="table.value">Value</th><th></th></tr></thead><tbody id="ri-params-tbody"></tbody></table>
+            <button type="button" id="ri-add-param" data-i18n="repeater.addParam" style="margin-top:5px;font-size:11px;min-height:26px;padding:3px 8px">+ Add param</button>
+          </div>
+          <div id="ri-body-view" style="display:none">
+            <table class="ri-table" id="ri-body-table"><thead><tr><th data-i18n="table.key">Key</th><th data-i18n="table.value">Value</th><th></th></tr></thead><tbody id="ri-body-tbody"></tbody></table>
+          </div>
+        </div>
+        <div class="ri-section" id="ri-headers-section">
+          <h4 data-i18n="repeater.headers">Headers</h4>
+          <table class="ri-table" id="ri-headers-table"><thead><tr><th data-i18n="table.name">Name</th><th data-i18n="table.value">Value</th></tr></thead><tbody id="ri-headers-tbody"></tbody></table>
+        </div>
+        <div class="ri-section" id="ri-raw-section">
+          <h4 data-i18n="repeater.raw">Raw</h4>
+          <pre id="ri-raw-preview" class="code-editor"></pre>
+        </div>
+      </div>
+    </div>
+    <!-- F1: Live Auth Matrix / Native Autorize++ -->
+    <div id="auth-matrix-wrap" style="display:none;margin-bottom:10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:10px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <strong style="font-size:12.5px;"><span aria-hidden="true">🛡️</span> <span data-i18n="repeater.authMatrixHeading">Live Auth Matrix — BOLA / IDOR / BFLA</span></strong>
+          <span id="auth-matrix-status" class="muted" style="font-size:11.5px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button type="button" class="primary" id="auth-matrix-run-btn" data-i18n="repeater.authMatrixRun">▶ Run Matrix</button>
+          <button type="button" id="auth-matrix-close-btn" title="Close">✕</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(280px, 1fr) minmax(420px, 1.6fr);gap:12px;align-items:start;">
+        <!-- Role Profiles Builder -->
+        <div style="border:1px solid var(--line);border-radius:var(--radius);padding:8px;background:var(--panel);">
+          <div style="font-size:11.5px;font-weight:600;margin-bottom:6px;" data-i18n="repeater.authMatrixRolesTitle">Профілі ролей (Actors)</div>
+          <div id="auth-matrix-profiles-list" style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px;max-height:170px;overflow-y:auto;"></div>
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:5px;margin-bottom:5px;">
+            <input type="text" id="am-role-name" placeholder="Role name (e.g. User_B)" style="font-size:11.5px;padding:4px 6px;">
+            <select id="am-role-type" style="font-size:11.5px;padding:4px 6px;">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="anon">Anonymous</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:110px 1fr;gap:5px;margin-bottom:6px;">
+            <input type="text" id="am-header-key" value="Authorization" placeholder="Header" style="font-size:11.5px;padding:4px 6px;">
+            <input type="text" id="am-header-val" placeholder="Bearer token or cookie..." style="font-size:11.5px;padding:4px 6px;">
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;">
+            <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;"><input type="checkbox" id="am-strip-auth"> <span data-i18n="repeater.authMatrixStrip">Strip auth</span></label>
+            <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;text-transform:none;"><input type="checkbox" id="am-is-baseline"> <span data-i18n="repeater.authMatrixBaseline">Baseline</span></label>
+            <button type="button" id="am-add-role-btn" style="padding:3px 9px;font-size:11px;min-height:24px;" data-i18n="repeater.authMatrixAdd">+ Add Role</button>
+          </div>
+        </div>
+        <!-- Matrix Results Table -->
+        <div style="border:1px solid var(--line);border-radius:var(--radius);padding:8px;background:var(--panel);overflow-x:auto;">
+          <table class="ri-table" style="width:100%;font-size:11.5px;">
+            <thead>
+              <tr>
+                <th data-i18n="repeater.authMatrixColRole">Role</th>
+                <th data-i18n="table.status">Status</th>
+                <th data-i18n="table.length">Length</th>
+                <th>RTT</th>
+                <th data-i18n="repeater.authMatrixColVerdict">Verdict</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="auth-matrix-results-tbody">
+              <tr><td colspan="6" class="muted" style="text-align:center;padding:14px;" data-i18n="repeater.authMatrixEmpty">Натисніть «Run Matrix», щоб перевірити доступ по ролях.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- F3: Race Condition Chronograph & Multi-Endpoint Barrier -->
+    <div id="race-sync-wrap" style="display:none;margin-bottom:10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel-2);padding:10px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <strong style="font-size:12.5px;"><span aria-hidden="true">⏱️</span> <span data-i18n="repeater.raceSyncHeading">Race Condition Chronograph &amp; Last-Byte Barrier</span></strong>
+          <span id="rs-spread-badge" class="status-badge" style="display:none;font-size:11px;"></span>
+          <span id="rs-status" class="muted" style="font-size:11.5px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <label style="font-size:11px;display:inline-flex;align-items:center;gap:4px;text-transform:none;">
+            <span data-i18n="repeater.raceCopies">Copies:</span>
+            <input type="number" id="rs-copies" value="5" min="2" max="64" style="width:54px;padding:2px 5px;font-size:11.5px;">
+          </label>
+          <label style="font-size:11px;display:inline-flex;align-items:center;gap:4px;text-transform:none;">
+            <span>Hold (ms):</span>
+            <input type="number" id="rs-hold-ms" value="50" min="0" max="5000" style="width:62px;padding:2px 5px;font-size:11.5px;">
+          </label>
+          <button type="button" id="rs-add-current-btn" style="padding:3px 8px;font-size:11px;min-height:24px;" data-i18n="repeater.raceAddReq">+ Add Current Request</button>
+          <button type="button" id="rs-clear-queue-btn" style="padding:3px 8px;font-size:11px;min-height:24px;" data-i18n="repeater.raceClearQueue">Clear Queue</button>
+          <button type="button" class="primary" id="rs-fire-btn" data-i18n="repeater.raceFire">🚀 Fire Barrier</button>
+          <button type="button" id="rs-close-btn" title="Close">✕</button>
+        </div>
+      </div>
+      <div id="rs-queue-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;font-size:11px;"></div>
+      <div id="rs-svg-chronograph" style="border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:8px;margin-bottom:8px;overflow-x:auto;">
+        <div class="muted" style="font-size:11px;text-align:center;padding:8px;" data-i18n="repeater.raceEmptyChart">Додайте кілька запитів у чергу або запустіть пачку копій поточного запиту, щоб побачити SVG-хронограф таймінгу.</div>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow-x:auto;">
+        <table class="ri-table" style="width:100%;font-size:11.5px;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>URL</th>
+              <th data-i18n="table.status">Status</th>
+              <th>Connect+TLS (µs)</th>
+              <th>Last-Byte (µs)</th>
+              <th>TTFB (µs)</th>
+              <th>Total (µs)</th>
+            </tr>
+          </thead>
+          <tbody id="rs-results-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Raw Repeater workbench mirrors the reference request/response split view. -->
+    <div class="workspace">
+      <section><div class="workspace-title"><span data-i18n="label.request">Запит</span><span class="muted" data-i18n="repeater.shortcut">Ctrl/Cmd + Enter для надсилання</span></div><div class="raw-editor-stack"><pre id="repeater-raw-highlight" class="raw-editor-highlight" aria-hidden="true"></pre><textarea id="repeater-raw-request" class="code-editor raw-editor" spellcheck="false" aria-label="Repeater raw HTTP request" placeholder="GET /api/echo?value=test HTTP/1.1&#10;Host: 127.0.0.1:3000&#10;Accept: application/json&#10;&#10;"></textarea></div></section>
+      <section>
+        <div class="workspace-title">
+          <span data-i18n="label.response">Відповідь</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;">
+            <span id="repeater-response-meta" class="muted"></span>
+            <button type="button" id="repeater-view-pretty" class="active" style="padding:2px 8px;min-height:22px;font-size:11px;">Pretty</button>
+            <button type="button" id="repeater-view-raw" style="padding:2px 8px;min-height:22px;font-size:11px;">Raw</button>
+          </span>
+        </div>
+        <pre id="response" class="code-editor" data-i18n="response.empty">Відповідь з'явиться тут.</pre>
+      </section>
+    </div>
+  </section>

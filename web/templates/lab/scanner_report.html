@@ -1,0 +1,216 @@
+{% load osint_report scanner_report %}<!doctype html>
+{% comment %}
+Server-rendered Scanner report.
+
+The one rule this template exists to hold: no operator-controlled or
+third-party value is ever marked `|safe`. Django escapes every interpolation by
+default, and a finding's title, a template name, a matcher output and a response
+excerpt are all text that came from a target and from a corpus of YAML files the
+operator did not write. Removing an escape here would be a one-word change that
+turns a report into a stored-XSS vector, so there is no `|safe` in this file and
+the `evidence_block` filter exists precisely so the bulky blocks do not tempt
+anyone into adding one.
+
+The numbers come from `scanner_exports.build_scanner_report`, not from counting
+here. Counting in a template means counting twice, and two counts of the same
+list eventually disagree.
+
+There are exactly three `|safe` marks in this file, on `report_css`, `report_js`
+and `report_brand`. They are the stylesheet, the behaviour and the masthead —
+constants written in `scanner_exports.py`, carrying no operator input and no
+target data. They need it because a script and a style block are raw text: HTML
+escaping does not apply inside them, so an escaped `'` arrives as the literal six
+characters `&#x27;` and the report does not parse. Every other interpolation is
+data, and data is escaped.
+{% endcomment %}
+<html lang="{{ language }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ report_title }} · RequestRider</title>
+<style>{{ report_css|safe }}</style>
+</head>
+<body>
+<header class="rr-head">
+  {{ report_brand|safe }}
+  <div class="rr-title">{{ report_title }}</div>
+  <div class="rr-target" title="{{ url }}">{{ url }}</div>
+  <a class="rr-back" href="{{ back_url }}">{{ back_label }}</a>
+</header>
+
+<div class="rr-stats">
+  <span class="rr-stat"><b class="ok">{{ findings_total|intcomma }}</b>{% tr "scanner.findings" %}</span>
+  <span class="rr-stat"><b>{{ templates_total|intcomma }}</b>{% tr "scanner.files" %}</span>
+  <span class="rr-stat"><span class="rr-sev rr-sev-{{ highest_severity }}">{{ highest_severity|upper }}</span></span>
+  {% if source_ip %}<span class="rr-stat"><b>{{ source_ip }}</b>{% tr "scanner.source_ip" %}</span>{% endif %}
+  {% if rejected %}<span class="rr-stat"><b class="rr-rejected">{{ rejected|length }}</b>{% tr "scanner.rejected" %}</span>{% endif %}
+  <span class="rr-lang">
+    <a class="rr-btn" href="?lang={{ other_language }}" aria-label="{% tr 'switch_language' %}">{{ other_language_label }}</a>
+  </span>
+</div>
+
+{% if filters.severities or filters.statuses %}
+<p class="rr-note">
+  {% tr "scanner.filtered_by" %}
+  <code>{{ filters.severities|join:", " }}</code>
+  <code>{{ filters.statuses|join:", " }}</code>
+  <a class="rr-btn" href=".">{% tr "scanner.clear_filters" %}</a>
+</p>
+{% endif %}
+
+{% if rejected %}
+<p class="rr-note reject">
+  {% tr "scanner.rejected_note" %}
+  {% for item in rejected %}<code>{{ item.raw }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}
+</p>
+{% endif %}
+
+<main>
+  <div class="rr-tools">
+    <div id="rr-search" class="rr-search-wrap">
+    <form class="rr-page-form rr-search" method="get" role="search">
+      <!--
+        The id lives on the *container*, not on the field, and the field is
+        found by `input[data-rr-search]`.
+
+        Measured on a live exported report 2026-10-02: the field carried
+        `id="rr-search"` and no `data-rr-search`, so the shared
+        `EXPORT_REPORT_JS` — which binds the live filter with
+        `document.querySelector('[data-rr-search]')` — matched the first
+        *table row*, because rows carry that attribute for the search haystack.
+        The filter was therefore bound to a row, and `live_check.py`, which
+        probes `input[data-rr-search]`, found nothing.
+
+        Three parties must name the same field, so the selector is one string:
+        the shared JS, this generator's own script, and `live_check.py`. The
+        field is `input[data-rr-search]`; `rr-q` keeps parity with the
+        client-side export, which builds the same control with that id.
+      -->
+      <input id="rr-q" data-rr-search type="search" name="q" value="{{ query }}"
+             placeholder="{% tr 'search' %}" aria-label="{% tr 'search_aria' %}">
+      {% for level in filter_severities %}
+        <input type="hidden" name="severity" value="{{ level }}">
+      {% endfor %}
+      {% for state in filter_statuses %}
+        <input type="hidden" name="status" value="{{ state }}">
+      {% endfor %}
+      <button class="rr-btn" type="submit">{% tr "find" %}</button>
+    </form>
+    </div>
+    <div class="rr-chips" role="group" aria-label="{% tr 'scanner.severity_filter' %}">
+      {% for level in all_severities %}
+      <button type="button" class="rr-chip" data-rr-filter="{{ level }}" data-rr-value="severity"
+              aria-pressed="{% if level in filters.severities %}true{% else %}false{% endif %}">
+        <span class="rr-sev rr-sev-{{ level }}">{{ level|upper }}</span>
+        <b>{{ severity_counts|get_item:level }}</b>
+      </button>
+      {% endfor %}
+    </div>
+    <div class="rr-chips" role="group" aria-label="{% tr 'scanner.status_filter' %}">
+      {% for state in all_statuses %}
+      {% comment %}
+      The word is what says what the chip filters, so it is not optional: a row
+      of bare counts gives the analyst six buttons and no way to tell them
+      apart.
+
+      This block uses the long `comment` tag rather than Django's short hash
+      form because the short form is single-line only: wrapped across lines it
+      stops being a comment and becomes visible text, which is how the first
+      version of this block printed its own explanation straight across the
+      report.
+      {% endcomment %}
+      <button type="button" class="rr-chip" data-rr-filter="{{ state }}" data-rr-value="status"
+              aria-pressed="{% if state in filters.statuses %}true{% else %}false{% endif %}"
+              aria-label="{% finding_status state %} — {{ status_counts|get_item:state }}">
+        <span class="rr-chip-word">{% finding_status state %}</span>
+        <b>{{ status_counts|get_item:state }}</b>
+      </button>
+      {% endfor %}
+    </div>
+    <button id="rr-reset" class="rr-btn" type="button">{% tr "reset" %}</button>
+  </div>
+
+  {% if findings or templates %}
+  <div class="rr-scroll">
+    <table class="rr-table">
+      <thead>
+        <tr>
+          <th scope="col">{% tr "scanner.severity" %}</th>
+          <th scope="col">{% tr "scanner.title" %}</th>
+          <th scope="col">{% tr "scanner.status" %}</th>
+          <th scope="col">{% tr "scanner.template" %}</th>
+          <th scope="col">{% tr "scanner.cve" %}</th>
+          <th scope="col">{% tr "scanner.evidence" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in findings %}
+        <tr class="rr-row" data-rr-severity="{{ row.severity }}" data-rr-status="{{ row.status|default:'' }}"
+            data-rr-search="{{ row|row_search }}">
+          <td><span class="rr-sev rr-sev-{{ row.severity }}">{{ row.severity|upper }}</span></td>
+          <td class="rr-id">{{ row.title|default_if_none:"" }}</td>
+          <td>{% if row.status %}<span class="rr-status rr-status-{{ row.status }}">{% finding_status row.status %}</span>{% else %}<span class="rr-dash">—</span>{% endif %}</td>
+          <td class="rr-id">{{ row.template_id|default_if_none:"" }}</td>
+          <td class="rr-id">{{ row.cve|join:", " }}</td>
+          <td>{% evidence_block row %}</td>
+        </tr>
+        {% endfor %}
+        {% for row in templates %}
+        {% comment %}
+        The folder a file came from is part of what the report is about: a folder
+        upload reports per folder, and a reader of the exported document has no
+        other way to tell `check-00.yaml` of one folder from another. The path was
+        in the row and in `data-rr-search` (the search filter flattens every value
+        of the row), so it was searchable and invisible — present in the document,
+        absent from the report. Both the attribute and the visible line are here
+        so a machine check and a human read the same fact.
+        {% endcomment %}
+        <tr class="rr-row" data-rr-severity="{{ row.severity|default_if_none:'' }}" data-rr-status="{{ row.status }}"
+            data-rr-path="{{ row.path|default_if_none:'' }}"
+            data-rr-search="{{ row|row_search }}">
+          <td>{% if row.severity %}<span class="rr-sev rr-sev-{{ row.severity }}">{{ row.severity|upper }}</span>{% else %}<span class="rr-dash">—</span>{% endif %}</td>
+          <td class="rr-id">{{ row.title|default_if_none:"" }}</td>
+          <td><span class="rr-status rr-status-{{ row.status }}">{% finding_status row.status %}</span></td>
+          <td class="rr-id">{{ row.name|default_if_none:"" }}{% if row.path and row.path != row.name %}<br><span class="rr-muted" title="{{ row.path }}">{{ row.path }}</span>{% endif %}</td>
+          <td class="rr-id">{{ row.cve|join:", " }}</td>
+          <td>{% if row.reason %}<span class="rr-muted">{{ row.reason }}</span>{% else %}<span class="rr-dash">—</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="rr-empty">{% tr "scanner.empty" %}</p>
+  {% endif %}
+
+  <div class="rr-foot">
+    <span class="rr-status-line">
+      <b id="rr-search-status">{{ findings|length|add:templates|length }}</b>{% tr "scanner.rows" %}
+    </span>
+  </div>
+
+  {% if stats_rows %}
+  <div class="rr-scroll">
+    <table class="rr-table">
+      <thead>
+        <tr>
+          <th scope="col">{% tr "scanner.statistic" %}</th>
+          <th scope="col">{% tr "scanner.value" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, value in stats_rows %}
+        <tr>
+          <td class="rr-id">{{ key }}</td>
+          <td class="rr-id">{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</main>
+
+<script>{{ report_js|safe }}</script>
+</body>
+</html>
