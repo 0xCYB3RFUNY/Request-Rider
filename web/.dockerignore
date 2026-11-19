@@ -1,0 +1,42 @@
+# Build context for web/Dockerfile.
+#
+# Without this file the local 112 MB virtualenv and 357 __pycache__ directories
+# are copied into /app on every build: measured 290 MB of image where the
+# application itself is under 4 MB.
+
+# Local virtualenv. The image installs its own dependencies from
+# requirements.txt into the system interpreter; a host venv is not only useless
+# here, its absolute paths and its own interpreter link can shadow the image's.
+.venv/
+venv/
+env/
+
+# Bytecode and tool caches.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Collected static output: the image runs `runserver`, which serves
+# STATICFILES_DIRS directly and never runs collectstatic. Keeping
+# static/ is required - it holds the vendored browser bundle.
+staticfiles/
+
+# Local test databases and dumps must never reach an image.
+*.sqlite3
+*.dump
+*.bak
+
+# Never bake a secret or a CA private key into an image.
+.env
+.env.*
+data/
+*.key
+*.pem
+
+# Local editor and OS noise.
+.git/
+.gitignore
+.DS_Store
+*.log
