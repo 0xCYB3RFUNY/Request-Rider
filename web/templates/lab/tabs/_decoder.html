@@ -1,0 +1,81 @@
+  <section id="decoder" class="tab">
+    <div id="workspace-tabs-decoder" class="workspace-tabs" aria-label="Decoder workspaces" data-i18n-aria-label="a11y.workspacesDecoder"><div class="tool-corner-actions"><button type="button" class="tab-faq-trigger icon-btn" data-tab="decoder" title="Довідка / FAQ" aria-label="FAQ & Manual">❓ <span data-i18n="faq.button">FAQ</span></button><button type="button" class="tab-settings-trigger icon-btn" data-tab="decoder" title="Налаштування Decoder" aria-label="Налаштування Decoder">⚙️</button></div></div>
+    <div class="workspace-title"><span data-i18n="decoder.title">Decoder</span><span class="muted" data-i18n="decoder.subtitle">Encode, decode and transform request data</span></div>
+    <div class="toolbar">
+      <select id="decoder-operation" aria-label="Decoder operation" data-i18n-aria-label="decoder.operation">
+        <option value="urlEncode" data-i18n="decoder.opUrlEncode">URL encode</option><option value="urlDecode" data-i18n="decoder.opUrlDecode">URL decode</option>
+        <option value="base64Encode" data-i18n="decoder.opBase64Encode">Base64 encode</option><option value="base64Decode" data-i18n="decoder.opBase64Decode">Base64 decode</option>
+        <option value="base64UrlEncode" data-i18n="decoder.opBase64UrlEncode">Base64 URL-safe encode</option><option value="base64UrlDecode" data-i18n="decoder.opBase64UrlDecode">Base64 URL-safe decode</option>
+        <option value="htmlEncode" data-i18n="decoder.opHtmlEncode">HTML encode</option><option value="htmlDecode" data-i18n="decoder.opHtmlDecode">HTML decode</option>
+        <option value="hexEncode" data-i18n="decoder.opHexEncode">Hex encode</option><option value="hexDecode" data-i18n="decoder.opHexDecode">Hex decode</option>
+        <option value="asciiHexEncode" data-i18n="decoder.opAsciiHexEncode">ASCII Hex encode</option><option value="asciiHexDecode" data-i18n="decoder.opAsciiHexDecode">ASCII Hex decode</option>
+        <option value="octalEncode" data-i18n="decoder.opOctalEncode">Octal encode</option><option value="octalDecode" data-i18n="decoder.opOctalDecode">Octal decode</option>
+        <option value="gzipEncode" data-i18n="decoder.opGzipEncode">Gzip encode</option><option value="gzipDecode" data-i18n="decoder.opGzipDecode">Gzip decode</option>
+        <option value="byteEncode" data-i18n="decoder.opByteEncode">Byte encode</option><option value="byteDecode" data-i18n="decoder.opByteDecode">Byte decode</option>
+        <option value="jsonPretty" data-i18n="decoder.opJsonPretty">JSON pretty-print</option><option value="jsonMinify" data-i18n="decoder.opJsonMinify">JSON minify</option>
+        <option value="sha256" data-i18n="decoder.opSha256">SHA-256 hash</option>
+      </select>
+      <button type="button" class="primary" id="decoder-apply" data-i18n="decoder.apply">Apply</button>
+      <button type="button" id="decoder-swap" data-i18n="decoder.swap">Swap input/output</button>
+      <button type="button" id="decoder-clear" data-i18n="decoder.clear">Clear</button>
+      <button type="button" id="decoder-send-automation" data-i18n="button.sendAutomation">Send to Automation</button>
+    </div>
+    <div class="comparer-grid">
+      <section><div class="workspace-title"><span data-i18n="decoder.input">Input</span><span class="muted" data-i18n="decoder.inputHint">Text or hexadecimal data</span></div><textarea id="decoder-input" aria-label="Decoder input" data-i18n-aria-label="decoder.input" spellcheck="false" data-i18n-placeholder="decoder.inputPlaceholder" placeholder="Paste a value, request fragment or response body"></textarea></section>
+      <section><div class="workspace-title"><span data-i18n="decoder.output">Output</span><span id="decoder-status" class="muted"></span></div><textarea id="decoder-output" aria-label="Decoder output" data-i18n-aria-label="decoder.output" spellcheck="false" readonly data-i18n-placeholder="decoder.outputPlaceholder" placeholder="Decoded value will appear here"></textarea></section>
+    </div>
+    <!-- F5: JWT & Crypto Forge Studio -->
+    <div id="jwt-forge-studio" class="rr-subpanel">
+      <div class="rr-subpanel-head">
+        <div class="rr-subpanel-title-wrap">
+          <strong class="rr-subpanel-title"><span aria-hidden="true">🔐</span> <span data-i18n="decoder.jwtForgeTitle">JWT &amp; Crypto Forge Studio</span></strong>
+          <span id="jwt-forge-status" class="muted rr-subpanel-status"></span>
+        </div>
+        <div class="rr-subpanel-actions">
+          <select id="jwt-project-tokens" class="jwt-forge-select" aria-label="Project JWT Secrets" data-i18n-aria-label="decoder.jwtForgeSelectAria"><option value="" data-i18n="decoder.jwtForgeSelectPlaceholder">-- Project JWT Secrets --</option></select>
+          <button type="button" id="jwt-refresh-context-btn" class="rr-btn-compact" data-i18n="decoder.jwtForgeSync">↻ Sync Project</button>
+          <button type="button" class="primary" id="jwt-forge-run-btn" data-i18n="decoder.jwtForgeRun">⚡ Forge Attack Vectors</button>
+        </div>
+      </div>
+      <div class="muted jwt-forge-guide" data-i18n="decoder.jwtForgeGuide">1) Paste a JWT (or select from Project JWT Secrets) → 2) Edit Header / Payload (e.g. "role": "admin") → 3) Click «⚡ Forge Attack Vectors» → 4) Click «↩ Repeater» near any vector to send it back.</div>
+      <div class="jwt-forge-grid">
+        <div>
+          <label class="jwt-forge-label" for="jwt-forge-token" data-i18n="decoder.jwtForgeTokenLabel">JWT Token</label>
+          <textarea id="jwt-forge-token" class="jwt-forge-textarea" rows="3" spellcheck="false" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+          <div class="jwt-forge-subgrid" style="margin-top:6px;">
+            <input type="text" id="jwt-forge-secret" class="auth-matrix-input" placeholder="HMAC Secret (or leave blank)" data-i18n-placeholder="decoder.jwtForgeSecretPlaceholder">
+            <input type="text" id="jwt-forge-oast" class="auth-matrix-input" placeholder="OAST URL for JKU/X5U" data-i18n-placeholder="decoder.jwtForgeOastPlaceholder">
+          </div>
+          <div class="jwt-forge-options">
+            <label class="rr-inline-check"><input type="checkbox" id="jwt-extend-exp"> <span data-i18n="decoder.jwtForgeExtendExp">Extend exp (+1 yr)</span></label>
+            <input type="text" id="jwt-forge-pubkey" class="jwt-forge-pubkey" placeholder="Public Key PEM (for RS256→HS256)" data-i18n-placeholder="decoder.jwtForgePubkeyPlaceholder">
+          </div>
+        </div>
+        <div class="jwt-forge-subgrid">
+          <div>
+            <label class="jwt-forge-label" for="jwt-forge-header" data-i18n="decoder.jwtForgeHeaderLabel">Header JSON</label>
+            <textarea id="jwt-forge-header" class="jwt-forge-textarea" rows="5" spellcheck="false"></textarea>
+          </div>
+          <div>
+            <label class="jwt-forge-label" for="jwt-forge-payload" data-i18n="decoder.jwtForgePayloadLabel">Payload Claims JSON (tamper)</label>
+            <textarea id="jwt-forge-payload" class="jwt-forge-textarea" rows="5" spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="rr-table-scroll">
+        <table class="ri-table rr-table-full">
+          <thead>
+            <tr>
+              <th style="width:24%;" data-i18n="decoder.jwtForgeColVector">Attack Vector</th>
+              <th style="width:14%;" data-i18n="decoder.jwtForgeColCategory">Category</th>
+              <th data-i18n="decoder.jwtForgeColMutated">Mutated JWT</th>
+              <th style="width:200px;" data-i18n="table.actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jwt-forge-variants-tbody">
+            <tr><td colspan="4" class="muted rr-table-empty" data-i18n="decoder.jwtForgeEmpty">Paste a JWT or pick one from Project Secrets and click «Forge Attack Vectors».</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>

@@ -1,0 +1,1167 @@
+// --- Versioned UI Preferences v2 (Layout, Appearance, Custom Colors, DNS, and Tab Settings) ---
+const UI_PREFS_STORAGE_KEY = 'requestrider-ui-preferences-v2';
+const UI_PREFS_STORAGE_KEY_V1 = 'requestrider-ui-preferences-v1';
+const UI_PREFS_SCHEMA_VERSION = 2;
+
+const THEME_PRESETS = {
+  default: {
+    name: 'RequestRider Dark',
+    vars: {
+      '--bg': '#080c12',
+      '--panel': '#101722',
+      '--panel-2': '#0d141e',
+      '--line': '#263548',
+      '--text': '#dbe7f5',
+      '--muted': '#8294aa',
+      '--accent': '#43d9a3',
+      '--accent-strong': '#62e8b5',
+      '--button': '#182333',
+      '--button-hover': '#22344b',
+      '--syn-method': '#4ade80',
+      '--syn-path': '#22d3ee',
+      '--syn-status': '#fbbf24',
+      '--syn-key': '#c084fc',
+      '--syn-string': '#fb923c',
+      '--syn-number': '#a5b4fc',
+      '--syn-literal': '#f0abfc',
+      '--syn-tag': '#2dd4bf',
+      '--syn-attr': '#e879f9',
+      '--syn-punct': '#8294aa',
+      '--syn-marker': '#f06b38',
+      '--status-2xx': '#22c55e',
+      '--status-3xx': '#3b82f6',
+      '--status-4xx': '#f59e0b',
+      '--status-5xx': '#ef4444',
+      '--method-get': '#34d399',
+      '--method-post': '#fbbf24',
+      '--method-put': '#60a5fa',
+      '--method-delete': '#fb7185',
+      '--method-patch': '#c084fc',
+      '--method-options': '#a1a1aa'
+    }
+  },
+  burp: {
+    name: 'Burp Classic',
+    vars: {
+      '--bg': '#1b1d21',
+      '--panel': '#24282e',
+      '--panel-2': '#202328',
+      '--line': '#363b45',
+      '--text': '#e4e7ec',
+      '--muted': '#8f98a8',
+      '--accent': '#e86c3a',
+      '--accent-strong': '#f58456',
+      '--purple': '#61afef',
+      '--purple-strong': '#82c4f8',
+      '--orange': '#e86c3a',
+      '--green': '#98c379',
+      '--danger': '#e06c75',
+      '--warning': '#e5c07b',
+      '--info': '#61afef',
+      '--accent-tint': 'rgba(232, 108, 58, 0.14)',
+      '--button': '#2c313a',
+      '--button-hover': '#363d48',
+      '--syn-method': '#e86c3a',
+      '--syn-path': '#56b6c2',
+      '--syn-status': '#e5c07b',
+      '--syn-key': '#e06c75',
+      '--syn-string': '#98c379',
+      '--syn-number': '#d19a66',
+      '--syn-literal': '#c678dd',
+      '--syn-tag': '#e06c75',
+      '--syn-attr': '#d19a66',
+      '--syn-punct': '#abb2bf',
+      '--syn-marker': '#e86c3a',
+      '--status-2xx': '#98c379',
+      '--status-3xx': '#61afef',
+      '--status-4xx': '#e5c07b',
+      '--status-5xx': '#e06c75',
+      '--method-get': '#e86c3a',
+      '--method-post': '#e5c07b',
+      '--method-put': '#61afef',
+      '--method-delete': '#e06c75',
+      '--method-patch': '#c678dd',
+      '--method-options': '#abb2bf',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.22)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.32)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.45)'
+    }
+  },
+  cyberpunk: {
+    name: 'Cyberpunk Neon',
+    vars: {
+      '--bg': '#090a12',
+      '--panel': '#101322',
+      '--panel-2': '#0c0f1b',
+      '--line': '#243054',
+      '--text': '#e8f0fb',
+      '--muted': '#8190ab',
+      '--accent': '#18e0b8',
+      '--accent-strong': '#45f2cf',
+      '--purple': '#ec4899',
+      '--purple-strong': '#f472b6',
+      '--orange': '#f59e0b',
+      '--green': '#18e0b8',
+      '--danger': '#f43f5e',
+      '--warning': '#eab308',
+      '--info': '#38bdf8',
+      '--accent-tint': 'rgba(24, 224, 184, 0.14)',
+      '--button': '#171c31',
+      '--button-hover': '#222947',
+      '--syn-method': '#18e0b8',
+      '--syn-path': '#f472b6',
+      '--syn-status': '#facc15',
+      '--syn-key': '#f472b6',
+      '--syn-string': '#38bdf8',
+      '--syn-number': '#fb923c',
+      '--syn-literal': '#e879f9',
+      '--syn-tag': '#18e0b8',
+      '--syn-attr': '#facc15',
+      '--syn-punct': '#64748b',
+      '--syn-marker': '#f43f5e',
+      '--status-2xx': '#18e0b8',
+      '--status-3xx': '#38bdf8',
+      '--status-4xx': '#facc15',
+      '--status-5xx': '#f43f5e',
+      '--method-get': '#18e0b8',
+      '--method-post': '#facc15',
+      '--method-put': '#38bdf8',
+      '--method-delete': '#f43f5e',
+      '--method-patch': '#e879f9',
+      '--method-options': '#94a3b8',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.35)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.45)',
+      '--shadow-lg': '0 8px 28px rgba(0,0,0,0.6)'
+    }
+  },
+  monokai: {
+    name: 'Monokai Pro',
+    vars: {
+      '--bg': '#221f22',
+      '--panel': '#2d2a2e',
+      '--panel-2': '#262327',
+      '--line': '#403e41',
+      '--text': '#fcfcfa',
+      '--muted': '#939293',
+      '--accent': '#a9dc76',
+      '--accent-strong': '#bfe894',
+      '--purple': '#ab9df2',
+      '--purple-strong': '#c4b8f7',
+      '--orange': '#fc9867',
+      '--green': '#a9dc76',
+      '--danger': '#ff6188',
+      '--warning': '#ffd866',
+      '--info': '#78dce8',
+      '--accent-tint': 'rgba(169, 220, 118, 0.14)',
+      '--button': '#363338',
+      '--button-hover': '#454248',
+      '--syn-method': '#ff6188',
+      '--syn-path': '#78dce8',
+      '--syn-status': '#fc9867',
+      '--syn-key': '#78dce8',
+      '--syn-string': '#ffd866',
+      '--syn-number': '#ab9df2',
+      '--syn-literal': '#ab9df2',
+      '--syn-tag': '#ff6188',
+      '--syn-attr': '#a9dc76',
+      '--syn-punct': '#939293',
+      '--syn-marker': '#fc9867',
+      '--status-2xx': '#a9dc76',
+      '--status-3xx': '#78dce8',
+      '--status-4xx': '#ffd866',
+      '--status-5xx': '#ff6188',
+      '--method-get': '#a9dc76',
+      '--method-post': '#fc9867',
+      '--method-put': '#78dce8',
+      '--method-delete': '#ff6188',
+      '--method-patch': '#ab9df2',
+      '--method-options': '#939293',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.25)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.35)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.48)'
+    }
+  },
+  highContrast: {
+    name: 'High Contrast (A11y)',
+    vars: {
+      '--bg': '#000000',
+      '--panel': '#0a0a0a',
+      '--panel-2': '#050505',
+      '--line': '#ffffff',
+      '--text': '#ffffff',
+      '--muted': '#d4d4d4',
+      '--accent': '#00e5ff',
+      '--accent-strong': '#80f2ff',
+      '--purple': '#ff80df',
+      '--purple-strong': '#ffb3ec',
+      '--orange': '#ffaa00',
+      '--green': '#00ff66',
+      '--danger': '#ff4444',
+      '--warning': '#ffff00',
+      '--info': '#00e5ff',
+      '--accent-tint': 'rgba(0, 229, 255, 0.18)',
+      '--button': '#141414',
+      '--button-hover': '#292929',
+      '--syn-method': '#00ff66',
+      '--syn-path': '#00e5ff',
+      '--syn-status': '#ffff00',
+      '--syn-key': '#ff80df',
+      '--syn-string': '#ffff00',
+      '--syn-number': '#00e5ff',
+      '--syn-literal': '#ff80df',
+      '--syn-tag': '#00ff66',
+      '--syn-attr': '#ffff00',
+      '--syn-punct': '#ffffff',
+      '--syn-marker': '#ff4444',
+      '--status-2xx': '#00ff66',
+      '--status-3xx': '#00e5ff',
+      '--status-4xx': '#ffff00',
+      '--status-5xx': '#ff4444',
+      '--method-get': '#00ff66',
+      '--method-post': '#ffff00',
+      '--method-put': '#00e5ff',
+      '--method-delete': '#ff4444',
+      '--method-patch': '#ff80df',
+      '--method-options': '#ffffff',
+      '--shadow-sm': 'none',
+      '--shadow-md': 'none',
+      '--shadow-lg': 'none'
+    }
+  },
+  dracula: {
+    name: 'Dracula Theme',
+    vars: {
+      '--bg': '#21222c',
+      '--panel': '#282a36',
+      '--panel-2': '#1e1f29',
+      '--line': '#44475a',
+      '--text': '#f8f8f2',
+      '--muted': '#8b99c4',
+      '--accent': '#bd93f9',
+      '--accent-strong': '#d1b3ff',
+      '--purple': '#ff79c6',
+      '--purple-strong': '#ff9ad5',
+      '--orange': '#ffb86c',
+      '--green': '#50fa7b',
+      '--danger': '#ff5555',
+      '--warning': '#ffb86c',
+      '--info': '#8be9fd',
+      '--accent-tint': 'rgba(189, 147, 249, 0.15)',
+      '--button': '#343746',
+      '--button-hover': '#44475a',
+      '--syn-method': '#50fa7b',
+      '--syn-path': '#8be9fd',
+      '--syn-status': '#f1fa8c',
+      '--syn-key': '#ff79c6',
+      '--syn-string': '#f1fa8c',
+      '--syn-number': '#bd93f9',
+      '--syn-literal': '#bd93f9',
+      '--syn-tag': '#ff79c6',
+      '--syn-attr': '#50fa7b',
+      '--syn-punct': '#6272a4',
+      '--syn-marker': '#ff5555',
+      '--status-2xx': '#50fa7b',
+      '--status-3xx': '#8be9fd',
+      '--status-4xx': '#ffb86c',
+      '--status-5xx': '#ff5555',
+      '--method-get': '#50fa7b',
+      '--method-post': '#f1fa8c',
+      '--method-put': '#8be9fd',
+      '--method-delete': '#ff5555',
+      '--method-patch': '#bd93f9',
+      '--method-options': '#8b99c4',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.25)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.35)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.5)'
+    }
+  },
+  nord: {
+    name: 'Nord Frost',
+    vars: {
+      '--bg': '#242933',
+      '--panel': '#2e3440',
+      '--panel-2': '#1f232a',
+      '--line': '#3b4252',
+      '--text': '#eceff4',
+      '--muted': '#8f9bb3',
+      '--accent': '#88c0d0',
+      '--accent-strong': '#8fbcbb',
+      '--purple': '#b48ead',
+      '--purple-strong': '#c6a4c0',
+      '--orange': '#d08770',
+      '--green': '#a3be8c',
+      '--danger': '#bf616a',
+      '--warning': '#ebcb8b',
+      '--info': '#81a1c1',
+      '--accent-tint': 'rgba(136, 192, 208, 0.14)',
+      '--button': '#3b4252',
+      '--button-hover': '#434c5e',
+      '--syn-method': '#a3be8c',
+      '--syn-path': '#81a1c1',
+      '--syn-status': '#ebcb8b',
+      '--syn-key': '#88c0d0',
+      '--syn-string': '#a3be8c',
+      '--syn-number': '#b48ead',
+      '--syn-literal': '#b48ead',
+      '--syn-tag': '#81a1c1',
+      '--syn-attr': '#8fbcbb',
+      '--syn-punct': '#616e88',
+      '--syn-marker': '#bf616a',
+      '--status-2xx': '#a3be8c',
+      '--status-3xx': '#81a1c1',
+      '--status-4xx': '#ebcb8b',
+      '--status-5xx': '#bf616a',
+      '--method-get': '#a3be8c',
+      '--method-post': '#ebcb8b',
+      '--method-put': '#81a1c1',
+      '--method-delete': '#bf616a',
+      '--method-patch': '#b48ead',
+      '--method-options': '#d8dee9',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.2)',
+      '--shadow-md': '0 4px 12px rgba(0,0,0,0.28)',
+      '--shadow-lg': '0 8px 24px rgba(0,0,0,0.4)'
+    }
+  },
+  tokyoNight: {
+    name: 'Tokyo Night',
+    vars: {
+      '--bg': '#16161e',
+      '--panel': '#1f2335',
+      '--panel-2': '#1a1b26',
+      '--line': '#292e42',
+      '--text': '#c0caf5',
+      '--muted': '#787c99',
+      '--accent': '#7aa2f7',
+      '--accent-strong': '#9ab8f9',
+      '--purple': '#bb9af7',
+      '--purple-strong': '#ccb2fa',
+      '--orange': '#ff9e64',
+      '--green': '#9ece6a',
+      '--danger': '#f7768e',
+      '--warning': '#e0af68',
+      '--info': '#7dcfff',
+      '--accent-tint': 'rgba(122, 162, 247, 0.14)',
+      '--button': '#24283b',
+      '--button-hover': '#2f354f',
+      '--syn-method': '#9ece6a',
+      '--syn-path': '#7dcfff',
+      '--syn-status': '#e0af68',
+      '--syn-key': '#bb9af7',
+      '--syn-string': '#9ece6a',
+      '--syn-number': '#ff9e64',
+      '--syn-literal': '#ff7a93',
+      '--syn-tag': '#7aa2f7',
+      '--syn-attr': '#b4f9f8',
+      '--syn-punct': '#565f89',
+      '--syn-marker': '#f7768e',
+      '--status-2xx': '#9ece6a',
+      '--status-3xx': '#7aa2f7',
+      '--status-4xx': '#e0af68',
+      '--status-5xx': '#f7768e',
+      '--method-get': '#9ece6a',
+      '--method-post': '#e0af68',
+      '--method-put': '#7aa2f7',
+      '--method-delete': '#f7768e',
+      '--method-patch': '#bb9af7',
+      '--method-options': '#787c99',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.25)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.35)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.5)'
+    }
+  },
+  catppuccinMocha: {
+    name: 'Catppuccin Mocha',
+    vars: {
+      '--bg': '#181825',
+      '--panel': '#1e1e2e',
+      '--panel-2': '#141420',
+      '--line': '#313244',
+      '--text': '#cdd6f4',
+      '--muted': '#8c92ad',
+      '--accent': '#cba6f7',
+      '--accent-strong': '#d9befe',
+      '--purple': '#cba6f7',
+      '--purple-strong': '#dfc4fa',
+      '--orange': '#fab387',
+      '--green': '#a6e3a1',
+      '--danger': '#f38ba8',
+      '--warning': '#f9e2af',
+      '--info': '#89b4fa',
+      '--accent-tint': 'rgba(203, 166, 247, 0.14)',
+      '--button': '#26263a',
+      '--button-hover': '#313244',
+      '--syn-method': '#a6e3a1',
+      '--syn-path': '#89dceb',
+      '--syn-status': '#f9e2af',
+      '--syn-key': '#cba6f7',
+      '--syn-string': '#a6e3a1',
+      '--syn-number': '#fab387',
+      '--syn-literal': '#f5c2e7',
+      '--syn-tag': '#89b4fa',
+      '--syn-attr': '#94e2d5',
+      '--syn-punct': '#6c7086',
+      '--syn-marker': '#f38ba8',
+      '--status-2xx': '#a6e3a1',
+      '--status-3xx': '#89b4fa',
+      '--status-4xx': '#f9e2af',
+      '--status-5xx': '#f38ba8',
+      '--method-get': '#a6e3a1',
+      '--method-post': '#f9e2af',
+      '--method-put': '#89b4fa',
+      '--method-delete': '#f38ba8',
+      '--method-patch': '#cba6f7',
+      '--method-options': '#a6adc8',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.22)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.32)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.45)'
+    }
+  },
+  solarizedDark: {
+    name: 'Solarized Dark',
+    vars: {
+      '--bg': '#00212b',
+      '--panel': '#002b36',
+      '--panel-2': '#073642',
+      '--line': '#0e4b59',
+      '--text': '#93a1a1',
+      '--muted': '#657b83',
+      '--accent': '#268bd2',
+      '--accent-strong': '#3fa1e6',
+      '--purple': '#6c71c4',
+      '--purple-strong': '#868bd6',
+      '--orange': '#cb4b16',
+      '--green': '#859900',
+      '--danger': '#dc322f',
+      '--warning': '#b58900',
+      '--info': '#2aa198',
+      '--accent-tint': 'rgba(38, 139, 210, 0.16)',
+      '--button': '#073642',
+      '--button-hover': '#0d4e60',
+      '--syn-method': '#859900',
+      '--syn-path': '#2aa198',
+      '--syn-status': '#b58900',
+      '--syn-key': '#268bd2',
+      '--syn-string': '#2aa198',
+      '--syn-number': '#d33682',
+      '--syn-literal': '#6c71c4',
+      '--syn-tag': '#268bd2',
+      '--syn-attr': '#859900',
+      '--syn-punct': '#586e75',
+      '--syn-marker': '#cb4b16',
+      '--status-2xx': '#859900',
+      '--status-3xx': '#268bd2',
+      '--status-4xx': '#b58900',
+      '--status-5xx': '#dc322f',
+      '--method-get': '#859900',
+      '--method-post': '#b58900',
+      '--method-put': '#268bd2',
+      '--method-delete': '#dc322f',
+      '--method-patch': '#6c71c4',
+      '--method-options': '#93a1a1',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.25)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.35)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.48)'
+    }
+  },
+  matrix: {
+    name: 'Matrix Phosphor Green',
+    vars: {
+      '--bg': '#050c06',
+      '--panel': '#0a180c',
+      '--panel-2': '#071209',
+      '--line': '#184220',
+      '--text': '#c8f5cd',
+      '--muted': '#579662',
+      '--accent': '#22c55e',
+      '--accent-strong': '#4ade80',
+      '--purple': '#16a34a',
+      '--purple-strong': '#22c55e',
+      '--orange': '#eab308',
+      '--green': '#22c55e',
+      '--danger': '#ef4444',
+      '--warning': '#eab308',
+      '--info': '#2dd4bf',
+      '--accent-tint': 'rgba(34, 197, 94, 0.14)',
+      '--button': '#0f2614',
+      '--button-hover': '#16381d',
+      '--syn-method': '#4ade80',
+      '--syn-path': '#6ee7b7',
+      '--syn-status': '#a7f3d0',
+      '--syn-key': '#4ade80',
+      '--syn-string': '#86efac',
+      '--syn-number': '#2dd4bf',
+      '--syn-literal': '#5eead4',
+      '--syn-tag': '#4ade80',
+      '--syn-attr': '#6ee7b7',
+      '--syn-punct': '#3b7345',
+      '--syn-marker': '#ef4444',
+      '--status-2xx': '#22c55e',
+      '--status-3xx': '#2dd4bf',
+      '--status-4xx': '#eab308',
+      '--status-5xx': '#ef4444',
+      '--method-get': '#22c55e',
+      '--method-post': '#eab308',
+      '--method-put': '#2dd4bf',
+      '--method-delete': '#ef4444',
+      '--method-patch': '#86efac',
+      '--method-options': '#579662',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.3)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.4)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.55)'
+    }
+  },
+  gruvboxDark: {
+    name: 'Gruvbox Dark',
+    vars: {
+      '--bg': '#1d2021',
+      '--panel': '#282828',
+      '--panel-2': '#232526',
+      '--line': '#3c3836',
+      '--text': '#ebdbb2',
+      '--muted': '#a89984',
+      '--accent': '#fe8019',
+      '--accent-strong': '#ff9940',
+      '--purple': '#d3869b',
+      '--purple-strong': '#e3a1b3',
+      '--orange': '#fe8019',
+      '--green': '#b8bb26',
+      '--danger': '#fb4934',
+      '--warning': '#fabd2f',
+      '--info': '#83a598',
+      '--accent-tint': 'rgba(254, 128, 25, 0.14)',
+      '--button': '#32302f',
+      '--button-hover': '#3c3836',
+      '--syn-method': '#b8bb26',
+      '--syn-path': '#8ec07c',
+      '--syn-status': '#fabd2f',
+      '--syn-key': '#83a598',
+      '--syn-string': '#b8bb26',
+      '--syn-number': '#d3869b',
+      '--syn-literal': '#d3869b',
+      '--syn-tag': '#83a598',
+      '--syn-attr': '#fabd2f',
+      '--syn-punct': '#7c6f64',
+      '--syn-marker': '#fb4934',
+      '--status-2xx': '#b8bb26',
+      '--status-3xx': '#83a598',
+      '--status-4xx': '#fabd2f',
+      '--status-5xx': '#fb4934',
+      '--method-get': '#b8bb26',
+      '--method-post': '#fabd2f',
+      '--method-put': '#83a598',
+      '--method-delete': '#fb4934',
+      '--method-patch': '#d3869b',
+      '--method-options': '#a89984',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.22)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.32)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.45)'
+    }
+  },
+  githubDark: {
+    name: 'GitHub Dark Dimmed',
+    vars: {
+      '--bg': '#1c2128',
+      '--panel': '#22272e',
+      '--panel-2': '#181c21',
+      '--line': '#373e47',
+      '--text': '#adbac7',
+      '--muted': '#768390',
+      '--accent': '#539bf5',
+      '--accent-strong': '#6cb6ff',
+      '--purple': '#b083f0',
+      '--purple-strong': '#c6a2f7',
+      '--orange': '#e0823d',
+      '--green': '#57ab5a',
+      '--danger': '#e5534b',
+      '--warning': '#c69026',
+      '--info': '#539bf5',
+      '--accent-tint': 'rgba(83, 155, 245, 0.14)',
+      '--button': '#2d333b',
+      '--button-hover': '#373e47',
+      '--syn-method': '#57ab5a',
+      '--syn-path': '#6cb6ff',
+      '--syn-status': '#c69026',
+      '--syn-key': '#6cb6ff',
+      '--syn-string': '#96d0ff',
+      '--syn-number': '#6cb6ff',
+      '--syn-literal': '#b083f0',
+      '--syn-tag': '#57ab5a',
+      '--syn-attr': '#f47067',
+      '--syn-punct': '#636e7b',
+      '--syn-marker': '#e5534b',
+      '--status-2xx': '#57ab5a',
+      '--status-3xx': '#539bf5',
+      '--status-4xx': '#c69026',
+      '--status-5xx': '#e5534b',
+      '--method-get': '#57ab5a',
+      '--method-post': '#c69026',
+      '--method-put': '#539bf5',
+      '--method-delete': '#e5534b',
+      '--method-patch': '#b083f0',
+      '--method-options': '#768390',
+      '--shadow-sm': '0 1px 4px rgba(0,0,0,0.22)',
+      '--shadow-md': '0 4px 14px rgba(0,0,0,0.32)',
+      '--shadow-lg': '0 8px 26px rgba(0,0,0,0.45)'
+    }
+  },
+  softLight: {
+    name: 'Soft Light (Calm Paper)',
+    mode: 'light',
+    vars: {
+      '--bg': '#e4e7ec',
+      '--panel': '#eef0f4',
+      '--panel-2': '#dfe3e9',
+      '--line': '#ccd2dc',
+      '--text': '#2b313c',
+      '--muted': '#5e687a',
+      '--accent': '#1d7066',
+      '--accent-strong': '#175b53',
+      '--purple': '#6959a5',
+      '--purple-strong': '#56478c',
+      '--orange': '#b5562c',
+      '--button': '#e5e8ee',
+      '--button-hover': '#d8dde6',
+      '--green': '#1f7445',
+      '--danger': '#a83232',
+      '--warning': '#9c5618',
+      '--info': '#2555a8',
+      '--accent-tint': 'rgba(29, 112, 102, 0.10)',
+      '--syn-method': '#1f7445',
+      '--syn-path': '#1b5f8a',
+      '--syn-status': '#9c5618',
+      '--syn-key': '#6438a6',
+      '--syn-string': '#8e3d1c',
+      '--syn-number': '#3c439e',
+      '--syn-literal': '#76319e',
+      '--syn-tag': '#1d7066',
+      '--syn-attr': '#8f2c8c',
+      '--syn-punct': '#5c6678',
+      '--syn-marker': '#b5562c',
+      '--syn-comment': '#667082',
+      '--syn-sensitive': '#a83232',
+      '--syn-sensitive-fg': '#8c2323',
+      '--syn-sensitive-bg': 'rgba(168, 50, 50, 0.10)',
+      '--syn-cookie': '#6438a6',
+      '--syn-cookie-value': '#532d8c',
+      '--syn-cookie-flag': '#667082',
+      '--status-1xx': '#2555a8',
+      '--status-2xx': '#1f7445',
+      '--status-3xx': '#2555a8',
+      '--status-4xx': '#9c5618',
+      '--status-5xx': '#a83232',
+      '--method-get': '#1f7445',
+      '--method-post': '#9c5618',
+      '--method-put': '#2555a8',
+      '--method-delete': '#a83232',
+      '--method-patch': '#6438a6',
+      '--method-options': '#4e5869',
+      '--shadow-sm': '0 1px 2px rgba(20, 28, 40, 0.05)',
+      '--shadow-md': '0 3px 10px rgba(20, 28, 40, 0.07)',
+      '--shadow-lg': '0 8px 20px rgba(20, 28, 40, 0.10)'
+    }
+  },
+  softDark: {
+    name: 'Soft Dark (Calm Charcoal)',
+    mode: 'dark',
+    vars: {
+      '--bg': '#121418',
+      '--panel': '#191c22',
+      '--panel-2': '#15181d',
+      '--line': '#2a2f3a',
+      '--text': '#d5dbe5',
+      '--muted': '#8892a4',
+      '--accent': '#4ea898',
+      '--accent-strong': '#62bba9',
+      '--purple': '#9b84d8',
+      '--purple-strong': '#b19ee6',
+      '--orange': '#d47a52',
+      '--button': '#20242c',
+      '--button-hover': '#2a2f3a',
+      '--green': '#4ca982',
+      '--danger': '#d97373',
+      '--warning': '#d49a45',
+      '--info': '#6897d8',
+      '--accent-tint': 'rgba(78, 168, 152, 0.10)',
+      '--syn-method': '#5eb88a',
+      '--syn-path': '#5ca7c7',
+      '--syn-status': '#d4a857',
+      '--syn-key': '#a88fd8',
+      '--syn-string': '#d4936a',
+      '--syn-number': '#8fa2d9',
+      '--syn-literal': '#c696d8',
+      '--syn-tag': '#5aaea0',
+      '--syn-attr': '#c58cc4',
+      '--syn-punct': '#7c8596',
+      '--syn-marker': '#d47a52',
+      '--syn-comment': '#6d7687',
+      '--syn-sensitive': '#d97373',
+      '--syn-sensitive-fg': '#e89c9c',
+      '--syn-sensitive-bg': 'rgba(217, 115, 115, 0.12)',
+      '--syn-cookie': '#a88fd8',
+      '--syn-cookie-value': '#9b84d8',
+      '--syn-cookie-flag': '#746d91',
+      '--status-1xx': '#6897d8',
+      '--status-2xx': '#4ca982',
+      '--status-3xx': '#6897d8',
+      '--status-4xx': '#d49a45',
+      '--status-5xx': '#d97373',
+      '--method-get': '#4ca982',
+      '--method-post': '#d4a857',
+      '--method-put': '#6897d8',
+      '--method-delete': '#d97373',
+      '--method-patch': '#a88fd8',
+      '--method-options': '#8892a4',
+      '--shadow-sm': '0 1px 4px rgba(0, 0, 0, 0.22)',
+      '--shadow-md': '0 4px 14px rgba(0, 0, 0, 0.28)',
+      '--shadow-lg': '0 8px 24px rgba(0, 0, 0, 0.40)'
+    }
+  }
+};
+
+function defaultUIPreferences() {
+  return {
+    version: UI_PREFS_SCHEMA_VERSION,
+    layout: {
+      repeaterSplitRatio: '1.08fr 0.92fr',
+      inspectorHeight: 'auto',
+      sidebarCollapsed: false,
+    },
+    shortcuts: {
+      profile: 'default',
+      sendRequest: 'Ctrl+Enter',
+      searchHistory: 'Ctrl+F',
+      commandPalette: 'Ctrl+K',
+    },
+    viewModes: {
+      historyDensity: 'compact',
+      trafficAutoScroll: true,
+      rawSyntaxHighlight: true,
+    },
+    tables: {
+      historySort: '-timestamp',
+      trafficSort: '-id',
+    },
+    appearance: {
+      theme: 'default',
+      customColors: {
+        methodGet: '#34d399',
+        methodPost: '#fbbf24',
+        methodPut: '#60a5fa',
+        methodDelete: '#fb7185',
+        methodPatch: '#c084fc',
+        methodOptions: '#a1a1aa',
+        headerName: '#93c5fd',
+        headerVal: '#e2e8f0',
+        urlProto: '#f43f5e',
+        urlHost: '#38bdf8',
+        urlPath: '#22d3ee',
+        urlParamKey: '#fbbf24',
+        urlParamVal: '#fde68a',
+        status2xx: '#22c55e',
+        status3xx: '#3b82f6',
+        status4xx: '#f59e0b',
+        status5xx: '#ef4444',
+        status401: '#f97316',
+        status429: '#ec4899',
+        status502: '#dc2626',
+        synMethod: '#4ade80',
+        synKey: '#c084fc',
+        synString: '#fb923c',
+        synNumber: '#a5b4fc',
+        synLiteral: '#f0abfc',
+        synTag: '#2dd4bf',
+        synAttr: '#e879f9',
+        synPunct: '#8294aa',
+        synMarker: '#f06b38',
+        synComment: '#7a8fa6',
+        synCookie: '#c084fc',
+        synCookieValue: '#a970ff',
+        synSensitive: '#f87171',
+        synSensitiveFg: '#fda4af'
+      },
+      syntaxHighlighting: {
+        wrap: true,
+        fontSize: '13px',
+        showWhitespace: false
+      },
+      uiScale: 'auto',
+      statusCodes: {
+        badgeStyle: 'filled',
+        showTabDot: true
+      }
+    },
+    dns: {
+      mode: 'system', // 'system', 'custom', 'doh', 'static', 'split'
+      customServer: '1.1.1.1:53',
+      dohUrl: 'https://cloudflare-dns.com/dns-query',
+      staticHosts: '127.0.0.1 localhost',
+      splitRules: '*.corp.internal=10.0.0.2:53',
+      forceTTL0: false,
+      tlsFingerprint: 'chrome' // 'chrome', 'firefox', 'safari', 'golang'
+    },
+    tabs: {
+      repeater: {
+        dnsMode: 'inherit',
+        timeout: 15,
+        followRedirects: 'same-host',
+        httpVersion: 'auto',
+        tabColorDot: true,
+        fontSize: '13px',
+        wordWrap: true
+      },
+      intruder: {
+        dnsMode: 'inherit',
+        mode: 'sniper',
+        concurrency: 1,
+        delayMs: 150,
+        detectEnabled: true,
+        autoScroll: true
+      },
+      target: {
+        dnsMode: 'inherit',
+        engine: 'static',
+        browser: 'firefox',
+        sameOrigin: true,
+        antiDetect: true,
+        maxDepth: -1,
+        maxPages: 0,
+        delayMs: 0
+      },
+      osint: {
+        dnsMode: 'inherit',
+        wildcardDetection: true,
+        timeout: 20,
+        layout: 'cose',
+        maxNodes: 1000,
+        animation: true,
+        autoFit: true,
+        hideIsolated: false
+      },
+      scanner: {
+        dnsMode: 'inherit',
+        probeTimeout: 10,
+        defaultProfile: 'Standard'
+      },
+      traffic: {
+        bufferSize: 1000,
+        ringBuffer: true,
+        hide404: false,
+        hideStatic: true,
+        autoScroll: true,
+        statusColorBadges: true
+      },
+      proxy: {
+        routeAddress: '',
+        checkUrl: 'https://check.torproject.org/',
+        checkTimeout: 15000,
+        listenerAddr: '127.0.0.1',
+        listenerPort: 8080
+      },
+      comparer: {
+        granularity: 'word',
+        ignoreCase: false,
+        ignoreWhitespace: true,
+        ignoreDynamicHeaders: true,
+        syncScroll: true
+      },
+      decoder: {
+        autoDetect: true,
+        outputFormat: 'text'
+      },
+      automation: {
+        timeout: 120,
+        failFast: false,
+        snapGrid: true,
+        showMinimap: true
+      },
+      ai: {
+        endpoint: 'http://127.0.0.1:11434',
+        model: 'qwen2.5-coder',
+        contextLimit: 4096,
+        temperature: 0.2,
+        systemPreset: 'analyst'
+      }
+    }
+  };
+}
+
+function deepMerge(target, source) {
+  if (!source || typeof source !== 'object') return target;
+  const output = Object.assign({}, target);
+  for (const [key, value] of Object.entries(source)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      output[key] = deepMerge(target[key] || {}, value);
+    } else if (value !== undefined) {
+      output[key] = value;
+    }
+  }
+  return output;
+}
+
+function migrateUIPreferences(stored) {
+  const current = defaultUIPreferences();
+  if (!stored || typeof stored !== 'object') return current;
+  if (typeof stored.version !== 'number' || stored.version < 1) {
+    stored.version = 1;
+  }
+  // Seamless migration from v1 to v2:
+  const migrated = deepMerge(current, stored);
+  migrated.version = UI_PREFS_SCHEMA_VERSION;
+  return migrated;
+}
+
+function loadUIPreferences() {
+  try {
+    let raw = localStorage.getItem(UI_PREFS_STORAGE_KEY);
+    if (!raw) {
+      raw = localStorage.getItem(UI_PREFS_STORAGE_KEY_V1);
+    }
+    if (!raw) return defaultUIPreferences();
+    const parsed = JSON.parse(raw);
+    const result = migrateUIPreferences(parsed);
+    // If we loaded v1, persist as v2 for future fast loads
+    if (parsed.version !== UI_PREFS_SCHEMA_VERSION) {
+      localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(result));
+    }
+    return result;
+  } catch (error) {
+    console.warn('Failed to load uiPreferences, falling back to defaults:', error);
+    return defaultUIPreferences();
+  }
+}
+
+function applyUIThemeAndColors(prefs) {
+  if (!prefs) prefs = loadUIPreferences();
+  const root = document.documentElement;
+  const themeName = prefs?.appearance?.theme || 'default';
+  const theme = THEME_PRESETS[themeName] || THEME_PRESETS.default;
+  const mode = theme.mode === 'light' ? 'light' : 'dark';
+
+  root.setAttribute('data-theme-preset', themeName);
+  root.setAttribute('data-theme-mode', mode);
+  root.style.colorScheme = mode;
+
+  // Clear any previously customized inline --syn-* overrides before applying theme preset
+  [
+    '--syn-method', '--syn-path', '--syn-status', '--syn-key', '--syn-string',
+    '--syn-number', '--syn-literal', '--syn-tag', '--syn-attr', '--syn-punct',
+    '--syn-marker', '--syn-comment', '--syn-cookie', '--syn-cookie-value',
+    '--syn-sensitive', '--syn-sensitive-fg'
+  ].forEach(prop => root.style.removeProperty(prop));
+
+  // 1. Apply base theme CSS variables
+  if (theme && theme.vars) {
+    for (const [prop, val] of Object.entries(theme.vars)) {
+      root.style.setProperty(prop, val);
+    }
+  }
+
+  // 2. Apply granular custom color overrides only when explicitly customized by user
+  const custom = prefs?.appearance?.customColors;
+  if (custom && prefs?.appearance?.customColorsCustomized === true) {
+    if (custom.status2xx) root.style.setProperty('--status-2xx', custom.status2xx);
+    if (custom.status3xx) root.style.setProperty('--status-3xx', custom.status3xx);
+    if (custom.status4xx) root.style.setProperty('--status-4xx', custom.status4xx);
+    if (custom.status5xx) root.style.setProperty('--status-5xx', custom.status5xx);
+    if (custom.methodGet) root.style.setProperty('--method-get', custom.methodGet);
+    if (custom.methodPost) root.style.setProperty('--method-post', custom.methodPost);
+    if (custom.methodPut) root.style.setProperty('--method-put', custom.methodPut);
+    if (custom.methodDelete) root.style.setProperty('--method-delete', custom.methodDelete);
+    if (custom.methodPatch) root.style.setProperty('--method-patch', custom.methodPatch);
+    if (custom.methodOptions) root.style.setProperty('--method-options', custom.methodOptions);
+    if (custom.urlPath) root.style.setProperty('--syn-path', custom.urlPath);
+    if (custom.urlParamKey) root.style.setProperty('--syn-status', custom.urlParamKey);
+    if (custom.synMethod) root.style.setProperty('--syn-method', custom.synMethod);
+    if (custom.synKey) root.style.setProperty('--syn-key', custom.synKey);
+    if (custom.synString) root.style.setProperty('--syn-string', custom.synString);
+    if (custom.synNumber) root.style.setProperty('--syn-number', custom.synNumber);
+    if (custom.synLiteral) root.style.setProperty('--syn-literal', custom.synLiteral);
+    if (custom.synTag) root.style.setProperty('--syn-tag', custom.synTag);
+    if (custom.synAttr) root.style.setProperty('--syn-attr', custom.synAttr);
+    if (custom.synPunct) root.style.setProperty('--syn-punct', custom.synPunct);
+    if (custom.synMarker) root.style.setProperty('--syn-marker', custom.synMarker);
+    if (custom.synComment) root.style.setProperty('--syn-comment', custom.synComment);
+    if (custom.synCookie) root.style.setProperty('--syn-cookie', custom.synCookie);
+    if (custom.synCookieValue) root.style.setProperty('--syn-cookie-value', custom.synCookieValue);
+    if (custom.synSensitive) root.style.setProperty('--syn-sensitive', custom.synSensitive);
+    if (custom.synSensitiveFg) root.style.setProperty('--syn-sensitive-fg', custom.synSensitiveFg);
+  }
+
+  updateHeaderThemeToggleButton(mode, themeName);
+
+  // 3. Apply editor syntax typography (font-size & word-wrap)
+  const syntax = prefs?.appearance?.syntaxHighlighting;
+  if (syntax) {
+    if (syntax.fontSize) {
+      root.style.setProperty('--syntax-font-size', syntax.fontSize);
+    }
+    const editors = document.querySelectorAll(
+      '.code-editor, .raw-editor, .raw-editor-highlight, .inspector-panel pre, ' +
+      '#traffic-request-inspector, #traffic-response-inspector, ' +
+      '#traffic .traffic-table, #traffic .traffic-table th, #traffic .traffic-table td, ' +
+      '#history-request-inspector, #history-response-inspector, ' +
+      '#history .history-table, #history .history-table th, #history .history-table td'
+    );
+    editors.forEach(ed => {
+      if (syntax.fontSize) ed.style.fontSize = syntax.fontSize;
+      if (syntax.wrap !== undefined) {
+        if (ed.tagName === 'PRE' || ed.tagName === 'TEXTAREA') {
+          ed.style.whiteSpace = syntax.wrap ? 'pre-wrap' : 'pre';
+          ed.style.wordBreak = syntax.wrap ? 'break-word' : 'normal';
+        }
+      }
+    });
+  }
+
+  // 4. Apply adaptive or custom UI Scale
+  const scaleMode = prefs?.appearance?.uiScale || localStorage.getItem('requestrider-ui-scale-mode') || 'auto';
+  applyAdaptiveUIScale(scaleMode);
+}
+
+function calculateAutoUIScale() {
+  const w = window.innerWidth || document.documentElement.clientWidth || (window.screen ? window.screen.width : 1920);
+  
+  // Standard desktop reference baseline (Full HD 1080p, 1920px)
+  // On standard monitors and laptops (w <= 1920px), scale is naturally 1.0 (100%), never shrunk!
+  // On large displays (32" 2K 2560px, 32" 4K 3840px), scale increases proportionally
+  // so that the interface preserves the exact same visual size and density as on 1080p.
+  if (w > 1920) {
+    const scale = w / 1920;
+    return Math.round(Math.min(2.5, scale) * 100) / 100;
+  }
+  return 1.0;
+}
+
+function applyAdaptiveUIScale(mode) {
+  let targetMode = mode;
+  if (!targetMode) {
+    try {
+      const prefs = loadUIPreferences();
+      targetMode = prefs?.appearance?.uiScale;
+    } catch (_) {}
+  }
+  if (!targetMode) {
+    targetMode = localStorage.getItem('requestrider-ui-scale-mode') || 'auto';
+  }
+
+  let finalScale = 1.0;
+  if (targetMode === 'auto') {
+    finalScale = calculateAutoUIScale();
+  } else {
+    const num = parseFloat(targetMode);
+    finalScale = Number.isFinite(num) && num > 0 ? num : 1.0;
+  }
+
+  document.documentElement.style.setProperty('--rr-ui-scale', finalScale);
+  if (document.body) {
+    document.body.style.zoom = finalScale;
+  }
+  try {
+    localStorage.setItem('requestrider-ui-scale-mode', targetMode);
+  } catch (_) {}
+
+  if (typeof refreshTableSizes === 'function') refreshTableSizes();
+  if (typeof applyOverlayEdges === 'function') applyOverlayEdges();
+  if (typeof syncAiFullscreenSize === 'function') syncAiFullscreenSize();
+
+  return finalScale;
+}
+
+function saveUIPreferences(patch) {
+  try {
+    const current = loadUIPreferences();
+    const updated = deepMerge(current, patch);
+    updated.version = UI_PREFS_SCHEMA_VERSION;
+    localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(updated));
+    applyUIThemeAndColors(updated);
+    window.dispatchEvent(new CustomEvent('rr:tab-settings-updated', {
+      detail: { allSettings: updated }
+    }));
+    return updated;
+  } catch (error) {
+    console.warn('Failed to save uiPreferences:', error);
+    return null;
+  }
+}
+
+function saveTabPreferences(tabName, tabSettings) {
+  try {
+    const current = loadUIPreferences();
+    if (!current.tabs) current.tabs = {};
+    current.tabs[tabName] = deepMerge(current.tabs[tabName] || {}, tabSettings);
+    localStorage.setItem(UI_PREFS_STORAGE_KEY, JSON.stringify(current));
+    applyUIThemeAndColors(current);
+    window.dispatchEvent(new CustomEvent('rr:tab-settings-updated', {
+      detail: { tab: tabName, settings: current.tabs[tabName], allSettings: current }
+    }));
+    return current;
+  } catch (error) {
+    console.warn(`Failed to save tab preferences for ${tabName}:`, error);
+    return null;
+  }
+}
+
+function applyUIPreferences() {
+  const prefs = loadUIPreferences();
+  applyUIThemeAndColors(prefs);
+  if (prefs?.layout?.repeaterSplitRatio) {
+    const workspaces = document.querySelectorAll('.workspace');
+    workspaces.forEach(el => {
+      if (prefs.layout.repeaterSplitRatio.includes('fr')) {
+        el.style.gridTemplateColumns = prefs.layout.repeaterSplitRatio;
+      }
+    });
+  }
+  if (prefs?.tables?.historySort && $('history-sort')) {
+    const opt = $('history-sort').querySelector(`option[value="${prefs.tables.historySort}"]`);
+    if (opt) $('history-sort').value = prefs.tables.historySort;
+  }
+}
+
+function updateHeaderThemeToggleButton(mode, themeName) {
+  const btn = document.getElementById('header-theme-toggle');
+  if (!btn) return;
+  const isLight = mode === 'light';
+  btn.textContent = isLight ? '🌙' : '☀️';
+  btn.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+  btn.dataset.themeMode = mode;
+  btn.dataset.themePreset = themeName || 'default';
+}
+
+function toggleLightDarkTheme() {
+  const prefs = loadUIPreferences();
+  const currentTheme = prefs?.appearance?.theme || 'default';
+  const currentMode = THEME_PRESETS[currentTheme]?.mode === 'light' ? 'light' : 'dark';
+  const fallbackDark = prefs?.appearance?.lastDarkTheme || 'default';
+  const nextTheme = currentMode === 'light'
+    ? (THEME_PRESETS[fallbackDark]?.mode === 'light' ? 'default' : fallbackDark)
+    : 'softLight';
+  const patchAppearance = {
+    theme: nextTheme,
+    customColorsCustomized: false
+  };
+  if (currentMode === 'dark') {
+    patchAppearance.lastDarkTheme = currentTheme;
+  }
+  const updated = saveUIPreferences({
+    appearance: patchAppearance
+  });
+  const themePresetSel = document.getElementById('setting-theme-preset');
+  if (themePresetSel && updated?.appearance?.theme) {
+    themePresetSel.value = updated.appearance.theme;
+  }
+  return updated;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('header-theme-toggle');
+  if (btn) {
+    btn.addEventListener('click', toggleLightDarkTheme);
+  }
+  try {
+    const prefs = loadUIPreferences();
+    const themeName = prefs?.appearance?.theme || 'default';
+    const mode = THEME_PRESETS[themeName]?.mode === 'light' ? 'light' : 'dark';
+    updateHeaderThemeToggleButton(mode, themeName);
+  } catch (_) {}
+});

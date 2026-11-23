@@ -1,0 +1,1202 @@
+import json
+import os
+import xml.etree.ElementTree as ET
+from pathlib import Path
+import tempfile
+from unittest.mock import MagicMock, patch
+
+from django.test import Client, TestCase
+
+from lab import openvas_client, xml_exports
+from lab.models import (
+    OsintEntity,
+    OsintGraph,
+    Project,
+    ProjectEndpoint,
+    ScannerRun,
+    TrafficRecord,
+    Workflow,
+    WorkflowRun,
+)
+
+SAMPLE_OPENVAS_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<get_reports_response status="200" status_text="OK">
+  <report id="rep-1">
+    <results>
+      <result id="res-1">
+        <name>Apache HTTP Server Path Traversal</name>
+        <host>192.168.1.50</host>
+        <port>443/tcp</port>
+        <threat>High</threat>
+        <severity>7.5</severity>
+        <description>Path traversal vulnerability detected.</description>
+        <nvt oid="1.3.6.1.4.1.25623.1.0.146850">
+          <name>Apache HTTP Server Path Traversal</name>
+          <cvss_base>7.5</cvss_base>
+          <cve>CVE-2021-41773</cve>
+          <solution>Upgrade Apache HTTP Server to 2.4.51 or later.</solution>
+        </nvt>
+      </result>
+    </results>
+  </report>
+</get_reports_response>
+"""
+
+
+class OpenVASClientTests(TestCase):
+    def test_parse_openvas_report_xml(self):
+        findings = openvas_client.parse_openvas_report_xml(SAMPLE_OPENVAS_XML)
+        self.assertEqual(len(findings), 1)
+        f = findings[0]
+        self.assertEqual(f["engine"], "openvas")
+        self.assertEqual(f["severity"], "high")
+        self.assertEqual(f["cvss"], 7.5)
+        self.assertEqual(f["host"], "192.168.1.50")
+        self.assertEqual(f["port"], "443/tcp")
+        self.assertEqual(f["nvt_oid"], "1.3.6.1.4.1.25623.1.0.146850")
+        self.assertIn("CVE-2021-41773", f["cve"])
+
+    def test_parse_openvas_report_xml_extracts_qod_impact_and_evidence(self):
+        xml_with_qod = """<?xml version="1.0" encoding="UTF-8"?>
+<get_reports_response status="200" status_text="OK">
+  <report id="rep-qod">
+    <results>
+      <result id="res-qod">
+        <name>Exposed Admin Panel</name>
+        <host>10.10.10.5</host>
+        <port>8443/tcp</port>
+        <threat>Medium</threat>
+        <severity>5.3</severity>
+        <qod><value>80</value><type>remote_banner</type></qod>
+        <evidence>HTTP/1.1 200 OK</evidence>
+        <nvt oid="1.3.6.1.4.1.25623.1.0.999999">
+          <name>Exposed Admin Panel</name>
+          <tags>cvss_base_vector=AV:N/AC:L/Au:N/C:P/I:N/A:N|summary=Panel is reachable.|impact=Unauthorized access risk.|solution_type=Mitigation</tags>
+        </nvt>
+      </result>
+    </results>
+  </report>
+</get_reports_response>"""
+        findings = openvas_client.parse_openvas_report_xml(xml_with_qod)
+        self.assertEqual(len(findings), 1)
+        f = findings[0]
+        self.assertEqual(f["qod"], 80)
+        self.assertEqual(f["impact"], "Unauthorized access risk.")
+        self.assertEqual(f["evidence"], "HTTP/1.1 200 OK")
+        self.assertEqual(f["description"], "Panel is reachable.")
+
+    def test_get_tasks_strips_rr_target_prefix(self):
+        cfg = openvas_client.GVMConnectionConfig(socket_path="/run/gvmd/gvmd.sock")
+        client = openvas_client.GMPClient(cfg)
+        resp = ET.fromstring(
+            '<get_tasks_response status="200" status_text="OK">'
+            '<task id="t-1"><name>RR-Scan-example.com</name><status>Done</status><progress>100</progress>'
+            '<target id="tgt-1"><name>RR-https://example.com/</name></target>'
+            '<last_report><report id="r-1"><timestamp>2026-11-17T08:00:00Z</timestamp></report></last_report>'
+            '</task></get_tasks_response>'
+        )
+        with patch.object(client, "send_xml", return_value=resp):
+            tasks = client.get_tasks()
+        self.assertEqual(len(tasks), 1)
+        self.assertEqual(tasks[0]["target"], "https://example.com/")
+
+    def test_xxe_rejected(self):
+        xxe = '<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><report>&xxe;</report>'
+        with self.assertRaises(openvas_client.GVMError):
+            openvas_client.parse_openvas_report_xml(xxe)
+
+    def test_unix_socket_permission_denied_raises_gvm_error_and_returns_502(self):
+        mock_sock = MagicMock()
+        mock_sock.connect.side_effect = PermissionError(13, "Permission denied")
+        cfg = openvas_client.GVMConnectionConfig(socket_path="/run/gvmd/gvmd.sock")
+        with (
+            patch("lab.openvas_client.os.path.exists", return_value=True),
+            patch("lab.openvas_client.socket.socket", return_value=mock_sock),
+        ):
+            with self.assertRaises(openvas_client.GVMError) as ctx:
+                openvas_client.GMPClient(cfg).connect()
+            self.assertIn("permission denied", str(ctx.exception).lower())
+            mock_sock.close.assert_called_once()
+
+            resp = Client().post(
+                "/api/scanner/openvas/sync",
+                data=json.dumps({"socket_path": "/run/gvmd/gvmd.sock"}),
+                content_type="application/json",
+            )
+            self.assertEqual(resp.status_code, 502)
+            body = resp.json()
+            self.assertFalse(body["ok"])
+            self.assertIn("permission denied", body["error"].lower())
+
+
+class XMLExportAndMetasploitTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.project = Project.objects.create(
+            name="Test <Project> & Co",
+            target="https://app.example.test:8443",
+        )
+        self.run = ScannerRun.objects.create(
+            project=self.project,
+            engine="openvas",
+            url="https://app.example.test:8443/login",
+            findings=[
+                {
+                    "title": "SQL Injection <test>",
+                    "severity": "critical",
+                    "endpoint": "https://app.example.test:8443/login?id=1",
+                    "method": "POST",
+                    "param": "id",
+                    "cve": ["CVE-2024-0001"],
+                    "nvt_oid": "1.3.6.1.4.1.25623.1.0.999999",
+                    "description": "Injected & verified",
+                }
+            ],
+        )
+        self.graph = OsintGraph.objects.create(project=self.project, name="OSINT")
+        OsintEntity.objects.create(
+            graph=self.graph,
+            project=self.project,
+            entity_type="ip",
+            identity="10.0.0.5",
+            display_value="10.0.0.5",
+        )
+        ProjectEndpoint.objects.create(
+            project=self.project,
+            method="GET",
+            path="/api",
+            sample_url="https://app.example.test:8443/api",
+        )
+        TrafficRecord.objects.create(
+            project=self.project,
+            source="proxy",
+            method="GET",
+            url="https://app.example.test:8443/health",
+        )
+
+    def test_metasploit_xml_structure_and_escaping(self):
+        xml_str = xml_exports.export_metasploit_xml(
+            self.project,
+            scanner_runs=[self.run],
+            osint_entities=list(OsintEntity.objects.filter(graph=self.graph)),
+            endpoints=list(ProjectEndpoint.objects.filter(project=self.project)),
+            traffic_records=list(TrafficRecord.objects.filter(project=self.project)),
+        )
+        root = ET.fromstring(xml_str)
+        self.assertEqual(root.tag, "MetasploitV4")
+        addresses = [el.text for el in root.findall("./hosts/host/address")]
+        self.assertIn("app.example.test", addresses)
+        self.assertIn("10.0.0.5", addresses)
+        vuln_names = [el.text for el in root.findall("./hosts/host/vulns/vuln/name")]
+        self.assertIn("SQL Injection <test>", vuln_names)
+        refs = [el.text for el in root.findall("./hosts/host/vulns/vuln/refs/ref")]
+        self.assertIn("CVE-2024-0001", refs)
+        self.assertIn("OID-1.3.6.1.4.1.25623.1.0.999999", refs)
+        web_vulns = root.findall("./web_vulns/web_vuln")
+        self.assertGreaterEqual(len(web_vulns), 1)
+        host_el = root.find("./hosts/host")
+        self.assertIsNotNone(host_el)
+        for tag in ("mac", "comm", "created-at", "updated-at", "os-name", "os-flavor", "os-sp", "os-lang", "purpose", "state"):
+            self.assertIsNotNone(host_el.find(tag), f"Missing <{tag}> in <host>")
+        svc_el = host_el.find("./services/service")
+        if svc_el is not None:
+            for tag in ("created-at", "updated-at", "port", "proto", "state", "name", "info"):
+                self.assertIsNotNone(svc_el.find(tag), f"Missing <{tag}> in <service>")
+        note_el = host_el.find("./notes/note")
+        if note_el is not None:
+            for tag in ("created-at", "updated-at", "ntype", "critical", "seen", "data"):
+                self.assertIsNotNone(note_el.find(tag), f"Missing <{tag}> in <note>")
+
+    def test_project_export_xml_and_msf_xml_endpoints(self):
+        res_xml = self.client.get(f"/api/projects/{self.project.id}/export?format=xml")
+        self.assertEqual(res_xml.status_code, 200)
+        self.assertIn("application/xml", res_xml["Content-Type"])
+        root = ET.fromstring(res_xml.content.decode("utf-8"))
+        self.assertEqual(root.tag, "project_bundle")
+
+        res_msf = self.client.get(f"/api/projects/{self.project.id}/export?format=msf-xml")
+        self.assertEqual(res_msf.status_code, 200)
+        self.assertIn("application/xml", res_msf["Content-Type"])
+        msf_root = ET.fromstring(res_msf.content.decode("utf-8"))
+        self.assertEqual(msf_root.tag, "MetasploitV4")
+
+    @patch("lab.xml_exports.subprocess.run")
+    def test_project_metasploit_import_endpoint_uses_no_shell(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0, stdout="Imported", stderr="")
+        res = self.client.post(
+            f"/api/projects/{self.project.id}/metasploit-import",
+            data=json.dumps({"workspace": "pentest_ws"}),
+            content_type="application/json",
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["workspace"], "pentest_ws")
+        mock_run.assert_called_once()
+        _, kwargs = mock_run.call_args
+        self.assertFalse(kwargs.get("shell"))
+
+    @patch("lab.xml_exports.subprocess.run")
+    def test_project_metasploit_import_detects_disconnected_db(self, mock_run):
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="[-] Database not connected\n[-] Failed to connect to the database\n",
+            stderr="",
+        )
+        res = self.client.post(
+            f"/api/projects/{self.project.id}/metasploit-import",
+            data=json.dumps({"workspace": "pentest_ws"}),
+            content_type="application/json",
+        )
+        self.assertEqual(res.status_code, 502)
+        data = res.json()
+        self.assertFalse(data["ok"])
+        self.assertIn("sudo msfdb init", data.get("error", ""))
+
+    def test_history_and_workflow_and_scanner_xml_exports(self):
+        res_hist = self.client.get("/api/history/export?format=xml")
+        self.assertEqual(res_hist.status_code, 200)
+        self.assertEqual(ET.fromstring(res_hist.content.decode("utf-8")).tag, "history_export")
+
+        wf = Workflow.objects.create(project=self.project, name="WF1", nodes=[], connections=[])
+        res_wf = self.client.get(f"/api/workflows/{wf.id}/export?format=xml")
+        self.assertEqual(res_wf.status_code, 200)
+        self.assertEqual(ET.fromstring(res_wf.content.decode("utf-8")).tag, "workflow_export")
+
+        wf_run = WorkflowRun.objects.create(workflow=wf, status="completed", mode="manual", output_data={"ok": True})
+        res_wfr = self.client.get(f"/api/workflows/runs/{wf_run.id}/export?format=xml")
+        self.assertEqual(res_wfr.status_code, 200)
+        self.assertEqual(ET.fromstring(res_wfr.content.decode("utf-8")).tag, "workflow_run_export")
+
+        res_scan_xml = self.client.post(
+            "/api/scanner/report?view=openvas&format=xml",
+            data=json.dumps({"view": "openvas", "findings": self.run.findings}),
+            content_type="application/json",
+        )
+        self.assertEqual(res_scan_xml.status_code, 200)
+        self.assertEqual(ET.fromstring(res_scan_xml.content.decode("utf-8")).tag, "scanner_report")
+
+        res_scan_msf = self.client.post(
+            "/api/scanner/report?view=openvas&format=msf-xml",
+            data=json.dumps({"view": "openvas", "url": self.run.url, "findings": self.run.findings}),
+            content_type="application/json",
+        )
+        self.assertEqual(res_scan_msf.status_code, 200)
+        self.assertEqual(ET.fromstring(res_scan_msf.content.decode("utf-8")).tag, "MetasploitV4")
+
+    def test_openvas_import_xml_endpoint(self):
+        res = self.client.post(
+            "/api/scanner/openvas/import-xml",
+            data=json.dumps({"xml": SAMPLE_OPENVAS_XML, "project_id": self.project.id}),
+            content_type="application/json",
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["findings_count"], 1)
+        run = ScannerRun.objects.get(id=data["run_id"])
+        self.assertEqual(run.engine, "openvas")
+        self.assertEqual(len(run.findings), 1)
+
+    def test_openvas_status_includes_web_url(self):
+        res = self.client.get("/api/scanner/openvas/status")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertIn("web_url", data)
+        self.assertIn("web_reachable", data)
+        self.assertTrue(str(data["web_url"]).startswith("http"))
+
+    def test_openvas_sync_endpoint_imports_gvm_report(self):
+        from unittest.mock import patch
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def get_tasks(self):
+                return [{
+                    "task_id": "t-1",
+                    "name": "Juice Shop GVM Scan",
+                    "status": "Done",
+                    "progress": 100,
+                    "report_id": "r-1",
+                    "target": "127.0.0.1",
+                    "timestamp": "2026-11-15T17:00:00Z",
+                }]
+
+            def get_report_xml(self, report_id, *args, **kwargs):
+                self.last_report_id = report_id
+                self.last_kwargs = kwargs
+                return SAMPLE_OPENVAS_XML
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/sync",
+                data=json.dumps({"project_id": self.project.id}),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["report_id"], "r-1")
+        self.assertEqual(data["findings_count"], 1)
+        run = ScannerRun.objects.get(id=data["run_id"])
+        self.assertEqual(run.engine, "openvas")
+        self.assertEqual(run.findings[0]["title"], "Apache HTTP Server Path Traversal")
+
+    def test_project_import_metasploit_xml_roundtrip(self):
+        exp = self.client.get(f"/api/projects/{self.project.id}/export?format=msf-xml")
+        self.assertEqual(exp.status_code, 200)
+        msf_xml = exp.content.decode("utf-8")
+
+        imp = self.client.post(
+            "/api/projects/import-metasploit-xml",
+            data=json.dumps({"xml": msf_xml, "project_name": "From Metasploit"}),
+            content_type="application/json",
+        )
+        self.assertEqual(imp.status_code, 200)
+        data = imp.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["project_name"], "From Metasploit")
+        self.assertGreaterEqual(data["findings_count"], 1)
+        self.assertGreaterEqual(data["hosts_count"], 1)
+
+        bad = self.client.post(
+            f"/api/projects/{self.project.id}/import-metasploit-xml",
+            data=json.dumps({"xml": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM 'file:///etc/passwd'>]><MetasploitV4/>"}),
+            content_type="application/json",
+        )
+        self.assertEqual(bad.status_code, 400)
+
+    def test_openvas_scan_passes_credentials_and_authenticates(self):
+        from unittest.mock import patch
+
+        calls = {"authenticated": False, "username": None, "password": None}
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                calls["authenticated"] = True
+                calls["username"] = self.cfg.username
+                calls["password"] = self.cfg.password
+
+            def find_config_id(self, name):
+                if not calls["authenticated"]:
+                    raise openvas_client.GVMError(
+                        "GMP get_configs failed (400): Only command GET_VERSION is allowed before AUTHENTICATE"
+                    )
+                return "cfg-1"
+
+            def find_scanner_id(self):
+                return "scn-1"
+
+            def create_target(self, name, hosts):
+                return "tgt-1"
+
+            def create_task(self, name, config_id, target_id, scanner_id):
+                return "tsk-1"
+
+            def start_task(self, task_id):
+                return "rep-1"
+
+            def get_tasks(self):
+                return []
+
+            def get_targets(self):
+                return []
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/scan",
+                data=json.dumps({
+                    "project_id": self.project.id,
+                    "target": "http://127.0.0.1:3000",
+                    "username": "gvm_admin",
+                    "password": "secret-password",
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["task_id"], "tsk-1")
+        self.assertTrue(calls["authenticated"])
+        self.assertEqual(calls["username"], "gvm_admin")
+        self.assertEqual(calls["password"], "secret-password")
+
+    def test_openvas_scan_returns_401_auth_required_on_unauthenticated_gmp(self):
+        import os
+        from unittest.mock import patch
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def find_config_id(self, name):
+                raise openvas_client.GVMError(
+                    "GMP get_configs failed (400): Only command GET_VERSION is allowed before AUTHENTICATE"
+                )
+
+        with patch.dict(os.environ, {"GVM_PASSWORD": ""}), patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/scan",
+                data=json.dumps({"project_id": self.project.id, "target": "http://127.0.0.1:3000"}),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 401)
+        data = res.json()
+        self.assertFalse(data["ok"])
+        self.assertTrue(data["auth_required"])
+        self.assertIn("GVM", data["error"])
+
+    def test_openvas_sync_post_action_list_with_credentials(self):
+        from unittest.mock import patch
+
+        calls = {"authenticated": False, "password": None}
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                calls["authenticated"] = True
+                calls["password"] = self.cfg.password
+
+            def get_tasks(self):
+                return [{"task_id": "t-2", "name": "Task 2", "status": "Done", "progress": 100, "report_id": "r-2"}]
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/sync",
+                data=json.dumps({"action": "list", "username": "admin", "password": "pw"}),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertTrue(calls["authenticated"])
+        self.assertEqual(calls["password"], "pw")
+        self.assertEqual(len(data["tasks"]), 1)
+
+    def test_gvm_credentials_save_and_load_from_env_file(self):
+        import os
+        import tempfile
+        from pathlib import Path
+        from lab import openvas_client
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cred_file = Path(tmpdir) / "gvm.env"
+            with patch.dict(
+                os.environ,
+                {"GVM_CREDENTIALS_FILE": str(cred_file), "GVM_USER": "", "GVM_PASSWORD": ""},
+                clear=False,
+            ):
+                openvas_client.save_gvm_credentials("secadmin", "s3cr3t!")
+                self.assertTrue(cred_file.is_file())
+                os.environ.pop("GVM_USER", None)
+                os.environ.pop("GVM_PASSWORD", None)
+                cfg = openvas_client.GVMConnectionConfig.from_env_and_payload({})
+                self.assertEqual(cfg.username, "secadmin")
+                self.assertEqual(cfg.password, "s3cr3t!")
+
+                # Stale environment variable should NOT override valid saved credentials from gvm.env
+                os.environ["GVM_PASSWORD"] = "stale-old-password"
+                cfg_stale = openvas_client.GVMConnectionConfig.from_env_and_payload({})
+                self.assertEqual(cfg_stale.password, "s3cr3t!")
+
+    def test_is_auth_required_error_detection(self):
+        self.assertTrue(openvas_client.is_auth_required_error(openvas_client.GVMError("Only command GET_VERSION is allowed before AUTHENTICATE")))
+        self.assertTrue(openvas_client.is_auth_required_error(openvas_client.GVMError("GMP authenticate failed (400): Authentication failed")))
+        self.assertTrue(openvas_client.is_auth_required_error(Exception("Authentication failed")))
+        self.assertFalse(openvas_client.is_auth_required_error(openvas_client.GVMError("Connection refused")))
+        self.assertFalse(openvas_client.is_auth_required_error(openvas_client.GVMError("Task not found")))
+
+    def test_gmp_client_authenticate_fallback_on_auth_failed(self):
+        import tempfile
+        import xml.etree.ElementTree as ET
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cred_file = Path(tmpdir) / "gvm.env"
+            cred_file.write_text('GVM_USER="admin"\nGVM_PASSWORD="correct_saved_pwd"\n', encoding="utf-8")
+            with patch.dict(os.environ, {"GVM_CREDENTIALS_FILE": str(cred_file)}):
+                cfg = openvas_client.GVMConnectionConfig(username="admin", password="wrong_stale_pwd")
+                client = openvas_client.GMPClient(cfg)
+                calls = []
+
+                def fake_send_xml(xml_cmd: str):
+                    calls.append(xml_cmd)
+                    if "wrong_stale_pwd" in xml_cmd:
+                        return ET.fromstring('<authenticate_response status="400" status_text="Authentication failed"/>')
+                    if "correct_saved_pwd" in xml_cmd:
+                        return ET.fromstring('<authenticate_response status="200" status_text="OK"/>')
+                    return ET.fromstring('<get_version_response status="200"><version>22.7</version></get_version_response>')
+
+                client.send_xml = fake_send_xml
+                client.connect = lambda: None
+                client.close = lambda: None
+                client.authenticate()
+                self.assertEqual(client.config.password, "correct_saved_pwd")
+                self.assertIn("wrong_stale_pwd", calls[0])
+                self.assertIn("correct_saved_pwd", calls[1])
+
+    def test_openvas_options_endpoint(self):
+        from unittest.mock import patch
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def get_options(self):
+                return {
+                    "configs": [{"id": "c1", "name": "Full and fast"}],
+                    "scanners": [{"id": "s1", "name": "OpenVAS Default"}],
+                    "port_lists": [{"id": "p1", "name": "All IANA assigned TCP"}],
+                    "credentials": [{"id": "cr1", "name": "SSH Key"}],
+                    "schedules": [],
+                    "alerts": [],
+                    "alive_tests": openvas_client.ALIVE_TESTS_OPTIONS,
+                    "hosts_ordering": openvas_client.HOSTS_ORDERING_OPTIONS,
+                }
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.get("/api/scanner/openvas/options")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["configs"][0]["name"], "Full and fast")
+        self.assertEqual(data["port_lists"][0]["id"], "p1")
+        self.assertIn("Consider Alive", data["alive_tests"])
+
+    def test_openvas_scan_passes_full_target_and_task_settings(self):
+        from unittest.mock import patch
+
+        captured = {}
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def create_target(self, name, hosts, **kwargs):
+                captured["target"] = {"name": name, "hosts": hosts, **kwargs}
+                return "tgt-full"
+
+            def create_task(self, name, config_id, target_id, scanner_id, **kwargs):
+                captured["task"] = {
+                    "name": name,
+                    "config_id": config_id,
+                    "target_id": target_id,
+                    "scanner_id": scanner_id,
+                    **kwargs,
+                }
+                return "tsk-full"
+
+            def start_task(self, task_id):
+                captured["started"] = task_id
+                return "rep-full"
+
+            def get_tasks(self):
+                return []
+
+            def get_targets(self):
+                return []
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/scan",
+                data=json.dumps({
+                    "project_id": self.project.id,
+                    "target_name": "JuiceShop Target",
+                    "hosts": "127.0.0.1, 10.0.0.0/24",
+                    "exclude_hosts": "10.0.0.1",
+                    "port_list_id": "pl-1",
+                    "alive_tests": "Consider Alive",
+                    "reverse_lookup_only": True,
+                    "ssh_credential_id": "cred-ssh",
+                    "ssh_port": 2222,
+                    "task_name": "JuiceShop Full Audit",
+                    "config_id": "cfg-1",
+                    "scanner_id": "scn-1",
+                    "hosts_ordering": "random",
+                    "max_checks": 8,
+                    "max_hosts": 10,
+                    "source_iface": "eth0",
+                    "min_qod": 80,
+                    "add_to_assets": True,
+                    "apply_overrides": False,
+                    "alterable": True,
+                    "auto_delete": "keep",
+                    "auto_delete_data": 3,
+                    "comment": "GSA parity test",
+                    "start_immediately": False,
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertFalse(data["started"])
+        self.assertNotIn("started", captured)
+        self.assertEqual(captured["target"]["name"], "JuiceShop Target")
+        self.assertEqual(captured["target"]["port_list_id"], "pl-1")
+        self.assertEqual(captured["target"]["alive_tests"], "Consider Alive")
+        self.assertEqual(captured["target"]["ssh_port"], 2222)
+        self.assertEqual(captured["task"]["config_id"], "cfg-1")
+        self.assertEqual(captured["task"]["hosts_ordering"], "random")
+        self.assertEqual(captured["task"]["max_checks"], 8)
+        self.assertEqual(captured["task"]["min_qod"], 80)
+        self.assertEqual(captured["task"]["auto_delete"], "keep")
+
+    def test_openvas_scan_retries_with_unique_target_name_when_target_exists(self):
+        from unittest.mock import patch
+
+        target_names = []
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def find_config_id(self, name):
+                return "cfg-1"
+
+            def find_scanner_id(self):
+                return "scn-1"
+
+            def get_port_lists(self):
+                return []
+
+            def create_target(self, name, hosts, **kwargs):
+                target_names.append(name)
+                if len(target_names) == 1:
+                    raise openvas_client.GVMError(
+                        "GMP create_target failed (400): Target exists already"
+                    )
+                return "tgt-retry"
+
+            def create_task(self, name, config_id, target_id, scanner_id, **kwargs):
+                return "tsk-retry"
+
+            def start_task(self, task_id):
+                return "rep-retry"
+
+            def get_tasks(self):
+                return []
+
+            def get_targets(self):
+                return []
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res = self.client.post(
+                "/api/scanner/openvas/scan",
+                data=json.dumps({
+                    "project_id": self.project.id,
+                    "target": "http://127.0.0.1:3000",
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["target_id"], "tgt-retry")
+        self.assertEqual(len(target_names), 2)
+        self.assertEqual(target_names[0], "RR-http://127.0.0.1:3000")
+        self.assertTrue(target_names[1].startswith("RR-http://127.0.0.1:3000-"))
+        self.assertNotEqual(target_names[0], target_names[1])
+
+    def test_openvas_task_action_endpoint(self):
+        from unittest.mock import patch
+
+        actions = []
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def start_task(self, task_id):
+                actions.append(("start", task_id))
+                return "rep-1"
+
+            def stop_task(self, task_id):
+                actions.append(("stop", task_id))
+
+            def resume_task(self, task_id):
+                actions.append(("resume", task_id))
+                return "rep-2"
+
+            def delete_task(self, task_id):
+                actions.append(("delete", task_id))
+
+            def get_task_status(self, task_id):
+                st = "Stopped" if any(a[0] == "stop" for a in actions) else "New"
+                return {"task_id": task_id, "status": st, "progress": 10, "report_id": "rep-1"}
+
+            def get_tasks(self):
+                return []
+
+            def get_targets(self):
+                return []
+
+        self.run.summary = {"task_id": "t-99"}
+        self.run.save(update_fields=["summary"])
+        self.assertEqual(ScannerRun.objects.filter(project=self.project, engine="openvas").count(), 1)
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            for act in ("start", "stop", "resume", "delete"):
+                res = self.client.post(
+                    "/api/scanner/openvas/task-action",
+                    data=json.dumps({"task_id": "t-99", "action": act, "project_id": self.project.id}),
+                    content_type="application/json",
+                )
+                self.assertEqual(res.status_code, 200)
+                self.assertTrue(res.json()["ok"])
+        self.assertEqual(actions, [("start", "t-99"), ("stop", "t-99"), ("resume", "t-99"), ("delete", "t-99")])
+        self.assertEqual(ScannerRun.objects.filter(project=self.project, engine="openvas").count(), 0)
+
+    def test_openvas_create_port_list_and_credential_endpoints(self):
+        from unittest.mock import patch
+
+        created = {}
+
+        class _FakeGMPClient:
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def authenticate(self):
+                return None
+
+            def create_port_list(self, name, port_range, comment=""):
+                created["port_list"] = (name, port_range)
+                return "pl-new"
+
+            def create_credential(self, name, username="", password="", credential_type="up", comment="", **kwargs):
+                created["credential"] = (name, username, password, credential_type)
+                created["credential_kwargs"] = kwargs
+                return "cred-new"
+
+            def get_options(self):
+                return {
+                    "configs": [],
+                    "scanners": [],
+                    "port_lists": [{"id": "pl-new", "name": "Web Ports"}],
+                    "credentials": [{"id": "cred-new", "name": "SSH User"}],
+                    "schedules": [],
+                    "alerts": [],
+                    "alive_tests": openvas_client.ALIVE_TESTS_OPTIONS,
+                    "hosts_ordering": openvas_client.HOSTS_ORDERING_OPTIONS,
+                }
+
+        with patch("lab.openvas_client.GMPClient", _FakeGMPClient):
+            res_pl = self.client.post(
+                "/api/scanner/openvas/create-port-list",
+                data=json.dumps({"name": "Web Ports", "port_range": "T:80,443,3000"}),
+                content_type="application/json",
+            )
+            self.assertEqual(res_pl.status_code, 200)
+            self.assertEqual(res_pl.json()["id"], "pl-new")
+            self.assertEqual(created["port_list"], ("Web Ports", "T:80,443,3000"))
+
+            res_cr = self.client.post(
+                "/api/scanner/openvas/create-credential",
+                data=json.dumps({"name": "SSH User", "cred_username": "kali", "cred_password": "pw", "credential_type": "up"}),
+                content_type="application/json",
+            )
+            self.assertEqual(res_cr.status_code, 200)
+            self.assertEqual(res_cr.json()["id"], "cred-new")
+            self.assertEqual(created["credential"], ("SSH User", "kali", "pw", "up"))
+
+    def test_openvas_create_credential_usk_snmp_pw_xml_and_validation(self):
+        import xml.etree.ElementTree as ET
+        from unittest.mock import patch
+
+        sent_xml = []
+
+        class _FakeTransportClient(openvas_client.GMPClient):
+            def __init__(self):
+                super().__init__(openvas_client.GVMConnectionConfig())
+
+            def send_xml(self, xml_cmd: str):
+                sent_xml.append(xml_cmd)
+                return ET.fromstring('<create_credential_response status="201" status_text="OK, resource created" id="cred-xyz"/>')
+
+        fake = _FakeTransportClient()
+        cid_usk = fake.create_credential("SSH Key", username="root", credential_type="usk", private_key="KEYDATA", passphrase="p1")
+        self.assertEqual(cid_usk, "cred-xyz")
+        self.assertIn("<type>usk</type>", sent_xml[-1])
+        self.assertIn("<private>KEYDATA</private>", sent_xml[-1])
+        self.assertIn("<phrase>p1</phrase>", sent_xml[-1])
+
+        cid_snmp = fake.create_credential(
+            "SNMP v3", username="snmpu", password="apw", credential_type="snmp",
+            auth_algorithm="sha256", privacy_password="ppw", privacy_algorithm="aes"
+        )
+        self.assertEqual(cid_snmp, "cred-xyz")
+        self.assertIn("<auth_algorithm>sha256</auth_algorithm>", sent_xml[-1])
+        self.assertIn("<algorithm>aes</algorithm>", sent_xml[-1])
+
+        with patch("lab.openvas_client.GMPClient") as mock_cls:
+            res_bad_usk = self.client.post(
+                "/api/scanner/openvas/create-credential",
+                data=json.dumps({"name": "SSH Key", "cred_username": "root", "credential_type": "usk"}),
+                content_type="application/json",
+            )
+            self.assertEqual(res_bad_usk.status_code, 400)
+            mock_cls.assert_not_called()
+
+    def test_gvm_scanner_select_dedup_and_faq_docs(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[2]
+        logic_text = (root / "web/templates/lab/includes/_active_scanner_logic.html").read_text(encoding="utf-8")
+        self.assertIn("omitEmptyWhenPopulated: true", logic_text)
+        self.assertIn("dedup: true", logic_text)
+
+        faq_text = (root / "web/templates/lab/includes/_faq_dialog.html").read_text(encoding="utf-8")
+        self.assertIn("ospd-openvas", faq_text)
+        self.assertIn("OpenVAS Default", faq_text)
+        self.assertIn("CVE", faq_text)
+
+        for doc_rel in ("Документація/aktivnyi-skanner.md", "Документація/posibnyk-korystuvacha.md"):
+            doc_text = (root / doc_rel).read_text(encoding="utf-8")
+            self.assertIn("ospd-openvas", doc_text)
+            self.assertIn("CVE", doc_text)
+
+    def test_gvm_reload_restore_avoids_tdz(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[2]
+        logic_text = (root / "web/templates/lab/includes/_active_scanner_logic.html").read_text(encoding="utf-8")
+        self.assertIn("target === 'openvas' && window._gvmModuleReady === true", logic_text)
+        self.assertEqual(logic_text.count("window._gvmModuleReady = true;"), 1)
+        self.assertGreater(
+            logic_text.index("window._gvmModuleReady = true;"),
+            logic_text.index("let _gvmStatusInFlight = false;"),
+        )
+        self.assertIn("openvasResult: scannerViews.openvas?.current || null", logic_text)
+        self.assertIn("scannerViews.openvas.current = state.openvasResult || null", logic_text)
+        self.assertIn("renderOpenvasFindings(ovFindings, ovTarget)", logic_text)
+
+    def test_scanner_status_bars_isolated_per_panel(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[2]
+        html = (root / "web/templates/lab/tabs/_scanner.html").read_text(encoding="utf-8")
+        cms_pos = html.index('id="scanner-panel-cms"')
+        nuclei_pos = html.index('id="scanner-panel-nuclei"')
+        active_pos = html.index('id="scanner-panel-active"')
+        cms_status_pos = html.index('id="scanner-status"')
+        nuclei_status_pos = html.index('id="scanner-nuclei-status"')
+        self.assertGreater(cms_status_pos, cms_pos)
+        self.assertLess(cms_status_pos, nuclei_pos)
+        self.assertGreater(nuclei_status_pos, nuclei_pos)
+        self.assertLess(nuclei_status_pos, active_pos)
+
+    def test_get_tasks_requests_all_rows_and_find_matching_task_reuses_active(self):
+        cfg = openvas_client.GVMConnectionConfig(socket_path="/run/gvmd/gvmd.sock")
+        client = openvas_client.GMPClient(cfg)
+        resp = ET.fromstring('<get_tasks_response status="200" status_text="OK"/>')
+        with patch.object(client, "send_xml", return_value=resp) as send_mock:
+            client.get_tasks()
+        send_mock.assert_called_once()
+        self.assertIn("rows=-1", send_mock.call_args[0][0])
+
+        tasks = [
+            {"task_id": "t-done", "name": "RR-Scan-http://192.168.56.4", "status": "Done", "target": "192.168.56.4"},
+            {"task_id": "t-run", "name": "Custom-Scan", "status": "Running", "target": "http://192.168.56.4/"},
+        ]
+        matched, is_active = openvas_client.find_matching_task(tasks, "RR-Scan-http://192.168.56.4", "http://192.168.56.4/")
+        self.assertTrue(is_active)
+        self.assertEqual(matched["task_id"], "t-run")
+
+        idle_only = [{"task_id": "t-done", "name": "RR-Scan-http://192.168.56.4", "status": "Stopped", "target": "192.168.56.4"}]
+        matched_idle, is_active_idle = openvas_client.find_matching_task(idle_only, "RR-Scan-http://192.168.56.4", "http://192.168.56.4/")
+        self.assertFalse(is_active_idle)
+        self.assertEqual(matched_idle["task_id"], "t-done")
+
+    def test_enrich_openvas_cve_findings_populates_epss_and_kev(self):
+        import io
+        from unittest.mock import patch
+
+        openvas_client._CVE_ENRICH_CACHE.clear()
+        openvas_client._KEV_FEED_CACHE = None
+
+        def fake_urlopen(url, timeout=1.5):
+            if "known_exploited" in url:
+                payload = json.dumps({
+                    "vulnerabilities": [{"cveID": "CVE-2024-8888", "knownRansomwareCampaignUse": "Known"}]
+                }).encode("utf-8")
+            else:
+                payload = json.dumps({
+                    "data": [{"cve": "CVE-2024-8888", "epss": "0.915", "percentile": "0.99"}]
+                }).encode("utf-8")
+            cm = io.BytesIO(payload)
+            cm.__enter__ = lambda s=cm: s
+            cm.__exit__ = lambda *args: None
+            return cm
+
+        findings = [{"title": "Apache Test CVE", "cve": ["CVE-2024-8888"]}]
+        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            openvas_client.enrich_openvas_cve_findings(findings)
+
+        self.assertTrue(findings[0]["is_kev"])
+        self.assertAlmostEqual(findings[0]["epss_score"], 0.915, places=3)
+        self.assertEqual(findings[0]["known_ransomware_campaign_use"], "Known")
+
+    def test_enrich_openvas_cve_findings_auto_detects_poc(self):
+        findings = [
+            {
+                "title": "OpenVAS Struts RCE",
+                "cve": ["CVE-2017-5638"],
+                "references": ["https://github.com/vulhub/vulhub/tree/master/struts2/s2-045"],
+            },
+            {
+                "title": "OpenVAS Text PoC",
+                "cve": ["CVE-2020-14882"],
+                "description": "Exploit available at https://www.exploit-db.com/exploits/49067 and details.",
+            },
+            {
+                "title": "OpenVAS Sploitus PoC",
+                "cve": ["CVE-2018-11776"],
+                "references": ["https://sploitus.com/exploit?id=PACKETSTORM:149008"],
+            },
+        ]
+        openvas_client.enrich_openvas_cve_findings(findings, timeout_s=0.1, epss_url="", kev_url="")
+
+        self.assertTrue(findings[0].get("is_poc"))
+        self.assertEqual(findings[0]["poc"][0]["url"], "https://github.com/vulhub/vulhub/tree/master/struts2/s2-045")
+        self.assertTrue(findings[1].get("is_poc"))
+        self.assertEqual(findings[1]["poc"][0]["url"], "https://www.exploit-db.com/exploits/49067")
+        self.assertTrue(findings[2].get("is_poc"))
+        self.assertEqual(findings[2]["poc"][0]["url"], "https://sploitus.com/exploit?id=PACKETSTORM:149008")
+
+    def test_get_report_xml_ignore_pagination_and_result_id_preserved(self):
+        cfg = openvas_client.GVMConnectionConfig(socket_path="/run/gvmd/gvmd.sock")
+        client = openvas_client.GMPClient(cfg)
+        resp = ET.fromstring('<get_reports_response status="200" status_text="OK"/>')
+        with patch.object(client, "send_xml", return_value=resp) as send_mock:
+            client.get_report_xml("rep-123")
+        send_mock.assert_called_once()
+        cmd = send_mock.call_args[0][0]
+        self.assertIn('ignore_pagination="1"', cmd)
+        self.assertNotIn("rows=-1", cmd)
+        self.assertIn("levels=hmlgf", cmd)
+        self.assertIn("min_qod=0", cmd)
+
+        xml = """<report>
+          <results>
+            <result id="res-uuid-1">
+              <name>Test Finding</name>
+              <host>10.0.0.1</host>
+              <port>80/tcp</port>
+              <threat>High</threat>
+              <severity>7.5</severity>
+            </result>
+          </results>
+        </report>"""
+        parsed = openvas_client.parse_openvas_report_xml(xml)
+        self.assertEqual(len(parsed), 1)
+        self.assertEqual(parsed[0]["id"], "gvm-res-uuid-1")
+        self.assertEqual(parsed[0]["identity_hash"], "gvm-res-uuid-1")
+
+    def test_get_report_xml_paginates_when_gvmd_truncates_results(self):
+        cfg = openvas_client.GVMConnectionConfig(socket_path="/run/gvmd/gvmd.sock")
+        client = openvas_client.GMPClient(cfg)
+
+        page1 = ET.fromstring(
+            '<get_reports_response status="200" status_text="OK">'
+            '<report id="rep-big"><report id="rep-big">'
+            '<result_count><filtered>4</filtered><full>4</full></result_count>'
+            '<results start="1" max="2">'
+            '<result id="r-1"><name>Vuln 1</name><host>10.0.0.1</host><port>80/tcp</port><threat>High</threat><severity>7.5</severity></result>'
+            '<result id="r-2"><name>Vuln 2</name><host>10.0.0.1</host><port>443/tcp</port><threat>Medium</threat><severity>5.0</severity></result>'
+            '</results></report></report></get_reports_response>'
+        )
+        page2 = ET.fromstring(
+            '<get_reports_response status="200" status_text="OK">'
+            '<report id="rep-big"><report id="rep-big">'
+            '<result_count><filtered>4</filtered><full>4</full></result_count>'
+            '<results start="3" max="2">'
+            '<result id="r-3"><name>Vuln 3</name><host>10.0.0.2</host><port>22/tcp</port><threat>Low</threat><severity>3.1</severity></result>'
+            '<result id="r-4"><name>Vuln 4</name><host>10.0.0.2</host><port>general/tcp</port><threat>Critical</threat><severity>9.8</severity></result>'
+            '</results></report></report></get_reports_response>'
+        )
+
+        with patch.object(client, "send_xml", side_effect=[page1, page2]) as send_mock:
+            full_xml = client.get_report_xml("rep-big")
+
+        self.assertEqual(send_mock.call_count, 2)
+        self.assertIn("first=3", send_mock.call_args_list[1][0][0])
+        findings = openvas_client.parse_openvas_report_xml(full_xml)
+        self.assertEqual(len(findings), 4)
+        self.assertEqual({f["id"] for f in findings}, {"gvm-r-1", "gvm-r-2", "gvm-r-3", "gvm-r-4"})
+
+    def test_openvas_sync_updates_existing_run_and_syncs_project_hosts(self):
+        from lab.models import ProjectHost
+
+        project = Project.objects.create(name="GVM Sync Target", target="http://10.20.30.40")
+        client = Client()
+
+        partial_xml = (
+            '<get_reports_response status="200" status_text="OK"><report id="rep-sync-1"><results>'
+            '<result id="f-1"><name>Partial Finding</name><host>10.20.30.40</host><port>80/tcp</port>'
+            '<threat>Medium</threat><severity>5.0</severity></result>'
+            '</results></report></get_reports_response>'
+        )
+        full_xml = (
+            '<get_reports_response status="200" status_text="OK"><report id="rep-sync-1"><results>'
+            '<result id="f-1"><name>Partial Finding</name><host>10.20.30.40</host><port>80/tcp</port>'
+            '<threat>Medium</threat><severity>5.0</severity></result>'
+            '<result id="f-2"><name>Critical RCE</name><host>10.20.30.40</host><port>443/tcp</port>'
+            '<threat>High</threat><severity>9.8</severity></result>'
+            '<result id="f-3"><name>Host Level Info</name><host>10.20.30.40</host><port>general/tcp</port>'
+            '<threat>Low</threat><severity>2.5</severity></result>'
+            '</results></report></get_reports_response>'
+        )
+
+        with patch("lab.openvas_client.GMPClient") as mock_gmp_cls:
+            mock_gmp = mock_gmp_cls.return_value.__enter__.return_value
+            mock_gmp.get_tasks.return_value = [
+                {
+                    "task_id": "t-sync-1",
+                    "name": "RR-Scan-10.20.30.40",
+                    "status": "Running",
+                    "progress": 20,
+                    "report_id": "rep-sync-1",
+                    "target": "10.20.30.40",
+                }
+            ]
+            mock_gmp.get_report_xml.return_value = partial_xml
+
+            resp1 = client.post(
+                "/api/scanner/openvas/sync",
+                data=json.dumps({"task_id": "t-sync-1", "project_id": project.id}),
+                content_type="application/json",
+            )
+            self.assertEqual(resp1.status_code, 200)
+            data1 = resp1.json()
+            self.assertEqual(data1["findings_count"], 1)
+            self.assertEqual(data1["task_status"], "Running")
+            self.assertEqual(data1["project_id"], project.id)
+
+            # Now task completes and returns all 3 findings for the same report_id
+            mock_gmp.get_tasks.return_value = [
+                {
+                    "task_id": "t-sync-1",
+                    "name": "RR-Scan-10.20.30.40",
+                    "status": "Done",
+                    "progress": 100,
+                    "report_id": "rep-sync-1",
+                    "target": "10.20.30.40",
+                }
+            ]
+            mock_gmp.get_report_xml.return_value = full_xml
+
+            resp2 = client.post(
+                "/api/scanner/openvas/sync",
+                data=json.dumps({"task_id": "t-sync-1", "project_id": project.id}),
+                content_type="application/json",
+            )
+            self.assertEqual(resp2.status_code, 200)
+            data2 = resp2.json()
+            self.assertEqual(data2["findings_count"], 3)
+            self.assertEqual(data2["task_status"], "Done")
+            self.assertEqual(data2["run_id"], data1["run_id"])
+
+        runs = ScannerRun.objects.filter(project=project, engine="openvas")
+        self.assertEqual(runs.count(), 1)
+        self.assertEqual(len(runs.first().findings), 3)
+
+        hosts = ProjectHost.objects.filter(project=project, ip_address="10.20.30.40")
+        self.assertEqual(hosts.count(), 1)
+        host = hosts.first()
+        self.assertEqual(host.open_ports_count, 2)
+        self.assertEqual(host.vulns_count, 3)
+
+        hub_resp = client.get(f"/api/projects/{project.id}/hub")
+        self.assertEqual(hub_resp.status_code, 200)
+        hub_data = hub_resp.json()
+        self.assertEqual(hub_data["metrics"]["scans"], 1)
+        self.assertEqual(hub_data["metrics"]["hosts"], 1)
+        self.assertEqual(hub_data["metrics"]["host_vulns"], 3)
+        self.assertEqual(len(hub_data["scanner_runs"][0]["findings"]), 3)
+
+    def test_openvas_ui_wires_active_project_and_done_sync_correctly(self):
+        root_dir = Path(__file__).resolve().parents[1]
+        logic_js = (root_dir / "templates" / "lab" / "includes" / "_active_scanner_logic.html").read_text(encoding="utf-8")
+        index_html = (root_dir / "templates" / "lab" / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("window.getActiveProjectId =", logic_js)
+        self.assertIn("String(data.task_status || '').toLowerCase() === 'done'", logic_js)
+        self.assertIn("String(autoSyncTarget.status || '').toLowerCase() === 'done'", logic_js)
+        self.assertIn("const latestOpenvasScan = (data.scanner_runs || []).find(r => r.engine === 'openvas');", index_html)

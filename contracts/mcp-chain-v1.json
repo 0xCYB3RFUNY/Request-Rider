@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://requestrider.local/contracts/mcp-chain-v1.json",
+  "title": "Request-Rider MCP Chain Contract v1",
+  "description": "Локальний machine-checkable контракт для ланцюгів MCP-інструментів Request-Rider. Контракт описує кроки, залежності, retry/fallback, timeout, streaming події та локальні межі. Він не відкриває спільного або віддаленого доступу.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "chain_id",
+    "created_at",
+    "mode",
+    "limits",
+    "steps"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "mcp-chain-v1"
+    },
+    "chain_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "local_only"
+      ]
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_steps",
+        "max_depth",
+        "shared_platform_access",
+        "remote_access",
+        "multi_user",
+        "external_handlers",
+        "streaming"
+      ],
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "shared_platform_access": {
+          "const": false
+        },
+        "remote_access": {
+          "const": false
+        },
+        "multi_user": {
+          "const": false
+        },
+        "external_handlers": {
+          "const": false
+        },
+        "streaming": {
+          "$ref": "#/$defs/streaming"
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/event_rule"
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "toolName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^([a-z][a-z0-9_]*|\\$[A-Za-z0-9_.-]+)$"
+    },
+    "stepId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512,
+      "pattern": "^\\$([A-Za-z0-9_-]+)(\\.[A-Za-z0-9_-]+|\\[\\d+\\])*$"
+    },
+    "value": {
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 16384
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "maxItems": 512,
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/value"
+          }
+        }
+      ]
+    },
+    "argumentValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/reference"
+        },
+        {
+          "$ref": "#/$defs/value"
+        }
+      ]
+    },
+    "streaming": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "transport"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "local_event_bus"
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_.]*$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "events"
+            ],
+            "properties": {
+              "events": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      }
+    },
+    "event_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "produced_by"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_.]*$"
+        },
+        "produced_by": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stepId"
+          },
+          "uniqueItems": true,
+          "maxItems": 64
+        }
+      }
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_attempts",
+        "backoff",
+        "backoff_ms"
+      ],
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "backoff": {
+          "type": "string",
+          "enum": [
+            "fixed",
+            "exponential"
+          ]
+        },
+        "backoff_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000
+        }
+      }
+    },
+    "fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "reason"
+      ],
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/toolName"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tool",
+        "args",
+        "timeout_ms"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stepId"
+        },
+        "tool": {
+          "$ref": "#/$defs/toolName"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stepId"
+          },
+          "uniqueItems": true,
+          "maxItems": 64
+        },
+        "args": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/argumentValue"
+          }
+        },
+        "handler": {
+          "$ref": "#/$defs/handler"
+        },
+        "retry": {
+          "$ref": "#/$defs/retry"
+        },
+        "fallback": {
+          "$ref": "#/$defs/fallback"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "emit": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_.]*$"
+          },
+          "uniqueItems": true,
+          "maxItems": 16
+        }
+      }
+    }
+  }
+}
